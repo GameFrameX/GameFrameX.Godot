@@ -1,0 +1,30 @@
+{
+    "name": "GameFrameX.Editor",
+    "rootNamespace": "GameFrameX.Editor",
+    "references": [
+        "GameFrameX.Runtime",
+        "WxEditor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.qq.weixin.minigame",
+            "expression": "",
+            "define": "ENABLE_WX_MINI_GAME"
+        },
+        {
+            "name": "com.code-philosophy.hybridclr",
+            "expression": "",
+            "define": "ENABLE_GAME_FRAME_X_HYBRID_CLR"
+        }
+    ],
+    "noEngineReferences": false
+}
