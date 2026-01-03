@@ -37,34 +37,31 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 基础组件。
     /// </summary>
-    [DisallowMultipleComponent]
-    [AddComponentMenu("GameFrameX/Base")]
-    [DefaultExecutionOrder(-500)]
     public sealed class BaseComponent : GameFrameworkComponent
     {
         private const int DefaultDpi = 96; // default windows dpi
 
         private float m_GameSpeedBeforePause = 1f;
 
-        // [SerializeField] private bool m_EditorResourceMode = true;
+        // [Export] private bool m_EditorResourceMode = true;
 
-        [SerializeField] private string m_TextHelperTypeName = "UnityGameFramework.Runtime.DefaultTextHelper";
+        [Export] private string m_TextHelperTypeName = "UnityGameFramework.Runtime.DefaultTextHelper";
 
-        [SerializeField] private string m_VersionHelperTypeName = "UnityGameFramework.Runtime.DefaultVersionHelper";
+        [Export] private string m_VersionHelperTypeName = "UnityGameFramework.Runtime.DefaultVersionHelper";
 
-        [SerializeField] private string m_LogHelperTypeName = "UnityGameFramework.Runtime.DefaultLogHelper";
+        [Export] private string m_LogHelperTypeName = "UnityGameFramework.Runtime.DefaultLogHelper";
 
-        [SerializeField] private string m_CompressionHelperTypeName = "UnityGameFramework.Runtime.DefaultCompressionHelper";
+        [Export] private string m_CompressionHelperTypeName = "UnityGameFramework.Runtime.DefaultCompressionHelper";
 
-        [SerializeField] private string m_JsonHelperTypeName = "UnityGameFramework.Runtime.DefaultJsonHelper";
+        [Export] private string m_JsonHelperTypeName = "UnityGameFramework.Runtime.DefaultJsonHelper";
 
-        [SerializeField] private int m_FrameRate = 30;
+        [Export] private int m_FrameRate = 30;
 
-        [SerializeField] private float m_GameSpeed = 1f;
+        [Export] private float m_GameSpeed = 1f;
 
-        [SerializeField] private bool m_RunInBackground = true;
+        [Export] private bool m_RunInBackground = true;
 
-        [SerializeField] private bool m_NeverSleep = true;
+        [Export] private bool m_NeverSleep = true;
 
         /// <summary>
         /// 获取或设置是否使用编辑器资源模式（仅编辑器内有效）。
@@ -86,7 +83,7 @@ namespace GameFrameX.Runtime
         public int FrameRate
         {
             get { return m_FrameRate; }
-            set { Application.targetFrameRate = m_FrameRate = value; }
+            set { Engine.MaxFps = m_FrameRate = value; }
         }
 
         /// <summary>
@@ -95,7 +92,7 @@ namespace GameFrameX.Runtime
         public float GameSpeed
         {
             get { return m_GameSpeed; }
-            set { Time.timeScale = m_GameSpeed = value >= 0f ? value : 0f; }
+            set { Engine.TimeScale = m_GameSpeed = value >= 0f ? value : 0f; }
         }
 
         /// <summary>
@@ -120,7 +117,12 @@ namespace GameFrameX.Runtime
         public bool RunInBackground
         {
             get { return m_RunInBackground; }
-            set { Application.runInBackground = m_RunInBackground = value; }
+            set
+            {
+                // TODO: Godot doesn't have a direct equivalent for Application.runInBackground
+                // This may need to be handled at the project level or via Display settings
+                m_RunInBackground = value;
+            }
         }
 
         /// <summary>
@@ -131,75 +133,74 @@ namespace GameFrameX.Runtime
             get { return m_NeverSleep; }
             set
             {
+                // TODO: Godot doesn't have a direct equivalent for Screen.sleepTimeout
+                // This may need to be handled via OS features or plugin
                 m_NeverSleep = value;
-                Screen.sleepTimeout = value ? SleepTimeout.NeverSleep : SleepTimeout.SystemSetting;
             }
         }
 
         /// <summary>
         /// 游戏框架组件初始化。
         /// </summary>
-        protected override void Awake()
+        public override void _Ready()
         {
             IsAutoRegister = false;
-            base.Awake();
+            base._Ready();
 
-            DontDestroyOnLoad(this);
+            // TODO: DontDestroyOnLoad equivalent in Godot - use AutoLoad singletons instead
+            // DontDestroyOnLoad(this);
             InitTextHelper();
             InitVersionHelper();
             InitLogHelper();
             // Log.Info("Game Framework Version: {0}", GameFramework.Version.GameFrameworkVersion);
-            Log.Info("Game Version: {0}, Unity Version: {1}", Version.GameVersion, Application.unityVersion);
-#if UNITY_5_3_OR_NEWER || UNITY_5_3
+            Log.Info("Game Version: {0}, Godot Version: {1}", Version.GameVersion, Engine.GetVersionInfo().String);
             InitCompressionHelper();
             InitJsonHelper();
 
-            Utility.Converter.ScreenDpi = Screen.dpi;
-            if (Utility.Converter.ScreenDpi <= 0)
-            {
-                Utility.Converter.ScreenDpi = DefaultDpi;
-            }
+            // TODO: Godot doesn't have a direct equivalent for Screen.dpi
+            // Utility.Converter.ScreenDpi = Screen.dpi;
+            // if (Utility.Converter.ScreenDpi <= 0)
+            // {
+            //     Utility.Converter.ScreenDpi = DefaultDpi;
+            // }
 
-            // m_EditorResourceMode &= Application.isEditor;
+            // m_EditorResourceMode &= OS.HasFeature("editor");
             // if (m_EditorResourceMode)
             // {
             //     Log.Info(
             //         "During this run, Game Framework will use editor resource files, which you should validate first.");
             // }
 
-            Application.targetFrameRate = m_FrameRate;
-            Time.timeScale = m_GameSpeed;
-            Application.runInBackground = m_RunInBackground;
-            Screen.sleepTimeout = m_NeverSleep ? SleepTimeout.NeverSleep : SleepTimeout.SystemSetting;
-#else
-            Log.Error("Game Framework only applies with Unity 5.3 and above, but current Unity version is {0}.", Application.unityVersion);
-            GameEntry.Shutdown(ShutdownType.Quit);
-#endif
-#if UNITY_5_6_OR_NEWER
-            Application.lowMemory += OnLowMemory;
-#endif
+            Engine.MaxFps = m_FrameRate;
+            Engine.TimeScale = m_GameSpeed;
+            // Application.runInBackground = m_RunInBackground; // TODO: No direct equivalent
+            // Screen.sleepTimeout = m_NeverSleep ? SleepTimeout.NeverSleep : SleepTimeout.SystemSetting; // TODO: No direct equivalent
         }
 
+        // TODO: Consider if Start() is needed in Godot or if logic should move to _Ready()
         private void Start()
         {
         }
 
-        private void Update()
+        public override void _Process(double delta)
         {
-            GameFrameworkEntry.Update(Time.deltaTime, Time.unscaledDeltaTime);
+            GameFrameworkEntry.Update((float)delta, (float)(delta / Engine.TimeScale));
         }
 
-        private void OnApplicationQuit()
+        public override void _Notification(int what)
         {
-#if UNITY_5_6_OR_NEWER
-            Application.lowMemory -= OnLowMemory;
-#endif
-            StopAllCoroutines();
-        }
+            base._Notification(what);
 
-        private void OnDestroy()
-        {
-            GameFrameworkEntry.Shutdown();
+            if (what == NotificationWMCloseRequest)
+            {
+                // Equivalent to OnApplicationQuit in Unity
+                StopAllCoroutines();
+            }
+            else if (what == NotificationPredelete || what == NotificationExitTree)
+            {
+                // Equivalent to OnDestroy in Unity
+                GameFrameworkEntry.Shutdown();
+            }
         }
 
         /// <summary>
@@ -244,7 +245,7 @@ namespace GameFrameX.Runtime
 
         internal void Shutdown()
         {
-            Destroy(gameObject);
+            QueueFree();
         }
 
         private void InitTextHelper()
