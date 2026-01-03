@@ -29,24 +29,24 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
-    /// UnityEngine.Texture 变量类。
+    /// Godot.Texture 变量类。
     /// </summary>
     public sealed class VarTexture : Variable<Texture>
     {
         /// <summary>
-        /// 初始化 UnityEngine.Texture 变量类的新实例。
+        /// 初始化 Godot.Texture 变量类的新实例。
         /// </summary>
         public VarTexture()
         {
         }
 
         /// <summary>
-        /// 从 UnityEngine.Texture 到 UnityEngine.Texture 变量类的隐式转换。
+        /// 从 Godot.Texture 到 Godot.Texture 变量类的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator VarTexture(Texture value)
@@ -57,7 +57,7 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 从 UnityEngine.Texture 变量类到 UnityEngine.Texture 的隐式转换。
+        /// 从 Godot.Texture 变量类到 Godot.Texture 的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator Texture(VarTexture value)

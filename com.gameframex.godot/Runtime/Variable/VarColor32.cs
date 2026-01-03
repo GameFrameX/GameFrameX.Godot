@@ -29,24 +29,24 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
-    /// UnityEngine.Color32 变量类。
+    /// Godot.Color32 变量类。
     /// </summary>
     public sealed class VarColor32 : Variable<Color32>
     {
         /// <summary>
-        /// 初始化 UnityEngine.Color32 变量类的新实例。
+        /// 初始化 Godot.Color32 变量类的新实例。
         /// </summary>
         public VarColor32()
         {
         }
 
         /// <summary>
-        /// 从 UnityEngine.Color32 到 UnityEngine.Color32 变量类的隐式转换。
+        /// 从 Godot.Color32 到 Godot.Color32 变量类的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator VarColor32(Color32 value)
@@ -57,7 +57,7 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 从 UnityEngine.Color32 变量类到 UnityEngine.Color32 的隐式转换。
+        /// 从 Godot.Color32 变量类到 Godot.Color32 的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator Color32(VarColor32 value)

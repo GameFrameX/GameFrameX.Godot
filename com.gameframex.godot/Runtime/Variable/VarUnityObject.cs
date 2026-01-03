@@ -29,24 +29,24 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
-    /// UnityEngine.Object 变量类。
+    /// Godot.Object 变量类。
     /// </summary>
     public sealed class VarUnityObject : Variable<Object>
     {
         /// <summary>
-        /// 初始化 UnityEngine.Object 变量类的新实例。
+        /// 初始化 Godot.Object 变量类的新实例。
         /// </summary>
         public VarUnityObject()
         {
         }
 
         /// <summary>
-        /// 从 UnityEngine.Object 到 UnityEngine.Object 变量类的隐式转换。
+        /// 从 Godot.Object 到 Godot.Object 变量类的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator VarUnityObject(Object value)
@@ -57,7 +57,7 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 从 UnityEngine.Object 变量类到 UnityEngine.Object 的隐式转换。
+        /// 从 Godot.Object 变量类到 Godot.Object 的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator Object(VarUnityObject value)

@@ -29,24 +29,24 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
-    /// UnityEngine.Color 变量类。
+    /// Godot.Color 变量类。
     /// </summary>
     public sealed class VarColor : Variable<Color>
     {
         /// <summary>
-        /// 初始化 UnityEngine.Color 变量类的新实例。
+        /// 初始化 Godot.Color 变量类的新实例。
         /// </summary>
         public VarColor()
         {
         }
 
         /// <summary>
-        /// 从 UnityEngine.Color 到 UnityEngine.Color 变量类的隐式转换。
+        /// 从 Godot.Color 到 Godot.Color 变量类的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator VarColor(Color value)
@@ -57,7 +57,7 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 从 UnityEngine.Color 变量类到 UnityEngine.Color 的隐式转换。
+        /// 从 Godot.Color 变量类到 Godot.Color 的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator Color(VarColor value)

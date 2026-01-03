@@ -1,39 +1,33 @@
 using System;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
     /// 相机帮助类
+    /// Note: Camera screenshot functionality is different in Godot
     /// </summary>
     public static class CameraHelper
     {
         /// <summary>
         /// 获取相机快照
+        /// In Godot, use Viewport texture for screenshots
         /// </summary>
-        /// <param name="main">相机</param>
+        /// <param name="camera">相机</param>
         /// <param name="scale">缩放比</param>
-        public static Texture2D GetCaptureScreenshot(Camera main, float scale = 0.5f)
+        public static Texture2D GetCaptureScreenshot(Camera3D camera, float scale = 0.5f)
         {
-            Rect rect = new Rect(0, 0, Screen.width * scale, Screen.height * scale);
-            string name = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
-            RenderTexture renderTexture = RenderTexture.GetTemporary((int)rect.width, (int)rect.height, 0);
-            renderTexture.name = SceneManager.GetActiveScene().name + "_" + renderTexture.width + "_" + renderTexture.height + "_" + name;
-            main.targetTexture = renderTexture;
-            main.Render();
-
-            RenderTexture.active = renderTexture;
-            Texture2D screenShot = new Texture2D((int)rect.width, (int)rect.height, TextureFormat.RGB24, false)
+            // Godot uses Viewport for capturing screenshots
+            // This is a placeholder implementation
+            var viewport = camera.GetViewport();
+            var image = viewport.GetTexture().GetData();
+            if (scale != 1.0f)
             {
-                name = renderTexture.name
-            };
-            screenShot.ReadPixels(rect, 0, 0);
-            screenShot.Apply();
-            main.targetTexture = null;
-            RenderTexture.active = null;
-            RenderTexture.ReleaseTemporary(renderTexture);
-            return screenShot;
+                image.Resize((int)(image.GetWidth() * scale), (int)(image.GetHeight() * scale));
+            }
+            var texture = new ImageTexture();
+            texture.CreateFromImage(image);
+            return texture;
         }
     }
 }

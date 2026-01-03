@@ -1,7 +1,7 @@
 #if ENABLE_GAME_FRAME_X_DO_TWEEN
 using System;
 using DG.Tweening;
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
@@ -15,7 +15,7 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="gameObject">物体对象</param>
         /// <param name="complete">是否直接完成动画</param>
-        public static void Kill(GameObject gameObject, bool complete = false)
+        public static void Kill(Node gameObject, bool complete = false)
         {
             DOTween.Kill(gameObject, complete);
         }

@@ -29,24 +29,24 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
-    /// UnityEngine.Vector2 变量类。
+    /// Godot.Vector2 变量类。
     /// </summary>
     public sealed class VarVector2 : Variable<Vector2>
     {
         /// <summary>
-        /// 初始化 UnityEngine.Vector2 变量类的新实例。
+        /// 初始化 Godot.Vector2 变量类的新实例。
         /// </summary>
         public VarVector2()
         {
         }
 
         /// <summary>
-        /// 从 UnityEngine.Vector2 到 UnityEngine.Vector2 变量类的隐式转换。
+        /// 从 Godot.Vector2 到 Godot.Vector2 变量类的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator VarVector2(Vector2 value)
@@ -57,7 +57,7 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 从 UnityEngine.Vector2 变量类到 UnityEngine.Vector2 的隐式转换。
+        /// 从 Godot.Vector2 变量类到 Godot.Vector2 的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator Vector2(VarVector2 value)

@@ -29,24 +29,24 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
-    /// UnityEngine.Rect 变量类。
+    /// Godot.Rect 变量类。
     /// </summary>
     public sealed class VarRect : Variable<Rect>
     {
         /// <summary>
-        /// 初始化 UnityEngine.Rect 变量类的新实例。
+        /// 初始化 Godot.Rect 变量类的新实例。
         /// </summary>
         public VarRect()
         {
         }
 
         /// <summary>
-        /// 从 UnityEngine.Rect 到 UnityEngine.Rect 变量类的隐式转换。
+        /// 从 Godot.Rect 到 Godot.Rect 变量类的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator VarRect(Rect value)
@@ -57,7 +57,7 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 从 UnityEngine.Rect 变量类到 UnityEngine.Rect 的隐式转换。
+        /// 从 Godot.Rect 变量类到 Godot.Rect 的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator Rect(VarRect value)

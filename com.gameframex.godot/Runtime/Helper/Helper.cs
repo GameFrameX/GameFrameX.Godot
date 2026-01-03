@@ -30,7 +30,7 @@
 // ==========================================================================================
 
 using GameFrameX;
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
@@ -46,7 +46,7 @@ namespace GameFrameX.Runtime
         /// <param name="helperTypeName">要创建的辅助器类型名称。</param>
         /// <param name="customHelper">若要创建的辅助器类型为空时，使用的自定义辅助器类型。</param>
         /// <returns>创建的辅助器。</returns>
-        public static T CreateHelper<T>(string helperTypeName, T customHelper) where T : MonoBehaviour
+        public static T CreateHelper<T>(string helperTypeName, T customHelper) where T : Node
         {
             return CreateHelper(helperTypeName, customHelper, 0);
         }
@@ -59,7 +59,7 @@ namespace GameFrameX.Runtime
         /// <param name="customHelper">若要创建的辅助器类型为空时，使用的自定义辅助器类型。</param>
         /// <param name="index">要创建的辅助器索引。</param>
         /// <returns>创建的辅助器。</returns>
-        public static T CreateHelper<T>(string helperTypeName, T customHelper, int index) where T : MonoBehaviour
+        public static T CreateHelper<T>(string helperTypeName, T customHelper, int index) where T : Node
         {
             T helper = null;
             if (!string.IsNullOrEmpty(helperTypeName))
@@ -77,20 +77,26 @@ namespace GameFrameX.Runtime
                     return null;
                 }
 
-                helper = (T)new GameObject().AddComponent(helperType);
+                // In Godot, create node instance directly
+                helper = Activator.CreateInstance(helperType) as T;
+                if (helper != null)
+                {
+                    helper.Name = typeof(T).Name;
+                }
             }
             else if (customHelper == null)
             {
                 Log.Warning("You must set custom helper with '{0}' type first.", typeof(T).FullName);
                 return null;
             }
-            else if (customHelper.gameObject.InScene())
+            else if (IsInsideTreeHelper(customHelper))
             {
-                helper = index > 0 ? Object.Instantiate(customHelper) : customHelper;
+                // In Godot, use Duplicate() for cloning nodes
+                helper = index > 0 ? customHelper.Duplicate() as T : customHelper;
             }
             else
             {
-                helper = Object.Instantiate(customHelper);
+                helper = customHelper.Duplicate() as T;
             }
 
             return helper;
@@ -105,7 +111,7 @@ namespace GameFrameX.Runtime
         /// <param name="customHelper">若要创建的辅助器类型为空时，使用的自定义辅助器类型。</param>
         /// <param name="index">要创建的辅助器索引。</param>
         /// <returns>创建的辅助器。</returns>
-        public static T CreateHelper<T>(GameObject target, string helperTypeName, T customHelper, int index) where T : MonoBehaviour
+        public static T CreateHelper<T>(Node target, string helperTypeName, T customHelper, int index) where T : Node
         {
             GameFrameworkGuard.NotNull(target, nameof(target));
             T helper = null;
@@ -124,23 +130,37 @@ namespace GameFrameX.Runtime
                     return null;
                 }
 
-                helper = (T)target.AddComponent(helperType);
+                // In Godot, create and add child node
+                helper = Activator.CreateInstance(helperType) as T;
+                if (helper != null)
+                {
+                    target.AddChild(helper);
+                }
             }
             else if (customHelper == null)
             {
                 Log.Warning("You must set custom helper with '{0}' type first.", typeof(T).FullName);
                 return null;
             }
-            else if (customHelper.gameObject.InScene())
+            else if (IsInsideTreeHelper(customHelper))
             {
-                helper = index > 0 ? Object.Instantiate(customHelper) : customHelper;
+                // In Godot, use Duplicate() for cloning nodes
+                helper = index > 0 ? customHelper.Duplicate() as T : customHelper;
             }
             else
             {
-                helper = Object.Instantiate(customHelper);
+                helper = customHelper.Duplicate() as T;
             }
 
             return helper;
+        }
+
+        /// <summary>
+        /// 检查节点是否在场景树中
+        /// </summary>
+        private static bool IsInsideTreeHelper<T>(T node) where T : Node
+        {
+            return node != null && node.IsInsideTree();
         }
     }
 }

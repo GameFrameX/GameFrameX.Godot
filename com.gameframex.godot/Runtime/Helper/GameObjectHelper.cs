@@ -1,6 +1,4 @@
-using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
@@ -12,87 +10,71 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 销毁子物体
         /// </summary>
-        /// <param name="go"></param>
-        public static void RemoveChildren(GameObject go)
+        /// <param name="node">要销毁子物体的节点</param>
+        public static void RemoveChildren(Node node)
         {
-            for (var i = go.transform.childCount - 1; i >= 0; i--)
+            foreach (Node child in node.GetChildren())
             {
-                Destroy(go.transform.GetChild(i).gameObject);
+                child.QueueFree();
             }
         }
 
         /// <summary>
-        /// 销毁游戏物体
+        /// 销毁节点
         /// </summary>
-        /// <param name="gameObject"></param>
-        public static void DestroyObject(this GameObject gameObject)
+        /// <param name="node">要销毁的节点</param>
+        public static void DestroyObject(this Node node)
         {
-            if (!ReferenceEquals(gameObject, null))
+            if (!ReferenceEquals(node, null))
             {
-                if (Application.isEditor && !Application.isPlaying)
-                {
-                    Object.DestroyImmediate(gameObject);
-                    return;
-                }
-
-                Object.Destroy(gameObject);
+                node.QueueFree();
             }
         }
 
         /// <summary>
-        /// 销毁游戏物体
+        /// 销毁节点
         /// </summary>
-        /// <param name="gameObject"></param>
-        public static void Destroy(GameObject gameObject)
+        /// <param name="node">要销毁的节点</param>
+        public static void Destroy(Node node)
         {
-            gameObject.DestroyObject();
+            node.DestroyObject();
         }
 
         /// <summary>
-        /// 销毁游戏组件
+        /// 在场景树中查找特定名称的节点。
         /// </summary>
-        /// <param name="component"></param>
-        public static void DestroyComponent(Component component)
-        {
-            if (!ReferenceEquals(component, null))
-            {
-                if (Application.isEditor && !Application.isPlaying)
-                {
-                    Object.DestroyImmediate(component);
-                    return;
-                }
-
-                Object.Destroy(component);
-            }
-        }
-
-        /// <summary>
-        /// 在指定场景中查找特定名称的节点。
-        /// </summary>
-        /// <param name="sceneName">场景名称。</param>
         /// <param name="nodeName">节点名称。</param>
-        /// <returns>找到的节点的GameObject实例，如果没有找到返回null。</returns>
-        public static GameObject FindChildGamObjectByName(string nodeName, string sceneName = null)
+        /// <param name="rootNode">根节点，如果为null则使用场景根节点。</param>
+        /// <returns>找到的节点，如果没有找到返回null。</returns>
+        public static Node FindChildNodeByName(string nodeName, Node rootNode = null)
         {
-            Scene scene;
-            if (sceneName.IsNullOrWhiteSpace())
+            if (rootNode == null)
             {
-                scene = SceneManager.GetActiveScene();
-            }
-            else
-            {
-                scene = SceneManager.GetSceneByName(sceneName);
-                if (!scene.isLoaded)
+                var sceneTree = Engine.GetMainLoop() as SceneTree;
+                if (sceneTree != null && sceneTree.Root != null)
+                {
+                    rootNode = sceneTree.Root;
+                }
+                else
                 {
                     return null;
                 }
             }
 
-            var rootObjects = scene.GetRootGameObjects();
-            foreach (var rootObject in rootObjects)
+            return FindChildNodeByNameRecursive(rootNode, nodeName);
+        }
+
+        private static Node FindChildNodeByNameRecursive(Node parent, string name)
+        {
+            foreach (Node child in parent.GetChildren())
             {
-                var result = FindChildGamObjectByName(rootObject, nodeName);
-                if (result.IsNotNull())
+                if (child.Name == name)
+                {
+                    return child;
+                }
+
+                var result = FindChildNodeByNameRecursive(child, name);
+                if (result != null)
                 {
                     return result;
                 }
@@ -102,93 +84,86 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 根据游戏对象名称查询子对象
+        /// 根据节点名称查询子对象
         /// </summary>
-        /// <param name="gameObject"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static GameObject FindChildGamObjectByName(GameObject gameObject, string name)
+        /// <param name="node">父节点</param>
+        /// <param name="name">子节点名称</param>
+        /// <returns>找到的节点</returns>
+        public static Node FindChildNodeByName(Node node, string name)
         {
-            var transform = gameObject.transform.FindChildName(name);
-            if (transform.IsNotNull())
+            return node.FindChild(name, true, false);
+        }
+
+        /// <summary>
+        /// 创建节点
+        /// </summary>
+        /// <param name="parent">父节点</param>
+        /// <param name="name">节点名称</param>
+        /// <returns>创建的节点</returns>
+        public static Node Create(Node parent, string name)
+        {
+            if (parent == null)
             {
-                return transform.gameObject;
+                throw new System.ArgumentNullException(nameof(parent));
             }
-
-            return null;
+            var node = new Node();
+            node.Name = name;
+            parent.AddChild(node);
+            return node;
         }
 
         /// <summary>
-        /// 创建游戏对象
+        /// 重置节点的变换数据
         /// </summary>
-        /// <param name="parent"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static GameObject Create(Transform parent, string name)
+        /// <param name="node">要重置的节点</param>
+        public static void ResetTransform(Node node)
         {
-            Debug.Assert(!ReferenceEquals(parent, null), nameof(parent) + " == null");
-            var gameObject = new GameObject(name);
-            gameObject.transform.SetParent(parent);
-            return gameObject;
-        }
-
-        /// <summary>
-        /// 创建游戏对象
-        /// </summary>
-        /// <param name="parent"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static GameObject Create(GameObject parent, string name)
-        {
-            Debug.Assert(!ReferenceEquals(parent, null), nameof(parent) + " == null");
-            return Create(parent.transform, name);
-        }
-
-        /// <summary>
-        /// 重置游戏对象的变换数据
-        /// </summary>
-        /// <param name="gameObject"></param>
-        /// <returns></returns>
-        public static void ResetTransform(GameObject gameObject)
-        {
-            gameObject.transform.localScale = Vector3.one;
-            gameObject.transform.localPosition = Vector3.zero;
-            gameObject.transform.localRotation = Quaternion.identity;
+            if (node is Node2D node2D)
+            {
+                node2D.Scale = new Vector2(1, 1);
+                node2D.Position = new Vector2(0, 0);
+                node2D.RotationDegrees = 0;
+            }
+            else if (node is Node3D node3D)
+            {
+                node3D.Scale = new Vector3(1, 1, 1);
+                node3D.Position = new Vector3(0, 0, 0);
+                node3D.RotationDegrees = new Vector3(0, 0, 0);
+            }
         }
 
         /// <summary>
         /// 设置对象的显示排序层
+        /// Godot uses Z-index and canvas layers instead of sorting layers
         /// </summary>
-        /// <param name="gameObject">游戏对象</param>
-        /// <param name="sortingLayer">显示层</param>
-        public static void SetSortingGroupLayer(GameObject gameObject, string sortingLayer)
+        /// <param name="node">节点</param>
+        /// <param name="zIndex">Z轴索引</param>
+        public static void SetZIndex(Node node, int zIndex)
         {
-            SortingGroup[] sortingGroups = gameObject.GetComponentsInChildren<SortingGroup>();
-            foreach (SortingGroup sg in sortingGroups)
+            if (node is Node2D node2D)
             {
-                sg.sortingLayerName = sortingLayer;
+                node2D.ZIndex = zIndex;
             }
         }
 
         /// <summary>
         /// 设置对象的层
+        /// In Godot, use collision layers/masks for physics or canvas layers for rendering
         /// </summary>
-        /// <param name="gameObject">游戏对象</param>
+        /// <param name="node">节点</param>
         /// <param name="layer">层</param>
         /// <param name="children">是否设置子物体</param>
-        public static void SetLayer(GameObject gameObject, int layer, bool children = true)
+        public static void SetLayer(Node node, int layer, bool children = true)
         {
-            if (gameObject.layer != layer)
-            {
-                gameObject.layer = layer;
-            }
-
+            // Godot doesn't have the same concept of layers as Unity
+            // For physics, use Collision layers/masks
+            // For rendering, use Canvas layers
+            // This is a placeholder for compatibility
             if (children)
             {
-                Transform[] transforms = gameObject.GetComponentsInChildren<Transform>();
-                foreach (var sg in transforms)
+                foreach (Node child in node.GetChildren())
                 {
-                    sg.gameObject.layer = layer;
+                    SetLayer(child, layer, true);
                 }
             }
         }

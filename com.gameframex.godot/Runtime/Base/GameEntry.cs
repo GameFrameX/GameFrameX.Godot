@@ -31,8 +31,7 @@
 
 using System;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
@@ -124,16 +123,22 @@ namespace GameFrameX.Runtime
 
             if (shutdownType == ShutdownType.Restart)
             {
-                SceneManager.LoadScene(GameFrameworkSceneId);
+                // In Godot, reload the current scene
+                var sceneTree = Engine.GetMainLoop() as SceneTree;
+                if (sceneTree != null)
+                {
+                    sceneTree.ReloadCurrentScene();
+                }
                 return;
             }
 
             if (shutdownType == ShutdownType.Quit)
             {
-                Application.Quit();
-#if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-#endif
+                var sceneTree = Engine.GetMainLoop() as SceneTree;
+                if (sceneTree != null)
+                {
+                    sceneTree.Quit();
+                }
                 return;
             }
         }

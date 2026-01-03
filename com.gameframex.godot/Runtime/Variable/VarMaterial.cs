@@ -29,24 +29,24 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
-    /// UnityEngine.Material 变量类。
+    /// Godot.Material 变量类。
     /// </summary>
     public sealed class VarMaterial : Variable<Material>
     {
         /// <summary>
-        /// 初始化 UnityEngine.Material 变量类的新实例。
+        /// 初始化 Godot.Material 变量类的新实例。
         /// </summary>
         public VarMaterial()
         {
         }
 
         /// <summary>
-        /// 从 UnityEngine.Material 到 UnityEngine.Material 变量类的隐式转换。
+        /// 从 Godot.Material 到 Godot.Material 变量类的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator VarMaterial(Material value)
@@ -57,7 +57,7 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 从 UnityEngine.Material 变量类到 UnityEngine.Material 的隐式转换。
+        /// 从 Godot.Material 变量类到 Godot.Material 的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
         public static implicit operator Material(VarMaterial value)

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿using Godot;
 
 namespace GameFrameX.Runtime
 {
@@ -6,7 +6,7 @@ namespace GameFrameX.Runtime
     /// 游戏框架单例
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class GameFrameworkMonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
+    public abstract class GameFrameworkMonoSingleton<T> : Node where T : Node
     {
         private static T _instance;
 
@@ -23,18 +23,33 @@ namespace GameFrameX.Runtime
             {
                 if (_instance == null)
                 {
-                    _instance = (T)Object.FindObjectOfType(typeof(T));
+                    // In Godot, we typically use AutoLoad singletons or find nodes in the scene
+                    // This is a simplified approach - for production use AutoLoad pattern
+                    var rootNode = Engine.GetMainLoop() as SceneTree;
+                    if (rootNode != null)
+                    {
+                        _instance = rootNode.Root.FindChild(typeof(T).Name, true, false) as T;
+                    }
                 }
 
                 if (_instance == null)
                 {
-                    var insObj = new GameObject();
-                    _instance = insObj.AddComponent<T>();
-                    _instance.name = "[Singleton]" + typeof(T);
-
-                    if (Application.isPlaying)
+                    var insObj = new Node();
+                    _instance = insObj as T;
+                    if (_instance == null)
                     {
-                        Object.DontDestroyOnLoad(insObj);
+                        // If T is not the same type as the created node, we need a different approach
+                        // For now, we'll use reflection to create an instance
+                        _instance = Activator.CreateInstance<T>();
+                    }
+                    _instance.Name = "[Singleton]" + typeof(T).Name;
+
+                    // In Godot, use AutoLoad singleton pattern instead of DontDestroyOnLoad
+                    // For now, we'll just add it to the scene
+                    var rootNode = Engine.GetMainLoop() as SceneTree;
+                    if (rootNode != null && _instance.GetParent() == null)
+                    {
+                        rootNode.Root.AddChild(_instance);
                     }
                 }
 

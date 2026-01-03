@@ -30,14 +30,14 @@
 // ==========================================================================================
 
 using System;
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
     /// 游戏框架组件抽象类。
     /// </summary>
-    public abstract class GameFrameworkComponent : MonoBehaviour
+    public abstract class GameFrameworkComponent : Node
     {
         /// <summary>
         /// 是否自动注册
@@ -57,13 +57,14 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 游戏框架组件类型。
         /// </summary>
-        [SerializeField] protected string componentType = string.Empty;
+        [Export] protected string componentType = string.Empty;
 
         /// <summary>
         /// 游戏框架组件初始化。
         /// </summary>
-        protected virtual void Awake()
+        public override void _Ready()
         {
+            base._Ready();
             GameEntry.RegisterComponent(this);
             if (IsAutoRegister)
             {

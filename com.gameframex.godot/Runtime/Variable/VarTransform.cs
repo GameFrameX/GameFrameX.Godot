@@ -29,27 +29,27 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
-    /// UnityEngine.Transform 变量类。
+    /// Godot.Node 变量类（Transform在Godot中是Node的属性）。
     /// </summary>
-    public sealed class VarTransform : Variable<Transform>
+    public sealed class VarTransform : Variable<Node>
     {
         /// <summary>
-        /// 初始化 UnityEngine.Transform 变量类的新实例。
+        /// 初始化 Godot.Node 变量类的新实例。
         /// </summary>
         public VarTransform()
         {
         }
 
         /// <summary>
-        /// 从 UnityEngine.Transform 到 UnityEngine.Transform 变量类的隐式转换。
+        /// 从 Godot.Node 到 Godot.Node 变量类的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
-        public static implicit operator VarTransform(Transform value)
+        public static implicit operator VarTransform(Node value)
         {
             VarTransform varValue = ReferencePool.Acquire<VarTransform>();
             varValue.Value = value;
@@ -57,10 +57,10 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 从 UnityEngine.Transform 变量类到 UnityEngine.Transform 的隐式转换。
+        /// 从 Godot.Node 变量类到 Godot.Node 的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
-        public static implicit operator Transform(VarTransform value)
+        public static implicit operator Node(VarTransform value)
         {
             return value.Value;
         }
