@@ -2,7 +2,6 @@
 
 namespace System.Collections.Generic
 {
-    [UnityEngine.Scripting.Preserve]
     public static class CollectionExtensions
     {
         #region DictionaryExtensions
@@ -16,7 +15,6 @@ namespace System.Collections.Generic
         /// <param name="func"></param>
         /// <typeparam name="TKey"></typeparam>
         /// <typeparam name="TValue"></typeparam>
-        [UnityEngine.Scripting.Preserve]
         public static void Merge<TKey, TValue>(this Dictionary<TKey, TValue> self, TKey k, TValue v, Func<TValue, TValue, TValue> func)
         {
             self[k] = self.TryGetValue(k, out var value) ? func(value, v) : v;
@@ -25,7 +23,6 @@ namespace System.Collections.Generic
         /// <summary>
         /// 根据key获取value值，当不存在时通过valueGetter生成value，放入Dictionary并返回value
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> self, TKey key, Func<TKey, TValue> valueGetter)
         {
             if (!self.TryGetValue(key, out var value))
@@ -40,7 +37,6 @@ namespace System.Collections.Generic
         /// <summary>
         /// 根据key获取value值，当不存在时通过默认构造函数生成value，放入Dictionary并返回value
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> self, TKey key) where TValue : new()
         {
             return GetOrAdd(self, key, k => new TValue());
@@ -49,7 +45,6 @@ namespace System.Collections.Generic
         /// <summary>
         /// 根据条件移除
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static int RemoveIf<TKey, TValue>(this Dictionary<TKey, TValue> self, Func<TKey, TValue, bool> predict)
         {
             int count = 0;
@@ -73,10 +68,8 @@ namespace System.Collections.Generic
 
         #endregion
 
-
         #region ICollectionExtensions
 
-        [UnityEngine.Scripting.Preserve]
         public static bool IsNullOrEmpty<T>(this ICollection<T> self)
         {
             return self == null || self.Count <= 0;
@@ -89,7 +82,6 @@ namespace System.Collections.Generic
         /// <summary>
         /// 打乱
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static void Shuffer<T>(this List<T> list)
         {
             int n = list.Count;
@@ -101,7 +93,6 @@ namespace System.Collections.Generic
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
         public static void RemoveIf<T>(this List<T> list, Predicate<T> condition)
         {
             var idx = list.FindIndex(condition);
@@ -121,7 +112,6 @@ namespace System.Collections.Generic
         /// <param name="separator">默认为逗号</param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static string ListToString<T>(this List<T> list, string separator = ",")
         {
             ListToStringBuilder.Clear();
@@ -136,7 +126,6 @@ namespace System.Collections.Generic
 
         #endregion
 
-        [UnityEngine.Scripting.Preserve]
         public static void AddRange<T>(this HashSet<T> c, IEnumerable<T> e)
         {
             foreach (var item in e)

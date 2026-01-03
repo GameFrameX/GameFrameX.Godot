@@ -7,14 +7,12 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 游戏对象帮助类
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public static class GameObjectHelper
     {
         /// <summary>
         /// 销毁子物体
         /// </summary>
         /// <param name="go"></param>
-        [UnityEngine.Scripting.Preserve]
         public static void RemoveChildren(GameObject go)
         {
             for (var i = go.transform.childCount - 1; i >= 0; i--)
@@ -27,7 +25,6 @@ namespace GameFrameX.Runtime
         /// 销毁游戏物体
         /// </summary>
         /// <param name="gameObject"></param>
-        [UnityEngine.Scripting.Preserve]
         public static void DestroyObject(this GameObject gameObject)
         {
             if (!ReferenceEquals(gameObject, null))
@@ -46,7 +43,6 @@ namespace GameFrameX.Runtime
         /// 销毁游戏物体
         /// </summary>
         /// <param name="gameObject"></param>
-        [UnityEngine.Scripting.Preserve]
         public static void Destroy(GameObject gameObject)
         {
             gameObject.DestroyObject();
@@ -56,7 +52,6 @@ namespace GameFrameX.Runtime
         /// 销毁游戏组件
         /// </summary>
         /// <param name="component"></param>
-        [UnityEngine.Scripting.Preserve]
         public static void DestroyComponent(Component component)
         {
             if (!ReferenceEquals(component, null))
@@ -77,7 +72,6 @@ namespace GameFrameX.Runtime
         /// <param name="sceneName">场景名称。</param>
         /// <param name="nodeName">节点名称。</param>
         /// <returns>找到的节点的GameObject实例，如果没有找到返回null。</returns>
-        [UnityEngine.Scripting.Preserve]
         public static GameObject FindChildGamObjectByName(string nodeName, string sceneName = null)
         {
             Scene scene;
@@ -113,7 +107,6 @@ namespace GameFrameX.Runtime
         /// <param name="gameObject"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static GameObject FindChildGamObjectByName(GameObject gameObject, string name)
         {
             var transform = gameObject.transform.FindChildName(name);
@@ -131,7 +124,6 @@ namespace GameFrameX.Runtime
         /// <param name="parent"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static GameObject Create(Transform parent, string name)
         {
             Debug.Assert(!ReferenceEquals(parent, null), nameof(parent) + " == null");
@@ -146,7 +138,6 @@ namespace GameFrameX.Runtime
         /// <param name="parent"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static GameObject Create(GameObject parent, string name)
         {
             Debug.Assert(!ReferenceEquals(parent, null), nameof(parent) + " == null");
@@ -158,7 +149,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="gameObject"></param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static void ResetTransform(GameObject gameObject)
         {
             gameObject.transform.localScale = Vector3.one;
@@ -171,7 +161,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="gameObject">游戏对象</param>
         /// <param name="sortingLayer">显示层</param>
-        [UnityEngine.Scripting.Preserve]
         public static void SetSortingGroupLayer(GameObject gameObject, string sortingLayer)
         {
             SortingGroup[] sortingGroups = gameObject.GetComponentsInChildren<SortingGroup>();
@@ -187,7 +176,6 @@ namespace GameFrameX.Runtime
         /// <param name="gameObject">游戏对象</param>
         /// <param name="layer">层</param>
         /// <param name="children">是否设置子物体</param>
-        [UnityEngine.Scripting.Preserve]
         public static void SetLayer(GameObject gameObject, int layer, bool children = true)
         {
             if (gameObject.layer != layer)

@@ -38,7 +38,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// Marshal 相关的实用函数。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static class Marshal
         {
             private const int BlockSize = 1024 * 4;
@@ -48,7 +47,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 获取缓存的从进程的非托管内存中分配的内存的大小。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public static int CachedHGlobalSize
             {
                 get { return s_CachedHGlobalSize; }
@@ -58,7 +56,6 @@ namespace GameFrameX.Runtime
             /// 确保从进程的非托管内存中分配足够大小的内存并缓存。
             /// </summary>
             /// <param name="ensureSize">要确保从进程的非托管内存中分配内存的大小。</param>
-            [UnityEngine.Scripting.Preserve]
             public static void EnsureCachedHGlobalSize(int ensureSize)
             {
                 if (ensureSize < 0)
@@ -78,7 +75,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 释放缓存的从进程的非托管内存中分配的内存。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public static void FreeCachedHGlobal()
             {
                 if (s_CachedHGlobalPtr != IntPtr.Zero)
@@ -95,7 +91,6 @@ namespace GameFrameX.Runtime
             /// <typeparam name="T">要转换的对象的类型。</typeparam>
             /// <param name="structure">要转换的对象。</param>
             /// <returns>存储转换结果的二进制流。</returns>
-            [UnityEngine.Scripting.Preserve]
             public static byte[] StructureToBytes<T>(T structure)
             {
                 return StructureToBytes(structure, System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)));
@@ -108,7 +103,6 @@ namespace GameFrameX.Runtime
             /// <param name="structure">要转换的对象。</param>
             /// <param name="structureSize">要转换的对象的大小。</param>
             /// <returns>存储转换结果的二进制流。</returns>
-            [UnityEngine.Scripting.Preserve]
             internal static byte[] StructureToBytes<T>(T structure, int structureSize)
             {
                 if (structureSize < 0)
@@ -129,7 +123,6 @@ namespace GameFrameX.Runtime
             /// <typeparam name="T">要转换的对象的类型。</typeparam>
             /// <param name="structure">要转换的对象。</param>
             /// <param name="result">存储转换结果的二进制流。</param>
-            [UnityEngine.Scripting.Preserve]
             public static void StructureToBytes<T>(T structure, byte[] result)
             {
                 StructureToBytes(structure, System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)), result, 0);
@@ -142,7 +135,6 @@ namespace GameFrameX.Runtime
             /// <param name="structure">要转换的对象。</param>
             /// <param name="structureSize">要转换的对象的大小。</param>
             /// <param name="result">存储转换结果的二进制流。</param>
-            [UnityEngine.Scripting.Preserve]
             internal static void StructureToBytes<T>(T structure, int structureSize, byte[] result)
             {
                 StructureToBytes(structure, structureSize, result, 0);
@@ -155,7 +147,6 @@ namespace GameFrameX.Runtime
             /// <param name="structure">要转换的对象。</param>
             /// <param name="result">存储转换结果的二进制流。</param>
             /// <param name="startIndex">写入存储转换结果的二进制流的起始位置。</param>
-            [UnityEngine.Scripting.Preserve]
             public static void StructureToBytes<T>(T structure, byte[] result, int startIndex)
             {
                 StructureToBytes(structure, System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)), result, startIndex);
@@ -169,7 +160,6 @@ namespace GameFrameX.Runtime
             /// <param name="structureSize">要转换的对象的大小。</param>
             /// <param name="result">存储转换结果的二进制流。</param>
             /// <param name="startIndex">写入存储转换结果的二进制流的起始位置。</param>
-            [UnityEngine.Scripting.Preserve]
             internal static void StructureToBytes<T>(T structure, int structureSize, byte[] result, int startIndex)
             {
                 if (structureSize < 0)
@@ -203,7 +193,6 @@ namespace GameFrameX.Runtime
             /// <typeparam name="T">要转换的对象的类型。</typeparam>
             /// <param name="buffer">要转换的二进制流。</param>
             /// <returns>存储转换结果的对象。</returns>
-            [UnityEngine.Scripting.Preserve]
             public static T BytesToStructure<T>(byte[] buffer)
             {
                 return BytesToStructure<T>(System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)), buffer, 0);
@@ -216,7 +205,6 @@ namespace GameFrameX.Runtime
             /// <param name="buffer">要转换的二进制流。</param>
             /// <param name="startIndex">读取要转换的二进制流的起始位置。</param>
             /// <returns>存储转换结果的对象。</returns>
-            [UnityEngine.Scripting.Preserve]
             public static T BytesToStructure<T>(byte[] buffer, int startIndex)
             {
                 return BytesToStructure<T>(System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)), buffer, startIndex);
@@ -229,7 +217,6 @@ namespace GameFrameX.Runtime
             /// <param name="structureSize">要转换的对象的大小。</param>
             /// <param name="buffer">要转换的二进制流。</param>
             /// <returns>存储转换结果的对象。</returns>
-            [UnityEngine.Scripting.Preserve]
             internal static T BytesToStructure<T>(int structureSize, byte[] buffer)
             {
                 return BytesToStructure<T>(structureSize, buffer, 0);
@@ -243,7 +230,6 @@ namespace GameFrameX.Runtime
             /// <param name="buffer">要转换的二进制流。</param>
             /// <param name="startIndex">读取要转换的二进制流的起始位置。</param>
             /// <returns>存储转换结果的对象。</returns>
-            [UnityEngine.Scripting.Preserve]
             internal static T BytesToStructure<T>(int structureSize, byte[] buffer, int startIndex)
             {
                 if (structureSize < 0)

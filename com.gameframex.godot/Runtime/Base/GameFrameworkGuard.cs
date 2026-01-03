@@ -13,7 +13,6 @@ namespace GameFrameX.Runtime
         /// <param name="value">要检查的值。</param>
         /// <param name="name">值的名称。</param>
         /// <exception cref="ArgumentNullException">当值为null时引发。</exception>
-        [UnityEngine.Scripting.Preserve]
         public static void NotNullOrEmpty(string value, string name)
         {
             if (string.IsNullOrEmpty(value))
@@ -30,7 +29,6 @@ namespace GameFrameX.Runtime
         /// <param name="value">要检查的值。</param>
         /// <param name="name">值的名称。</param>
         /// <exception cref="ArgumentNullException">当值为null时引发。</exception>
-        [UnityEngine.Scripting.Preserve]
         public static void NotNull<T>(T value, string name) where T : class
         {
             if (value == null)
@@ -47,7 +45,6 @@ namespace GameFrameX.Runtime
         /// <param name="max">允许的最大值。</param>
         /// <param name="name">值的名称。</param>
         /// <exception cref="ArgumentOutOfRangeException">当值不在指定范围内时抛出。</exception>
-        [UnityEngine.Scripting.Preserve]
         public static void NotRange(int value, int min, int max, string name)
         {
             if (value > max || value < min)

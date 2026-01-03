@@ -109,7 +109,6 @@ namespace GameFrameX.Runtime
             return new DateTimeOffset(GetTodayEndTime()).ToUnixTimeSeconds();
         }
 
-
         /// <summary>
         /// 获取指定日期的开始时间
         /// </summary>
@@ -225,7 +224,6 @@ namespace GameFrameX.Runtime
         {
             return new DateTimeOffset(GetTomorrowEndTime()).ToUnixTimeSeconds();
         }
-
 
         /// <summary>
         /// 按照本地时间判断两个时间戳是否是同一天
@@ -350,7 +348,6 @@ namespace GameFrameX.Runtime
             return (endTime - startTime).TotalDays;
         }
 
-
         /// <summary>
         /// 获取从指定日期到当前UTC日期之间跨越的天数。
         /// </summary>
@@ -438,7 +435,6 @@ namespace GameFrameX.Runtime
             var endTime = UtcSecondsToLocalDateTime(endTimestamp);
             return GetCrossDays(startTime, endTime);
         }
-
 
         /// <summary>
         /// 获取当前本地时区的日期，格式为yyyyMMdd的整数

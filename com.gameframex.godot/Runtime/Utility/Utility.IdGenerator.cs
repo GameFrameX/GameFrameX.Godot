@@ -5,7 +5,6 @@ namespace GameFrameX.Runtime
 {
     public static partial class Utility
     {
-        [UnityEngine.Scripting.Preserve]
         public static class IdGenerator
         {
             /// <summary>
@@ -22,7 +21,6 @@ namespace GameFrameX.Runtime
             /// 使用Interlocked.Increment生成唯一ID的方法
             /// </summary>
             /// <returns>返回一个唯一的长整型ID</returns>
-            [UnityEngine.Scripting.Preserve]
             public static long GetNextUniqueId()
             {
                 // 原子性地递增值
@@ -33,7 +31,6 @@ namespace GameFrameX.Runtime
             /// 使用Interlocked.Increment生成唯一ID的方法
             /// </summary>
             /// <returns>返回一个唯一的整型ID</returns>
-            [UnityEngine.Scripting.Preserve]
             public static int GetNextUniqueIntId()
             {
                 return Interlocked.Increment(ref _intCounter);

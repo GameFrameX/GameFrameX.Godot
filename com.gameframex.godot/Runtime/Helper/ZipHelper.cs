@@ -10,7 +10,6 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 压缩帮助类
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public static class ZipHelper
     {
         private static readonly Crc32 CRC = new Crc32();
@@ -22,7 +21,6 @@ namespace GameFrameX.Runtime
         /// <param name="stream">压缩前的Stream,方法执行后变为压缩完成后的文件</param> 
         /// <param name="password">密码</param> 
         /// <returns>是否成功</returns> 
-        [UnityEngine.Scripting.Preserve]
         public static bool CompressDirectoryToStream(string folderToZip, Stream stream, string password = null)
         {
             return CompressDirectoryToZipStream(folderToZip, stream, password) != null;
@@ -36,7 +34,6 @@ namespace GameFrameX.Runtime
         /// <param name="stream">压缩前的Stream,方法执行后变为压缩完成后的文件</param> 
         /// <param name="password">密码</param> 
         /// <returns>是否压缩成功返回ZipOutputStream，否则返回null</returns> 
-        [UnityEngine.Scripting.Preserve]
         public static ZipOutputStream CompressDirectoryToZipStream(string folderToZip, Stream stream, string password = null)
         {
             if (!Directory.Exists(folderToZip))
@@ -68,7 +65,6 @@ namespace GameFrameX.Runtime
         /// <param name="zipStream">压缩输出流</param> 
         /// <param name="parentFolderName">此文件夹的上级文件夹</param> 
         /// <returns>是否成功</returns> 
-        [UnityEngine.Scripting.Preserve]
         private static bool CompressDirectory(string folderToZip, ZipOutputStream zipStream, string parentFolderName)
         {
             //这段是创建空文件夹,注释掉可以去掉空文件夹(因为在写入文件的时候也会创建文件夹)
@@ -130,7 +126,6 @@ namespace GameFrameX.Runtime
         /// <param name="zipFile">压缩文件完整路径</param> 
         /// <param name="password">密码</param> 
         /// <returns>是否成功</returns> 
-        [UnityEngine.Scripting.Preserve]
         public static bool CompressDirectory(string folderToZip, string zipFile, string password = null)
         {
             if (folderToZip.EndsWithFast(Path.DirectorySeparatorChar.ToString()) || folderToZip.EndsWithFast("/"))
@@ -155,7 +150,6 @@ namespace GameFrameX.Runtime
         /// <param name="zipFile">压缩后的文件名</param> 
         /// <param name="password">密码</param> 
         /// <returns>是否成功</returns> 
-        [UnityEngine.Scripting.Preserve]
         public static bool CompressFile(string fileToZip, string zipFile, string password = null)
         {
             if (!File.Exists(fileToZip))
@@ -203,7 +197,6 @@ namespace GameFrameX.Runtime
         /// <param name="zipFolder">指定解压目标目录</param> 
         /// <param name="password">密码</param> 
         /// <returns>是否成功</returns> 
-        [UnityEngine.Scripting.Preserve]
         public static bool DecompressFile(string fileToUnZip, string zipFolder, string password = null)
         {
             if (!System.IO.File.Exists(fileToUnZip))
@@ -270,7 +263,6 @@ namespace GameFrameX.Runtime
         /// <param name="content">要压缩的原始字节数组。不能为null。</param>
         /// <returns>压缩后的字节数组。如果输入为空数组，则直接返回该空数组。如果压缩过程中发生异常，则返回原始数组。</returns>
         /// <exception cref="ArgumentNullException">当输入参数content为null时抛出。</exception>
-        [UnityEngine.Scripting.Preserve]
         public static byte[] Compress(byte[] content)
         {
             content.CheckNull(nameof(content));
@@ -318,7 +310,6 @@ namespace GameFrameX.Runtime
         /// <returns>解压后的原始字节数组。如果输入为空数组，则直接返回该空数组。如果解压过程中发生异常，则返回原始数组。</returns>
         /// <exception cref="ArgumentNullException">当输入参数content为null时抛出。</exception>
         /// <exception cref="InvalidDataException">当压缩数据格式无效或已损坏时抛出。</exception>
-        [UnityEngine.Scripting.Preserve]
         public static byte[] Decompress(byte[] content)
         {
             content.CheckNull(nameof(content));

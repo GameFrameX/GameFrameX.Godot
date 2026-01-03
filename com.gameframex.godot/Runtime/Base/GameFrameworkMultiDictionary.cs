@@ -40,7 +40,6 @@ namespace GameFrameX.Runtime
     /// </summary>
     /// <typeparam name="TKey">指定多值字典的主键类型。</typeparam>
     /// <typeparam name="TValue">指定多值字典的值类型。</typeparam>
-    [UnityEngine.Scripting.Preserve]
     public sealed class GameFrameworkMultiDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, GameFrameworkLinkedListRange<TValue>>>, IEnumerable
     {
         private readonly GameFrameworkLinkedList<TValue> m_LinkedList;
@@ -49,7 +48,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 初始化游戏框架多值字典类的新实例。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public GameFrameworkMultiDictionary()
         {
             m_LinkedList = new GameFrameworkLinkedList<TValue>();
@@ -59,7 +57,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取多值字典中实际包含的主键数量。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int Count
         {
             get { return m_Dictionary.Count; }
@@ -70,7 +67,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="key">指定的主键。</param>
         /// <returns>指定主键的范围。</returns>
-        [UnityEngine.Scripting.Preserve]
         public GameFrameworkLinkedListRange<TValue> this[TKey key]
         {
             get
@@ -84,7 +80,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 清理多值字典。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public void Clear()
         {
             m_Dictionary.Clear();
@@ -96,7 +91,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="key">要检查的主键。</param>
         /// <returns>多值字典中是否包含指定主键。</returns>
-        [UnityEngine.Scripting.Preserve]
         public bool Contains(TKey key)
         {
             return m_Dictionary.ContainsKey(key);
@@ -108,7 +102,6 @@ namespace GameFrameX.Runtime
         /// <param name="key">要检查的主键。</param>
         /// <param name="value">要检查的值。</param>
         /// <returns>多值字典中是否包含指定值。</returns>
-        [UnityEngine.Scripting.Preserve]
         public bool Contains(TKey key, TValue value)
         {
             GameFrameworkLinkedListRange<TValue> range = default(GameFrameworkLinkedListRange<TValue>);
@@ -126,7 +119,6 @@ namespace GameFrameX.Runtime
         /// <param name="key">指定的主键。</param>
         /// <param name="range">指定主键的范围。</param>
         /// <returns>是否获取成功。</returns>
-        [UnityEngine.Scripting.Preserve]
         public bool TryGetValue(TKey key, out GameFrameworkLinkedListRange<TValue> range)
         {
             return m_Dictionary.TryGetValue(key, out range);
@@ -137,7 +129,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="key">指定的主键。</param>
         /// <param name="value">指定的值。</param>
-        [UnityEngine.Scripting.Preserve]
         public void Add(TKey key, TValue value)
         {
             GameFrameworkLinkedListRange<TValue> range = default(GameFrameworkLinkedListRange<TValue>);
@@ -159,7 +150,6 @@ namespace GameFrameX.Runtime
         /// <param name="key">指定的主键。</param>
         /// <param name="value">指定的值。</param>
         /// <returns>是否移除成功。</returns>
-        [UnityEngine.Scripting.Preserve]
         public bool Remove(TKey key, TValue value)
         {
             GameFrameworkLinkedListRange<TValue> range = default(GameFrameworkLinkedListRange<TValue>);
@@ -197,7 +187,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="key">指定的主键。</param>
         /// <returns>是否移除成功。</returns>
-        [UnityEngine.Scripting.Preserve]
         public bool RemoveAll(TKey key)
         {
             GameFrameworkLinkedListRange<TValue> range = default(GameFrameworkLinkedListRange<TValue>);
@@ -223,7 +212,6 @@ namespace GameFrameX.Runtime
         /// 返回循环访问集合的枚举数。
         /// </summary>
         /// <returns>循环访问集合的枚举数。</returns>
-        [UnityEngine.Scripting.Preserve]
         public Enumerator GetEnumerator()
         {
             return new Enumerator(m_Dictionary);
@@ -233,7 +221,6 @@ namespace GameFrameX.Runtime
         /// 返回循环访问集合的枚举数。
         /// </summary>
         /// <returns>循环访问集合的枚举数。</returns>
-        [UnityEngine.Scripting.Preserve]
         IEnumerator<KeyValuePair<TKey, GameFrameworkLinkedListRange<TValue>>> IEnumerable<KeyValuePair<TKey, GameFrameworkLinkedListRange<TValue>>>.GetEnumerator()
         {
             return GetEnumerator();
@@ -243,7 +230,6 @@ namespace GameFrameX.Runtime
         /// 返回循环访问集合的枚举数。
         /// </summary>
         /// <returns>循环访问集合的枚举数。</returns>
-        [UnityEngine.Scripting.Preserve]
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -253,12 +239,10 @@ namespace GameFrameX.Runtime
         /// 循环访问集合的枚举数。
         /// </summary>
         [StructLayout(LayoutKind.Auto)]
-        [UnityEngine.Scripting.Preserve]
         public struct Enumerator : IEnumerator<KeyValuePair<TKey, GameFrameworkLinkedListRange<TValue>>>, IEnumerator
         {
             private Dictionary<TKey, GameFrameworkLinkedListRange<TValue>>.Enumerator m_Enumerator;
 
-            [UnityEngine.Scripting.Preserve]
             internal Enumerator(Dictionary<TKey, GameFrameworkLinkedListRange<TValue>> dictionary)
             {
                 if (dictionary == null)
@@ -272,7 +256,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 获取当前结点。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public KeyValuePair<TKey, GameFrameworkLinkedListRange<TValue>> Current
             {
                 get { return m_Enumerator.Current; }
@@ -289,7 +272,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 清理枚举数。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public void Dispose()
             {
                 m_Enumerator.Dispose();
@@ -299,7 +281,6 @@ namespace GameFrameX.Runtime
             /// 获取下一个结点。
             /// </summary>
             /// <returns>返回下一个结点。</returns>
-            [UnityEngine.Scripting.Preserve]
             public bool MoveNext()
             {
                 return m_Enumerator.MoveNext();
@@ -308,7 +289,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 重置枚举数。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             void IEnumerator.Reset()
             {
                 ((IEnumerator<KeyValuePair<TKey, GameFrameworkLinkedListRange<TValue>>>)m_Enumerator).Reset();

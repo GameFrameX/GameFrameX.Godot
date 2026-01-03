@@ -63,7 +63,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 引用类型
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public Type ReferenceType
             {
                 get { return _referenceType; }
@@ -72,7 +71,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 未使用的引用计数。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public int UnusedReferenceCount
             {
                 get { return _references.Count; }
@@ -81,7 +79,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 正在使用的引用计数。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public int UsingReferenceCount
             {
                 get { return _usingReferenceCount; }
@@ -90,7 +87,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 获取引用的次数。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public int AcquireReferenceCount
             {
                 get { return _acquireReferenceCount; }
@@ -99,7 +95,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 归还引用的次数。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public int ReleaseReferenceCount
             {
                 get { return _releaseReferenceCount; }
@@ -108,7 +103,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 添加引用的次数。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public int AddReferenceCount
             {
                 get { return _addReferenceCount; }
@@ -117,7 +111,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 移除引用的次数。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public int RemoveReferenceCount
             {
                 get { return _removeReferenceCount; }
@@ -128,7 +121,6 @@ namespace GameFrameX.Runtime
             /// </summary>
             /// <typeparam name="T">引用类型。</typeparam>
             /// <returns>引用。</returns>
-            [UnityEngine.Scripting.Preserve]
             public T Acquire<T>() where T : class, IReference, new()
             {
                 if (typeof(T) != _referenceType)
@@ -154,7 +146,6 @@ namespace GameFrameX.Runtime
             /// 从引用池获取引用。
             /// </summary>
             /// <returns>引用。</returns>
-            [UnityEngine.Scripting.Preserve]
             public IReference Acquire()
             {
                 _usingReferenceCount++;
@@ -175,7 +166,6 @@ namespace GameFrameX.Runtime
             /// 释放一个引用对象。
             /// </summary>
             /// <param name="reference">要释放的引用对象。</param>
-            [UnityEngine.Scripting.Preserve]
             public void Release(IReference reference)
             {
                 reference.Clear();
@@ -200,7 +190,6 @@ namespace GameFrameX.Runtime
             /// <typeparam name="T">要添加的引用对象类型。</typeparam>
             /// <param name="count">要添加的引用对象数量。</param>
             /// <exception cref="GameFrameworkException">类型无效。</exception>
-            [UnityEngine.Scripting.Preserve]
             public void Add<T>(int count) where T : class, IReference, new()
             {
                 if (typeof(T) != _referenceType)
@@ -222,7 +211,6 @@ namespace GameFrameX.Runtime
             /// 向引用池中添加指定数量的引用。
             /// </summary>
             /// <param name="count">要添加的引用数量。</param>
-            [UnityEngine.Scripting.Preserve]
             public void Add(int count)
             {
                 lock (_references)
@@ -239,7 +227,6 @@ namespace GameFrameX.Runtime
             /// 从引用池中移除指定数量的引用。
             /// </summary>
             /// <param name="count">要移除的引用数量。</param>
-            [UnityEngine.Scripting.Preserve]
             public void Remove(int count)
             {
                 lock (_references)
@@ -260,7 +247,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 从引用池中移除所有的引用。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public void RemoveAll()
             {
                 lock (_references)

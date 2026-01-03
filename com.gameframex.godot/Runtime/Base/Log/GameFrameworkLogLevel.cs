@@ -34,7 +34,6 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 游戏框架日志等级。
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public enum GameFrameworkLogLevel : byte
     {
         /// <summary>

@@ -29,7 +29,6 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine.Scripting;
 
 namespace GameFrameX.Runtime
 {
@@ -45,7 +44,6 @@ namespace GameFrameX.Runtime
             /// </summary>
             /// <param name="level">游戏框架日志等级。</param>
             /// <param name="message">日志内容。</param>
-            [Preserve]
             void Log(GameFrameworkLogLevel level, object message);
         }
     }

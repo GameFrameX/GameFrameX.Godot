@@ -31,14 +31,12 @@
 
 using System;
 using GameFrameX.Runtime;
-using UnityEngine.Scripting;
 
 namespace GameFrameX.ObjectPool
 {
     /// <summary>
     /// 对象基类。
     /// </summary>
-    [Preserve]
     public abstract class ObjectBase : IReference
     {
         private string m_Name;
@@ -50,7 +48,6 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 初始化对象基类的新实例。
         /// </summary>
-        [Preserve]
         public ObjectBase()
         {
             m_Name = null;
@@ -63,7 +60,6 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 获取对象名称。
         /// </summary>
-        [Preserve]
         public virtual string Name
         {
             get { return m_Name; }
@@ -73,7 +69,6 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 获取对象。
         /// </summary>
-        [Preserve]
         public object Target
         {
             get { return m_Target; }
@@ -82,7 +77,6 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 获取或设置对象是否被加锁。
         /// </summary>
-        [Preserve]
         public bool Locked
         {
             get { return m_Locked; }
@@ -92,7 +86,6 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 获取或设置对象的优先级。
         /// </summary>
-        [Preserve]
         public int Priority
         {
             get { return m_Priority; }
@@ -102,7 +95,6 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 获取自定义释放检查标记。
         /// </summary>
-        [Preserve]
         public virtual bool CustomCanReleaseFlag
         {
             get { return true; }
@@ -111,7 +103,6 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 获取对象上次使用时间。
         /// </summary>
-        [Preserve]
         public DateTime LastUseTime
         {
             get { return m_LastUseTime; }
@@ -122,7 +113,6 @@ namespace GameFrameX.ObjectPool
         /// 初始化对象基类。
         /// </summary>
         /// <param name="target">对象。</param>
-        [Preserve]
         protected void Initialize(object target)
         {
             Initialize(null, target, false, 0);
@@ -133,7 +123,6 @@ namespace GameFrameX.ObjectPool
         /// </summary>
         /// <param name="name">对象名称。</param>
         /// <param name="target">对象。</param>
-        [Preserve]
         protected void Initialize(string name, object target)
         {
             Initialize(name, target, false, 0);
@@ -145,7 +134,6 @@ namespace GameFrameX.ObjectPool
         /// <param name="name">对象名称。</param>
         /// <param name="target">对象。</param>
         /// <param name="locked">对象是否被加锁。</param>
-        [Preserve]
         protected void Initialize(string name, object target, bool locked)
         {
             Initialize(name, target, locked, 0);
@@ -157,7 +145,6 @@ namespace GameFrameX.ObjectPool
         /// <param name="name">对象名称。</param>
         /// <param name="target">对象。</param>
         /// <param name="priority">对象的优先级。</param>
-        [Preserve]
         protected void Initialize(string name, object target, int priority)
         {
             Initialize(name, target, false, priority);
@@ -170,7 +157,6 @@ namespace GameFrameX.ObjectPool
         /// <param name="target">对象。</param>
         /// <param name="locked">对象是否被加锁。</param>
         /// <param name="priority">对象的优先级。</param>
-        [Preserve]
         protected void Initialize(string name, object target, bool locked, int priority)
         {
             if (target == null)
@@ -188,7 +174,6 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 清理对象基类。
         /// </summary>
-        [Preserve]
         public virtual void Clear()
         {
             m_Name = null;
@@ -201,7 +186,6 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 获取对象时的事件。
         /// </summary>
-        [Preserve]
         protected internal virtual void OnSpawn()
         {
         }
@@ -209,7 +193,6 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 回收对象时的事件。
         /// </summary>
-        [Preserve]
         protected internal virtual void OnUnspawn()
         {
         }
@@ -218,7 +201,6 @@ namespace GameFrameX.ObjectPool
         /// 释放对象。
         /// </summary>
         /// <param name="isShutdown">是否是关闭对象池时触发。</param>
-        [Preserve]
         protected internal abstract void Release(bool isShutdown);
     }
 }

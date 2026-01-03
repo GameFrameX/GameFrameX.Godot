@@ -9,7 +9,6 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 文件帮助类
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public static class FileHelper
     {
         /// <summary>
@@ -17,7 +16,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="files">文件存放路径列表对象</param>
         /// <param name="dir">目标目录</param>
-        [UnityEngine.Scripting.Preserve]
         public static void GetAllFiles(List<string> files, string dir)
         {
             if (!Directory.Exists(dir))
@@ -42,7 +40,6 @@ namespace GameFrameX.Runtime
         /// 清理目录
         /// </summary>
         /// <param name="dir">目标路径</param>
-        [UnityEngine.Scripting.Preserve]
         public static void CleanDirectory(string dir)
         {
             if (!Directory.Exists(dir))
@@ -67,7 +64,6 @@ namespace GameFrameX.Runtime
         /// <param name="srcDir">源路径</param>
         /// <param name="targetDir">目标路径</param>
         /// <exception cref="Exception"></exception>
-        [UnityEngine.Scripting.Preserve]
         public static void CopyDirectory(string srcDir, string targetDir)
         {
             DirectoryInfo source = new DirectoryInfo(srcDir);
@@ -109,7 +105,6 @@ namespace GameFrameX.Runtime
         /// <param name="sourceFileName">源路径</param>
         /// <param name="destFileName">目标路径</param>
         /// <param name="overwrite">是否覆盖</param>
-        [UnityEngine.Scripting.Preserve]
         public static void Copy(string sourceFileName, string destFileName, bool overwrite = false)
         {
             if (!File.Exists(sourceFileName))
@@ -124,7 +119,6 @@ namespace GameFrameX.Runtime
         /// 删除文件
         /// </summary>
         /// <param name="path">文件路径</param>
-        [UnityEngine.Scripting.Preserve]
         public static void Delete(string path)
         {
             File.Delete(path);
@@ -135,7 +129,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="path">文件路径</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsExists(string path)
         {
 #if ENABLE_GAME_FRAME_X_READ_ASSETS
@@ -147,7 +140,6 @@ namespace GameFrameX.Runtime
             return File.Exists(path);
         }
 
-        [UnityEngine.Scripting.Preserve]
         private static bool IsAndroidReadOnlyPath(string path, out string readPath)
         {
             if (Application.platform == RuntimePlatform.Android)
@@ -168,7 +160,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="sourceFileName">文件源路径</param>
         /// <param name="destFileName">目标路径</param>
-        [UnityEngine.Scripting.Preserve]
         public static void Move(string sourceFileName, string destFileName)
         {
             if (!File.Exists(sourceFileName))
@@ -185,7 +176,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="path">文件路径</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static byte[] ReadAllBytes(string path)
         {
 #if ENABLE_GAME_FRAME_X_READ_ASSETS
@@ -204,7 +194,6 @@ namespace GameFrameX.Runtime
         /// <param name="path">文件路径</param>
         /// <param name="encoding">编码</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static string ReadAllText(string path, Encoding encoding)
         {
             return File.ReadAllText(path, encoding);
@@ -215,7 +204,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="path">文件路径</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static string ReadAllText(string path)
         {
             return File.ReadAllText(path, Encoding.UTF8);
@@ -227,7 +215,6 @@ namespace GameFrameX.Runtime
         /// <param name="path">文件路径</param>
         /// <param name="encoding">编码</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static string[] ReadAllLines(string path, Encoding encoding)
         {
             return File.ReadAllLines(path, encoding);
@@ -238,7 +225,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="path">文件路径</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static string[] ReadAllLines(string path)
         {
             return File.ReadAllLines(path, Encoding.UTF8);
@@ -250,7 +236,6 @@ namespace GameFrameX.Runtime
         /// <param name="path">文件路径</param>
         /// <param name="buffer">写入内容</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static void ReadAllLines(string path, byte[] buffer)
         {
             File.WriteAllBytes(path, buffer);
@@ -263,7 +248,6 @@ namespace GameFrameX.Runtime
         /// <param name="lines">写入的内容</param>
         /// <param name="encoding">编码</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static void WriteAllLines(string path, string[] lines, Encoding encoding)
         {
             File.WriteAllLines(path, lines, encoding);
@@ -275,7 +259,6 @@ namespace GameFrameX.Runtime
         /// <param name="path">文件路径</param>
         /// <param name="lines">写入的内容</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static void WriteAllLines(string path, string[] lines)
         {
             File.WriteAllLines(path, lines, Encoding.UTF8);
@@ -288,7 +271,6 @@ namespace GameFrameX.Runtime
         /// <param name="content">写入的内容</param>
         /// <param name="encoding">编码</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static void WriteAllText(string path, string content, Encoding encoding)
         {
             File.WriteAllText(path, content, encoding);
@@ -300,7 +282,6 @@ namespace GameFrameX.Runtime
         /// <param name="path">文件路径</param>
         /// <param name="content">写入的内容</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static void WriteAllText(string path, string content)
         {
             File.WriteAllText(path, content, Encoding.UTF8);
@@ -312,7 +293,6 @@ namespace GameFrameX.Runtime
         /// <param name="path">文件路径</param>
         /// <param name="buffer">写入的内容</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static void WriteAllBytes(string path, byte[] buffer)
         {
             File.WriteAllBytes(path, buffer);

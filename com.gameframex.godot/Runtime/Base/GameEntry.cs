@@ -39,7 +39,6 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 游戏入口。
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public static class GameEntry
     {
         private static readonly GameFrameworkLinkedList<GameFrameworkComponent> GameFrameworkComponents = new GameFrameworkLinkedList<GameFrameworkComponent>();
@@ -54,7 +53,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <typeparam name="T">要获取的游戏框架组件类型。</typeparam>
         /// <returns>要获取的游戏框架组件。</returns>
-        [UnityEngine.Scripting.Preserve]
         public static T GetComponent<T>() where T : GameFrameworkComponent
         {
             return (T)GetComponent(typeof(T));
@@ -65,7 +63,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="type">要获取的游戏框架组件类型。</param>
         /// <returns>要获取的游戏框架组件。</returns>
-        [UnityEngine.Scripting.Preserve]
         public static GameFrameworkComponent GetComponent(Type type)
         {
             LinkedListNode<GameFrameworkComponent> current = GameFrameworkComponents.First;
@@ -87,7 +84,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="typeName">要获取的游戏框架组件类型名称。</param>
         /// <returns>要获取的游戏框架组件。</returns>
-        [UnityEngine.Scripting.Preserve]
         public static GameFrameworkComponent GetComponent(string typeName)
         {
             LinkedListNode<GameFrameworkComponent> current = GameFrameworkComponents.First;
@@ -109,7 +105,6 @@ namespace GameFrameX.Runtime
         /// 关闭游戏框架。
         /// </summary>
         /// <param name="shutdownType">关闭游戏框架类型。</param>
-        [UnityEngine.Scripting.Preserve]
         public static void Shutdown(ShutdownType shutdownType)
         {
             Log.Info("Shutdown Game Framework ({0})...", shutdownType);
@@ -147,7 +142,6 @@ namespace GameFrameX.Runtime
         /// 注册游戏框架组件。
         /// </summary>
         /// <param name="gameFrameworkComponent">要注册的游戏框架组件。</param>
-        [UnityEngine.Scripting.Preserve]
         internal static void RegisterComponent(GameFrameworkComponent gameFrameworkComponent)
         {
             if (gameFrameworkComponent == null)

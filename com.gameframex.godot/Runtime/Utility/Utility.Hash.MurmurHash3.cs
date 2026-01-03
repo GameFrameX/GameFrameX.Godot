@@ -12,13 +12,11 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// MurmurHash3
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             /// <summary>
             /// MurmurHash3 哈希算法的实现。
             /// </summary>
             public static class MurmurHash3
             {
-                [UnityEngine.Scripting.Preserve]
                 /// <summary>
                 /// 计算给定字符串的 MurmurHash3 哈希值。
                 /// </summary>

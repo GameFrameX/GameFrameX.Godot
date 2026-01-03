@@ -32,7 +32,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using UnityEngine.Scripting;
 
 namespace GameFrameX.Runtime
 {
@@ -54,7 +53,6 @@ namespace GameFrameX.Runtime
         /// 初始化事件池的新实例。
         /// </summary>
         /// <param name="mode">事件池模式。</param>
-        [Preserve]
         public EventPool(EventPoolMode mode)
         {
             _eventHandlers = new GameFrameworkMultiDictionary<string, EventHandler<T>>();
@@ -68,7 +66,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取事件处理函数的数量。
         /// </summary>
-        [Preserve]
         public int EventHandlerCount
         {
             get
@@ -83,7 +80,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取事件数量。
         /// </summary>
-        [Preserve]
         public int EventCount
         {
             get { return _events.Count; }
@@ -94,7 +90,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
         /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
-        [Preserve]
         public void Update(float elapseSeconds, float realElapseSeconds)
         {
             while (_events.TryDequeue(out var eventNodeNode))
@@ -257,7 +252,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="sender">事件源。</param>
         /// <param name="e">事件参数。</param>
-        [Preserve]
         public void Fire(object sender, T e)
         {
             if (e == null)

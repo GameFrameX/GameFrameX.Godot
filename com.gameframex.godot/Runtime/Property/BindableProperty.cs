@@ -1,9 +1,7 @@
 ﻿using System;
-using UnityEngine.Scripting;
 
 namespace GameFrameX.Runtime
 {
-    [Preserve]
     public sealed class BindableProperty<T>
     {
         private T _value;
@@ -34,19 +32,16 @@ namespace GameFrameX.Runtime
         /// 默认构造函数
         /// </summary>
         /// <param name="defaultValue">默认值</param>
-        [Preserve]
         public BindableProperty(T defaultValue = default) : this()
         {
             _value = defaultValue;
         }
-
 
         /// <summary>
         /// 注册值变化事件
         /// </summary>
         /// <param name="callback"></param>
         /// <returns></returns>
-        [Preserve]
         public BindableProperty<T> Add(Action<T> callback)
         {
             GameFrameworkGuard.NotNull(callback, nameof(callback));
@@ -59,7 +54,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="callback"></param>
         /// <returns></returns>
-        [Preserve]
         public BindableProperty<T> RegisterWithInitValue(Action<T> callback)
         {
             GameFrameworkGuard.NotNull(callback, nameof(callback));
@@ -71,7 +65,6 @@ namespace GameFrameX.Runtime
         /// 移除事件
         /// </summary>
         /// <param name="callback">事件</param>
-        [Preserve]
         public void Remove(Action<T> callback)
         {
             GameFrameworkGuard.NotNull(callback, nameof(callback));
@@ -81,7 +74,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 清除事件
         /// </summary>
-        [Preserve]
         public void Clear()
         {
             _onValueChanged = null;

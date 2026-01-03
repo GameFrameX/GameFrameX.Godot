@@ -5,7 +5,6 @@ namespace System
     /// <summary>
     /// 扩展方法，用于检查当前类型是否实现了指定的接口。
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public static class TypeExtensions
     {
         /// <summary>
@@ -25,7 +24,6 @@ namespace System
         /// 4. self实现了target接口（根据directOnly参数决定检查范围）
         /// 否则返回false
         /// </returns>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsImplWithInterface(this Type self, Type target, bool directOnly = false)
         {
             // 参数有效性检查

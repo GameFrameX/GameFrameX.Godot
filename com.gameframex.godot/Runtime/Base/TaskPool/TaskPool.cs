@@ -37,7 +37,6 @@ namespace GameFrameX.Runtime
     /// 任务池。
     /// </summary>
     /// <typeparam name="T">任务类型。</typeparam>
-    [UnityEngine.Scripting.Preserve]
     public sealed class TaskPool<T> where T : TaskBase
     {
         private readonly Stack<ITaskAgent<T>> m_FreeAgents;
@@ -48,7 +47,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 初始化任务池的新实例。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public TaskPool()
         {
             m_FreeAgents = new Stack<ITaskAgent<T>>();
@@ -60,7 +58,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取或设置任务池是否被暂停。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public bool Paused
         {
             get { return m_Paused; }
@@ -70,7 +67,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取任务代理总数量。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int TotalAgentCount
         {
             get { return FreeAgentCount + WorkingAgentCount; }
@@ -79,7 +75,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取可用任务代理数量。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int FreeAgentCount
         {
             get { return m_FreeAgents.Count; }
@@ -88,7 +83,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取工作中任务代理数量。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int WorkingAgentCount
         {
             get { return m_WorkingAgents.Count; }
@@ -97,7 +91,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取等待任务数量。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int WaitingTaskCount
         {
             get { return m_WaitingTasks.Count; }
@@ -108,7 +101,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
         /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
-        [UnityEngine.Scripting.Preserve]
         public void Update(float elapseSeconds, float realElapseSeconds)
         {
             if (m_Paused)
@@ -123,7 +115,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 关闭并清理任务池。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public void Shutdown()
         {
             RemoveAllTasks();
@@ -138,7 +129,6 @@ namespace GameFrameX.Runtime
         /// 增加任务代理。
         /// </summary>
         /// <param name="agent">要增加的任务代理。</param>
-        [UnityEngine.Scripting.Preserve]
         public void AddAgent(ITaskAgent<T> agent)
         {
             if (agent == null)
@@ -155,7 +145,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="serialId">要获取信息的任务的序列编号。</param>
         /// <returns>任务的信息。</returns>
-        [UnityEngine.Scripting.Preserve]
         public TaskInfo GetTaskInfo(int serialId)
         {
             foreach (ITaskAgent<T> workingAgent in m_WorkingAgents)
@@ -183,7 +172,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="tag">要获取信息的任务的标签。</param>
         /// <returns>任务的信息。</returns>
-        [UnityEngine.Scripting.Preserve]
         public TaskInfo[] GetTaskInfos(string tag)
         {
             List<TaskInfo> results = new List<TaskInfo>();
@@ -196,7 +184,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="tag">要获取信息的任务的标签。</param>
         /// <param name="results">任务的信息。</param>
-        [UnityEngine.Scripting.Preserve]
         public void GetTaskInfos(string tag, List<TaskInfo> results)
         {
             if (results == null)
@@ -227,7 +214,6 @@ namespace GameFrameX.Runtime
         /// 获取所有任务的信息。
         /// </summary>
         /// <returns>所有任务的信息。</returns>
-        [UnityEngine.Scripting.Preserve]
         public TaskInfo[] GetAllTaskInfos()
         {
             int index = 0;
@@ -250,7 +236,6 @@ namespace GameFrameX.Runtime
         /// 获取所有任务的信息。
         /// </summary>
         /// <param name="results">所有任务的信息。</param>
-        [UnityEngine.Scripting.Preserve]
         public void GetAllTaskInfos(List<TaskInfo> results)
         {
             if (results == null)
@@ -275,7 +260,6 @@ namespace GameFrameX.Runtime
         /// 增加任务。
         /// </summary>
         /// <param name="task">要增加的任务。</param>
-        [UnityEngine.Scripting.Preserve]
         public void AddTask(T task)
         {
             LinkedListNode<T> current = m_WaitingTasks.Last;
@@ -304,7 +288,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="serialId">要移除任务的序列编号。</param>
         /// <returns>是否移除任务成功。</returns>
-        [UnityEngine.Scripting.Preserve]
         public bool RemoveTask(int serialId)
         {
             foreach (T task in m_WaitingTasks)
@@ -343,7 +326,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="tag">要移除任务的标签。</param>
         /// <returns>移除任务的数量。</returns>
-        [UnityEngine.Scripting.Preserve]
         public int RemoveTasks(string tag)
         {
             int count = 0;
@@ -388,7 +370,6 @@ namespace GameFrameX.Runtime
         /// 移除所有任务。
         /// </summary>
         /// <returns>移除任务的数量。</returns>
-        [UnityEngine.Scripting.Preserve]
         public int RemoveAllTasks()
         {
             int count = m_WaitingTasks.Count + m_WorkingAgents.Count;

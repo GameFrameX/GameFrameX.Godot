@@ -38,7 +38,6 @@ namespace GameFrameX.Runtime
     /// </summary>
     [DisallowMultipleComponent]
     [AddComponentMenu("GameFrameX/ReferencePool")]
-    [UnityEngine.Scripting.Preserve]
     public sealed class ReferencePoolComponent : GameFrameworkComponent
     {
         [SerializeField] private ReferenceStrictCheckType m_EnableStrictCheck = ReferenceStrictCheckType.AlwaysEnable;
@@ -46,7 +45,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取或设置是否开启强制检查。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public bool EnableStrictCheck
         {
             get { return ReferencePool.EnableStrictCheck; }
@@ -63,14 +61,12 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 游戏框架组件初始化。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         protected override void Awake()
         {
             IsAutoRegister = false;
             base.Awake();
         }
 
-        [UnityEngine.Scripting.Preserve]
         private void Start()
         {
             switch (m_EnableStrictCheck)

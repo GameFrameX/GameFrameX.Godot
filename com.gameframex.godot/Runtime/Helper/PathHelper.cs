@@ -4,13 +4,11 @@ using UnityEngine;
 
 namespace GameFrameX.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
     public static class PathHelper
     {
         /// <summary>
         ///应用程序外部资源路径存放路径(热更新资源路径)
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static string AppHotfixResPath
         {
             get
@@ -24,7 +22,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 应用程序内部资源路径存放路径
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static string AppResPath
         {
             get { return NormalizePath(Application.streamingAssetsPath); }
@@ -33,7 +30,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 应用程序内部资源路径存放路径(www/webrequest专用)
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static string AppResPath4Web
         {
             get
@@ -52,7 +48,6 @@ namespace GameFrameX.Runtime
         /// <remarks>
         /// 此属性已废弃，请使用 ApplicationHelper.PlatformName 替代
         /// </remarks>
-        [UnityEngine.Scripting.Preserve]
         [Obsolete("此方法已废弃，请使用 ApplicationHelper.PlatformName 替代")]
         public static string GetPlatformName
         {
@@ -79,7 +74,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static string NormalizePath(string path)
         {
             return path.Replace('\\', '/').Replace("\\", "/");
@@ -92,7 +86,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="paths"></param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static string Combine(params string[] paths)
         {
             CombineStringBuilder.Clear();

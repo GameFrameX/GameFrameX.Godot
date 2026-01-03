@@ -127,7 +127,6 @@ namespace GameFrameX.Editor
                     return;
                 }
 
-
                 var buildDirectory = new DirectoryInfo(resultDirectory);
                 foreach (var directoryInfo in buildDirectory.GetDirectories())
                 {
@@ -190,9 +189,7 @@ namespace GameFrameX.Editor
                     }
                 }
 
-
                 CopySteamWorksConfig(buildDirectory);
-
 
                 var pathName = Path.GetDirectoryName(resultDirectory);
                 Debug.Log("Build Output Path:" + resultDirectory);
@@ -255,7 +252,6 @@ namespace GameFrameX.Editor
                 RunPostHookBuild();
             }
         }
-
 
         /// <summary>
         /// 复制 SteamWorks 配置
@@ -421,7 +417,6 @@ namespace GameFrameX.Editor
                 Debug.LogError("输出路径异常,取消打包AAB");
                 return;
             }
-
 
             if (string.IsNullOrEmpty(PlayerSettings.Android.keystoreName)
                 || string.IsNullOrEmpty(PlayerSettings.Android.keyaliasName)
@@ -602,7 +597,6 @@ namespace GameFrameX.Editor
             }
         }
 
-
         /// <summary>
         /// 发布 Xcode Debug 版本
         /// </summary>
@@ -632,7 +626,6 @@ namespace GameFrameX.Editor
                 RunPostHookBuild();
             }
         }
-
 
         /// <summary>
         /// 发布 Xcode Release 版本
@@ -760,7 +753,6 @@ namespace GameFrameX.Editor
                 }
                     break;
             }
-
 
             return path.Replace('\\', '/');
         }

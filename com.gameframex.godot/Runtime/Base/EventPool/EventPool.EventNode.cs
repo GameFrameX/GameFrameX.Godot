@@ -29,7 +29,6 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine.Scripting; // 确保引入命名空间
 
 namespace GameFrameX.Runtime
 {
@@ -46,7 +45,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 发送者
             /// </summary>
-            [Preserve] // 添加 Preserve 标签
             public object Sender
             {
                 get { return _sender; }
@@ -55,7 +53,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 事件参数
             /// </summary>
-            [Preserve] // 添加 Preserve 标签
             public T EventArgs
             {
                 get { return _eventArgs; }
@@ -67,7 +64,6 @@ namespace GameFrameX.Runtime
             /// <param name="sender"></param>
             /// <param name="eventArgs"></param>
             /// <returns></returns>
-            [Preserve] // 添加 Preserve 标签
             public static EventNode Create(object sender, T eventArgs)
             {
                 EventNode eventNodeNode = ReferencePool.Acquire<EventNode>();

@@ -39,7 +39,6 @@ namespace GameFrameX.Runtime
     /// 游戏框架链表范围。
     /// </summary>
     /// <typeparam name="T">指定链表范围的元素类型。</typeparam>
-    [UnityEngine.Scripting.Preserve]
     [StructLayout(LayoutKind.Auto)]
     public readonly struct GameFrameworkLinkedListRange<T> : IEnumerable<T>, IEnumerable
     {
@@ -51,7 +50,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="first">链表范围的开始结点。</param>
         /// <param name="terminal">链表范围的终结标记结点。</param>
-        [UnityEngine.Scripting.Preserve]
         public GameFrameworkLinkedListRange(LinkedListNode<T> first, LinkedListNode<T> terminal)
         {
             if (first == null || terminal == null || first == terminal)
@@ -74,7 +72,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取链表范围的开始结点。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public LinkedListNode<T> First
         {
             get { return m_First; }
@@ -83,7 +80,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取链表范围的终结标记结点。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public LinkedListNode<T> Terminal
         {
             get { return m_Terminal; }
@@ -92,7 +88,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取链表范围的结点数量。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int Count
         {
             get
@@ -117,7 +112,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="value">要检查的值。</param>
         /// <returns>是否包含指定值。</returns>
-        [UnityEngine.Scripting.Preserve]
         public bool Contains(T value)
         {
             for (LinkedListNode<T> current = m_First; current != null && current != m_Terminal; current = current.Next)
@@ -135,7 +129,6 @@ namespace GameFrameX.Runtime
         /// 返回循环访问集合的枚举数。
         /// </summary>
         /// <returns>循环访问集合的枚举数。</returns>
-        [UnityEngine.Scripting.Preserve]
         public Enumerator GetEnumerator()
         {
             return new Enumerator(this);
@@ -145,7 +138,6 @@ namespace GameFrameX.Runtime
         /// 返回循环访问集合的枚举数。
         /// </summary>
         /// <returns>循环访问集合的枚举数。</returns>
-        [UnityEngine.Scripting.Preserve]
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             return GetEnumerator();
@@ -155,7 +147,6 @@ namespace GameFrameX.Runtime
         /// 返回循环访问集合的枚举数。
         /// </summary>
         /// <returns>循环访问集合的枚举数。</returns>
-        [UnityEngine.Scripting.Preserve]
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -186,7 +177,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// 获取当前结点。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public T Current
             {
                 get { return m_CurrentValue; }

@@ -17,7 +17,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// Sha1 哈希算法的实现。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public static class Sha1
             {
 
@@ -26,7 +25,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="content">要计算哈希值的内容。</param>
                 /// <returns>返回计算得到的Sha1哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string Hash(string content)
                 {
                     return Hash(content, Encoding.UTF8);
@@ -38,7 +36,6 @@ namespace GameFrameX.Runtime
                 /// <param name="content">要计算哈希值的内容。</param>
                 /// <param name="encode">用于编码的Encoding对象。</param>
                 /// <returns>返回计算得到的Sha1哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string Hash(string content, Encoding encode)
                 {
                     //创建SHA1对象

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using UnityEngine.Scripting;
 
 namespace GameFrameX.Runtime
 {
@@ -15,7 +14,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// Md5
             /// </summary>
-            [Preserve]
             public static class MD5
             {
                 private static readonly System.Security.Cryptography.MD5 MD5Cryptography = System.Security.Cryptography.MD5.Create();
@@ -25,7 +23,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="input"></param>
                 /// <returns></returns>
-                [Preserve]
                 public static string Hash(string input)
                 {
                     var data = MD5Cryptography.ComputeHash(Encoding.UTF8.GetBytes(input));
@@ -37,7 +34,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="input"></param>
                 /// <returns></returns>
-                [Preserve]
                 public static string Hash(Stream input)
                 {
                     var data = MD5Cryptography.ComputeHash(input);
@@ -50,7 +46,6 @@ namespace GameFrameX.Runtime
                 /// <param name="input"></param>
                 /// <param name="hash"></param>
                 /// <returns></returns>
-                [Preserve]
                 public static bool IsVerify(string input, string hash)
                 {
                     var comparer = StringComparer.OrdinalIgnoreCase;
@@ -73,7 +68,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="filePath"></param>
                 /// <returns></returns>
-                [Preserve]
                 public static string FileHash(string filePath)
                 {
                     using (FileStream file = new FileStream(filePath, FileMode.Open))

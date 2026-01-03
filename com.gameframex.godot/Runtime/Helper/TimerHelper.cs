@@ -97,7 +97,6 @@ namespace GameFrameX.Runtime
         /// 设置时间差
         /// </summary>
         /// <param name="timeSpan"></param>
-        [UnityEngine.Scripting.Preserve]
         public static void SetDifferenceTime(long timeSpan)
         {
             if (timeSpan > 1000000000000)
@@ -124,7 +123,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="serverTime">服务器时间</param>
         /// <param name="isUtc">是否使用UTC时间</param>
-        [UnityEngine.Scripting.Preserve]
         public static void SetDifferenceTime(DateTime serverTime, bool isUtc = false)
         {
             if (isUtc)
@@ -141,13 +139,11 @@ namespace GameFrameX.Runtime
         /// 毫秒级
         /// </summary>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static long ClientNowMillisecond()
         {
             return (DateTime.UtcNow.Ticks - Epoch) / TicksMillisecondUnit;
         }
 
-        [UnityEngine.Scripting.Preserve]
         public static long ServerToday()
         {
             if (_isSecLevel)
@@ -158,7 +154,6 @@ namespace GameFrameX.Runtime
             return (_differenceTime + ClientTodayMillisecond()) / 1000;
         }
 
-        [UnityEngine.Scripting.Preserve]
         public static long ClientTodayMillisecond()
         {
             return (DateTime.Now.Date.ToUniversalTime().Ticks - Epoch) / 10000;
@@ -168,7 +163,6 @@ namespace GameFrameX.Runtime
         /// 服务器当前时间 单位 秒
         /// </summary>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static long ServerNow()
         {
             if (_isSecLevel)
@@ -184,7 +178,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="seconds">秒</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static TimeSpan FromSeconds(int seconds)
         {
             return TimeSpan.FromSeconds(seconds);
@@ -194,7 +187,6 @@ namespace GameFrameX.Runtime
         /// 今天的客户端时间
         /// </summary>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static long ClientToday()
         {
             return (DateTime.Now.Date.ToUniversalTime().Ticks - Epoch) / TicksSecondUnit;
@@ -204,7 +196,6 @@ namespace GameFrameX.Runtime
         /// 客户端时间，毫秒
         /// </summary>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static long ClientNow()
         {
             return (DateTime.UtcNow.Ticks - Epoch) / 10000;
@@ -214,7 +205,6 @@ namespace GameFrameX.Runtime
         /// 客户端时间。秒
         /// </summary>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static long ClientNowSeconds()
         {
             return (DateTime.UtcNow.Ticks - Epoch) / 10000000;
@@ -225,7 +215,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="server">是否使用服务器时间</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static DateTime DateTimeNow(bool server = true)
         {
             if (server)
@@ -241,7 +230,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="server">是否使用服务器时间</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static DateTime Now(bool server = true)
         {
             if (server)
@@ -257,7 +245,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="time">指定时间</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static long LocalTimeToUnixTimeSeconds(DateTime time)
         {
             var utcDateTime = time.ToUniversalTime();
@@ -269,7 +256,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="time">指定时间</param>
         /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
         public static long LocalTimeToUnixTimeMilliseconds(DateTime time)
         {
             var utcDateTime = time.ToUniversalTime();

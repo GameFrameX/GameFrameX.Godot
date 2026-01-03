@@ -15,14 +15,12 @@ namespace GameFrameX.Editor
             window.Show();
         }
 
-
         private Vector2 _leftScrollPosition;
 
         private Vector2 _rightVersionScrollPosition;
 
         // private List<PackageInfo> items = new List<PackageInfo>();
         private PackageManagerInfo selectedItem;
-
 
         private void OnEnable()
         {

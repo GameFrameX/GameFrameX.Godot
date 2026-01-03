@@ -37,7 +37,6 @@ namespace GameFrameX.Runtime
     /// 变量。
     /// </summary>
     /// <typeparam name="T">变量类型。</typeparam>
-    [UnityEngine.Scripting.Preserve]
     public abstract class Variable<T> : Variable
     {
         private T m_Value;
@@ -45,7 +44,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 初始化变量的新实例。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public Variable()
         {
             m_Value = default(T);
@@ -54,7 +52,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取变量类型。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public override Type Type
         {
             get { return typeof(T); }
@@ -63,7 +60,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取或设置变量值。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public T Value
         {
             get { return m_Value; }
@@ -74,7 +70,6 @@ namespace GameFrameX.Runtime
         /// 获取变量值。
         /// </summary>
         /// <returns>变量值。</returns>
-        [UnityEngine.Scripting.Preserve]
         public override object GetValue()
         {
             return m_Value;
@@ -84,7 +79,6 @@ namespace GameFrameX.Runtime
         /// 设置变量值。
         /// </summary>
         /// <param name="value">变量值。</param>
-        [UnityEngine.Scripting.Preserve]
         public override void SetValue(object value)
         {
             m_Value = (T)value;
@@ -93,7 +87,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 清理变量值。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public override void Clear()
         {
             m_Value = default(T);
@@ -103,7 +96,6 @@ namespace GameFrameX.Runtime
         /// 获取变量字符串。
         /// </summary>
         /// <returns>变量字符串。</returns>
-        [UnityEngine.Scripting.Preserve]
         public override string ToString()
         {
             return (m_Value != null) ? m_Value.ToString() : "<Null>";

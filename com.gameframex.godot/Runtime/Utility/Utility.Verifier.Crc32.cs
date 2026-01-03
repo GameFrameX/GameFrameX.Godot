@@ -38,7 +38,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// CRC32 算法。
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             private sealed class Crc32
             {
                 private const int TableLength = 256;
@@ -52,7 +51,6 @@ namespace GameFrameX.Runtime
                 /// <summary>
                 /// 初始化 CRC32 类的新实例。
                 /// </summary>
-                [UnityEngine.Scripting.Preserve]
                 public Crc32()
                     : this(DefaultPolynomial, DefaultSeed)
                 {
@@ -63,7 +61,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="polynomial">用于计算 CRC 的多项式。</param>
                 /// <param name="seed">用于初始化哈希值的种子。</param>
-                [UnityEngine.Scripting.Preserve]
                 public Crc32(uint polynomial, uint seed)
                 {
                     m_Seed = seed;
@@ -74,7 +71,6 @@ namespace GameFrameX.Runtime
                 /// <summary>
                 /// 初始化 CRC32 计算。
                 /// </summary>
-                [UnityEngine.Scripting.Preserve]
                 public void Initialize()
                 {
                     m_Hash = m_Seed;
@@ -86,7 +82,6 @@ namespace GameFrameX.Runtime
                 /// <param name="bytes">要计算哈希的字节数组。</param>
                 /// <param name="offset">字节数组的起始偏移量。</param>
                 /// <param name="length">要计算的字节数。</param>
-                [UnityEngine.Scripting.Preserve]
                 public void HashCore(byte[] bytes, int offset, int length)
                 {
                     m_Hash = CalculateHash(m_Table, m_Hash, bytes, offset, length);
@@ -96,7 +91,6 @@ namespace GameFrameX.Runtime
                 /// 返回计算的 CRC32 哈希值。
                 /// </summary>
                 /// <returns>计算的 CRC32 哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public uint HashFinal()
                 {
                     return ~m_Hash;

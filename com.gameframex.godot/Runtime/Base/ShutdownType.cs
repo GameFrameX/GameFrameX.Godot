@@ -34,7 +34,6 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 关闭游戏框架类型。
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public enum ShutdownType : byte
     {
         /// <summary>

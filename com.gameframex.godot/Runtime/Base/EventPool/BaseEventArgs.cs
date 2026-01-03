@@ -29,7 +29,6 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine.Scripting; // 确保引入命名空间
 
 namespace GameFrameX.Runtime
 {
@@ -41,7 +40,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取事件ID。
         /// </summary>
-        [Preserve] // 添加 Preserve 标签
         public abstract string Id { get; }
     }
 }

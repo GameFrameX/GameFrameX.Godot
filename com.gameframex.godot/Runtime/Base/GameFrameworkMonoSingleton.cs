@@ -6,12 +6,10 @@ namespace GameFrameX.Runtime
     /// 游戏框架单例
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [UnityEngine.Scripting.Preserve]
     public abstract class GameFrameworkMonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
     {
         private static T _instance;
 
-        [UnityEngine.Scripting.Preserve]
         protected GameFrameworkMonoSingleton()
         {
         }
@@ -19,7 +17,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 单例对象
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static T Instance
         {
             get

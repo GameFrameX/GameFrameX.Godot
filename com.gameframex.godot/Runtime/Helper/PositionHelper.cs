@@ -5,7 +5,6 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 坐标帮助类
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public static class PositionHelper
     {
         /// <summary>
@@ -13,7 +12,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="pos">二维坐标</param>
         /// <returns>三维坐标</returns>
-        [UnityEngine.Scripting.Preserve]
         public static Vector3 RayCastV2ToV3(Vector2 pos)
         {
             return new Vector3(pos.x, 0, pos.y);
@@ -25,7 +23,6 @@ namespace GameFrameX.Runtime
         /// <param name="x">X坐标</param>
         /// <param name="y">Y坐标</param>
         /// <returns>三维坐标</returns>
-        [UnityEngine.Scripting.Preserve]
         public static Vector3 RayCastXYToV3(float x, float y)
         {
             return new Vector3(x, 0, y);
@@ -36,7 +33,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="pos">三维坐标</param>
         /// <returns>修改后的三维坐标</returns>
-        [UnityEngine.Scripting.Preserve]
         public static Vector3 RayCastV3ToV3(Vector3 pos)
         {
             return new Vector3(pos.x, 0, pos.z);
@@ -47,7 +43,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="angle">角度</param>
         /// <returns>对应的四元数</returns>
-        [UnityEngine.Scripting.Preserve]
         public static Quaternion AngleToQuaternion(int angle)
         {
             return Quaternion.AngleAxis(-angle, Vector3.up) * Quaternion.AngleAxis(90, Vector3.up);
@@ -59,7 +54,6 @@ namespace GameFrameX.Runtime
         /// <param name="source">源向量</param>
         /// <param name="dire">目标向量</param>
         /// <returns>对应的四元数</returns>
-        [UnityEngine.Scripting.Preserve]
         public static Quaternion GetVector3ToQuaternion(Vector3 source, Vector3 dire)
         {
             Vector3 nowPos = source;
@@ -78,7 +72,6 @@ namespace GameFrameX.Runtime
         /// <param name="v1">第一个三维坐标</param>
         /// <param name="v2">第二个三维坐标</param>
         /// <returns>两点之间的二维距离</returns>
-        [UnityEngine.Scripting.Preserve]
         public static float Distance2D(Vector3 v1, Vector3 v2)
         {
             Vector2 d1 = new Vector2(v1.x, v1.z);
@@ -91,7 +84,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="angle">角度</param>
         /// <returns>对应的四元数</returns>
-        [UnityEngine.Scripting.Preserve]
         public static Quaternion GetAngleToQuaternion(float angle)
         {
             return Quaternion.AngleAxis(-angle, Vector3.up) * Quaternion.AngleAxis(90, Vector3.up);
@@ -103,7 +95,6 @@ namespace GameFrameX.Runtime
         /// <param name="from">起始向量</param>
         /// <param name="to">目标向量</param>
         /// <returns>360度角度</returns>
-        [UnityEngine.Scripting.Preserve]
         public static float Vector3ToAngle360(Vector3 from, Vector3 to)
         {
             float angle = Vector3.Angle(from, to);
@@ -118,7 +109,6 @@ namespace GameFrameX.Runtime
         /// <param name="endPoint">线的终点</param>
         /// <param name="point">点</param>
         /// <returns>点到直线的距离</returns>
-        [UnityEngine.Scripting.Preserve]
         public static float DistanceOfPointToVector(Vector3 startPoint, Vector3 endPoint, Vector3 point)
         {
             Vector2 startVe2 = startPoint.IgnoreYAxis();
@@ -139,7 +129,6 @@ namespace GameFrameX.Runtime
         /// <param name="redis">半径</param>
         /// <param name="dist">距离</param>
         /// <returns>是否碰撞</returns>
-        [UnityEngine.Scripting.Preserve]
         public static bool RayCastSphere(Ray ray, Vector3 center, float redis, out float dist)
         {
             dist = 0;
@@ -162,7 +151,6 @@ namespace GameFrameX.Runtime
         /// <param name="x">边长x</param>
         /// <param name="y">边长y</param>
         /// <returns>勾股定理结果</returns>
-        [UnityEngine.Scripting.Preserve]
         public static float PythagoreanTheorem(float x, float y)
         {
             return Mathf.Sqrt(x * x + y * y);
@@ -173,7 +161,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="vector3">三维向量</param>
         /// <returns>投影后的二维向量</returns>
-        [UnityEngine.Scripting.Preserve]
         public static Vector2 IgnoreYAxis(this Vector3 vector3)
         {
             return new Vector2(vector3.x, vector3.z);
@@ -185,7 +172,6 @@ namespace GameFrameX.Runtime
         /// <param name="originPoint">原点</param>
         /// <param name="point">目标点</param>
         /// <returns>True if on left, false if on right</returns>
-        [UnityEngine.Scripting.Preserve]
         public static bool PointOnLeftSideOfVector(this Vector3 vector3, Vector3 originPoint, Vector3 point)
         {
             Vector2 originVec2 = originPoint.IgnoreYAxis();

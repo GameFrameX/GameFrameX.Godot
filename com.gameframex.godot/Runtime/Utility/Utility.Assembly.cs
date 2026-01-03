@@ -31,7 +31,6 @@
 
 using System;
 using System.Collections.Generic;
-using UnityEngine.Scripting;
 
 namespace GameFrameX.Runtime
 {
@@ -54,7 +53,6 @@ namespace GameFrameX.Runtime
             /// 获取已加载的程序集。
             /// </summary>
             /// <returns>已加载的程序集。</returns>
-            [Preserve]
             public static System.Reflection.Assembly[] GetAssemblies()
             {
                 return s_Assemblies;
@@ -64,7 +62,6 @@ namespace GameFrameX.Runtime
             /// 获取已加载的程序集中的所有类型。
             /// </summary>
             /// <returns>已加载的程序集中的所有类型。</returns>
-            [Preserve]
             public static Type[] GetTypes()
             {
                 List<Type> results = new List<Type>();
@@ -80,7 +77,6 @@ namespace GameFrameX.Runtime
             /// 获取已加载的程序集中的所有类型。
             /// </summary>
             /// <param name="results">已加载的程序集中的所有类型。</param>
-            [Preserve]
             public static void GetTypes(List<Type> results)
             {
                 if (results == null)
@@ -100,7 +96,6 @@ namespace GameFrameX.Runtime
             /// </summary>
             /// <param name="typeName">要获取的类型名。</param>
             /// <returns>已加载的程序集中的指定类型。</returns>
-            [Preserve]
             public static Type GetType(string typeName)
             {
                 if (string.IsNullOrEmpty(typeName))
@@ -139,7 +134,6 @@ namespace GameFrameX.Runtime
             /// </summary>
             /// <param name="type">指定类型</param>
             /// <returns></returns>
-            [Preserve]
             public static List<string> GetRuntimeTypeNames(Type type)
             {
                 var types = GetTypes();

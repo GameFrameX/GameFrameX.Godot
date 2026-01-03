@@ -298,7 +298,6 @@ namespace GameFrameX.Runtime
             return new DateTimeOffset(GetWeekEndTime()).ToUnixTimeSeconds();
         }
 
-
         /// <summary>
         /// 获取指定日期所在周的开始时间
         /// </summary>
@@ -331,7 +330,6 @@ namespace GameFrameX.Runtime
         {
             return new DateTimeOffset(GetStartTimeOfWeek(date)).ToUnixTimeSeconds();
         }
-
 
         /// <summary>
         /// 获取下周开始时间
@@ -388,7 +386,6 @@ namespace GameFrameX.Runtime
         {
             return new DateTimeOffset(GetNextWeekEndTime()).ToUnixTimeSeconds();
         }
-
 
         /// <summary>
         /// 获取指定日期所在周的结束时间

@@ -40,7 +40,6 @@ namespace GameFrameX.Runtime
     /// 游戏框架链表类。
     /// </summary>
     /// <typeparam name="T">指定链表的元素类型。</typeparam>
-    [UnityEngine.Scripting.Preserve]
     public sealed class GameFrameworkLinkedList<T> : ICollection<T>, IEnumerable<T>, ICollection, IEnumerable
     {
         private readonly LinkedList<T> m_LinkedList;
@@ -49,38 +48,31 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 初始化游戏框架链表类的新实例。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public GameFrameworkLinkedList()
         {
             m_LinkedList = new LinkedList<T>();
             m_CachedNodes = new Queue<LinkedListNode<T>>();
         }
 
-
         /// <summary>
         /// 获取链表中实际包含的结点数量。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int Count
         {
             get { return m_LinkedList.Count; }
         }
 
-
         /// <summary>
         /// 获取链表结点缓存数量。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int CachedNodeCount
         {
             get { return m_CachedNodes.Count; }
         }
 
-
         /// <summary>
         /// 获取链表的第一个结点。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public LinkedListNode<T> First
         {
             get { return m_LinkedList.First; }
@@ -89,7 +81,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取链表的最后一个结点。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public LinkedListNode<T> Last
         {
             get { return m_LinkedList.Last; }
@@ -98,7 +89,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取一个值，该值指示 ICollection`1 是否为只读。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public bool IsReadOnly
         {
             get { return ((ICollection<T>)m_LinkedList).IsReadOnly; }
@@ -107,17 +97,14 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取可用于同步对 ICollection 的访问的对象。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public object SyncRoot
         {
             get { return ((ICollection)m_LinkedList).SyncRoot; }
         }
 
-
         /// <summary>
         /// 获取一个值，该值指示是否同步对 ICollection 的访问（线程安全）。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public bool IsSynchronized
         {
             get { return ((ICollection)m_LinkedList).IsSynchronized; }
@@ -129,7 +116,6 @@ namespace GameFrameX.Runtime
         /// <param name="node">指定的现有结点。</param>
         /// <param name="value">指定值。</param>
         /// <returns>包含指定值的新结点。</returns>
-        [UnityEngine.Scripting.Preserve]
         public LinkedListNode<T> AddAfter(LinkedListNode<T> node, T value)
         {
             LinkedListNode<T> newNode = AcquireNode(value);
@@ -142,7 +128,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="node">指定的现有结点。</param>
         /// <param name="newNode">指定的新结点。</param>
-        [UnityEngine.Scripting.Preserve]
         public void AddAfter(LinkedListNode<T> node, LinkedListNode<T> newNode)
         {
             m_LinkedList.AddAfter(node, newNode);
@@ -154,7 +139,6 @@ namespace GameFrameX.Runtime
         /// <param name="node">指定的现有结点。</param>
         /// <param name="value">指定值。</param>
         /// <returns>包含指定值的新结点。</returns>
-        [UnityEngine.Scripting.Preserve]
         public LinkedListNode<T> AddBefore(LinkedListNode<T> node, T value)
         {
             LinkedListNode<T> newNode = AcquireNode(value);
@@ -167,7 +151,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="node">指定的现有结点。</param>
         /// <param name="newNode">指定的新结点。</param>
-        [UnityEngine.Scripting.Preserve]
         public void AddBefore(LinkedListNode<T> node, LinkedListNode<T> newNode)
         {
             m_LinkedList.AddBefore(node, newNode);
@@ -178,7 +161,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="value">指定值。</param>
         /// <returns>包含指定值的新结点。</returns>
-        [UnityEngine.Scripting.Preserve]
         public LinkedListNode<T> AddFirst(T value)
         {
             LinkedListNode<T> node = AcquireNode(value);
@@ -190,7 +172,6 @@ namespace GameFrameX.Runtime
         /// 在链表的开头处添加指定的新结点。
         /// </summary>
         /// <param name="node">指定的新结点。</param>
-        [UnityEngine.Scripting.Preserve]
         public void AddFirst(LinkedListNode<T> node)
         {
             m_LinkedList.AddFirst(node);
@@ -201,7 +182,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="value">指定值。</param>
         /// <returns>包含指定值的新结点。</returns>
-        [UnityEngine.Scripting.Preserve]
         public LinkedListNode<T> AddLast(T value)
         {
             LinkedListNode<T> node = AcquireNode(value);
@@ -213,7 +193,6 @@ namespace GameFrameX.Runtime
         /// 在链表的结尾处添加指定的新结点。
         /// </summary>
         /// <param name="node">指定的新结点。</param>
-        [UnityEngine.Scripting.Preserve]
         public void AddLast(LinkedListNode<T> node)
         {
             m_LinkedList.AddLast(node);
@@ -222,7 +201,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 从链表中移除所有结点。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public void Clear()
         {
             LinkedListNode<T> current = m_LinkedList.First;
@@ -238,7 +216,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 清除链表结点缓存。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public void ClearCachedNodes()
         {
             m_CachedNodes.Clear();
@@ -249,7 +226,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="value">指定值。</param>
         /// <returns>某值是否在链表中。</returns>
-        [UnityEngine.Scripting.Preserve]
         public bool Contains(T value)
         {
             return m_LinkedList.Contains(value);
@@ -260,7 +236,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="array">一维数组，它是从链表复制的元素的目标。数组必须具有从零开始的索引。</param>
         /// <param name="index">array 中从零开始的索引，从此处开始复制。</param>
-        [UnityEngine.Scripting.Preserve]
         public void CopyTo(T[] array, int index)
         {
             m_LinkedList.CopyTo(array, index);
@@ -271,7 +246,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="array">一维数组，它是从 ICollection 复制的元素的目标。数组必须具有从零开始的索引。</param>
         /// <param name="index">array 中从零开始的索引，从此处开始复制。</param>
-        [UnityEngine.Scripting.Preserve]
         public void CopyTo(Array array, int index)
         {
             ((ICollection)m_LinkedList).CopyTo(array, index);
@@ -282,7 +256,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="value">要查找的指定值。</param>
         /// <returns>包含指定值的第一个结点。</returns>
-        [UnityEngine.Scripting.Preserve]
         public LinkedListNode<T> Find(T value)
         {
             return m_LinkedList.Find(value);
@@ -293,7 +266,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="value">要查找的指定值。</param>
         /// <returns>包含指定值的最后一个结点。</returns>
-        [UnityEngine.Scripting.Preserve]
         public LinkedListNode<T> FindLast(T value)
         {
             return m_LinkedList.FindLast(value);
@@ -304,7 +276,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="value">指定值。</param>
         /// <returns>是否移除成功。</returns>
-        [UnityEngine.Scripting.Preserve]
         public bool Remove(T value)
         {
             LinkedListNode<T> node = m_LinkedList.Find(value);
@@ -322,7 +293,6 @@ namespace GameFrameX.Runtime
         /// 从链表中移除指定的结点。
         /// </summary>
         /// <param name="node">指定的结点。</param>
-        [UnityEngine.Scripting.Preserve]
         public void Remove(LinkedListNode<T> node)
         {
             m_LinkedList.Remove(node);
@@ -332,7 +302,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 移除位于链表开头处的结点。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public void RemoveFirst()
         {
             LinkedListNode<T> first = m_LinkedList.First;
@@ -348,7 +317,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 移除位于链表结尾处的结点。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public void RemoveLast()
         {
             LinkedListNode<T> last = m_LinkedList.Last;
@@ -365,7 +333,6 @@ namespace GameFrameX.Runtime
         /// 返回循环访问集合的枚举数。
         /// </summary>
         /// <returns>循环访问集合的枚举数。</returns>
-        [UnityEngine.Scripting.Preserve]
         public Enumerator GetEnumerator()
         {
             return new Enumerator(m_LinkedList);
@@ -424,7 +391,6 @@ namespace GameFrameX.Runtime
         /// 循环访问集合的枚举数。
         /// </summary>
         [StructLayout(LayoutKind.Auto)]
-        [UnityEngine.Scripting.Preserve]
         public struct Enumerator : IEnumerator<T>, IEnumerator
         {
             private LinkedList<T>.Enumerator m_Enumerator;

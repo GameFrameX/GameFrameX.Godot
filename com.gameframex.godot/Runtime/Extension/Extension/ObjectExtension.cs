@@ -1,10 +1,8 @@
 ﻿using System;
-using UnityEngine.Scripting; // Added this line for the Preserve attribute
 
 /// <summary>
 /// 对象扩展函数
 /// </summary>
-[Preserve]
 public static class ObjectExtension
 {
     /// <summary>
@@ -12,7 +10,6 @@ public static class ObjectExtension
     /// </summary>
     /// <param name="self"></param>
     /// <returns></returns>
-    [Preserve]
     public static bool IsNull(this object self)
     {
         return self == null;
@@ -23,7 +20,6 @@ public static class ObjectExtension
     /// </summary>
     /// <param name="self"></param>
     /// <returns></returns>
-    [Preserve]
     public static bool IsNotNull(this object self)
     {
         return !self.IsNull();
@@ -35,7 +31,6 @@ public static class ObjectExtension
     /// <param name="self">对象值</param>
     /// <param name="name">异常信息</param>
     /// <exception cref="ArgumentNullException">参数为空的异常</exception>
-    [Preserve]
     public static void CheckNull(this object self, string name)
     {
         if (self.IsNull())

@@ -5,13 +5,11 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 应用帮助类
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public static class ApplicationHelper
     {
         /// <summary>
         /// 是否是编辑器
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsEditor
         {
             get
@@ -27,7 +25,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 是否是安卓
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsAndroid
         {
             get
@@ -43,7 +40,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 是否是WebGL平台
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsWebGL
         {
             get
@@ -59,7 +55,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 是否是WebGL微信小游戏平台
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsWebGLWeChatMiniGame
         {
             get
@@ -75,7 +70,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 是否是WebGL抖音小游戏平台
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsWebGLDouYinMiniGame
         {
             get
@@ -91,7 +85,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 是否是Windows平台
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsWindows
         {
             get
@@ -106,7 +99,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 是否是Linux平台
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsLinux
         {
             get { return Application.platform == RuntimePlatform.LinuxPlayer || Application.platform == RuntimePlatform.LinuxEditor; }
@@ -115,7 +107,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 是否是Mac平台
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsMacOsx
         {
             get
@@ -139,7 +130,6 @@ namespace GameFrameX.Runtime
         /// - "Windows": Windows平台
         /// - 空字符串: 其他未定义的平台
         /// </returns>
-        [UnityEngine.Scripting.Preserve]
         public static string PlatformName
         {
             get
@@ -163,7 +153,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 是否是iOS 移动平台
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static bool IsIOS
         {
             get
@@ -179,7 +168,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 退出
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static void Quit()
         {
 #if UNITY_EDITOR
@@ -196,7 +184,6 @@ namespace GameFrameX.Runtime
         /// 打开URL
         /// </summary>
         /// <param name="url">url地址</param>
-        [UnityEngine.Scripting.Preserve]
         public static void OpenURL(string url)
         {
 #if UNITY_EDITOR
@@ -217,7 +204,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 打开设置界面
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static void OpenSetting()
         {
 #if UNITY_EDITOR
@@ -228,7 +214,6 @@ namespace GameFrameX.Runtime
 #endif
         }
 
-
 #if UNITY_IOS
         [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void open_request_tracking_authorization();
@@ -236,7 +221,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 打开请求跟踪授权
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static void OpenRequestTrackingAuthorization()
         {
 #if UNITY_EDITOR

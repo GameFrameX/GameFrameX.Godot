@@ -14,7 +14,6 @@ namespace GameFrameX.Runtime
             /// <summary>
             /// xxHash
             /// </summary>
-            [UnityEngine.Scripting.Preserve]
             public static class XXHash
             {
                 /// <summary>
@@ -22,7 +21,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="buffer">要计算哈希值的字节数组。</param>
                 /// <returns>返回计算得到的32位哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static uint Hash32(byte[] buffer)
                 {
                     return XXHashHelper.Hash32(buffer);
@@ -33,7 +31,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="text">要计算哈希值的字符串。</param>
                 /// <returns>返回计算得到的32位哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static uint Hash32(string text)
                 {
                     return XXHashHelper.Hash32(text);
@@ -44,7 +41,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="type">要计算哈希值的类型。</param>
                 /// <returns>返回计算得到的32位哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static uint Hash32(Type type)
                 {
                     return XXHashHelper.Hash32(type);
@@ -55,7 +51,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <typeparam name="T">要计算哈希值的泛型类型。</typeparam>
                 /// <returns>返回计算得到的32位哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static uint Hash32<T>()
                 {
                     return XXHashHelper.Hash32<T>();
@@ -66,7 +61,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="buffer">要计算哈希值的字节数组。</param>
                 /// <returns>返回计算得到的64位哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static ulong Hash64(byte[] buffer)
                 {
                     return XXHashHelper.Hash64(buffer);
@@ -77,7 +71,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="text">要计算哈希值的字符串。</param>
                 /// <returns>返回计算得到的64位哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static ulong Hash64(string text)
                 {
                     return XXHashHelper.Hash64(text);
@@ -88,7 +81,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="type">要计算哈希值的类型。</param>
                 /// <returns>返回计算得到的64位哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static ulong Hash64(Type type)
                 {
                     return XXHashHelper.Hash64(type);
@@ -99,7 +91,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <typeparam name="T">要计算哈希值的泛型类型。</typeparam>
                 /// <returns>返回计算得到的64位哈希值。</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static ulong Hash64<T>()
                 {
                     return XXHashHelper.Hash64<T>();
@@ -310,7 +301,6 @@ namespace GameFrameX.Runtime
                 }
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                [UnityEngine.Scripting.Preserve]
                 public static uint Hash32(byte[] buffer)
                 {
                     int length = buffer.Length;
@@ -324,19 +314,15 @@ namespace GameFrameX.Runtime
                 }
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                [UnityEngine.Scripting.Preserve]
                 public static uint Hash32(string text) => Hash32(Encoding.UTF8.GetBytes(text));
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                [UnityEngine.Scripting.Preserve]
                 public static uint Hash32(Type type) => Hash32(type.FullName);
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                [UnityEngine.Scripting.Preserve]
                 public static uint Hash32<T>() => Hash32(typeof(T));
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                [UnityEngine.Scripting.Preserve]
                 public static ulong Hash64(byte[] buffer)
                 {
                     int length = buffer.Length;
@@ -350,15 +336,12 @@ namespace GameFrameX.Runtime
                 }
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                [UnityEngine.Scripting.Preserve]
                 public static ulong Hash64(string text) => Hash64(Encoding.UTF8.GetBytes(text));
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                [UnityEngine.Scripting.Preserve]
                 public static ulong Hash64(Type type) => Hash64(type.FullName);
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                [UnityEngine.Scripting.Preserve]
                 public static ulong Hash64<T>() => Hash64(typeof(T));
             }
         }

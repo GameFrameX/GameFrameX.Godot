@@ -39,7 +39,6 @@ namespace GameFrameX.Runtime
     /// </summary>
     [DisallowMultipleComponent]
     [AddComponentMenu("GameFrameX/Base")]
-    [UnityEngine.Scripting.Preserve]
     [DefaultExecutionOrder(-500)]
     public sealed class BaseComponent : GameFrameworkComponent
     {
@@ -84,7 +83,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取或设置游戏帧率。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int FrameRate
         {
             get { return m_FrameRate; }
@@ -94,7 +92,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取或设置游戏速度。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public float GameSpeed
         {
             get { return m_GameSpeed; }
@@ -104,7 +101,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取游戏是否暂停。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public bool IsGamePaused
         {
             get { return m_GameSpeed <= 0f; }
@@ -113,7 +109,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取是否正常游戏速度。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public bool IsNormalGameSpeed
         {
             get { return m_GameSpeed == 1f; }
@@ -122,7 +117,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取或设置是否允许后台运行。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public bool RunInBackground
         {
             get { return m_RunInBackground; }
@@ -132,7 +126,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取或设置是否禁止休眠。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public bool NeverSleep
         {
             get { return m_NeverSleep; }
@@ -212,7 +205,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 暂停游戏。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public void PauseGame()
         {
             if (IsGamePaused)
@@ -227,7 +219,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 恢复游戏。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public void ResumeGame()
         {
             if (!IsGamePaused)
@@ -241,7 +232,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 重置为正常游戏速度。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public void ResetNormalGameSpeed()
         {
             if (IsNormalGameSpeed)

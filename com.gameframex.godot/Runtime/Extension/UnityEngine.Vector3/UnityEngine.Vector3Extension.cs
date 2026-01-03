@@ -34,7 +34,6 @@ namespace UnityEngine
     /// <summary>
     /// 对 Unity 的扩展方法。
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public static class UnityEngineVector3Extension
     {
         /// <summary>
@@ -42,7 +41,6 @@ namespace UnityEngine
         /// </summary>
         /// <param name="self">要转换的 Vector3。</param>
         /// <returns>转换后的 Vector2。</returns>
-        [UnityEngine.Scripting.Preserve]
         public static Vector2 ToVector2(this Vector3 self)
         {
             return new Vector2(self.x, self.z);
@@ -53,7 +51,6 @@ namespace UnityEngine
         /// </summary>
         /// <param name="self">要转换的 Vector3。</param>
         /// <returns>转换后的 Vector3。</returns>
-        [UnityEngine.Scripting.Preserve]
         public static Vector3 ToVector3(this Vector3Int self)
         {
             return new Vector3(self.x, self.y, self.z);

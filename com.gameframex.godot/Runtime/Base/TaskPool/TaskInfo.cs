@@ -37,7 +37,6 @@ namespace GameFrameX.Runtime
     /// 任务信息。
     /// </summary>
     [StructLayout(LayoutKind.Auto)]
-    [UnityEngine.Scripting.Preserve]
     public struct TaskInfo
     {
         private readonly bool m_IsValid;
@@ -57,7 +56,6 @@ namespace GameFrameX.Runtime
         /// <param name="userData">任务的用户自定义数据。</param>
         /// <param name="status">任务状态。</param>
         /// <param name="description">任务描述。</param>
-        [UnityEngine.Scripting.Preserve]
         public TaskInfo(int serialId, string tag, int priority, object userData, TaskStatus status, string description)
         {
             m_IsValid = true;
@@ -72,7 +70,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取任务信息是否有效。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public bool IsValid
         {
             get { return m_IsValid; }
@@ -81,7 +78,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取任务的序列编号。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int SerialId
         {
             get
@@ -98,7 +94,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取任务的标签。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public string Tag
         {
             get
@@ -115,7 +110,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取任务的优先级。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public int Priority
         {
             get
@@ -132,7 +126,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取任务的用户自定义数据。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public object UserData
         {
             get
@@ -149,7 +142,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取任务状态。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public TaskStatus Status
         {
             get
@@ -166,7 +158,6 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 获取任务描述。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public string Description
         {
             get

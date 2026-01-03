@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "Er43o/UbK/M=",
+  "success": true,
+  "projectFilePath": "/Users/blank/Documents/GithubWorks/GameFrameX/Godot.Godot/Godot.csproj",
+  "expectedPackageFiles": [
+    "/Users/blank/.nuget/packages/godot.sourcegenerators/4.5.1/godot.sourcegenerators.4.5.1.nupkg.sha512",
+    "/Users/blank/.nuget/packages/godotsharp/4.5.1/godotsharp.4.5.1.nupkg.sha512",
+    "/Users/blank/.nuget/packages/godotsharpeditor/4.5.1/godotsharpeditor.4.5.1.nupkg.sha512",
+    "/Users/blank/.nuget/packages/microsoft.netcore.app.ref/8.0.22/microsoft.netcore.app.ref.8.0.22.nupkg.sha512",
+    "/Users/blank/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.22/microsoft.aspnetcore.app.ref.8.0.22.nupkg.sha512"
+  ],
+  "logs": []
+}

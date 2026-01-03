@@ -34,7 +34,6 @@ namespace UnityEngine
     /// <summary>
     /// 对 Unity 的扩展方法。
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public static class UnityEngineVector4Extension
     {
         /// <summary>

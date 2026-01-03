@@ -12,7 +12,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         public static partial class Encryption
         {
-            [UnityEngine.Scripting.Preserve]
             public static class Aes
             {
                 #region 加密
@@ -24,7 +23,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="EncryptString">待加密密文</param>
                 /// <param name="EncryptKey">加密密钥</param>
-                [UnityEngine.Scripting.Preserve]
                 public static string AESEncrypt(string EncryptString, string EncryptKey)
                 {
                     return Convert.ToBase64String(AESEncrypt(Encoding.UTF8.GetBytes(EncryptString), EncryptKey));
@@ -39,7 +37,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="EncryptByte">待加密的字节数组</param>
                 /// <param name="EncryptKey">加密密钥</param>
-                [UnityEngine.Scripting.Preserve]
                 public static byte[] AESEncrypt(byte[] EncryptByte, string EncryptKey)
                 {
                     if (EncryptByte.Length == 0)
@@ -107,7 +104,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="DecryptString">待解密密文</param>
                 /// <param name="DecryptKey">解密密钥</param>
-                [UnityEngine.Scripting.Preserve]
                 public static string AESDecrypt(string DecryptString, string DecryptKey)
                 {
                     return Encoding.UTF8.GetString((AESDecrypt(Convert.FromBase64String(DecryptString), DecryptKey)));
@@ -122,7 +118,6 @@ namespace GameFrameX.Runtime
                 /// </summary>
                 /// <param name="DecryptByte">待解密的字节数组</param>
                 /// <param name="DecryptKey">解密密钥</param>
-                [UnityEngine.Scripting.Preserve]
                 public static byte[] AESDecrypt(byte[] DecryptByte, string DecryptKey)
                 {
                     if (DecryptByte.Length == 0)

@@ -29,14 +29,12 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using UnityEngine.Scripting;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
     /// 引用强制检查类型。
     /// </summary>
-    [Preserve]
     public enum ReferenceStrictCheckType : byte
     {
         /// <summary>

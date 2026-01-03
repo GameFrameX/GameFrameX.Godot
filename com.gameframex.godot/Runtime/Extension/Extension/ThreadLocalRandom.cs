@@ -5,7 +5,6 @@ namespace System
     /// <summary>
     /// 线程私有random对象
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public static class ThreadLocalRandom
     {
         private static int _seed = Environment.TickCount;

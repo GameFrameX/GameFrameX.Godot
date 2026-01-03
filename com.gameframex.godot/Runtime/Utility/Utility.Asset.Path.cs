@@ -5,7 +5,6 @@
         /// <summary>
         /// AB实用函数集，主要是路径拼接
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
         public static class Asset
         {
             /// <summary>
@@ -98,7 +97,6 @@
                 /// </summary>
                 /// <param name="filePath">相对于Bundles的路径，不要以/开头</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetFilePath(string filePath)
                 {
                     return $"{BundlesPath}/{filePath}";
@@ -109,7 +107,6 @@
                 /// </summary>
                 /// <param name="filePath">相对于Bundles/Spine的路径，不要以/开头,需要携带扩展名</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetSpinePath(string filePath)
                 {
                     return GetCategoryFilePath(BundlesDirectorySpineName, filePath);
@@ -120,7 +117,6 @@
                 /// </summary>
                 /// <param name="filePath">相对于Bundles/Shader的路径，不要以/开头,需要携带扩展名</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetShaderPath(string filePath)
                 {
                     return GetCategoryFilePath(BundlesDirectoryShaderName, filePath);
@@ -131,7 +127,6 @@
                 /// </summary>
                 /// <param name="filePath">相对于Bundles/Fonts的路径，不要以/开头,需要携带扩展名</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetFontPath(string filePath)
                 {
                     return GetCategoryFilePath(BundlesDirectoryFontsName, filePath);
@@ -142,7 +137,6 @@
                 /// </summary>
                 /// <param name="filePath">相对于Bundles/Image的路径，不要以/开头,需要携带扩展名</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetImagePath(string filePath)
                 {
                     return GetCategoryFilePath(BundlesDirectoryImageName, filePath);
@@ -153,7 +147,6 @@
                 /// </summary>
                 /// <param name="filePath">相对于Bundles/Video的路径，不要以/开头,需要携带扩展名</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetVideoPath(string filePath)
                 {
                     return GetCategoryFilePath(BundlesDirectoryVideoName, filePath);
@@ -164,7 +157,6 @@
                 /// </summary>
                 /// <param name="filePath">相对于Bundles/Sprite的路径，不要以/开头,需要携带扩展名</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetSpritePath(string filePath)
                 {
                     return GetCategoryFilePath(BundlesDirectorySpriteName, filePath);
@@ -175,7 +167,6 @@
                 /// </summary>
                 /// <param name="filePath">相对于Bundles/Prefabs的路径，不要以/开头,需要携带扩展名</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetPrefabPath(string filePath)
                 {
                     return GetCategoryFilePath(BundlesDirectoryPrefabName, filePath);
@@ -187,7 +178,6 @@
                 /// <param name="category">相对于Bundles的类别名称</param>
                 /// <param name="filePath">相对于Bundles的路径，不要以/开头</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetCategoryFilePath(string category, string filePath)
                 {
                     return $"{BundlesPath}/{category}/{filePath}";
@@ -199,7 +189,6 @@
                 /// <param name="fileName">相对于Bundles/Config的路径，不要以/开头,需要携带扩展名</param>
                 /// <param name="extension">文件扩展名称</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetConfigPath(string fileName, string extension = ".bytes")
                 {
                     return GetCategoryFilePath(BundlesDirectoryConfigName, $"{fileName}{extension}");
@@ -211,7 +200,6 @@
                 /// <param name="fileName">相对于Bundles/AOTCode的路径，不要以/开头,需要携带扩展名</param>
                 /// <param name="extension">文件扩展名称</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetAOTCodePath(string fileName, string extension = ".bytes")
                 {
                     return GetCategoryFilePath(BundlesDirectoryAOTCodeName, $"{fileName}{extension}");
@@ -223,7 +211,6 @@
                 /// <param name="fileName">相对于Bundles/Code的路径，不要以/开头,需要携带扩展名</param>
                 /// <param name="extension">文件扩展名称</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetCodePath(string fileName, string extension = ".bytes")
                 {
                     return GetCategoryFilePath(BundlesDirectoryCodeName, $"{fileName}{extension}");
@@ -234,7 +221,6 @@
                 /// </summary>
                 /// <param name="uiPackageName">UI包名</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetUIPackagePath(string uiPackageName)
                 {
                     return GetCategoryFilePath(BundlesDirectoryUIName, $"{uiPackageName}/{uiPackageName}");
@@ -245,7 +231,6 @@
                 /// </summary>
                 /// <param name="uiPath">UI路径</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetUIPath(string uiPath)
                 {
                     return GetCategoryFilePath(BundlesDirectoryUIName, uiPath);
@@ -257,7 +242,6 @@
                 /// <param name="pathName">路径包含名称</param>
                 /// <param name="extension">扩展名称,默认为.mp3</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetSoundPath(string pathName, string extension = ".mp3")
                 {
                     if (pathName.IndexOf('.') >= 0)
@@ -274,7 +258,6 @@
                 /// <param name="pathName">路径包含名称</param>
                 /// <param name="extension">扩展名,默认为.unity</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetScenePath(string pathName, string extension = ".unity")
                 {
                     if (pathName.IndexOf('.') >= 0)
@@ -291,7 +274,6 @@
                 /// <param name="pathName">路径包含名称</param>
                 /// <param name="extension">文件扩展名</param>
                 /// <returns>返回拼接好的路径</returns>
-                [UnityEngine.Scripting.Preserve]
                 public static string GetLocalizationPath(string pathName, string extension = ".xml")
                 {
                     if (pathName.IndexOf('.') >= 0)

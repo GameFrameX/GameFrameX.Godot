@@ -37,7 +37,6 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 默认游戏框架日志辅助器。
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
     public class DefaultLogHelper : GameFrameworkLog.ILogHelper
     {
         /// <summary>
@@ -45,7 +44,6 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="level">日志等级。</param>
         /// <param name="message">日志内容。</param>
-        [UnityEngine.Scripting.Preserve] // Added Preserve attribute
         public void Log(GameFrameworkLogLevel level, object message)
         {
             var time = $"[Unity]:[{DateTime.Now:HH:mm:ss.fff}]:";
