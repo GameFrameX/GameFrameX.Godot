@@ -39,9 +39,7 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 对象池组件。
     /// </summary>
-    [DisallowMultipleComponent]
-    [AddComponentMenu("GameFrameX/Object Pool")]
-    public sealed class ObjectPoolComponent : GameFrameworkComponent
+    public sealed partial class ObjectPoolComponent : GameFrameworkComponent
     {
         private IObjectPoolManager m_ObjectPoolManager = null;
 
@@ -56,11 +54,11 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 游戏框架组件初始化。
         /// </summary>
-        protected override void Awake()
+        public override void _Ready()
         {
             ImplementationComponentType = Type.GetType(componentType);
             InterfaceComponentType = typeof(IObjectPoolManager);
-            base.Awake();
+            base._Ready();
             m_ObjectPoolManager = GameFrameworkEntry.GetModule<IObjectPoolManager>();
             if (m_ObjectPoolManager == null)
             {

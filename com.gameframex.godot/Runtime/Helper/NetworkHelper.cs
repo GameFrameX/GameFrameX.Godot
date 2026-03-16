@@ -27,25 +27,25 @@ namespace GameFrameX.Runtime
             return addressIPs;
         }
 
-        /// <summary>
-        /// 是否有网络
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsReachable()
-        {
-            return Application.internetReachability != NetworkReachability.NotReachable;
-        }
+        // /// <summary>
+        // /// 是否有网络
+        // /// </summary>
+        // /// <returns></returns>
+        // public static bool IsReachable()
+        // {
+        //     return Application.internetReachability != NetworkReachability.NotReachable;
+        // }
 
-        /// <summary>
+        /*/// <summary>
         /// 是否是WIFI
         /// </summary>
         /// <returns></returns>
         public static bool IsWifi()
         {
             return Application.internetReachability == NetworkReachability.ReachableViaLocalAreaNetwork;
-        }
+        }*/
 
-        /// <summary>
+        /*/// <summary>
         /// 是否是移动网络
         /// </summary>
         /// <returns></returns>
@@ -53,6 +53,6 @@ namespace GameFrameX.Runtime
         {
             //当用户使用移动网络时
             return Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork;
-        }
+        }*/
     }
 }

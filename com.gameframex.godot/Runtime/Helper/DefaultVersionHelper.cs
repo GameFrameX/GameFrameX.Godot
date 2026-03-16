@@ -43,7 +43,7 @@ namespace GameFrameX.Runtime
         /// </summary>
         public string GameVersion
         {
-            get { return Application.version; }
+            get { return OS.GetVersion(); }
         }
     }
 }

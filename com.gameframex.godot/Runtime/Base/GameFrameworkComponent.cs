@@ -37,7 +37,7 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 游戏框架组件抽象类。
     /// </summary>
-    public abstract class GameFrameworkComponent : Node
+    public abstract partial class GameFrameworkComponent : Node
     {
         /// <summary>
         /// 是否自动注册

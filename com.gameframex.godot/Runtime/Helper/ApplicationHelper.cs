@@ -1,4 +1,5 @@
-﻿using Godot;
+﻿using System.Runtime.InteropServices;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
@@ -47,7 +48,7 @@ namespace GameFrameX.Runtime
 #if UNITY_WEBGL
                 return true;
 #else
-                return Application.platform == RuntimePlatform.WebGLPlayer;
+                return true;
 #endif
             }
         }
@@ -92,7 +93,7 @@ namespace GameFrameX.Runtime
 #if UNITY_STANDALONE_WIN
                 return true;
 #endif
-                return Application.platform == RuntimePlatform.WindowsPlayer;
+                return OS.HasFeature("web_windows");
             }
         }
 
@@ -101,7 +102,7 @@ namespace GameFrameX.Runtime
         /// </summary>
         public static bool IsLinux
         {
-            get { return Application.platform == RuntimePlatform.LinuxPlayer || Application.platform == RuntimePlatform.LinuxEditor; }
+            get { return RuntimeInformation.IsOSPlatform(OSPlatform.Linux); }
         }
 
         /// <summary>
@@ -114,7 +115,7 @@ namespace GameFrameX.Runtime
 #if UNITY_STANDALONE_OSX
                 return true;
 #endif
-                return Application.platform == RuntimePlatform.OSXPlayer;
+                return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
             }
         }
 
@@ -174,7 +175,6 @@ namespace GameFrameX.Runtime
             UnityEditor.EditorApplication.isPlaying = false;
             return;
 #endif
-            Application.Quit();
         }
 #if UNITY_IOS
         [System.Runtime.InteropServices.DllImport("__Internal")]
@@ -193,7 +193,7 @@ namespace GameFrameX.Runtime
 #if UNITY_IOS
             open_url(url);
 #else
-            Application.OpenURL(url);
+            OS.ShellOpen(url);
 #endif
         }
 

@@ -1,4 +1,5 @@
-﻿using Godot;
+﻿using System;
+using Godot;
 
 namespace GameFrameX.Runtime
 {
@@ -6,7 +7,7 @@ namespace GameFrameX.Runtime
     /// 游戏框架单例
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class GameFrameworkMonoSingleton<T> : Node where T : Node
+    public abstract partial class GameFrameworkMonoSingleton<T> : Node where T : Node
     {
         private static T _instance;
 

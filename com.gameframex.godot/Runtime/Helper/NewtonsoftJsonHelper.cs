@@ -30,7 +30,6 @@
 // ==========================================================================================
 
 using System;
-using Newtonsoft.Json;
 
 namespace GameFrameX.Runtime
 {
@@ -46,7 +45,7 @@ namespace GameFrameX.Runtime
         /// <returns>序列化后的 JSON 字符串。</returns>
         public string ToJson(object obj)
         {
-            return JsonConvert.SerializeObject(obj);
+            return System.Text.Json.JsonSerializer.Serialize(obj);
         }
 
         /// <summary>
@@ -57,7 +56,7 @@ namespace GameFrameX.Runtime
         /// <returns>反序列化后的对象。</returns>
         public T ToObject<T>(string json)
         {
-            return JsonConvert.DeserializeObject<T>(json);
+            return System.Text.Json.JsonSerializer.Deserialize<T>(json);
         }
 
         /// <summary>
@@ -68,7 +67,7 @@ namespace GameFrameX.Runtime
         /// <returns>反序列化后的对象。</returns>
         public object ToObject(Type objectType, string json)
         {
-            return JsonConvert.DeserializeObject(json, objectType);
+            return System.Text.Json.JsonSerializer.Deserialize(json, objectType);
         }
     }
 }

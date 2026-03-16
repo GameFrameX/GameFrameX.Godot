@@ -36,7 +36,7 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 引用池组件。
     /// </summary>
-    public sealed class ReferencePoolComponent : GameFrameworkComponent
+    public sealed partial class ReferencePoolComponent : GameFrameworkComponent
     {
         [Export] private ReferenceStrictCheckType m_EnableStrictCheck = ReferenceStrictCheckType.AlwaysEnable;
 

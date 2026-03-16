@@ -36,7 +36,7 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// Godot.Rect 变量类。
     /// </summary>
-    public sealed class VarRect : Variable<Rect>
+    public sealed class VarRect : Variable<Rect2>
     {
         /// <summary>
         /// 初始化 Godot.Rect 变量类的新实例。
@@ -49,7 +49,7 @@ namespace GameFrameX.Runtime
         /// 从 Godot.Rect 到 Godot.Rect 变量类的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
-        public static implicit operator VarRect(Rect value)
+        public static implicit operator VarRect(Rect2 value)
         {
             VarRect varValue = ReferencePool.Acquire<VarRect>();
             varValue.Value = value;
@@ -60,7 +60,7 @@ namespace GameFrameX.Runtime
         /// 从 Godot.Rect 变量类到 Godot.Rect 的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
-        public static implicit operator Rect(VarRect value)
+        public static implicit operator Rect2(VarRect value)
         {
             return value.Value;
         }

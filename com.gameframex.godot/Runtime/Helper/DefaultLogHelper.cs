@@ -51,23 +51,23 @@ namespace GameFrameX.Runtime
             switch (level)
             {
                 case GameFrameworkLogLevel.Debug:
-                    Debug.Log($"{time}{message}");
+                    GD.Print($"{time}{message}");
                     break;
 
                 case GameFrameworkLogLevel.Info:
-                    Debug.Log($"{time}{message}");
+                    GD.Print($"{time}{message}");
                     break;
 
                 case GameFrameworkLogLevel.Warning:
-                    Debug.LogWarning($"{time}{message}");
+                    GD.PushWarning($"{time}{message}");
                     break;
 
                 case GameFrameworkLogLevel.Error:
-                    Debug.LogError($"{time}{message}");
+                    GD.PrintErr($"{time}{message}");
                     break;
 
                 case GameFrameworkLogLevel.Fatal:
-                    Debug.LogError($"{time}{message}");
+                    GD.PrintErr($"{time}{message}");
                     break;
                 default:
                     throw new GameFrameworkException($"{time}{message}");

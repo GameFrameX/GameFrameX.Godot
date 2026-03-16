@@ -14,7 +14,7 @@ namespace GameFrameX.Runtime
         /// <returns>三维坐标</returns>
         public static Vector3 RayCastV2ToV3(Vector2 pos)
         {
-            return new Vector3(pos.x, 0, pos.y);
+            return new Vector3(pos.X, 0, pos.Y);
         }
 
         /// <summary>
@@ -35,20 +35,10 @@ namespace GameFrameX.Runtime
         /// <returns>修改后的三维坐标</returns>
         public static Vector3 RayCastV3ToV3(Vector3 pos)
         {
-            return new Vector3(pos.x, 0, pos.z);
+            return new Vector3(pos.X, 0, pos.Z);
         }
 
-        /// <summary>
-        /// 将角度转换为四元数。
-        /// </summary>
-        /// <param name="angle">角度</param>
-        /// <returns>对应的四元数</returns>
-        public static Quaternion AngleToQuaternion(int angle)
-        {
-            return Quaternion.AngleAxis(-angle, Vector3.up) * Quaternion.AngleAxis(90, Vector3.up);
-        }
-
-        /// <summary>
+        /*/// <summary>
         /// 根据源向量和目标向量计算四元数。
         /// </summary>
         /// <param name="source">源向量</param>
@@ -62,9 +52,9 @@ namespace GameFrameX.Runtime
                 return new Quaternion();
             }
 
-            Vector3 direction = (dire - nowPos).normalized;
-            return Quaternion.LookRotation(direction, Vector3.up);
-        }
+            Vector3 direction = (dire - nowPos).Normalized();
+            return Quaternion.Identity.LookRotation(direction, Vector3.Up);
+        }*/
 
         /// <summary>
         /// 计算二维距离。
@@ -74,12 +64,12 @@ namespace GameFrameX.Runtime
         /// <returns>两点之间的二维距离</returns>
         public static float Distance2D(Vector3 v1, Vector3 v2)
         {
-            Vector2 d1 = new Vector2(v1.x, v1.z);
-            Vector2 d2 = new Vector2(v2.x, v2.z);
-            return Vector2.Distance(d1, d2);
+            Vector2 d1 = new Vector2(v1.X, v1.Z);
+            Vector2 d2 = new Vector2(v2.X, v2.Z);
+            return d1.DistanceTo(d2);
         }
 
-        /// <summary>
+        /*/// <summary>
         /// 根据角度获取四元数。
         /// </summary>
         /// <param name="angle">角度</param>
@@ -87,7 +77,7 @@ namespace GameFrameX.Runtime
         public static Quaternion GetAngleToQuaternion(float angle)
         {
             return Quaternion.AngleAxis(-angle, Vector3.up) * Quaternion.AngleAxis(90, Vector3.up);
-        }
+        }*/
 
         /// <summary>
         /// 计算从一个向量到另一个向量的360度角度。
@@ -97,9 +87,9 @@ namespace GameFrameX.Runtime
         /// <returns>360度角度</returns>
         public static float Vector3ToAngle360(Vector3 from, Vector3 to)
         {
-            float angle = Vector3.Angle(from, to);
-            Vector3 cross = Vector3.Cross(from, to);
-            return cross.y > 0 ? angle : 360 - angle;
+            float angle = from.AngleTo(to);
+            Vector3 cross = from.Cross(to);
+            return cross.Y > 0 ? angle : 360 - angle;
         }
 
         /// <summary>
@@ -113,14 +103,15 @@ namespace GameFrameX.Runtime
         {
             Vector2 startVe2 = startPoint.IgnoreYAxis();
             Vector2 endVe2 = endPoint.IgnoreYAxis();
-            float A = endVe2.y - startVe2.y;
-            float B = startVe2.x - endVe2.x;
-            float C = endVe2.x * startVe2.y - startVe2.x * endVe2.y;
-            float denominator = Mathf.Sqrt(A * A + B * B);
+            float a = endVe2.Y - startVe2.Y;
+            float b = startVe2.X - endVe2.X;
+            float c = endVe2.X * startVe2.Y - startVe2.X * endVe2.Y;
+            float denominator = Mathf.Sqrt(a * a + b * b);
             Vector2 pointVe2 = point.IgnoreYAxis();
-            return Mathf.Abs((A * pointVe2.x + B * pointVe2.y + C) / denominator);
+            return Mathf.Abs((a * pointVe2.X + b * pointVe2.Y + c) / denominator);
         }
 
+        /*
         /// <summary>
         /// 判断射线是否碰撞到球体，如果碰撞到，返回射线起点到碰撞点之间的距离
         /// </summary>
@@ -143,7 +134,7 @@ namespace GameFrameX.Runtime
             }
 
             return false;
-        }
+        }*/
 
         /// <summary>
         /// 勾股定理
@@ -163,7 +154,7 @@ namespace GameFrameX.Runtime
         /// <returns>投影后的二维向量</returns>
         public static Vector2 IgnoreYAxis(this Vector3 vector3)
         {
-            return new Vector2(vector3.x, vector3.z);
+            return new Vector2(vector3.X, vector3.Z);
         }
 
         /// <summary>
@@ -176,17 +167,17 @@ namespace GameFrameX.Runtime
         {
             Vector2 originVec2 = originPoint.IgnoreYAxis();
 
-            Vector2 pointVec2 = (point.IgnoreYAxis() - originVec2).normalized;
+            Vector2 pointVec2 = (point.IgnoreYAxis() - originVec2).Normalized();
 
             Vector2 vector2 = vector3.IgnoreYAxis();
 
-            float verticalX = originVec2.x;
+            float verticalX = originVec2.X;
 
-            float verticalY = (-verticalX * vector2.x) / vector2.y;
+            float verticalY = (-verticalX * vector2.X) / vector2.Y;
 
-            Vector2 norVertical = (new Vector2(verticalX, verticalY)).normalized;
+            Vector2 norVertical = (new Vector2(verticalX, verticalY)).Normalized();
 
-            float dotValue = Vector2.Dot(norVertical, pointVec2);
+            float dotValue = norVertical.Dot(pointVec2);
 
             return dotValue < 0f;
         }

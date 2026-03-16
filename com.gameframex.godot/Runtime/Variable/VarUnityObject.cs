@@ -36,12 +36,12 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// Godot.Object 变量类。
     /// </summary>
-    public sealed class VarUnityObject : Variable<Object>
+    public sealed class VarGodotObject : Variable<GodotObject>
     {
         /// <summary>
         /// 初始化 Godot.Object 变量类的新实例。
         /// </summary>
-        public VarUnityObject()
+        public VarGodotObject()
         {
         }
 
@@ -49,9 +49,9 @@ namespace GameFrameX.Runtime
         /// 从 Godot.Object 到 Godot.Object 变量类的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
-        public static implicit operator VarUnityObject(Object value)
+        public static implicit operator VarGodotObject(Node value)
         {
-            VarUnityObject varValue = ReferencePool.Acquire<VarUnityObject>();
+            VarGodotObject varValue = ReferencePool.Acquire<VarGodotObject>();
             varValue.Value = value;
             return varValue;
         }
@@ -60,7 +60,7 @@ namespace GameFrameX.Runtime
         /// 从 Godot.Object 变量类到 Godot.Object 的隐式转换。
         /// </summary>
         /// <param name="value">值。</param>
-        public static implicit operator Object(VarUnityObject value)
+        public static implicit operator GodotObject(VarGodotObject value)
         {
             return value.Value;
         }

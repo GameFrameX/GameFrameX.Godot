@@ -142,7 +142,7 @@ namespace GameFrameX.Runtime
 
         private static bool IsAndroidReadOnlyPath(string path, out string readPath)
         {
-            if (Application.platform == RuntimePlatform.Android)
+            if (ApplicationHelper.IsAndroid)
             {
                 if (PathHelper.NormalizePath(path).Contains(PathHelper.AppResPath))
                 {

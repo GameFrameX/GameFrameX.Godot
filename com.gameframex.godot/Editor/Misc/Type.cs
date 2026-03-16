@@ -29,40 +29,74 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using Godot;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using GameFrameX.Runtime;
 
-namespace GameFrameX.Runtime
+namespace GameFrameX.Editor
 {
     /// <summary>
-    /// Godot.Color32 变量类。
+    /// 类型相关的实用函数。
     /// </summary>
-    public sealed class VarColor32 : Variable<Color32>
+    public static class Type
     {
+        private static readonly string[] RuntimeAssemblyNames = Utility.Assembly.GetAssemblies().Where(m => !m.FullName.Contains("Editor")).Select(m => m.FullName).ToArray();
+
+        private static readonly string[] RuntimeOrEditorAssemblyNames = Utility.Assembly.GetAssemblies().Select(m => m.FullName).ToArray();
+
         /// <summary>
-        /// 初始化 Godot.Color32 变量类的新实例。
+        /// 在运行时程序集中获取指定基类的所有子类的名称。
         /// </summary>
-        public VarColor32()
+        /// <param name="typeBase">基类类型。</param>
+        /// <returns>指定基类的所有子类的名称。</returns>
+        public static string[] GetRuntimeTypeNames(System.Type typeBase)
         {
+            return GetTypeNames(typeBase, RuntimeAssemblyNames);
         }
 
         /// <summary>
-        /// 从 Godot.Color32 到 Godot.Color32 变量类的隐式转换。
+        /// 在运行时或编辑器程序集中获取指定基类的所有子类的名称。
         /// </summary>
-        /// <param name="value">值。</param>
-        public static implicit operator VarColor32(Color32 value)
+        /// <param name="typeBase">基类类型。</param>
+        /// <returns>指定基类的所有子类的名称。</returns>
+        internal static string[] GetRuntimeOrEditorTypeNames(System.Type typeBase)
         {
-            VarColor32 varValue = ReferencePool.Acquire<VarColor32>();
-            varValue.Value = value;
-            return varValue;
+            return GetTypeNames(typeBase, RuntimeOrEditorAssemblyNames);
         }
 
-        /// <summary>
-        /// 从 Godot.Color32 变量类到 Godot.Color32 的隐式转换。
-        /// </summary>
-        /// <param name="value">值。</param>
-        public static implicit operator Color32(VarColor32 value)
+        private static string[] GetTypeNames(System.Type typeBase, string[] assemblyNames)
         {
-            return value.Value;
+            var typeNames = new List<string>();
+            foreach (var assemblyName in assemblyNames)
+            {
+                Assembly assembly = null;
+                try
+                {
+                    assembly = Assembly.Load(assemblyName);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (assembly == null)
+                {
+                    continue;
+                }
+
+                var types = assembly.GetTypes();
+                foreach (var type in types)
+                {
+                    if (type.IsClass && !type.IsAbstract && typeBase.IsAssignableFrom(type))
+                    {
+                        typeNames.Add(type.FullName);
+                    }
+                }
+            }
+
+            typeNames.Sort();
+            return typeNames.ToArray();
         }
     }
 }

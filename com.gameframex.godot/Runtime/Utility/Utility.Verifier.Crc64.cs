@@ -584,8 +584,6 @@ namespace GameFrameX.Runtime
                 /// </remarks>
                 protected virtual void GetHashAndResetCore(Span<byte> destination)
                 {
-                    Debug.Assert(destination.Length == HashLengthInBytes);
-
                     GetCurrentHashCore(destination);
                     Reset();
                 }

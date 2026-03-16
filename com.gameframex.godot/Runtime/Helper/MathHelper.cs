@@ -14,12 +14,12 @@ namespace GameFrameX.Runtime
         /// <param name="src"></param>
         /// <param name="target"></param>
         /// <returns></returns>
-        public static bool CheckIntersect(RectInt src, RectInt target)
+        public static bool CheckIntersect(Rect2I src, Rect2I target)
         {
-            int minX = Math.Max(src.x, target.x);
-            int minY = Math.Max(src.y, target.y);
-            int maxX = Math.Min(src.x + src.width, target.x + target.width);
-            int maxY = Math.Min(src.y + src.height, target.y + target.height);
+            var minX = Math.Max(src.Position.X, src.Position.X);
+            var minY = Math.Max(src.Position.Y, src.Position.Y);
+            var maxX = Math.Min(src.Position.X + src.Size.X, src.Position.X + target.Size.X);
+            var maxY = Math.Min(src.Position.Y + src.Size.Y, src.Position.Y + target.Size.Y);
             if (minX >= maxX || minY >= maxY)
             {
                 return false;
@@ -67,7 +67,7 @@ namespace GameFrameX.Runtime
         /// <param name="h2"></param>
         /// <param name="rect"></param>
         /// <returns></returns>
-        private static bool CheckIntersect(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2, out RectInt rect)
+        private static bool CheckIntersect(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2, out Rect2I rect)
         {
             rect = default;
             int minX = Math.Max(x1, x2);
@@ -79,10 +79,8 @@ namespace GameFrameX.Runtime
                 return false;
             }
 
-            rect.x = minX;
-            rect.y = minY;
-            rect.width = Math.Abs(maxX - minX);
-            rect.height = Math.Abs(maxY - minY);
+            rect.Position = new Vector2I(minX, minY);
+            rect.Size = new Vector2I(Math.Abs(maxX - minX), Math.Abs(maxY - minY));
             return true;
         }
 
@@ -101,7 +99,7 @@ namespace GameFrameX.Runtime
         /// <returns>返回是否相交</returns>
         public static bool CheckIntersectPoints(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2, int[] intersectPoints)
         {
-            Vector2Int dPt = new Vector2Int();
+            Rect2I dPt = new Rect2I();
 
             if (false == CheckIntersect(x1, y1, w1, h1, x2, y2, w2, h2, out var rectInt))
             {
@@ -114,9 +112,8 @@ namespace GameFrameX.Runtime
                 {
                     if (intersectPoints[i * h1 + n] == 1)
                     {
-                        dPt.x = x1 + i;
-                        dPt.y = y1 + n;
-                        if (rectInt.Contains(dPt))
+                        dPt.Position = new Vector2I(x1 + i, y1 + n);
+                        if (rectInt.Intersects(dPt))
                         {
                             intersectPoints[i * h1 + n] = 0;
                         }

@@ -37,7 +37,7 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 基础组件。
     /// </summary>
-    public sealed class BaseComponent : GameFrameworkComponent
+    public sealed partial class BaseComponent : GameFrameworkComponent
     {
         private const int DefaultDpi = 96; // default windows dpi
 
@@ -45,15 +45,15 @@ namespace GameFrameX.Runtime
 
         // [Export] private bool m_EditorResourceMode = true;
 
-        [Export] private string m_TextHelperTypeName = "UnityGameFramework.Runtime.DefaultTextHelper";
+        [Export] private string m_TextHelperTypeName = "GameFrameX.Runtime.DefaultTextHelper";
 
-        [Export] private string m_VersionHelperTypeName = "UnityGameFramework.Runtime.DefaultVersionHelper";
+        [Export] private string m_VersionHelperTypeName = "GameFrameX.Runtime.DefaultVersionHelper";
 
-        [Export] private string m_LogHelperTypeName = "UnityGameFramework.Runtime.DefaultLogHelper";
+        [Export] private string m_LogHelperTypeName = "GameFrameX.Runtime.DefaultLogHelper";
 
-        [Export] private string m_CompressionHelperTypeName = "UnityGameFramework.Runtime.DefaultCompressionHelper";
+        [Export] private string m_CompressionHelperTypeName = "GameFrameX.Runtime.DefaultCompressionHelper";
 
-        [Export] private string m_JsonHelperTypeName = "UnityGameFramework.Runtime.DefaultJsonHelper";
+        [Export] private string m_JsonHelperTypeName = "GameFrameX.Runtime.NewtonsoftJsonHelper";
 
         [Export] private int m_FrameRate = 30;
 
@@ -153,7 +153,7 @@ namespace GameFrameX.Runtime
             InitVersionHelper();
             InitLogHelper();
             // Log.Info("Game Framework Version: {0}", GameFramework.Version.GameFrameworkVersion);
-            Log.Info("Game Version: {0}, Godot Version: {1}", Version.GameVersion, Engine.GetVersionInfo().String);
+            Log.Info("Game Version: {0}, Godot Version: {1}", Version.GameVersion, Engine.GetVersionInfo());
             InitCompressionHelper();
             InitJsonHelper();
 
@@ -194,7 +194,7 @@ namespace GameFrameX.Runtime
             if (what == NotificationWMCloseRequest)
             {
                 // Equivalent to OnApplicationQuit in Unity
-                StopAllCoroutines();
+                // StopAllCoroutines();
             }
             else if (what == NotificationPredelete || what == NotificationExitTree)
             {

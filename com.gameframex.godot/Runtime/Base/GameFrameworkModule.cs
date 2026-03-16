@@ -1,4 +1,4 @@
-﻿// ==========================================================================================
+// ==========================================================================================
 //  GameFrameX 组织及其衍生项目的版权、商标、专利及其他相关权利
 //  GameFrameX organization and its derivative projects' copyrights, trademarks, patents, and related rights
 //  均受中华人民共和国及相关国际法律法规保护。
@@ -40,7 +40,7 @@ namespace GameFrameX.Runtime
         /// 获取游戏框架模块优先级。
         /// </summary>
         /// <remarks>优先级较高的模块会优先轮询，并且关闭操作会后进行。</remarks>
-        protected internal virtual int Priority
+        protected virtual int Priority
         {
             get { return 0; }
         }
@@ -50,11 +50,11 @@ namespace GameFrameX.Runtime
         /// </summary>
         /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
         /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
-        protected internal abstract void Update(float elapseSeconds, float realElapseSeconds);
+        protected abstract void Update(float elapseSeconds, float realElapseSeconds);
 
         /// <summary>
         /// 关闭并清理游戏框架模块。
         /// </summary>
-        protected internal abstract void Shutdown();
+        protected abstract void Shutdown();
     }
 }

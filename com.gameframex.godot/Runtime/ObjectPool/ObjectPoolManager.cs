@@ -1,4 +1,4 @@
-﻿// ==========================================================================================
+// ==========================================================================================
 //  GameFrameX 组织及其衍生项目的版权、商标、专利及其他相关权利
 //  GameFrameX organization and its derivative projects' copyrights, trademarks, patents, and related rights
 //  均受中华人民共和国及相关国际法律法规保护。
@@ -62,7 +62,7 @@ namespace GameFrameX.ObjectPool
         /// 获取游戏框架模块优先级。
         /// </summary>
         /// <remarks>优先级较高的模块会优先轮询，并且关闭操作会后进行。</remarks>
-        protected internal override int Priority
+        protected override int Priority
         {
             get { return 6; }
         }
@@ -80,7 +80,7 @@ namespace GameFrameX.ObjectPool
         /// </summary>
         /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
         /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
-        protected internal override void Update(float elapseSeconds, float realElapseSeconds)
+        protected override void Update(float elapseSeconds, float realElapseSeconds)
         {
             foreach (KeyValuePair<TypeNamePair, ObjectPoolBase> objectPool in m_ObjectPools)
             {
@@ -91,7 +91,7 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 关闭并清理对象池管理器。
         /// </summary>
-        protected internal override void Shutdown()
+        protected override void Shutdown()
         {
             foreach (KeyValuePair<TypeNamePair, ObjectPoolBase> objectPool in m_ObjectPools)
             {
