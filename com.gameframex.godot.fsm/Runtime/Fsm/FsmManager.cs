@@ -34,7 +34,7 @@ namespace GameFrameX.Fsm.Runtime
         /// 获取游戏框架模块优先级。
         /// </summary>
         /// <remarks>优先级较高的模块会优先轮询，并且关闭操作会后进行。</remarks>
-        protected override int Priority
+        public override int Priority
         {
             get { return 1; }
         }
@@ -52,7 +52,7 @@ namespace GameFrameX.Fsm.Runtime
         /// </summary>
         /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
         /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
-        protected override void Update(float elapseSeconds, float realElapseSeconds)
+        public override void Update(float elapseSeconds, float realElapseSeconds)
         {
             m_TempFsms.Clear();
             if (m_Fsms.Count <= 0)
@@ -108,7 +108,7 @@ namespace GameFrameX.Fsm.Runtime
         /// <summary>
         /// 关闭并清理有限状态机管理器。
         /// </summary>
-        protected override void Shutdown()
+        public override void Shutdown()
         {
             foreach (var fsm in m_Fsms)
             {
