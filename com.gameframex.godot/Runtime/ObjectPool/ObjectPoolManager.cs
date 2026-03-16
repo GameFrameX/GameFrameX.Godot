@@ -62,7 +62,7 @@ namespace GameFrameX.ObjectPool
         /// 获取游戏框架模块优先级。
         /// </summary>
         /// <remarks>优先级较高的模块会优先轮询，并且关闭操作会后进行。</remarks>
-        protected override int Priority
+        public override int Priority
         {
             get { return 6; }
         }
@@ -80,7 +80,7 @@ namespace GameFrameX.ObjectPool
         /// </summary>
         /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
         /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
-        protected override void Update(float elapseSeconds, float realElapseSeconds)
+        public override void Update(float elapseSeconds, float realElapseSeconds)
         {
             foreach (KeyValuePair<TypeNamePair, ObjectPoolBase> objectPool in m_ObjectPools)
             {
@@ -91,7 +91,7 @@ namespace GameFrameX.ObjectPool
         /// <summary>
         /// 关闭并清理对象池管理器。
         /// </summary>
-        protected override void Shutdown()
+        public override void Shutdown()
         {
             foreach (KeyValuePair<TypeNamePair, ObjectPoolBase> objectPool in m_ObjectPools)
             {
