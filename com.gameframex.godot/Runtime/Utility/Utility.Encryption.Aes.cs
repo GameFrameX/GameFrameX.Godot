@@ -50,8 +50,8 @@ namespace GameFrameX.Runtime
                     }
 
                     byte[] m_strEncrypt;
-                    byte[] m_btIV = new byte[16] {224, 131, 122, 101, 37, 254, 33, 17, 19, 28, 212, 130, 45, 65, 43, 32};
-                    byte[] m_salt = new byte[16] {234, 231, 123, 100, 87, 254, 123, 17, 89, 18, 230, 13, 45, 65, 43, 32};
+                    byte[] m_btIV = new byte[16] { 224, 131, 122, 101, 37, 254, 33, 17, 19, 28, 212, 130, 45, 65, 43, 32 };
+                    byte[] m_salt = new byte[16] { 234, 231, 123, 100, 87, 254, 123, 17, 89, 18, 230, 13, 45, 65, 43, 32 };
                     Rijndael m_AESProvider = Rijndael.Create();
                     try
                     {
@@ -131,8 +131,8 @@ namespace GameFrameX.Runtime
                     }
 
                     byte[] m_strDecrypt;
-                    byte[] m_btIV = new byte[16] {224, 131, 122, 101, 37, 254, 33, 17, 19, 28, 212, 130, 45, 65, 43, 32};
-                    byte[] m_salt = new byte[16] {234, 231, 123, 100, 87, 254, 123, 17, 89, 18, 230, 13, 45, 65, 43, 32};
+                    byte[] m_btIV = new byte[16] { 224, 131, 122, 101, 37, 254, 33, 17, 19, 28, 212, 130, 45, 65, 43, 32 };
+                    byte[] m_salt = new byte[16] { 234, 231, 123, 100, 87, 254, 123, 17, 89, 18, 230, 13, 45, 65, 43, 32 };
                     Rijndael m_AESProvider = Rijndael.Create();
                     try
                     {

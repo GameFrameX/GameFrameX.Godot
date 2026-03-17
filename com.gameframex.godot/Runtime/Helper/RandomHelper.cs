@@ -7,7 +7,7 @@ namespace GameFrameX.Runtime
     /// </summary>
     public static class RandomHelper
     {
-        private static Random _random = new Random((int) DateTime.UtcNow.Ticks);
+        private static Random _random = new Random((int)DateTime.UtcNow.Ticks);
 
         /// <summary>
         /// 设置随机种子

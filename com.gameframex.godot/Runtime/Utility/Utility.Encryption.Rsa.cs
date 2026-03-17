@@ -181,7 +181,7 @@ namespace GameFrameX.Runtime
                 public static bool RSAVerifyData(string dataToVerify, string signedData, string publicKey)
                 {
                     return RSAVerifyData(Encoding.UTF8.GetBytes(dataToVerify), Convert.FromBase64String(signedData),
-                        publicKey);
+                                         publicKey);
                 }
 
                 public bool VerifyData(byte[] dataToVerify, byte[] signedData)

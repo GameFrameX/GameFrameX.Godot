@@ -19,7 +19,6 @@ namespace GameFrameX.Runtime
             /// </summary>
             public static class Sha1
             {
-
                 /// <summary>
                 /// 计算给定内容的Sha1哈希值，使用UTF-8编码。
                 /// </summary>

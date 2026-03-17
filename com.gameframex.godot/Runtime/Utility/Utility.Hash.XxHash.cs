@@ -125,10 +125,10 @@ namespace GameFrameX.Runtime
                             int count = length >> 4;
                             for (int i = 0; i < count; i++)
                             {
-                                var pos0 = *(uint*) (input + 0);
-                                var pos1 = *(uint*) (input + 4);
-                                var pos2 = *(uint*) (input + 8);
-                                var pos3 = *(uint*) (input + 12);
+                                var pos0 = *(uint*)(input + 0);
+                                var pos1 = *(uint*)(input + 4);
+                                var pos2 = *(uint*)(input + 8);
+                                var pos3 = *(uint*)(input + 12);
 
                                 val0 += pos0 * prime2;
                                 val0 = (val0 << 13) | (val0 >> (32 - 13));
@@ -155,12 +155,12 @@ namespace GameFrameX.Runtime
                                    ((val3 << 18) | (val3 >> (32 - 18)));
                         }
 
-                        hash += (uint) length;
+                        hash += (uint)length;
 
                         length &= 15;
                         while (length >= 4)
                         {
-                            hash += *(uint*) input * prime3;
+                            hash += *(uint*)input * prime3;
                             hash = ((hash << 17) | (hash >> (32 - 17))) * prime4;
                             input += 4;
                             length -= 4;
@@ -207,10 +207,10 @@ namespace GameFrameX.Runtime
                             int count = length >> 5;
                             for (int i = 0; i < count; i++)
                             {
-                                var pos0 = *(ulong*) (input + 0);
-                                var pos1 = *(ulong*) (input + 8);
-                                var pos2 = *(ulong*) (input + 16);
-                                var pos3 = *(ulong*) (input + 24);
+                                var pos0 = *(ulong*)(input + 0);
+                                var pos1 = *(ulong*)(input + 8);
+                                var pos2 = *(ulong*)(input + 16);
+                                var pos3 = *(ulong*)(input + 24);
 
                                 val0 += pos0 * prime2;
                                 val0 = (val0 << 31) | (val0 >> (64 - 31));
@@ -261,12 +261,12 @@ namespace GameFrameX.Runtime
                             hash = hash * prime1 + prime4;
                         }
 
-                        hash += (ulong) length;
+                        hash += (ulong)length;
 
                         length &= 31;
                         while (length >= 8)
                         {
-                            ulong lane = *(ulong*) input * prime2;
+                            ulong lane = *(ulong*)input * prime2;
                             lane = ((lane << 31) | (lane >> (64 - 31))) * prime1;
                             hash ^= lane;
                             hash = ((hash << 27) | (hash >> (64 - 27))) * prime1 + prime4;
@@ -276,7 +276,7 @@ namespace GameFrameX.Runtime
 
                         if (length >= 4)
                         {
-                            hash ^= *(uint*) input * prime1;
+                            hash ^= *(uint*)input * prime1;
                             hash = ((hash << 23) | (hash >> (64 - 23))) * prime2 + prime3;
                             input += 4;
                             length -= 4;

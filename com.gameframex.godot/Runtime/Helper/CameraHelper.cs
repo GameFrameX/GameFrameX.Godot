@@ -9,6 +9,5 @@ namespace GameFrameX.Runtime
     /// </summary>
     public static class CameraHelper
     {
-
     }
 }

@@ -40,7 +40,7 @@ namespace GameFrameX.Localization.Runtime
     /// 语言代码遵循 ISO 639-1 语言代码标准和 ISO 3166-1 国家/地区代码标准。
     /// 格式为: [语言代码]_[国家/地区代码]，例如 "zh_CN" 表示中国大陆简体中文。
     /// </remarks>
-        public static class LocalizationCode
+    public static class LocalizationCode
     {
         #region 东亚地区语言代码
 

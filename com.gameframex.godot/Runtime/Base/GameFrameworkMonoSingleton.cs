@@ -43,6 +43,7 @@ namespace GameFrameX.Runtime
                         // For now, we'll use reflection to create an instance
                         _instance = Activator.CreateInstance<T>();
                     }
+
                     _instance.Name = "[Singleton]" + typeof(T).Name;
 
                     // In Godot, use AutoLoad singleton pattern instead of DontDestroyOnLoad

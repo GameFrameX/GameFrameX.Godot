@@ -1,4 +1,4 @@
-// ==========================================================================================
+﻿// ==========================================================================================
 //  GameFrameX 组织及其衍生项目的版权、商标、专利及其他相关权利
 //  GameFrameX organization and its derivative projects' copyrights, trademarks, patents, and related rights
 //  均受中华人民共和国及相关国际法律法规保护。
@@ -36,11 +36,11 @@ namespace GameFrameX.Localization.Runtime
     /// <summary>
     /// 本地化辅助器基类。
     /// </summary>
-        public abstract partial class LocalizationHelperBase : Node, ILocalizationHelper
+    public abstract partial class LocalizationHelperBase : Node, ILocalizationHelper
     {
         /// <summary>
         /// 获取系统语言。
         /// </summary>
-                public abstract string SystemLanguage { get; }
+        public abstract string SystemLanguage { get; }
     }
 }

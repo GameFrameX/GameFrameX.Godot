@@ -35,11 +35,11 @@ namespace GameFrameX.Localization.Runtime
     /// <summary>
     /// 本地化辅助器接口。
     /// </summary>
-        public interface ILocalizationHelper
+    public interface ILocalizationHelper
     {
         /// <summary>
         /// 获取系统语言。
         /// </summary>
-                string SystemLanguage { get; }
+        string SystemLanguage { get; }
     }
 }

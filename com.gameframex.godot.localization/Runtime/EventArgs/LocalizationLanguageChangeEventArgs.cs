@@ -6,7 +6,7 @@ namespace GameFrameX.Localization.Runtime
     /// <summary>
     /// 本地化语言改变事件。
     /// </summary>
-        public sealed class LocalizationLanguageChangeEventArgs : GameEventArgs
+    public sealed class LocalizationLanguageChangeEventArgs : GameEventArgs
     {
         /// <summary>
         /// 本地化语言改变事件编号。
@@ -16,7 +16,7 @@ namespace GameFrameX.Localization.Runtime
         /// <summary>
         /// 当前语言。
         /// </summary>
-                public string Language { get; set; }
+        public string Language { get; set; }
 
         /// <summary>
         /// 未知本地化
@@ -26,12 +26,12 @@ namespace GameFrameX.Localization.Runtime
         /// <summary>
         /// 旧的语言。
         /// </summary>
-                public string OldLanguage { get; set; }
+        public string OldLanguage { get; set; }
 
         /// <summary>
         /// 初始化本地化语言改变事件的新实例。
         /// </summary>
-                public LocalizationLanguageChangeEventArgs()
+        public LocalizationLanguageChangeEventArgs()
         {
             OldLanguage = UnknownLocalization;
             Language = UnknownLocalization;
@@ -43,7 +43,7 @@ namespace GameFrameX.Localization.Runtime
         /// <param name="oldLanguage">旧的语言。</param>
         /// <param name="language">当前语言。</param>
         /// <returns>创建的本地化语言改变事件。</returns>
-                public static LocalizationLanguageChangeEventArgs Create(string oldLanguage, string language)
+        public static LocalizationLanguageChangeEventArgs Create(string oldLanguage, string language)
         {
             LocalizationLanguageChangeEventArgs localizationLanguageChangeEventArgs = ReferencePool.Acquire<LocalizationLanguageChangeEventArgs>();
             localizationLanguageChangeEventArgs.OldLanguage = oldLanguage;
@@ -54,7 +54,7 @@ namespace GameFrameX.Localization.Runtime
         /// <summary>
         /// 清除事件参数。
         /// </summary>
-                public override void Clear()
+        public override void Clear()
         {
             OldLanguage = UnknownLocalization;
             Language = UnknownLocalization;
@@ -64,7 +64,7 @@ namespace GameFrameX.Localization.Runtime
         /// 获取事件编号。
         /// </summary>
         /// <returns>事件编号。</returns>
-                public override string Id
+        public override string Id
         {
             get { return EventId; }
         }

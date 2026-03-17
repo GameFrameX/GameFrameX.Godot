@@ -7,7 +7,7 @@
         /// </summary>
         public static class File
         {
-            private static readonly string[] UnitList = new[] {"B", "KB", "MB", "GB", "TB", "PB"};
+            private static readonly string[] UnitList = new[] { "B", "KB", "MB", "GB", "TB", "PB" };
 
             /// <summary>
             /// 获取字节大小

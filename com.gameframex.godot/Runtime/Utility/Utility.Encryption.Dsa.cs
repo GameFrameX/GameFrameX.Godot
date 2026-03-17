@@ -140,7 +140,7 @@ namespace GameFrameX.Runtime
                 public static bool DSAVerifyData(string dataToVerify, string signedData, string privateKey)
                 {
                     return DSAVerifyData(Encoding.UTF8.GetBytes(dataToVerify), Convert.FromBase64String(signedData),
-                        privateKey);
+                                         privateKey);
                 }
 
                 /// <summary>

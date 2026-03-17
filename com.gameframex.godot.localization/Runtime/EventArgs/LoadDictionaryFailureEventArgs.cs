@@ -37,7 +37,7 @@ namespace GameFrameX.Localization.Runtime
     /// <summary>
     /// 加载字典失败事件。
     /// </summary>
-        public sealed class LoadDictionaryFailureEventArgs : GameEventArgs
+    public sealed class LoadDictionaryFailureEventArgs : GameEventArgs
     {
         /// <summary>
         /// 加载字典失败事件编号。
@@ -47,7 +47,7 @@ namespace GameFrameX.Localization.Runtime
         /// <summary>
         /// 初始化加载字典失败事件的新实例。
         /// </summary>
-                public LoadDictionaryFailureEventArgs()
+        public LoadDictionaryFailureEventArgs()
         {
             DictionaryAssetName = null;
             ErrorMessage = null;
@@ -57,7 +57,7 @@ namespace GameFrameX.Localization.Runtime
         /// <summary>
         /// 获取加载字典失败事件编号。
         /// </summary>
-                public override string Id
+        public override string Id
         {
             get { return EventId; }
         }
@@ -65,17 +65,17 @@ namespace GameFrameX.Localization.Runtime
         /// <summary>
         /// 获取字典资源名称。
         /// </summary>
-                public string DictionaryAssetName { get; private set; }
+        public string DictionaryAssetName { get; private set; }
 
         /// <summary>
         /// 获取错误信息。
         /// </summary>
-                public string ErrorMessage { get; private set; }
+        public string ErrorMessage { get; private set; }
 
         /// <summary>
         /// 获取用户自定义数据。
         /// </summary>
-                public object UserData { get; private set; }
+        public object UserData { get; private set; }
 
         /// <summary>
         /// 创建加载字典失败事件。
@@ -84,7 +84,7 @@ namespace GameFrameX.Localization.Runtime
         /// <param name="errorMessage">错误信息。</param>
         /// <param name="userData">用户自定义数据。</param>
         /// <returns>创建的加载字典失败事件。</returns>
-                public static LoadDictionaryFailureEventArgs Create(string dataAssetName, string errorMessage, object userData)
+        public static LoadDictionaryFailureEventArgs Create(string dataAssetName, string errorMessage, object userData)
         {
             LoadDictionaryFailureEventArgs loadDictionaryFailureEventArgs = ReferencePool.Acquire<LoadDictionaryFailureEventArgs>();
             loadDictionaryFailureEventArgs.DictionaryAssetName = dataAssetName;
@@ -96,7 +96,7 @@ namespace GameFrameX.Localization.Runtime
         /// <summary>
         /// 清理加载字典失败事件。
         /// </summary>
-                public override void Clear()
+        public override void Clear()
         {
             DictionaryAssetName = null;
             ErrorMessage = null;

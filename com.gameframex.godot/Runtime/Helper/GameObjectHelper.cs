@@ -106,6 +106,7 @@ namespace GameFrameX.Runtime
             {
                 throw new System.ArgumentNullException(nameof(parent));
             }
+
             var node = new Node();
             node.Name = name;
             parent.AddChild(node);

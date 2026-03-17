@@ -26,7 +26,7 @@ namespace GameFrameX.Runtime
                 public static uint Hash(string str, uint seed = 27)
                 {
                     var data = System.Text.Encoding.UTF8.GetBytes(str);
-                    return Hash(data, (uint) data.Length, seed);
+                    return Hash(data, (uint)data.Length, seed);
                 }
 
                 private static uint Hash(byte[] data, uint length, uint seed)
@@ -68,9 +68,9 @@ namespace GameFrameX.Runtime
                     uint tailLength = length & 3;
 
                     if (tailLength == 3)
-                        k1 ^= (uint) data[2 + nBlocks] << 16;
+                        k1 ^= (uint)data[2 + nBlocks] << 16;
                     if (tailLength >= 2)
-                        k1 ^= (uint) data[1 + nBlocks] << 8;
+                        k1 ^= (uint)data[1 + nBlocks] << 8;
                     if (tailLength >= 1)
                     {
                         k1 ^= data[nBlocks];

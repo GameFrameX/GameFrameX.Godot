@@ -129,6 +129,7 @@ namespace GameFrameX.Runtime
                 {
                     sceneTree.ReloadCurrentScene();
                 }
+
                 return;
             }
 
@@ -139,6 +140,7 @@ namespace GameFrameX.Runtime
                 {
                     sceneTree.Quit();
                 }
+
                 return;
             }
         }

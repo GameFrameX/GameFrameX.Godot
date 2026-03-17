@@ -8,7 +8,7 @@
     {
         private static T _instance;
         private static readonly object _lock = new object();
-        
+
         protected GameFrameworkSingleton()
         {
         }
