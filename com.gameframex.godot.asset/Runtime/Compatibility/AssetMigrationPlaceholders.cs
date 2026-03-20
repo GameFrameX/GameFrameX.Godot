@@ -330,3 +330,51 @@ namespace YooAsset
         }
     }
 }
+
+namespace GameFrameX.Asset.Runtime
+{
+    /// <summary>
+    /// 异步操作状态兼容占位枚举。
+    /// </summary>
+    [UnityEngine.Scripting.Preserve]
+    public enum OperationStatus
+    {
+        None = 0,
+        Succeed = 1,
+        Failed = 2
+    }
+
+    /// <summary>
+    /// 异步操作基类兼容占位类型。
+    /// </summary>
+    [UnityEngine.Scripting.Preserve]
+    public abstract class AsyncOperationBase
+    {
+        /// <summary>
+        /// 获取或设置优先级。
+        /// </summary>
+        public int Priority { get; set; }
+
+        /// <summary>
+        /// 获取或设置入队顺序。
+        /// </summary>
+        public long EnqueueOrder { get; set; }
+
+        /// <summary>
+        /// 获取当前状态。
+        /// </summary>
+        public OperationStatus Status { get; protected set; }
+
+        /// <summary>
+        /// 更新操作并返回消耗的时间片毫秒数。
+        /// </summary>
+        /// <param name="deltaSeconds">帧间隔秒数。</param>
+        /// <param name="timeSliceMilliseconds">剩余时间片毫秒数。</param>
+        /// <returns>本次消耗的毫秒数。</returns>
+        [UnityEngine.Scripting.Preserve]
+        public virtual double UpdateOperation(double deltaSeconds, double timeSliceMilliseconds)
+        {
+            return 0d;
+        }
+    }
+}

@@ -8,6 +8,8 @@ namespace GameFrameX.Asset.Runtime
         {
             _ = typeof(Constant);
             _ = typeof(GfAssetSystem);
+            _ = typeof(AsyncOperationBase);
+            _ = typeof(OperationStatus);
             _ = typeof(OperationScheduler);
             _ = typeof(EPatchStates);
             _ = typeof(AssetDownloadProgressUpdateEventArgs);
