@@ -1,6 +1,0 @@
-/Users/blank/Documents/GithubWorks/GameFrameX/Godot.Godot/.godot/mono/temp/obj/Debug/Godot.csproj.AssemblyReference.cache
-/Users/blank/Documents/GithubWorks/GameFrameX/Godot.Godot/.godot/mono/temp/obj/Debug/Godot.GeneratedMSBuildEditorConfig.editorconfig
-/Users/blank/Documents/GithubWorks/GameFrameX/Godot.Godot/.godot/mono/temp/obj/Debug/Godot.AssemblyInfoInputs.cache
-/Users/blank/Documents/GithubWorks/GameFrameX/Godot.Godot/.godot/mono/temp/obj/Debug/Godot.AssemblyInfo.cs
-/Users/blank/Documents/GithubWorks/GameFrameX/Godot.Godot/.godot/mono/temp/obj/Debug/Godot.csproj.CoreCompileInputs.cache
-/Users/blank/Documents/GithubWorks/GameFrameX/Godot.Godot/.godot/mono/temp/obj/Debug/Godot.sourcelink.json
