@@ -18,6 +18,8 @@
   <ItemGroup>
     <Compile Include="../../Runtime/PreserveAttribute.cs" Link="Runtime/PreserveAttribute.cs" />
     <Compile Include="../../Runtime/Core/GfAssetSystem.cs" Link="Runtime/Core/GfAssetSystem.cs" />
+    <Compile Include="../../Runtime/Operation/OperationStatus.cs" Link="Runtime/Operation/OperationStatus.cs" />
+    <Compile Include="../../Runtime/Operation/AsyncOperationBase.cs" Link="Runtime/Operation/AsyncOperationBase.cs" />
     <Compile Include="../../Runtime/Operation/OperationScheduler.cs" Link="Runtime/Operation/OperationScheduler.cs" />
   </ItemGroup>
 </Project>
