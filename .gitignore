@@ -1,5 +1,9 @@
 .idea
 .godot
 
+# Build outputs
+[Bb]in/
+[Oo]bj/
+
 # IDE user settings
 *.DotSettings.user
