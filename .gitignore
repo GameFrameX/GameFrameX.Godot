@@ -1,2 +1,5 @@
 .idea
 .godot
+
+# IDE user settings
+*.DotSettings.user
