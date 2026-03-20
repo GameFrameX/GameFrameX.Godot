@@ -767,11 +767,11 @@ namespace GameFrameX.Asset.Runtime
         }
 
 
-        protected override void Update(float elapseSeconds, float realElapseSeconds)
+        public override void Update(float elapseSeconds, float realElapseSeconds)
         {
         }
 
-        protected override void Shutdown()
+        public override void Shutdown()
         {
         }
 

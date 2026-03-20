@@ -330,18 +330,3 @@ namespace YooAsset
         }
     }
 }
-
-namespace GameFrameX.Asset.Runtime
-{
-    /// <summary>
-    /// 资产管理器迁移期占位分片。
-    /// </summary>
-    [UnityEngine.Scripting.Preserve]
-    public partial class AssetManager
-    {
-        /// <summary>
-        /// 获取当前运行模式。
-        /// </summary>
-        public YooAsset.EPlayMode PlayMode { get; private set; } = YooAsset.EPlayMode.HostPlayMode;
-    }
-}
