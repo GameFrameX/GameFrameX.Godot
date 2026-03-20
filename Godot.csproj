@@ -1,15 +1,18 @@
 <Project Sdk="Godot.NET.Sdk/4.5.1">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
-    <EnableDynamicLoading>true</EnableDynamicLoading>
-  </PropertyGroup>
-</Project>    <PropertyGroup>
+    <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
         <EnableDynamicLoading>true</EnableDynamicLoading>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="SharpZipLib" Version="1.4.2"/>
     </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="com.gameframex.godot/Editor/**/*.cs"/>
+        <Compile Remove="com.gameframex.godot.asset/Runtime/Asset/AssetComponent.cs"/>
+        <Compile Remove="com.gameframex.godot.asset/Tests/**/*.cs"/>
+    </ItemGroup>
+</Project>
