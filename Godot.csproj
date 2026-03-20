@@ -4,4 +4,12 @@
     <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
-</Project>
+</Project>    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
+        <EnableDynamicLoading>true</EnableDynamicLoading>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="SharpZipLib" Version="1.4.2"/>
+    </ItemGroup>
