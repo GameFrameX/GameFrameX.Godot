@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using GameFrameX.Network.Runtime;
@@ -14,6 +15,7 @@ namespace GameFrameX.Web.Runtime
     /// </summary>
     public partial class WebManager : GameFrameworkModule, IWebManager
     {
+        private static readonly HttpClient BinaryHttpClient = new HttpClient();
         /// <summary>
         /// 等待处理的Binary请求队列
         /// </summary>
@@ -84,56 +86,32 @@ namespace GameFrameX.Web.Runtime
         {
             try
             {
-                HttpWebRequest request = WebRequest.CreateHttp(webData.URL);
-                request.Method = webData.IsGet ? WebRequestMethods.Http.Get : WebRequestMethods.Http.Post;
-                request.Timeout = (int)RequestTimeout.TotalMilliseconds; // 设置请求超时时间
-                request.ContentType = BinaryContentType;
-                byte[] postData = webData.SendData;
-                request.ContentLength = postData.Length;
-                using (Stream requestStream = request.GetRequestStream())
-                {
-                    await requestStream.WriteAsync(postData, 0, postData.Length);
-                }
+                using var request = new HttpRequestMessage(webData.IsGet ? HttpMethod.Get : HttpMethod.Post, webData.URL);
+                request.Content = new ByteArrayContent(webData.SendData);
+                request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(BinaryContentType);
 
                 if (webData.Header != null && webData.Header.Count > 0)
                 {
                     foreach (var kv in webData.Header)
                     {
-                        request.Headers[kv.Key] = kv.Value;
+                        if (!request.Headers.TryAddWithoutValidation(kv.Key, kv.Value))
+                        {
+                            request.Content.Headers.TryAddWithoutValidation(kv.Key, kv.Value);
+                        }
                     }
                 }
 
-                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                using var timeoutCts = new System.Threading.CancellationTokenSource(RequestTimeout);
+                using (var response = await BinaryHttpClient.SendAsync(request, timeoutCts.Token))
                 {
-                    using (Stream responseStream = response.GetResponseStream())
-                    {
-                        var transferEncoding = response.Headers.Get("Transfer-Encoding");
-                        if (string.IsNullOrWhiteSpace(transferEncoding))
-                        {
-                            m_MemoryStream.SetLength(response.ContentLength);
-                        }
-                        else
-                        {
-                            m_MemoryStream.SetLength(0);
-                        }
-
-                        m_MemoryStream.Position = 0;
-                        await responseStream.CopyToAsync(m_MemoryStream);
-                        var resultData = m_MemoryStream.ToArray();
-                        webData.Task.SetResult(new WebBufferResult(webData.UserData, resultData)); // 将流的内容复制到内存流中并转换为byte数组 
-                    }
+                    response.EnsureSuccessStatusCode();
+                    var resultData = await response.Content.ReadAsByteArrayAsync();
+                    webData.Task.SetResult(new WebBufferResult(webData.UserData, resultData));
                 }
             }
-            catch (WebException e)
+            catch (TaskCanceledException e)
             {
-                // 捕获超时异常
-                if (e.Status == WebExceptionStatus.Timeout)
-                {
-                    webData.Task.SetException(new TimeoutException(e.Message));
-                    return;
-                }
-
-                webData.Task.SetException(e);
+                webData.Task.SetException(new TimeoutException(e.Message));
             }
             catch (IOException e)
             {
