@@ -1,0 +1,28 @@
+{
+  "name": "com.gameframex.unity.google.protobuf",
+  "displayName": "Google Protocol Buffers",
+  "version": "3.3.0",
+  "unity": "2017.1",
+  "description": "Google Protocol Buffers",
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gameframex/com.gameframex.unity.google.protobuf.git",
+    "name": "com.gameframex.unity.google.protobuf"
+  },
+  "relatedPackages": {},
+  "dependencies": {},
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}
