@@ -2,8 +2,9 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>annotations</Nullable>
     <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,5 +22,12 @@
     <Compile Include="../../Runtime/Operation/OperationStatus.cs" Link="Runtime/Operation/OperationStatus.cs" />
     <Compile Include="../../Runtime/Operation/AsyncOperationBase.cs" Link="Runtime/Operation/AsyncOperationBase.cs" />
     <Compile Include="../../Runtime/Operation/OperationScheduler.cs" Link="Runtime/Operation/OperationScheduler.cs" />
+    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/OperationSystem/EOperationStatus.cs" Link="YooAsset/OperationSystem/EOperationStatus.cs" />
+    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/OperationSystem/AsyncOperationBase.cs" Link="YooAsset/OperationSystem/AsyncOperationBase.cs" />
+    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/OperationSystem/OperationSystem.cs" Link="YooAsset/OperationSystem/OperationSystem.cs" />
+    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/ResourcePackage/Operation/UpdatePackageManifestOperation.cs" Link="YooAsset/ResourcePackage/Operation/UpdatePackageManifestOperation.cs" />
+    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Utility/YooUtility.cs" Link="YooAsset/Utility/YooUtility.cs" />
+    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Utility/CRC32Algorithm.cs" Link="YooAsset/Utility/CRC32Algorithm.cs" />
+    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Utility/YooLogger.cs" Link="YooAsset/Utility/YooLogger.cs" />
   </ItemGroup>
 </Project>

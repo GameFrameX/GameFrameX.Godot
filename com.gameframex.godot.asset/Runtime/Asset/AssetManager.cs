@@ -47,6 +47,7 @@ namespace GameFrameX.Asset.Runtime
         {
             BetterStreamingAssets.Initialize();
             Log.Info($"资源系统运行模式：{PlayMode}");
+            YooAssets.SetAutoCreateDriver(false);
             YooAssets.Initialize();
             YooAssets.SetOperationSystemMaxTimeSlice(30);
             // YooAssets.SetCacheSystemCachedFileVerifyLevel(EVerifyLevel.High);
@@ -767,10 +768,19 @@ namespace GameFrameX.Asset.Runtime
         }
 
 
+        /// <summary>
+        /// 每帧更新资源系统驱动。
+        /// </summary>
+        /// <param name="elapseSeconds">逻辑帧间隔时间。</param>
+        /// <param name="realElapseSeconds">真实帧间隔时间。</param>
         public override void Update(float elapseSeconds, float realElapseSeconds)
         {
+            YooAssets.Tick();
         }
 
+        /// <summary>
+        /// 关闭资源系统模块。
+        /// </summary>
         public override void Shutdown()
         {
         }

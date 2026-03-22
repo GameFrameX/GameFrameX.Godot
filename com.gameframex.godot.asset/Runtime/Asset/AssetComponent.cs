@@ -15,7 +15,7 @@ namespace GameFrameX.Asset.Runtime
     [DisallowMultipleComponent]
     [AddComponentMenu("GameFrameX/Asset")]
     [UnityEngine.Scripting.Preserve]
-    public sealed class AssetComponent : GameFrameworkComponent
+    public sealed partial class AssetComponent : GameFrameworkComponent
     {
         [Tooltip("当目标平台为Web平台时，将会强制设置为" + nameof(EPlayMode.WebPlayMode))] [SerializeField]
         private EPlayMode m_GamePlayMode;
@@ -34,12 +34,11 @@ namespace GameFrameX.Asset.Runtime
 #endif
 
         public const string BuildInPackageName = "DefaultPackage";
-        private InitializationOperation _initializationOperation;
 
         private IAssetManager _assetManager;
 
         [UnityEngine.Scripting.Preserve]
-        protected override void Awake()
+        public override void _Ready()
         {
 #if !UNITY_EDITOR
             if (GamePlayMode == EPlayMode.EditorSimulateMode)
@@ -52,7 +51,7 @@ namespace GameFrameX.Asset.Runtime
 #endif
             ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(IAssetManager);
-            base.Awake();
+            base._Ready();
             _assetManager = GameFrameworkEntry.GetModule<IAssetManager>();
             if (_assetManager == null)
             {
