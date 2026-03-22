@@ -1,0 +1,17 @@
+{
+  "name": "YooAsset.Runtime",
+  "rootNamespace": "YooAsset",
+  "references": [
+    "StarkWebGL",
+    "Wx"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
