@@ -2,15 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using GameFrameX.Network.Runtime;
 using GameFrameX.Runtime;
 using GameFrameX.Web.Runtime;
+using Godot;
+using HttpClient = System.Net.Http.HttpClient;
 
 namespace GameFrameX.Web.ProtoBuff.Runtime
 {
     public partial class WebProtoBuffManager
     {
+        private static readonly HttpClient ProtoHttpClient = new HttpClient();
         private readonly Queue<WebProtoBufData> m_WaitingProtoBufQueue = new Queue<WebProtoBufData>(256);
         private readonly List<WebProtoBufData> m_SendingProtoBufList = new List<WebProtoBufData>(16);
         private const string ProtoBufContentType = "application/x-protobuf";
@@ -52,46 +56,20 @@ namespace GameFrameX.Web.ProtoBuff.Runtime
         {
             try
             {
-                var request = WebRequest.CreateHttp(webData.URL);
-                request.Method = webData.IsGet ? WebRequestMethods.Http.Get : WebRequestMethods.Http.Post;
-                request.Timeout = (int)RequestTimeout.TotalMilliseconds;
-                request.ContentType = ProtoBufContentType;
-                var postData = webData.SendData;
-                request.ContentLength = postData.Length;
-                using (var requestStream = request.GetRequestStream())
+                using var request = new HttpRequestMessage(webData.IsGet ? HttpMethod.Get : HttpMethod.Post, webData.URL);
+                request.Content = new ByteArrayContent(webData.SendData);
+                request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(ProtoBufContentType);
+                using var timeoutCts = new System.Threading.CancellationTokenSource(RequestTimeout);
+                using (var response = await ProtoHttpClient.SendAsync(request, timeoutCts.Token))
                 {
-                    await requestStream.WriteAsync(postData, 0, postData.Length);
-                }
-
-                using (var response = (HttpWebResponse)await request.GetResponseAsync())
-                {
-                    using (var responseStream = response.GetResponseStream())
-                    {
-                        var transferEncoding = response.Headers.Get("Transfer-Encoding");
-                        if (string.IsNullOrWhiteSpace(transferEncoding))
-                        {
-                            m_MemoryStream.SetLength(response.ContentLength);
-                        }
-                        else
-                        {
-                            m_MemoryStream.SetLength(0);
-                        }
-
-                        m_MemoryStream.Position = 0;
-                        await responseStream.CopyToAsync(m_MemoryStream);
-                        webData.Task.SetResult(new WebBufferResult(webData.UserData, m_MemoryStream.ToArray()));
-                    }
+                    response.EnsureSuccessStatusCode();
+                    var resultBytes = await response.Content.ReadAsByteArrayAsync(timeoutCts.Token);
+                    webData.Task.SetResult(new WebBufferResult(webData.UserData, resultBytes));
                 }
             }
-            catch (WebException e)
+            catch (TaskCanceledException e)
             {
-                if (e.Status == WebExceptionStatus.Timeout)
-                {
-                    webData.Task.SetException(new TimeoutException(e.Message));
-                    return;
-                }
-
-                webData.Task.SetException(e);
+                webData.Task.SetException(new TimeoutException(e.Message));
             }
             catch (IOException e)
             {
