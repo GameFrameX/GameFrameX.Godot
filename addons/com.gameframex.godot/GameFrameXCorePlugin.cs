@@ -20,7 +20,7 @@ namespace GameFrameX.Editor
         /// <remarks>
         /// The Inspector plugin instance for BaseComponent.
         /// </remarks>
-        private BaseComponentInspectorPlugin m_BaseComponentInspectorPlugin;
+        private BaseComponentInspector m_BaseComponentInspector;
 
         /// <summary>
         /// 当插件进入场景树时调用，注册 Inspector 插件。
@@ -31,8 +31,8 @@ namespace GameFrameX.Editor
         public override void _EnterTree()
         {
             // 只注册核心的 BaseComponent Inspector / Only register the core BaseComponent Inspector
-            m_BaseComponentInspectorPlugin = new BaseComponentInspectorPlugin();
-            AddInspectorPlugin(m_BaseComponentInspectorPlugin);
+            m_BaseComponentInspector = new BaseComponentInspector();
+            AddInspectorPlugin(m_BaseComponentInspector);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace GameFrameX.Editor
         public override void _ExitTree()
         {
             // Godot 4 会自动清理 InspectorPlugin，无需手动移除 / Godot 4 automatically cleans up InspectorPlugins, no need to remove manually
-            m_BaseComponentInspectorPlugin = null;
+            m_BaseComponentInspector = null;
         }
     }
 }

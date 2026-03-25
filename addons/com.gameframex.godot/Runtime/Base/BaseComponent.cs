@@ -55,7 +55,7 @@ namespace GameFrameX.Runtime
 
         [Export] private string m_JsonHelperTypeName = "GameFrameX.Runtime.NewtonsoftJsonHelper";
 
-        [Export] private int m_FrameRate = 30;
+        [Export(PropertyHint.IntIsObjectid)] private int m_FrameRate = 30;
 
         [Export] private float m_GameSpeed = 1f;
 
