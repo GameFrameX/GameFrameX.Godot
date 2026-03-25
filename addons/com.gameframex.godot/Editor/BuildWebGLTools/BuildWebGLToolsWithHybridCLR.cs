@@ -1,3 +1,6 @@
+
+#if false // Unity 特定代码，Godot 不支持
+
 #if UNITY_WEBGL && UNITY_EDITOR && !UNITY_2021_3_OR_NEWER
 
 using UnityEditor;
@@ -39,3 +42,4 @@ namespace GameFrameX.Editor
     }
 }
 #endif
+#endif // Unity 特定代码结束

@@ -1,3 +1,6 @@
+
+#if false // Unity 特定代码，Godot 不支持
+
 ﻿using Godot;
 using UnityEditor;
 
@@ -57,12 +60,10 @@ namespace GameFrameX.Editor
                 return false;
             }
 
-/*#if UNITY_2018_3_OR_NEWER
-            return PrefabUtility.GetPrefabAssetType(obj) != PrefabAssetType.Regular;
-#else
-            return PrefabUtility.GetPrefabType(obj) != PrefabType.Prefab;
-#endif*/
+// UNITY_2018_3_OR_NEWER: PrefabUtility.GetPrefabAssetType(obj) != PrefabAssetType.Regular
+// ELSE: PrefabUtility.GetPrefabType(obj) != PrefabType.Prefab
             return true;
         }
     }
 }
+#endif // Unity 特定代码结束

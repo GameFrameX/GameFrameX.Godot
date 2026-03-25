@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+#if false // 需要 Newtonsoft.Json 依赖，Godot 项目中暂不可用
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace GameFrameX.Editor
@@ -6,7 +7,7 @@ namespace GameFrameX.Editor
     public sealed class PackagesManifest
     {
         [JsonProperty("dependencies")] public Dictionary<string, string> Dependencies = new Dictionary<string, string>();
-        
+
         [JsonProperty("scopedRegistries")] public List<ScopedRegistry> ScopedRegistries = new List<ScopedRegistry>();
 
         public override string ToString()
@@ -14,13 +15,14 @@ namespace GameFrameX.Editor
             return JsonConvert.SerializeObject(this);
         }
     }
-    
+
     public sealed class ScopedRegistry
     {
         [JsonProperty("name")] public string Name { get; set; }
-        
+
         [JsonProperty("url")] public string Url { get; set; }
-        
+
         [JsonProperty("scopes")] public List<string> Scopes = new List<string>();
     }
 }
+#endif

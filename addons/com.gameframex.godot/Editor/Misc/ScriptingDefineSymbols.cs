@@ -1,3 +1,6 @@
+
+#if false // Unity 特定代码，Godot 不支持
+
 ﻿// ==========================================================================================
 //  GameFrameX 组织及其衍生项目的版权、商标、专利及其他相关权利
 //  GameFrameX organization and its derivative projects' copyrights, trademarks, patents, and related rights
@@ -179,3 +182,4 @@ namespace GameFrameX.Editor
         }
     }
 }
+#endif // Unity 特定代码结束

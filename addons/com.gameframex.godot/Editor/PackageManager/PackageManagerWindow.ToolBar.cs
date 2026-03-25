@@ -1,3 +1,6 @@
+
+#if false // Unity 特定代码，Godot 不支持
+
 ﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -69,3 +72,4 @@ namespace GameFrameX.Editor
         }
     }
 }
+#endif // Unity 特定代码结束

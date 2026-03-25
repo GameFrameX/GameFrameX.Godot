@@ -1,3 +1,6 @@
+
+#if false // Unity 特定代码，Godot 不支持
+
 /*using System;
 using System.IO;
 using System.Text;
@@ -117,3 +120,4 @@ namespace GameFrameX.Editor
         }
     }
 }*/
+#endif // Unity 特定代码结束
