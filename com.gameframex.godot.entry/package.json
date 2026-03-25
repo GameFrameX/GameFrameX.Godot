@@ -1,0 +1,25 @@
+{
+  "name": "com.gameframex.godot.entry",
+  "displayName": "Game Frame X Entry",
+  "category": "Game Framework",
+  "description": "Game Frame X Entry - 游戏框架入口组件，提供便捷的组件访问接口",
+  "version": "1.2.0",
+  "keywords": [
+    "Game Framework",
+    "Godot",
+    "Entry"
+  ],
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "repository": {
+    "name": "com.gameframex.godot.entry",
+    "url": "https://github.com/gameframex/com.gameframex.godot.entry.git",
+    "type": "git"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.5.1"
+  }
+}
