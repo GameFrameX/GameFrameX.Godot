@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 
@@ -38,7 +38,7 @@ namespace GameFrameX.Runtime
                 public static string Hash(string content, Encoding encode)
                 {
                     //创建SHA1对象
-                    using (var sha1 = new System.Security.Cryptography.SHA1CryptoServiceProvider())
+                    using (var sha1 = System.Security.Cryptography.SHA1.Create())
                     {
                         //将待加密字符串转为byte类型
                         var bytesIn = encode.GetBytes(content);

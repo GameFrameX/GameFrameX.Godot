@@ -52,7 +52,7 @@ namespace GameFrameX.Runtime
                     byte[] m_strEncrypt;
                     byte[] m_btIV = new byte[16] { 224, 131, 122, 101, 37, 254, 33, 17, 19, 28, 212, 130, 45, 65, 43, 32 };
                     byte[] m_salt = new byte[16] { 234, 231, 123, 100, 87, 254, 123, 17, 89, 18, 230, 13, 45, 65, 43, 32 };
-                    Rijndael m_AESProvider = Rijndael.Create();
+                    SymmetricAlgorithm m_AESProvider = System.Security.Cryptography.Aes.Create();
                     try
                     {
                         MemoryStream m_stream = new MemoryStream();
@@ -66,22 +66,6 @@ namespace GameFrameX.Runtime
                         m_stream.Dispose();
                         m_csstream.Close();
                         m_csstream.Dispose();
-                    }
-                    catch (IOException ex)
-                    {
-                        throw ex;
-                    }
-                    catch (CryptographicException ex)
-                    {
-                        throw ex;
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        throw ex;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw ex;
                     }
                     finally
                     {
@@ -133,7 +117,7 @@ namespace GameFrameX.Runtime
                     byte[] m_strDecrypt;
                     byte[] m_btIV = new byte[16] { 224, 131, 122, 101, 37, 254, 33, 17, 19, 28, 212, 130, 45, 65, 43, 32 };
                     byte[] m_salt = new byte[16] { 234, 231, 123, 100, 87, 254, 123, 17, 89, 18, 230, 13, 45, 65, 43, 32 };
-                    Rijndael m_AESProvider = Rijndael.Create();
+                    SymmetricAlgorithm m_AESProvider = System.Security.Cryptography.Aes.Create();
                     try
                     {
                         MemoryStream m_stream = new MemoryStream();
@@ -147,22 +131,6 @@ namespace GameFrameX.Runtime
                         m_stream.Dispose();
                         m_csstream.Close();
                         m_csstream.Dispose();
-                    }
-                    catch (IOException ex)
-                    {
-                        throw ex;
-                    }
-                    catch (CryptographicException ex)
-                    {
-                        throw ex;
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        throw ex;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw ex;
                     }
                     finally
                     {

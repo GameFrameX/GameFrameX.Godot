@@ -125,7 +125,7 @@ namespace GameFrameX.Runtime
                     {
                         RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
                         rsa.FromXmlString(privateKey);
-                        return rsa.SignData(dataToSign, new SHA1CryptoServiceProvider());
+                        return rsa.SignData(dataToSign, SHA1.Create());
                     }
                     catch
                     {
@@ -143,7 +143,7 @@ namespace GameFrameX.Runtime
                 {
                     try
                     {
-                        return _rsa.SignData(dataToSign, new SHA1CryptoServiceProvider());
+                        return _rsa.SignData(dataToSign, SHA1.Create());
                     }
                     catch
                     {
@@ -170,7 +170,7 @@ namespace GameFrameX.Runtime
                     {
                         RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
                         rsa.FromXmlString(publicKey);
-                        return rsa.VerifyData(dataToVerify, new SHA1CryptoServiceProvider(), signedData);
+                        return rsa.VerifyData(dataToVerify, SHA1.Create(), signedData);
                     }
                     catch
                     {
@@ -188,7 +188,7 @@ namespace GameFrameX.Runtime
                 {
                     try
                     {
-                        return _rsa.VerifyData(dataToVerify, new SHA1CryptoServiceProvider(), signedData);
+                        return _rsa.VerifyData(dataToVerify, SHA1.Create(), signedData);
                     }
                     catch
                     {
