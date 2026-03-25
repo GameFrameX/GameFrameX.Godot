@@ -40,7 +40,8 @@ public partial class BaseComponentInspectorPlugin : EditorInspectorPlugin
         { "mcompressionhelpertypename", typeof(Utility.Compression.ICompressionHelper) },
         { "compressionhelpertypename", typeof(Utility.Compression.ICompressionHelper) },
         { "mjsonhelpertypename", typeof(Utility.Json.IJsonHelper) },
-        { "jsonhelpertypename", typeof(Utility.Json.IJsonHelper) }
+        { "jsonhelpertypename", typeof(Utility.Json.IJsonHelper) },
+        { "componenttype", typeof(GameFrameworkComponent) },
     };
 
     /// <summary>
