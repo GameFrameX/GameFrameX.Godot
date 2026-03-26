@@ -30,6 +30,7 @@
 // ==========================================================================================
 
 #if TOOLS
+using GameFrameX.Editor;
 using GameFrameX.Timer.Runtime;
 using Godot;
 
@@ -39,13 +40,8 @@ namespace GameFrameX.Timer.Editor
     /// 定时器组件检查器插件。
     /// </summary>
     [Tool]
-    public partial class TimerComponentInspectorPlugin : EditorInspectorPlugin
+    public partial class TimerComponentInspectorPlugin : ComponentTypeComponentInspector
     {
-        public override bool _CanHandle(GodotObject @object)
-        {
-            return @object is TimerComponent;
-        }
-
         public override void _ParseBegin(GodotObject @object)
         {
             if (!(@object is TimerComponent timerComponent))
@@ -62,6 +58,16 @@ namespace GameFrameX.Timer.Editor
             hintLabel.Text = "Timer component provides timer management.";
             hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
             AddCustomControl(hintLabel);
+        }
+
+        protected override System.Type GetComponentType()
+        {
+            return typeof(TimerComponent);
+        }
+
+        protected override System.Type GetManagerType()
+        {
+            return typeof(ITimerManager);
         }
     }
 }
