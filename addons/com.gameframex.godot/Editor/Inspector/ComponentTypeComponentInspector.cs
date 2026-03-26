@@ -35,30 +35,27 @@ namespace GameFrameX.Editor
         private bool IsBindComponent(GodotObject @object)
         {
             var componentType = GetComponentType();
-            GD.Print($"[事件检查器] 开始判断 IsCanHandle，对象类型={@object?.GetType().FullName}");
-
+            // 仅 Node 节点可能挂载 C# 脚本，非 Node 直接不处理。
             if (@object is not Node node)
             {
-                GD.Print("[事件检查器] 未命中路径A：对象不是 Node，返回 false");
                 return false;
             }
 
-            GD.Print($"[事件检查器] 进入路径B：检查选中节点脚本，节点名={node.Name}");
+            // 读取节点脚本并要求其为 CSharpScript，其他脚本类型不参与匹配。
             var scriptVariant = node.GetScript();
             if (scriptVariant.Obj is not CSharpScript cSharpScript)
             {
                 return false;
             }
 
-            var scriptClass = cSharpScript.GetClass();
             var scriptPath = cSharpScript.ResourcePath;
-            GD.Print($"[事件检查器] 节点脚本信息：class={scriptClass}, path={scriptPath}");
-            GD.Print($"[事件检查器] 组件类型：{componentType.FullName}");
+            // 统一交给脚本匹配方法，按类型名与路径规则判断是否命中目标组件。
             return IsMatchedEventComponentScript(cSharpScript, componentType, scriptPath);
         }
 
         /// <summary>
-        /// 判断当前脚本是否命中 EventComponent，并打印每个判断分支的结果。
+        /// 判断当前脚本是否命中目标组件类型。
+        /// 匹配按“由强到弱”的顺序进行：类型系统判断优先，字符串判断次之，路径兜底最后。
         /// </summary>
         /// <param name="cSharpScript">当前节点的 CSharpScript 对象。</param>
         /// <param name="typeName">组件类型。</param>
@@ -73,53 +70,47 @@ namespace GameFrameX.Editor
             var safeScriptPath = scriptPath ?? string.Empty;
             var safePackagePathPrefix = packagePathPrefix ?? string.Empty;
 
+            // 规则 1：直接使用 IsClass 与短类名匹配（最常见场景）。
             var matchByShortIsClass = cSharpScript.IsClass(componentName);
-            GD.Print($"[事件检查器] 路径B-1 IsClass(短类名)={matchByShortIsClass}");
             if (matchByShortIsClass)
             {
-                GD.Print("[事件检查器] 命中路径B-1：IsClass(短类名) 命中，返回 true");
                 return true;
             }
 
+            // 规则 2：使用 IsClass 与全限定类名匹配，兼容命名空间场景。
             var matchByFullIsClass = cSharpScript.IsClass(componentFullName);
-            GD.Print($"[事件检查器] 路径B-2 IsClass(全类名:{componentFullName})={matchByFullIsClass}");
             if (matchByFullIsClass)
             {
-                GD.Print("[事件检查器] 命中路径B-2：IsClass(全类名) 命中，返回 true");
                 return true;
             }
 
+            // 规则 3：比较 GetClass 与短类名，兼容部分编辑器返回值差异。
             var matchByShortNameEquals = string.Equals(scriptClass, componentName, System.StringComparison.Ordinal);
-            GD.Print($"[事件检查器] 路径B-3 GetClass==短类名={matchByShortNameEquals}");
             if (matchByShortNameEquals)
             {
-                GD.Print("[事件检查器] 命中路径B-3：GetClass 与短类名相等，返回 true");
                 return true;
             }
 
+            // 规则 4：比较 GetClass 与全限定类名，进一步覆盖命名空间差异。
             var matchByFullNameEquals = string.Equals(scriptClass, componentFullName, System.StringComparison.Ordinal);
-            GD.Print($"[事件检查器] 路径B-4 GetClass==全类名={matchByFullNameEquals}");
             if (matchByFullNameEquals)
             {
-                GD.Print("[事件检查器] 命中路径B-4：GetClass 与全类名相等，返回 true");
                 return true;
             }
 
+            // 规则 5：路径同时满足包前缀与类名后缀，避免同名脚本误判。
             var matchByPackagePrefixAndClassSuffix =
                 safeScriptPath.Contains(safePackagePathPrefix, System.StringComparison.OrdinalIgnoreCase) &&
                 safeScriptPath.EndsWith($"/{componentName}.cs", System.StringComparison.OrdinalIgnoreCase);
-            GD.Print($"[事件检查器] 路径B-6 包前缀+类名后缀匹配={matchByPackagePrefixAndClassSuffix}");
             if (matchByPackagePrefixAndClassSuffix)
             {
-                GD.Print($"[事件检查器] 命中路径B-6：包含 {safePackagePathPrefix} 且以类名结尾，返回 true");
                 return true;
             }
 
+            // 规则 6：仅按脚本文件名后缀兜底匹配，作为最后手段。
             var matchByPathEndsWith = safeScriptPath.EndsWith($"/{componentName}.cs", System.StringComparison.OrdinalIgnoreCase);
-            GD.Print($"[事件检查器] 路径B-5 ResourcePath 后缀匹配={matchByPathEndsWith}");
             if (matchByPathEndsWith)
             {
-                GD.Print("[事件检查器] 命中路径B-5：脚本路径后缀匹配 EventComponent.cs，返回 true");
                 return true;
             }
 

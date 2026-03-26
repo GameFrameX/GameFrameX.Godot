@@ -50,30 +50,8 @@ public partial class BaseComponentInspector : GameFrameworkInspector
 
     protected override bool IsCanHandle(GodotObject @object)
     {
-        var node = (@object as Node);
-        var count = node.GetChildCount(true);
-        GD.Print(node._ImportPath);
-        // node.PrintTree();
-        var script = node.GetScript();
-        var baseComponent = script.Obj.GetType();
-        var csharpScript = script.Obj as CSharpScript;
-
-        var className = csharpScript.GetClass();
-        GD.Print(className);
-
-        var isBaseComponent = csharpScript.IsClass(nameof(baseComponent));
-        GD.Print(isBaseComponent);
-        GD.Print(script.Obj);
-        GD.Print("----------");
-        GD.Print(baseComponent);
-        for (int i = 0; i < count; i++)
-        {
-            var child = node.GetChild(i);
-
-            GD.Print(child.Name);
-        }
-
-        GD.Print();
+        // 这里仅判断目标对象是否为 BaseComponent，调试输出已移除。
+        // 如需排查 Inspector 识别问题，请使用断点调试查看节点、脚本和子节点信息。
         return @object is BaseComponent;
     }
 }
