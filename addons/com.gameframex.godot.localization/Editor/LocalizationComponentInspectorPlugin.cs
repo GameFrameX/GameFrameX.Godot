@@ -30,6 +30,7 @@
 // ==========================================================================================
 
 #if TOOLS
+using GameFrameX.Editor;
 using GameFrameX.Localization.Runtime;
 using Godot;
 
@@ -39,38 +40,43 @@ namespace GameFrameX.Localization.Editor
     /// 本地化组件检查器插件。
     /// </summary>
     [Tool]
-    public partial class LocalizationComponentInspectorPlugin : EditorInspectorPlugin
+    public partial class LocalizationComponentInspectorPlugin : ComponentTypeComponentInspector
     {
-        public override bool _CanHandle(GodotObject @object)
+        // public override void _ParseBegin(GodotObject @object)
+        // {
+        //     if (!(@object is LocalizationComponent localizationComponent))
+        //     {
+        //         return;
+        //     }
+        //
+        //     var infoLabel = new Label();
+        //     infoLabel.Text = "Localization Component - Runtime Info";
+        //     infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
+        //     AddCustomControl(infoLabel);
+        //
+        //     if (!Engine.IsEditorHint())
+        //     {
+        //         var runtimeInfo = new Label();
+        //         runtimeInfo.Text = $"Language: {localizationComponent.Language}\nSystem Language: {localizationComponent.SystemLanguage}";
+        //         AddCustomControl(runtimeInfo);
+        //     }
+        //     else
+        //     {
+        //         var hintLabel = new Label();
+        //         hintLabel.Text = "Available during runtime only.";
+        //         hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
+        //         AddCustomControl(hintLabel);
+        //     }
+        // }
+
+        protected override System.Type GetComponentType()
         {
-            return @object is LocalizationComponent;
+            return typeof(LocalizationComponent);
         }
 
-        public override void _ParseBegin(GodotObject @object)
+        protected override System.Type GetManagerType()
         {
-            if (!(@object is LocalizationComponent localizationComponent))
-            {
-                return;
-            }
-
-            var infoLabel = new Label();
-            infoLabel.Text = "Localization Component - Runtime Info";
-            infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
-            AddCustomControl(infoLabel);
-
-            if (!Engine.IsEditorHint())
-            {
-                var runtimeInfo = new Label();
-                runtimeInfo.Text = $"Language: {localizationComponent.Language}\nSystem Language: {localizationComponent.SystemLanguage}";
-                AddCustomControl(runtimeInfo);
-            }
-            else
-            {
-                var hintLabel = new Label();
-                hintLabel.Text = "Available during runtime only.";
-                hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
-                AddCustomControl(hintLabel);
-            }
+            return typeof(ILocalizationManager);
         }
     }
 }
