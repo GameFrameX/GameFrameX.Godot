@@ -23,6 +23,14 @@ namespace GameFrameX.Editor
         private BaseComponentInspector m_BaseComponentInspector;
 
         /// <summary>
+        /// ObjectPoolComponent 的 Inspector 插件实例。
+        /// </summary>
+        /// <remarks>
+        /// The Inspector plugin instance for ObjectPoolComponent.
+        /// </remarks>
+        private ObjectPoolComponentInspector m_ObjectPoolComponentInspector;
+
+        /// <summary>
         /// 当插件进入场景树时调用，注册 Inspector 插件。
         /// </summary>
         /// <remarks>
@@ -30,9 +38,13 @@ namespace GameFrameX.Editor
         /// </remarks>
         public override void _EnterTree()
         {
-            // 只注册核心的 BaseComponent Inspector / Only register the core BaseComponent Inspector
+            // 注册核心的 BaseComponent Inspector / Register the core BaseComponent Inspector
             m_BaseComponentInspector = new BaseComponentInspector();
             AddInspectorPlugin(m_BaseComponentInspector);
+
+            // 注册 ObjectPoolComponent Inspector / Register the ObjectPoolComponent Inspector
+            m_ObjectPoolComponentInspector = new ObjectPoolComponentInspector();
+            AddInspectorPlugin(m_ObjectPoolComponentInspector);
         }
 
         /// <summary>
@@ -45,6 +57,7 @@ namespace GameFrameX.Editor
         {
             // Godot 4 会自动清理 InspectorPlugin，无需手动移除 / Godot 4 automatically cleans up InspectorPlugins, no need to remove manually
             m_BaseComponentInspector = null;
+            m_ObjectPoolComponentInspector = null;
         }
     }
 }

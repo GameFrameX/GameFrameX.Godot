@@ -63,6 +63,7 @@ namespace GameFrameX.Runtime
 
         [Export] private bool m_NeverSleep = true;
 
+
         /// <summary>
         /// 获取或设置是否使用编辑器资源模式（仅编辑器内有效）。
         /// </summary>

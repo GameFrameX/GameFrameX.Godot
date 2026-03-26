@@ -15,6 +15,14 @@ using Type = System.Type;
 [Tool]
 public partial class BaseComponentInspector : GameFrameworkInspector
 {
+    // public override HashSet<string> GetHiddenPropertyNames()
+    // {
+    //     return new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    //     {
+    //         "componentType"
+    //     };
+    // }
+
     /// <summary>
     /// 属性名称到 Helper 接口类型的映射表（不区分大小写）。
     /// 键为属性名称（移除特殊字符后），值为对应的接口类型。
@@ -38,6 +46,35 @@ public partial class BaseComponentInspector : GameFrameworkInspector
             { "mJsonHelperTypeName", typeof(Utility.Json.IJsonHelper) },
             { "JsonHelperTypeName", typeof(Utility.Json.IJsonHelper) },
         };
+    }
+
+    protected override bool IsCanHandle(GodotObject @object)
+    {
+        var node = (@object as Node);
+        var count = node.GetChildCount(true);
+        GD.Print(node._ImportPath);
+        // node.PrintTree();
+        var script = node.GetScript();
+        var baseComponent = script.Obj.GetType();
+        var csharpScript = script.Obj as CSharpScript;
+
+        var className = csharpScript.GetClass();
+        GD.Print(className);
+
+        var isBaseComponent = csharpScript.IsClass(nameof(baseComponent));
+        GD.Print(isBaseComponent);
+        GD.Print(script.Obj);
+        GD.Print("----------");
+        GD.Print(baseComponent);
+        for (int i = 0; i < count; i++)
+        {
+            var child = node.GetChild(i);
+
+            GD.Print(child.Name);
+        }
+
+        GD.Print();
+        return @object is BaseComponent;
     }
 }
 #endif

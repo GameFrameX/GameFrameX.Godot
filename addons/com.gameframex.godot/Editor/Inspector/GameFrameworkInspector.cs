@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if TOOLS
+using System;
 using System.Collections.Generic;
 using Godot;
 
@@ -20,7 +21,15 @@ namespace GameFrameX.Editor
         /// Mapping table from property names to Helper interface types (case-insensitive).
         /// Key is the property name (with special characters removed), value is the corresponding interface type.
         /// </remarks>
-        private static Dictionary<string, System.Type> _helperPropertyTypeMap;
+        private Dictionary<string, System.Type> _helperPropertyTypeMap;
+
+        /// <summary>
+        /// 需要隐藏的属性名称集合（不区分大小写）。
+        /// </summary>
+        /// <remarks>
+        /// Set of property names to hide (case-insensitive).
+        /// </remarks>
+        private HashSet<string> _hiddenPropertyNames;
 
         /// <summary>
         /// 获取属性名称到 Helper 接口类型的映射表（不区分大小写）。
@@ -29,6 +38,20 @@ namespace GameFrameX.Editor
         public virtual Dictionary<string, System.Type> GetHelperPropertyTypeMap()
         {
             return new Dictionary<string, System.Type>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 获取需要隐藏的属性名称集合（不区分大小写）。
+        /// 子类可以重写此方法来指定要隐藏的父类属性。
+        /// </summary>
+        /// <remarks>
+        /// Gets the set of property names to hide (case-insensitive).
+        /// Subclasses can override this method to specify parent class properties to hide.
+        /// </remarks>
+        /// <returns>需要隐藏的属性名称集合 / Set of property names to hide</returns>
+        public virtual HashSet<string> GetHiddenPropertyNames()
+        {
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -41,8 +64,15 @@ namespace GameFrameX.Editor
         /// <returns>如果对象不为 null 则返回 <c>true</c>；否则返回 <c>false</c> / <c>true</c> if the object is not null; otherwise <c>false</c></returns>
         public override bool _CanHandle(GodotObject @object)
         {
-            return @object != null;
+            return IsCanHandle(@object);
         }
+
+        /// <summary>
+        /// 判断此 Inspector 插件是否可以处理指定的对象。
+        /// </summary>
+        /// <param name="object">要检查的 Godot 对象 / The Godot object to check</param>
+        /// <returns>如果可以处理则返回 <c>true</c>；否则返回 <c>false</c> / <c>true</c> if the object can be handled; otherwise <c>false</c></returns>
+        protected abstract bool IsCanHandle(GodotObject @object);
 
         /// <summary>
         /// 解析属性并为匹配的 Helper 类型属性添加自定义编辑器。
@@ -60,10 +90,20 @@ namespace GameFrameX.Editor
         /// <returns>如果属性被处理则返回 <c>true</c>；否则返回 <c>false</c> / <c>true</c> if the property was handled; otherwise <c>false</c></returns>
         public override bool _ParseProperty(GodotObject @object, Variant.Type type, string name, PropertyHint hintType, string hintString, PropertyUsageFlags usageFlags, bool wide)
         {
+            // 延迟初始化映射表，确保每个实例使用自己的映射
+            _helperPropertyTypeMap ??= GetHelperPropertyTypeMap();
+
             string normalizedPropertyName = NormalizePropertyName(name);
-            if (_helperPropertyTypeMap == null)
+
+
+            // 检查是否需要隐藏此属性
+            _hiddenPropertyNames ??= GetHiddenPropertyNames();
+
+            GD.Print(normalizedPropertyName + "  " + name);
+
+            if (_hiddenPropertyNames.Contains(normalizedPropertyName))
             {
-                _helperPropertyTypeMap = GetHelperPropertyTypeMap();
+                return true; // 隐藏属性，不显示任何编辑器
             }
 
             if (!_helperPropertyTypeMap.TryGetValue(normalizedPropertyName, out System.Type helperInterfaceType))
@@ -97,11 +137,10 @@ namespace GameFrameX.Editor
             }
 
             // 移除所有非字母数字字符
-            char[] buffer = new char[propertyName.Length];
-            int count = 0;
-            for (int i = 0; i < propertyName.Length; i++)
+            var buffer = new char[propertyName.Length];
+            var count = 0;
+            foreach (var c in propertyName)
             {
-                char c = propertyName[i];
                 if (char.IsLetterOrDigit(c))
                 {
                     buffer[count++] = c;
@@ -112,3 +151,4 @@ namespace GameFrameX.Editor
         }
     }
 }
+#endif
