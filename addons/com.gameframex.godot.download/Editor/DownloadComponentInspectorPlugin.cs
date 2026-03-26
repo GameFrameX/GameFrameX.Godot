@@ -31,7 +31,9 @@
 
 #if TOOLS
 using GameFrameX.Download.Runtime;
+using GameFrameX.Editor;
 using Godot;
+using Type = System.Type;
 
 namespace GameFrameX.Download.Editor
 {
@@ -39,42 +41,46 @@ namespace GameFrameX.Download.Editor
     /// 下载组件检查器插件。
     /// </summary>
     [Tool]
-    public partial class DownloadComponentInspectorPlugin : EditorInspectorPlugin
+    public partial class DownloadComponentInspectorPlugin : ComponentTypeComponentInspector
     {
-        public override bool _CanHandle(GodotObject @object)
+        // public override void _ParseBegin(GodotObject @object)
+        // {
+        //     if (!(@object is DownloadComponent downloadComponent))
+        //     {
+        //         return;
+        //     }
+        //
+        //     var infoLabel = new Label();
+        //     infoLabel.Text = "Download Component - Runtime Info";
+        //     infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
+        //     AddCustomControl(infoLabel);
+        //
+        //     if (!Engine.IsEditorHint())
+        //     {
+        //         var runtimeInfo = new Label();
+        //         runtimeInfo.Text = $"Total Agent Count: {downloadComponent.TotalAgentCount}\n" +
+        //                             $"Free Agent Count: {downloadComponent.FreeAgentCount}\n" +
+        //                             $"Working Agent Count: {downloadComponent.WorkingAgentCount}\n" +
+        //                             $"Waiting Task Count: {downloadComponent.WaitingTaskCount}\n" +
+        //                             $"Current Speed: {downloadComponent.CurrentSpeed}";
+        //         AddCustomControl(runtimeInfo);
+        //     }
+        //     else
+        //     {
+        //         var hintLabel = new Label();
+        //         hintLabel.Text = "Available during runtime only.";
+        //         hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
+        //         AddCustomControl(hintLabel);
+        //     }
+        // }
+        protected override Type GetComponentType()
         {
-            return @object is DownloadComponent;
+            return typeof(DownloadComponent);
         }
 
-        public override void _ParseBegin(GodotObject @object)
+        protected override Type GetManagerType()
         {
-            if (!(@object is DownloadComponent downloadComponent))
-            {
-                return;
-            }
-
-            var infoLabel = new Label();
-            infoLabel.Text = "Download Component - Runtime Info";
-            infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
-            AddCustomControl(infoLabel);
-
-            if (!Engine.IsEditorHint())
-            {
-                var runtimeInfo = new Label();
-                runtimeInfo.Text = $"Total Agent Count: {downloadComponent.TotalAgentCount}\n" +
-                                    $"Free Agent Count: {downloadComponent.FreeAgentCount}\n" +
-                                    $"Working Agent Count: {downloadComponent.WorkingAgentCount}\n" +
-                                    $"Waiting Task Count: {downloadComponent.WaitingTaskCount}\n" +
-                                    $"Current Speed: {downloadComponent.CurrentSpeed}";
-                AddCustomControl(runtimeInfo);
-            }
-            else
-            {
-                var hintLabel = new Label();
-                hintLabel.Text = "Available during runtime only.";
-                hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
-                AddCustomControl(hintLabel);
-            }
+            return typeof(IDownloadManager);
         }
     }
 }
