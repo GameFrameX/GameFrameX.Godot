@@ -30,8 +30,10 @@
 // ==========================================================================================
 
 #if TOOLS
+using GameFrameX.Editor;
 using GameFrameX.Procedure.Runtime;
 using Godot;
+using Type = System.Type;
 
 namespace GameFrameX.Procedure.Editor
 {
@@ -39,40 +41,45 @@ namespace GameFrameX.Procedure.Editor
     /// 流程组件检查器插件。
     /// </summary>
     [Tool]
-    public partial class ProcedureComponentInspectorPlugin : EditorInspectorPlugin
+    public partial class ProcedureComponentInspectorPlugin : ComponentTypeComponentInspector
     {
-        public override bool _CanHandle(GodotObject @object)
+        protected override Type GetComponentType()
         {
-            return @object is ProcedureComponent;
+            return typeof(ProcedureComponent);
         }
 
-        public override void _ParseBegin(GodotObject @object)
+        protected override Type GetManagerType()
         {
-            if (!(@object is ProcedureComponent procedureComponent))
-            {
-                return;
-            }
-
-            var infoLabel = new Label();
-            infoLabel.Text = "Procedure Component - Runtime Info";
-            infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
-            AddCustomControl(infoLabel);
-
-            if (!Engine.IsEditorHint())
-            {
-                var currentProcedure = procedureComponent.CurrentProcedure;
-                var runtimeInfo = new Label();
-                runtimeInfo.Text = $"Current Procedure: {(currentProcedure != null ? currentProcedure.GetType().Name : "None")}";
-                AddCustomControl(runtimeInfo);
-            }
-            else
-            {
-                var hintLabel = new Label();
-                hintLabel.Text = "Available during runtime only.";
-                hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
-                AddCustomControl(hintLabel);
-            }
+            return typeof(IProcedureManager);
         }
+
+        // public override void _ParseBegin(GodotObject @object)
+        // {
+        //     if (!(@object is ProcedureComponent procedureComponent))
+        //     {
+        //         return;
+        //     }
+        //
+        //     var infoLabel = new Label();
+        //     infoLabel.Text = "Procedure Component - Runtime Info";
+        //     infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
+        //     AddCustomControl(infoLabel);
+        //
+        //     if (!Engine.IsEditorHint())
+        //     {
+        //         var currentProcedure = procedureComponent.CurrentProcedure;
+        //         var runtimeInfo = new Label();
+        //         runtimeInfo.Text = $"Current Procedure: {(currentProcedure != null ? currentProcedure.GetType().Name : "None")}";
+        //         AddCustomControl(runtimeInfo);
+        //     }
+        //     else
+        //     {
+        //         var hintLabel = new Label();
+        //         hintLabel.Text = "Available during runtime only.";
+        //         hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
+        //         AddCustomControl(hintLabel);
+        //     }
+        // }
     }
 }
 #endif
