@@ -30,8 +30,10 @@
 // ==========================================================================================
 
 #if TOOLS
+using GameFrameX.Editor;
 using GameFrameX.Network.Runtime;
 using Godot;
+using Type = System.Type;
 
 namespace GameFrameX.Network.Editor
 {
@@ -39,47 +41,53 @@ namespace GameFrameX.Network.Editor
     /// 网络组件检查器插件。
     /// </summary>
     [Tool]
-    public partial class NetworkComponentInspectorPlugin : EditorInspectorPlugin
+    public partial class NetworkComponentInspectorPlugin : ComponentTypeComponentInspector
     {
-        public override bool _CanHandle(GodotObject @object)
+        protected override Type GetComponentType()
         {
-            return @object is NetworkComponent;
+            return typeof(NetworkComponent);
         }
 
-        public override void _ParseBegin(GodotObject @object)
+        protected override Type GetManagerType()
         {
-            if (!(@object is NetworkComponent networkComponent))
-            {
-                return;
-            }
-
-            var infoLabel = new Label();
-            infoLabel.Text = "Network Component - Runtime Info";
-            infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
-            AddCustomControl(infoLabel);
-
-            if (!Engine.IsEditorHint())
-            {
-                var runtimeInfo = new Label();
-                runtimeInfo.Text = $"Network Channel Count: {networkComponent.NetworkChannelCount}";
-                AddCustomControl(runtimeInfo);
-
-                var channels = networkComponent.GetAllNetworkChannels();
-                foreach (var channel in channels)
-                {
-                    var channelInfo = new Label();
-                    channelInfo.Text = $"  {channel.Name}: {(channel.Connected ? "Connected" : "Disconnected")}";
-                    AddCustomControl(channelInfo);
-                }
-            }
-            else
-            {
-                var hintLabel = new Label();
-                hintLabel.Text = "Available during runtime only.";
-                hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
-                AddCustomControl(hintLabel);
-            }
+            return typeof(INetworkManager);
         }
+
+        //
+        // public override void _ParseBegin(GodotObject @object)
+        // {
+        //     if (!(@object is NetworkComponent networkComponent))
+        //     {
+        //         return;
+        //     }
+        //
+        //     var infoLabel = new Label();
+        //     infoLabel.Text = "Network Component - Runtime Info";
+        //     infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
+        //     AddCustomControl(infoLabel);
+        //
+        //     if (!Engine.IsEditorHint())
+        //     {
+        //         var runtimeInfo = new Label();
+        //         runtimeInfo.Text = $"Network Channel Count: {networkComponent.NetworkChannelCount}";
+        //         AddCustomControl(runtimeInfo);
+        //
+        //         var channels = networkComponent.GetAllNetworkChannels();
+        //         foreach (var channel in channels)
+        //         {
+        //             var channelInfo = new Label();
+        //             channelInfo.Text = $"  {channel.Name}: {(channel.Connected ? "Connected" : "Disconnected")}";
+        //             AddCustomControl(channelInfo);
+        //         }
+        //     }
+        //     else
+        //     {
+        //         var hintLabel = new Label();
+        //         hintLabel.Text = "Available during runtime only.";
+        //         hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
+        //         AddCustomControl(hintLabel);
+        //     }
+        // }
     }
 }
 #endif
