@@ -30,6 +30,7 @@
 // ==========================================================================================
 
 #if TOOLS
+using GameFrameX.Editor;
 using GameFrameX.Entity.Runtime;
 using Godot;
 
@@ -39,49 +40,53 @@ namespace GameFrameX.Entity.Editor
     /// 实体组件检查器插件。
     /// </summary>
     [Tool]
-    public partial class EntityComponentInspectorPlugin : EditorInspectorPlugin
+    public partial class EntityComponentInspectorPlugin : ComponentTypeComponentInspector
     {
-        public override bool _CanHandle(GodotObject @object)
+        protected override System.Type GetComponentType()
         {
-            return @object is EntityComponent;
+            return typeof(EntityComponent);
         }
 
-        public override void _ParseBegin(GodotObject @object)
+        protected override System.Type GetManagerType()
         {
-            if (!(@object is EntityComponent entityComponent))
-            {
-                return;
-            }
-
-            var infoLabel = new Label();
-            infoLabel.Text = "Entity Component - Runtime Info";
-            infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
-            AddCustomControl(infoLabel);
-
-            if (!Engine.IsEditorHint())
-            {
-                var runtimeInfo = new Label();
-                runtimeInfo.Text = $"Entity Group Count: {entityComponent.EntityGroupCount}\n" +
-                                    $"Entity Count (Total): {entityComponent.EntityCount}";
-                AddCustomControl(runtimeInfo);
-
-                var entityGroups = entityComponent.GetAllEntityGroups();
-                foreach (var entityGroup in entityGroups)
-                {
-                    var groupInfo = new Label();
-                    groupInfo.Text = $"  {entityGroup.Name}: {entityGroup.EntityCount} entities";
-                    groupInfo.AddThemeColorOverride("font_color", new Color(0.6f, 0.8f, 0.6f));
-                    AddCustomControl(groupInfo);
-                }
-            }
-            else
-            {
-                var hintLabel = new Label();
-                hintLabel.Text = "Available during runtime only.";
-                hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
-                AddCustomControl(hintLabel);
-            }
+            return typeof(IEntityManager);
         }
+        // public override void _ParseBegin(GodotObject @object)
+        // {
+        //     if (!(@object is EntityComponent entityComponent))
+        //     {
+        //         return;
+        //     }
+        //
+        //     var infoLabel = new Label();
+        //     infoLabel.Text = "Entity Component - Runtime Info";
+        //     infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
+        //     AddCustomControl(infoLabel);
+        //
+        //     if (!Engine.IsEditorHint())
+        //     {
+        //         var runtimeInfo = new Label();
+        //         runtimeInfo.Text = $"Entity Group Count: {entityComponent.EntityGroupCount}\n" +
+        //                             $"Entity Count (Total): {entityComponent.EntityCount}";
+        //         AddCustomControl(runtimeInfo);
+        //
+        //         var entityGroups = entityComponent.GetAllEntityGroups();
+        //         foreach (var entityGroup in entityGroups)
+        //         {
+        //             var groupInfo = new Label();
+        //             groupInfo.Text = $"  {entityGroup.Name}: {entityGroup.EntityCount} entities";
+        //             groupInfo.AddThemeColorOverride("font_color", new Color(0.6f, 0.8f, 0.6f));
+        //             AddCustomControl(groupInfo);
+        //         }
+        //     }
+        //     else
+        //     {
+        //         var hintLabel = new Label();
+        //         hintLabel.Text = "Available during runtime only.";
+        //         hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
+        //         AddCustomControl(hintLabel);
+        //     }
+        // }
     }
 }
 #endif
