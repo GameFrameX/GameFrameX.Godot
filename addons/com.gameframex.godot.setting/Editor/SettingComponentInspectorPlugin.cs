@@ -30,8 +30,10 @@
 // ==========================================================================================
 
 #if TOOLS
+using GameFrameX.Editor;
 using GameFrameX.Setting.Runtime;
 using Godot;
+using Type = System.Type;
 
 namespace GameFrameX.Setting.Editor
 {
@@ -39,38 +41,43 @@ namespace GameFrameX.Setting.Editor
     /// 设置组件检查器插件。
     /// </summary>
     [Tool]
-    public partial class SettingComponentInspectorPlugin : EditorInspectorPlugin
+    public partial class SettingComponentInspectorPlugin : ComponentTypeComponentInspector
     {
-        public override bool _CanHandle(GodotObject @object)
+        // public override void _ParseBegin(GodotObject @object)
+        // {
+        //     if (!(@object is SettingComponent settingComponent))
+        //     {
+        //         return;
+        //     }
+        //
+        //     var infoLabel = new Label();
+        //     infoLabel.Text = "Setting Component - Runtime Info";
+        //     infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
+        //     AddCustomControl(infoLabel);
+        //
+        //     if (!Engine.IsEditorHint())
+        //     {
+        //         var runtimeInfo = new Label();
+        //         runtimeInfo.Text = $"Setting Count: {settingComponent.Count}";
+        //         AddCustomControl(runtimeInfo);
+        //     }
+        //     else
+        //     {
+        //         var hintLabel = new Label();
+        //         hintLabel.Text = "Available during runtime only.";
+        //         hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
+        //         AddCustomControl(hintLabel);
+        //     }
+        // }
+
+        protected override Type GetComponentType()
         {
-            return @object is SettingComponent;
+            return typeof(SettingComponent);
         }
 
-        public override void _ParseBegin(GodotObject @object)
+        protected override Type GetManagerType()
         {
-            if (!(@object is SettingComponent settingComponent))
-            {
-                return;
-            }
-
-            var infoLabel = new Label();
-            infoLabel.Text = "Setting Component - Runtime Info";
-            infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
-            AddCustomControl(infoLabel);
-
-            if (!Engine.IsEditorHint())
-            {
-                var runtimeInfo = new Label();
-                runtimeInfo.Text = $"Setting Count: {settingComponent.Count}";
-                AddCustomControl(runtimeInfo);
-            }
-            else
-            {
-                var hintLabel = new Label();
-                hintLabel.Text = "Available during runtime only.";
-                hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
-                AddCustomControl(hintLabel);
-            }
+            return typeof(ISettingManager);
         }
     }
 }
