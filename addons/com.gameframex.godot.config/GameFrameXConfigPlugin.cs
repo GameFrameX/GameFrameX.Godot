@@ -12,13 +12,11 @@
 //  完整许可证文本请参见源代码根目录下的 LICENSE 文件。
 //  please refer to the LICENSE file in the root directory of the source code for the full license text.
 //
-//  禁止利用本项目实施任何危害国家安全、破坏社会秩序、
+//  禁止利用本项目实施任何危害国家安全、破坏社会秩序、侵犯他人合法权益等法律法规所禁止的行为！
 //  It is prohibited to use this project to engage in any activities that endanger national security, disrupt social order,
-//  侵犯他人合法权益等法律法规所禁止的行为！
 //  or infringe upon the legitimate rights and interests of others, as prohibited by laws and regulations!
-//  因基于本项目二次开发所产生的一切法律纠纷与责任，
-//  Any legal disputes and liabilities arising from secondary development based on project
-//  本项目组织与贡献者概不承担。
+//  因基于本项目二次开发所产生的一切法律纠纷与责任，本项目组织与贡献者概不承担。
+//  Any legal disputes and liabilities arising from secondary development based on this project
 //  shall be borne solely by the developer; the project organization and contributors assume no responsibility.
 //
 //  GitHub 仓库：https://github.com/GameFrameX
@@ -30,26 +28,24 @@
 // ==========================================================================================
 
 #if TOOLS
-using GameFrameX.Config.Runtime;
-using GameFrameX.Editor;
 using Godot;
 
 namespace GameFrameX.Config.Editor
 {
-    /// <summary>
-    /// 配置组件检查器插件。
-    /// </summary>
     [Tool]
-    public partial class ConfigComponentInspectorPlugin : ComponentTypeComponentInspector
+    public partial class GameFrameXConfigPlugin : EditorPlugin
     {
-        protected override System.Type GetManagerType()
+        private ConfigComponentInspectorPlugin m_InspectorPlugin;
+
+        public override void _EnterTree()
         {
-            return typeof(IConfigManager);
+            m_InspectorPlugin = new ConfigComponentInspectorPlugin();
+            AddInspectorPlugin(m_InspectorPlugin);
         }
 
-        protected override System.Type GetComponentType()
+        public override void _ExitTree()
         {
-            return typeof(ConfigComponent);
+            m_InspectorPlugin = null;
         }
     }
 }
