@@ -30,6 +30,7 @@
 // ==========================================================================================
 
 #if TOOLS
+using GameFrameX.Editor;
 using GameFrameX.Fsm.Runtime;
 using Godot;
 
@@ -39,38 +40,16 @@ namespace GameFrameX.Fsm.Editor
     /// 有限状态机组件检查器插件。
     /// </summary>
     [Tool]
-    public partial class FsmComponentInspectorPlugin : EditorInspectorPlugin
+    public partial class FsmComponentInspectorPlugin : ComponentTypeComponentInspector
     {
-        public override bool _CanHandle(GodotObject @object)
+        protected override System.Type GetManagerType()
         {
-            return @object is FsmComponent;
+            return typeof(IFsmManager);
         }
 
-        public override void _ParseBegin(GodotObject @object)
+        protected override System.Type GetComponentType()
         {
-            if (!(@object is FsmComponent fsmComponent))
-            {
-                return;
-            }
-
-            var infoLabel = new Label();
-            infoLabel.Text = "FSM Component - Runtime Info";
-            infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
-            AddCustomControl(infoLabel);
-
-            if (!Engine.IsEditorHint())
-            {
-                var runtimeInfo = new Label();
-                runtimeInfo.Text = $"FSM Count: {fsmComponent.Count}";
-                AddCustomControl(runtimeInfo);
-            }
-            else
-            {
-                var hintLabel = new Label();
-                hintLabel.Text = "Available during runtime only.";
-                hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
-                AddCustomControl(hintLabel);
-            }
+            return typeof(FsmComponent);
         }
     }
 }
