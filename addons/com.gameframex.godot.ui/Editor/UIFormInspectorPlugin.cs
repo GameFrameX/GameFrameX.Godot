@@ -30,6 +30,7 @@
 // ==========================================================================================
 
 #if TOOLS
+using System;
 using GameFrameX.UI.Runtime;
 using Godot;
 
@@ -43,7 +44,7 @@ namespace GameFrameX.UI.Editor
     {
         public override bool _CanHandle(GodotObject @object)
         {
-            return @object is UIForm;
+            return IsMatchedScript(@object, typeof(UIForm));
         }
 
         public override void _ParseBegin(GodotObject @object)
@@ -67,6 +68,53 @@ namespace GameFrameX.UI.Editor
                 runtimeInfo.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
                 AddCustomControl(runtimeInfo);
             }
+        }
+
+        private static bool IsMatchedScript(GodotObject @object, Type componentType)
+        {
+            if (@object is not Node node)
+            {
+                return false;
+            }
+
+            var scriptVariant = node.GetScript();
+            if (scriptVariant.Obj is not CSharpScript cSharpScript)
+            {
+                return false;
+            }
+
+            var scriptClass = cSharpScript.GetClass();
+            var componentName = componentType.Name;
+            var componentFullName = componentType.FullName;
+            var scriptPath = cSharpScript.ResourcePath ?? string.Empty;
+            var scriptFileNameSuffix = $"/{componentName}.cs";
+
+            if (cSharpScript.IsClass(componentName))
+            {
+                return true;
+            }
+
+            if (cSharpScript.IsClass(componentFullName))
+            {
+                return true;
+            }
+
+            if (string.Equals(scriptClass, componentName, StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (string.Equals(scriptClass, componentFullName, StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (scriptPath.EndsWith(scriptFileNameSuffix, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -65,10 +65,10 @@ namespace GameFrameX.UI.Runtime
 
         protected int m_Serial;
 
-        /// <summary>
+        /*/// <summary>
         /// 资源管理器。
         /// </summary>
-        protected IAssetManager m_AssetManager;
+        protected IAssetManager m_AssetManager;*/
 
         /// <summary>
         /// 界面辅助器。
@@ -191,7 +191,7 @@ namespace GameFrameX.UI.Runtime
             m_InstancePool = m_ObjectPoolManager.CreateMultiSpawnObjectPool<UIFormInstanceObject>("UI Instance Pool");
         }
 
-        /// <summary>
+        /*/// <summary>
         /// 设置资源管理器。
         /// </summary>
         /// <param name="assetManager">资源管理器。</param>
@@ -200,7 +200,7 @@ namespace GameFrameX.UI.Runtime
             GameFrameworkGuard.NotNull(assetManager, nameof(assetManager));
 
             m_AssetManager = assetManager;
-        }
+        }*/
 
         /// <summary>
         /// 设置界面辅助器。

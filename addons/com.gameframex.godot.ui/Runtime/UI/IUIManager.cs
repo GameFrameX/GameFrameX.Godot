@@ -114,11 +114,11 @@ namespace GameFrameX.UI.Runtime
         /// <param name="objectPoolManager">对象池管理器。</param>
         void SetObjectPoolManager(IObjectPoolManager objectPoolManager);
 
-        /// <summary>
+        /*/// <summary>
         /// 设置资源管理器。
         /// </summary>
         /// <param name="assetManager">资源管理器。</param>
-        void SetResourceManager(IAssetManager assetManager);
+        void SetResourceManager(IAssetManager assetManager);*/
 
         /// <summary>
         /// 设置界面辅助器。

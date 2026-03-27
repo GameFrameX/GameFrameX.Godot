@@ -44,20 +44,18 @@ namespace GameFrameX.UI.Editor
     [Tool]
     public partial class UIComponentInspectorPlugin : EditorInspectorPlugin
     {
-        private const string NoneOptionName = "<None>";
-
-        private static readonly Dictionary<string, Type> HelperPropertyTypeMap = new Dictionary<string, Type>(StringComparer.Ordinal)
+        private static readonly Dictionary<string, Type> PropertyTypeMap = new Dictionary<string, Type>(StringComparer.Ordinal)
         {
+            { "mcomponenttype", typeof(IUIManager) },
+            { "componenttype", typeof(IUIManager) },
             { "muiformhelpertypename", typeof(IUIFormHelper) },
             { "uiformhelpertypename", typeof(IUIFormHelper) },
             { "muigrouphelpertypename", typeof(IUIGroupHelper) },
             { "uigrouphelpertypename", typeof(IUIGroupHelper) },
-        };
-
-        private static readonly Dictionary<string, Type> ComponentTypeMap = new Dictionary<string, Type>(StringComparer.Ordinal)
-        {
-            { "mcomponenttype", typeof(IUIManager) },
-            { "componenttype", typeof(IUIManager) },
+            { "mcustomuiformhelper", typeof(UIFormHelperBase) },
+            { "customuiformhelper", typeof(UIFormHelperBase) },
+            { "mcustomuigrouphelper", typeof(UIGroupHelperBase) },
+            { "customuigrouphelper", typeof(UIGroupHelperBase) },
         };
 
         public override bool _CanHandle(GodotObject @object)
@@ -67,21 +65,14 @@ namespace GameFrameX.UI.Editor
 
         public override bool _ParseProperty(GodotObject @object, Variant.Type type, string name, PropertyHint hintType, string hintString, PropertyUsageFlags usageFlags, bool wide)
         {
-            string normalizedPropertyName = NormalizePropertyName(name);
-
-            if (HelperPropertyTypeMap.TryGetValue(normalizedPropertyName, out Type helperInterfaceType))
+            var normalizedPropertyName = NormalizePropertyName(name);
+            if (!PropertyTypeMap.TryGetValue(normalizedPropertyName, out var interfaceType))
             {
-                AddPropertyEditor(name, new HelperTypeEditorProperty(name, helperInterfaceType));
-                return true;
+                return false;
             }
 
-            if (ComponentTypeMap.TryGetValue(normalizedPropertyName, out Type componentInterfaceType))
-            {
-                AddPropertyEditor(name, new ComponentTypeEditorProperty(name, componentInterfaceType));
-                return true;
-            }
-
-            return false;
+            AddPropertyEditor(name, new TypeDropdownEditorProperty(name, interfaceType));
+            return true;
         }
 
         private static string NormalizePropertyName(string propertyName)
@@ -91,11 +82,10 @@ namespace GameFrameX.UI.Editor
                 return string.Empty;
             }
 
-            char[] buffer = new char[propertyName.Length];
-            int count = 0;
-            for (int i = 0; i < propertyName.Length; i++)
+            var buffer = new char[propertyName.Length];
+            var count = 0;
+            foreach (var c in propertyName)
             {
-                char c = propertyName[i];
                 if (char.IsLetterOrDigit(c))
                 {
                     buffer[count++] = char.ToLowerInvariant(c);
@@ -105,16 +95,17 @@ namespace GameFrameX.UI.Editor
             return count == 0 ? string.Empty : new string(buffer, 0, count);
         }
 
-        private sealed partial class HelperTypeEditorProperty : EditorProperty
+        private sealed partial class TypeDropdownEditorProperty : EditorProperty
         {
+            private const string NoneOptionName = "<None>";
             private readonly string m_PropertyName;
             private readonly OptionButton m_OptionButton;
             private readonly string[] m_TypeNames;
 
-            public HelperTypeEditorProperty(string propertyName, Type helperInterfaceType)
+            public TypeDropdownEditorProperty(string propertyName, Type interfaceType)
             {
                 m_PropertyName = propertyName;
-                m_TypeNames = BuildTypeNames(helperInterfaceType);
+                m_TypeNames = BuildTypeNames(interfaceType);
                 m_OptionButton = new OptionButton();
                 m_OptionButton.SizeFlagsHorizontal = SizeFlags.ExpandFill;
                 m_OptionButton.ItemSelected += OnItemSelected;
@@ -125,8 +116,8 @@ namespace GameFrameX.UI.Editor
 
             public override void _UpdateProperty()
             {
-                string selectedTypeName = GetEditedObject().Get(m_PropertyName).AsString();
-                int selectedIndex = Array.IndexOf(m_TypeNames, selectedTypeName);
+                var selectedTypeName = GetEditedObject().Get(m_PropertyName).AsString();
+                var selectedIndex = Array.IndexOf(m_TypeNames, selectedTypeName);
                 if (selectedIndex < 0)
                 {
                     selectedIndex = 0;
@@ -138,10 +129,10 @@ namespace GameFrameX.UI.Editor
                 }
             }
 
-            private static string[] BuildTypeNames(Type helperInterfaceType)
+            private static string[] BuildTypeNames(Type interfaceType)
             {
-                List<string> typeNames = new List<string> { NoneOptionName };
-                List<string> runtimeTypeNames = Utility.Assembly.GetRuntimeTypeNames(helperInterfaceType);
+                var typeNames = new List<string> { NoneOptionName };
+                var runtimeTypeNames = Utility.Assembly.GetRuntimeTypeNames(interfaceType);
                 runtimeTypeNames.Sort(StringComparer.Ordinal);
                 typeNames.AddRange(runtimeTypeNames);
                 return typeNames.ToArray();
@@ -150,7 +141,7 @@ namespace GameFrameX.UI.Editor
             private void RefreshItems()
             {
                 m_OptionButton.Clear();
-                for (int i = 0; i < m_TypeNames.Length; i++)
+                for (var i = 0; i < m_TypeNames.Length; i++)
                 {
                     m_OptionButton.AddItem(m_TypeNames[i]);
                 }
@@ -158,65 +149,7 @@ namespace GameFrameX.UI.Editor
 
             private void OnItemSelected(long index)
             {
-                string selectedTypeName = index <= 0 ? string.Empty : m_TypeNames[index];
-                EmitChanged(m_PropertyName, selectedTypeName);
-            }
-        }
-
-        private sealed partial class ComponentTypeEditorProperty : EditorProperty
-        {
-            private readonly string m_PropertyName;
-            private readonly OptionButton m_OptionButton;
-            private readonly string[] m_TypeNames;
-
-            public ComponentTypeEditorProperty(string propertyName, Type componentInterfaceType)
-            {
-                m_PropertyName = propertyName;
-                m_TypeNames = BuildTypeNames(componentInterfaceType);
-                m_OptionButton = new OptionButton();
-                m_OptionButton.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-                m_OptionButton.ItemSelected += OnItemSelected;
-                AddChild(m_OptionButton);
-                AddFocusable(m_OptionButton);
-                RefreshItems();
-            }
-
-            public override void _UpdateProperty()
-            {
-                string selectedTypeName = GetEditedObject().Get(m_PropertyName).AsString();
-                int selectedIndex = Array.IndexOf(m_TypeNames, selectedTypeName);
-                if (selectedIndex < 0)
-                {
-                    selectedIndex = 0;
-                }
-
-                if (m_OptionButton.Selected != selectedIndex)
-                {
-                    m_OptionButton.Select(selectedIndex);
-                }
-            }
-
-            private static string[] BuildTypeNames(Type componentInterfaceType)
-            {
-                List<string> typeNames = new List<string> { NoneOptionName };
-                List<string> runtimeTypeNames = Utility.Assembly.GetRuntimeTypeNames(componentInterfaceType);
-                runtimeTypeNames.Sort(StringComparer.Ordinal);
-                typeNames.AddRange(runtimeTypeNames);
-                return typeNames.ToArray();
-            }
-
-            private void RefreshItems()
-            {
-                m_OptionButton.Clear();
-                for (int i = 0; i < m_TypeNames.Length; i++)
-                {
-                    m_OptionButton.AddItem(m_TypeNames[i]);
-                }
-            }
-
-            private void OnItemSelected(long index)
-            {
-                string selectedTypeName = index <= 0 ? string.Empty : m_TypeNames[index];
+                var selectedTypeName = index <= 0 ? string.Empty : m_TypeNames[index];
                 EmitChanged(m_PropertyName, selectedTypeName);
             }
         }
