@@ -8,7 +8,7 @@ namespace GameFrameX.Web.ProtoBuff.Runtime
     {
         private IWebProtoBuffManager m_WebProtoBuffManager;
 
-        [Export]
+        [Export(PropertyHint.Range, "0.5,120,0.1")]
         private float m_Timeout = 5f;
 
         public float Timeout

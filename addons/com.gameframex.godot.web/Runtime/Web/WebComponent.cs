@@ -53,7 +53,7 @@ namespace GameFrameX.Web.Runtime
         /// <summary>
         /// 请求超时时间配置
         /// </summary>
-        [Export]
+        [Export(PropertyHint.Range, "0.5,120,0.1")]
         private float m_Timeout = 5f;
 
         /// <summary>
