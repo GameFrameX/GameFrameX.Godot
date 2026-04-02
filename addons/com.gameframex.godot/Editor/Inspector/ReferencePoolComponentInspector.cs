@@ -1,4 +1,4 @@
-﻿// ==========================================================================================
+// ==========================================================================================
 //  GameFrameX 组织及其衍生项目的版权、商标、专利及其他相关权利
 //  GameFrameX organization and its derivative projects' copyrights, trademarks, patents, and related rights
 //  均受中华人民共和国及相关国际法律法规保护。
@@ -37,15 +37,24 @@ using Godot;
 
 namespace GameFrameX.Editor
 {
-    internal sealed partial class ReferencePoolComponentInspector : GameFrameworkInspector
+    public sealed partial class ReferencePoolComponentInspector : GameFrameworkInspector
     {
-        private readonly Dictionary<string, List<ReferencePoolInfo>> m_ReferencePoolInfos = new Dictionary<string, List<ReferencePoolInfo>>(StringComparer.Ordinal);
-
-        private readonly HashSet<string> m_OpenedItems = new HashSet<string>();
+        public override HashSet<string> GetHiddenPropertyNames()
+        {
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "componentType"
+            };
+        }
 
         protected override bool IsCanHandle(GodotObject @object)
         {
-            return @object is ReferencePoolComponent;
+            return IsBindComponent(@object);
+        }
+
+        protected override System.Type GetComponentType()
+        {
+            return typeof(ReferencePoolComponent);
         }
 
 
