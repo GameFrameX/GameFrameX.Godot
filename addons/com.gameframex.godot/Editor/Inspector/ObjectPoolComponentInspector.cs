@@ -44,8 +44,6 @@ namespace GameFrameX.Editor
     [Tool]
     internal sealed partial class ObjectPoolComponentInspector : ComponentTypeComponentInspector
     {
-        private readonly HashSet<string> m_OpenedItems = new HashSet<string>();
-
         protected override System.Type GetComponentType()
         {
             return typeof(ObjectPoolComponent);
