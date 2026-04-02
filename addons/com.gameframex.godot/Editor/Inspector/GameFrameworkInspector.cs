@@ -99,8 +99,6 @@ namespace GameFrameX.Editor
             // 检查是否需要隐藏此属性
             _hiddenPropertyNames ??= GetHiddenPropertyNames();
 
-            GD.Print(normalizedPropertyName + "  " + name);
-
             if (_hiddenPropertyNames.Contains(normalizedPropertyName))
             {
                 return true; // 隐藏属性，不显示任何编辑器
