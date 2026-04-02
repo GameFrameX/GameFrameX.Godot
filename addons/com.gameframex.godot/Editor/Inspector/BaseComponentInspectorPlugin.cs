@@ -23,6 +23,16 @@ public partial class BaseComponentInspector : GameFrameworkInspector
         };
     }
 
+    protected override bool IsCanHandle(GodotObject @object)
+    {
+        return IsBindComponent(@object);
+    }
+
+    protected override System.Type GetComponentType()
+    {
+        return typeof(BaseComponent);
+    }
+
     /// <summary>
     /// 属性名称到 Helper 接口类型的映射表（不区分大小写）。
     /// 键为属性名称（移除特殊字符后），值为对应的接口类型。
@@ -46,37 +56,6 @@ public partial class BaseComponentInspector : GameFrameworkInspector
             { "mJsonHelperTypeName", typeof(Utility.Json.IJsonHelper) },
             { "JsonHelperTypeName", typeof(Utility.Json.IJsonHelper) },
         };
-    }
-
-    protected override bool IsCanHandle(GodotObject @object)
-    {
-        if (@object is BaseComponent)
-        {
-            return true;
-        }
-
-        if (@object is not Node node)
-        {
-            return false;
-        }
-
-        var scriptVariant = node.GetScript();
-        if (scriptVariant.Obj is not CSharpScript cSharpScript)
-        {
-            return false;
-        }
-
-        var componentType = typeof(BaseComponent);
-        var componentName = componentType.Name;
-        var componentFullName = componentType.FullName;
-        var scriptClass = cSharpScript.GetClass();
-        var scriptPath = cSharpScript.ResourcePath ?? string.Empty;
-
-        return cSharpScript.IsClass(componentName) ||
-               cSharpScript.IsClass(componentFullName) ||
-               string.Equals(scriptClass, componentName, StringComparison.Ordinal) ||
-               string.Equals(scriptClass, componentFullName, StringComparison.Ordinal) ||
-               scriptPath.EndsWith($"/{componentName}.cs", StringComparison.OrdinalIgnoreCase);
     }
 }
 #endif
