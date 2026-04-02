@@ -15,13 +15,13 @@ using Type = System.Type;
 [Tool]
 public partial class BaseComponentInspector : GameFrameworkInspector
 {
-    // public override HashSet<string> GetHiddenPropertyNames()
-    // {
-    //     return new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-    //     {
-    //         "componentType"
-    //     };
-    // }
+    public override HashSet<string> GetHiddenPropertyNames()
+    {
+        return new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "componentType"
+        };
+    }
 
     /// <summary>
     /// 属性名称到 Helper 接口类型的映射表（不区分大小写）。
@@ -50,9 +50,33 @@ public partial class BaseComponentInspector : GameFrameworkInspector
 
     protected override bool IsCanHandle(GodotObject @object)
     {
-        // 这里仅判断目标对象是否为 BaseComponent，调试输出已移除。
-        // 如需排查 Inspector 识别问题，请使用断点调试查看节点、脚本和子节点信息。
-        return @object is BaseComponent;
+        if (@object is BaseComponent)
+        {
+            return true;
+        }
+
+        if (@object is not Node node)
+        {
+            return false;
+        }
+
+        var scriptVariant = node.GetScript();
+        if (scriptVariant.Obj is not CSharpScript cSharpScript)
+        {
+            return false;
+        }
+
+        var componentType = typeof(BaseComponent);
+        var componentName = componentType.Name;
+        var componentFullName = componentType.FullName;
+        var scriptClass = cSharpScript.GetClass();
+        var scriptPath = cSharpScript.ResourcePath ?? string.Empty;
+
+        return cSharpScript.IsClass(componentName) ||
+               cSharpScript.IsClass(componentFullName) ||
+               string.Equals(scriptClass, componentName, StringComparison.Ordinal) ||
+               string.Equals(scriptClass, componentFullName, StringComparison.Ordinal) ||
+               scriptPath.EndsWith($"/{componentName}.cs", StringComparison.OrdinalIgnoreCase);
     }
 }
 #endif
