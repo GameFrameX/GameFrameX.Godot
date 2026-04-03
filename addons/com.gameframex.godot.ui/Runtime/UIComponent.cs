@@ -55,6 +55,10 @@ namespace GameFrameX.UI.Runtime
 
         [Export] private bool m_EnableOpenUIFormFailureEvent = true;
 
+        [Export] private bool m_EnableOpenUIFormUpdateEvent = false;
+
+        [Export] private bool m_EnableOpenUIFormDependencyAssetEvent = false;
+
         [Export] private bool m_EnableCloseUIFormCompleteEvent = true;
         [Export] private bool m_IsEnableUIShowAnimation = false;
         [Export] private bool m_IsEnableUIHideAnimation = false;
@@ -69,11 +73,11 @@ namespace GameFrameX.UI.Runtime
 
         [Export] private NodePath m_UIRootPath;
 
-        [Export] private string m_UIFormHelperTypeName = "GameFrameX.UI.Runtime.DefaultUIFormHelper";
+        [Export] private string m_UIFormHelperTypeName = "GameFrameX.UI.GodotGUI.Runtime.UGUIFormHelper";
 
         [Export] private UIFormHelperBase m_CustomUIFormHelper = null;
 
-        [Export] private string m_UIGroupHelperTypeName = "GameFrameX.UI.Runtime.DefaultUIGroupHelper";
+        [Export] private string m_UIGroupHelperTypeName = "GameFrameX.UI.GodotGUI.Runtime.UGUIUIGroupHelper";
 
         [Export] private UIGroupHelperBase m_CustomUIGroupHelper = null;
 
@@ -172,6 +176,7 @@ namespace GameFrameX.UI.Runtime
         /// </summary>
         public override void _Ready()
         {
+            componentType = ResolveUIManagerComponentTypeName();
             ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(IUIManager);
             base._Ready();
@@ -201,12 +206,42 @@ namespace GameFrameX.UI.Runtime
 
             m_UIManager.OpenUIFormFailure += OnOpenUIFormFailure;
 
+            if (m_EnableOpenUIFormUpdateEvent)
+            {
+                m_UIManager.OpenUIFormUpdate += OnOpenUIFormUpdate;
+            }
+
+            if (m_EnableOpenUIFormDependencyAssetEvent)
+            {
+                m_UIManager.OpenUIFormDependencyAsset += OnOpenUIFormDependencyAsset;
+            }
+
             if (m_EnableCloseUIFormCompleteEvent)
             {
                 m_UIManager.CloseUIFormComplete += OnCloseUIFormComplete;
             }
 
             InitializeUIManager();
+        }
+
+        /// <summary>
+        /// 解析界面管理器实现类型名称。
+        /// </summary>
+        /// <returns>可用的界面管理器实现类型名称。</returns>
+        private string ResolveUIManagerComponentTypeName()
+        {
+            if (!string.IsNullOrWhiteSpace(componentType))
+            {
+                return componentType;
+            }
+
+            const string godotGuiUIManagerType = "GameFrameX.UI.GodotGUI.Runtime.UIManager";
+            if (Utility.Assembly.GetType(godotGuiUIManagerType) != null)
+            {
+                return godotGuiUIManagerType;
+            }
+
+            return "GameFrameX.UI.Runtime.UIManager";
         }
 
         private void InitializeUIManager()
@@ -233,6 +268,16 @@ namespace GameFrameX.UI.Runtime
             m_UIManager.RecycleInterval = m_RecycleInterval;
             m_UIManager.IsEnableUIHideAnimation = m_IsEnableUIHideAnimation;
             m_UIManager.IsEnableUIShowAnimation = m_IsEnableUIShowAnimation;
+
+            if (Utility.Assembly.GetType(m_UIGroupHelperTypeName) == null)
+            {
+                m_UIGroupHelperTypeName = "GameFrameX.UI.Runtime.DefaultUIGroupHelper";
+            }
+
+            if (Utility.Assembly.GetType(m_UIFormHelperTypeName) == null)
+            {
+                m_UIFormHelperTypeName = "GameFrameX.UI.Runtime.DefaultUIFormHelper";
+            }
 
             m_CustomUIGroupHelper = Helper.CreateHelper(m_UIGroupHelperTypeName, m_CustomUIGroupHelper);
             if (m_CustomUIGroupHelper == null)
@@ -364,6 +409,16 @@ namespace GameFrameX.UI.Runtime
             {
                 m_EventComponent.Fire(this, e);
             }
+        }
+
+        private void OnOpenUIFormUpdate(object sender, OpenUIFormUpdateEventArgs e)
+        {
+            m_EventComponent.Fire(this, e);
+        }
+
+        private void OnOpenUIFormDependencyAsset(object sender, OpenUIFormDependencyAssetEventArgs e)
+        {
+            m_EventComponent.Fire(this, e);
         }
 
         /// <summary>

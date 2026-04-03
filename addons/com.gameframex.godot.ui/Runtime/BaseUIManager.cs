@@ -65,10 +65,10 @@ namespace GameFrameX.UI.Runtime
 
         protected int m_Serial;
 
-        /*/// <summary>
+        /// <summary>
         /// 资源管理器。
         /// </summary>
-        protected IAssetManager m_AssetManager;*/
+        // protected IAssetManager m_AssetManager;
 
         /// <summary>
         /// 界面辅助器。

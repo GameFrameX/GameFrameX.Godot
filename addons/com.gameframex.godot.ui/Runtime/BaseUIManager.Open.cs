@@ -44,8 +44,8 @@ namespace GameFrameX.UI.Runtime
 
         protected EventHandler<OpenUIFormFailureEventArgs> m_OpenUIFormFailureEventHandler;
 
-        // private EventHandler<OpenUIFormUpdateEventArgs> m_OpenUIFormUpdateEventHandler;
-        // private EventHandler<OpenUIFormDependencyAssetEventArgs> m_OpenUIFormDependencyAssetEventHandler;
+        private EventHandler<OpenUIFormUpdateEventArgs> m_OpenUIFormUpdateEventHandler;
+        private EventHandler<OpenUIFormDependencyAssetEventArgs> m_OpenUIFormDependencyAssetEventHandler;
 
         /// <summary>
         /// 打开界面成功事件。
@@ -65,7 +65,6 @@ namespace GameFrameX.UI.Runtime
             remove { m_OpenUIFormFailureEventHandler -= value; }
         }
 
-        /*
         /// <summary>
         /// 打开界面更新事件。
         /// </summary>
@@ -82,7 +81,7 @@ namespace GameFrameX.UI.Runtime
         {
             add { m_OpenUIFormDependencyAssetEventHandler += value; }
             remove { m_OpenUIFormDependencyAssetEventHandler -= value; }
-        }*/
+        }
 
 
         /// <summary>
@@ -122,6 +121,64 @@ namespace GameFrameX.UI.Runtime
         /// <param name="isFullScreen">是否全屏</param>
         /// <returns>界面的实例。</returns>
         protected abstract Task<IUIForm> InnerOpenUIFormAsync(string uiFormAssetPath, Type uiFormType, bool pauseCoveredUIForm, object userData, bool isFullScreen = false);
+
+        /// <summary>
+        /// 触发打开界面更新事件。
+        /// </summary>
+        /// <param name="serialId">界面序列编号。</param>
+        /// <param name="uiFormAssetName">界面资源名称。</param>
+        /// <param name="uiGroupName">界面组名称。</param>
+        /// <param name="pauseCoveredUIForm">是否暂停被覆盖的界面。</param>
+        /// <param name="progress">打开进度。</param>
+        /// <param name="userData">用户自定义数据。</param>
+        protected void FireOpenUIFormUpdate(int serialId, string uiFormAssetName, string uiGroupName, bool pauseCoveredUIForm, float progress, object userData)
+        {
+            if (m_OpenUIFormUpdateEventHandler == null)
+            {
+                return;
+            }
+
+            OpenUIFormUpdateEventArgs eventArgs = OpenUIFormUpdateEventArgs.Create(serialId, uiFormAssetName, uiGroupName, pauseCoveredUIForm, progress, userData);
+            m_OpenUIFormUpdateEventHandler(this, eventArgs);
+        }
+
+        /// <summary>
+        /// 触发打开界面依赖资源加载事件。
+        /// </summary>
+        /// <param name="serialId">界面序列编号。</param>
+        /// <param name="uiFormAssetName">界面资源名称。</param>
+        /// <param name="uiGroupName">界面组名称。</param>
+        /// <param name="pauseCoveredUIForm">是否暂停被覆盖的界面。</param>
+        /// <param name="dependencyAssetName">依赖资源名称。</param>
+        /// <param name="loadedCount">已加载数量。</param>
+        /// <param name="totalCount">总数量。</param>
+        /// <param name="userData">用户自定义数据。</param>
+        protected void FireOpenUIFormDependencyAsset(
+            int serialId,
+            string uiFormAssetName,
+            string uiGroupName,
+            bool pauseCoveredUIForm,
+            string dependencyAssetName,
+            int loadedCount,
+            int totalCount,
+            object userData)
+        {
+            if (m_OpenUIFormDependencyAssetEventHandler == null)
+            {
+                return;
+            }
+
+            OpenUIFormDependencyAssetEventArgs eventArgs = OpenUIFormDependencyAssetEventArgs.Create(
+                serialId,
+                uiFormAssetName,
+                uiGroupName,
+                pauseCoveredUIForm,
+                dependencyAssetName,
+                loadedCount,
+                totalCount,
+                userData);
+            m_OpenUIFormDependencyAssetEventHandler(this, eventArgs);
+        }
 
         /// <summary>
         /// 激活界面。
