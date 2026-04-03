@@ -80,7 +80,7 @@ public partial class HelperTypeEditorProperty : EditorProperty
     /// </remarks>
     /// <param name="propertyName">要编辑的属性名称 / The property name to edit</param>
     /// <param name="helperInterfaceType">Helper 接口类型，用于查找所有实现类型 / The Helper interface type to find all implementations</param>
-    public HelperTypeEditorProperty(string propertyName, System.Type helperInterfaceType, Variant.Type propertyType)
+    public HelperTypeEditorProperty(string propertyName, System.Type helperInterfaceType, Variant.Type propertyType, string tooltipText = null)
     {
         m_PropertyName = propertyName;
         m_PropertyType = propertyType;
@@ -90,6 +90,7 @@ public partial class HelperTypeEditorProperty : EditorProperty
         m_OptionButton.ItemSelected += OnItemSelected;
         AddChild(m_OptionButton);
         AddFocusable(m_OptionButton);
+        SetTooltipText(string.IsNullOrWhiteSpace(tooltipText) ? BuildDefaultTooltip(helperInterfaceType) : tooltipText);
         RefreshItems();
     }
 
@@ -154,6 +155,20 @@ public partial class HelperTypeEditorProperty : EditorProperty
         {
             m_OptionButton.AddItem(m_TypeNames[i]);
         }
+
+        // 统一让属性容器与下拉控件显示同一份提示文本，避免悬停时出现“无可用描述”。
+        m_OptionButton.TooltipText = TooltipText;
+    }
+
+    /// <summary>
+    /// 构建默认提示文本。
+    /// </summary>
+    /// <param name="helperInterfaceType">Helper 接口类型。</param>
+    /// <returns>用于 Inspector 悬停显示的提示文本。</returns>
+    private string BuildDefaultTooltip(System.Type helperInterfaceType)
+    {
+        var interfaceName = helperInterfaceType?.Name ?? "UnknownHelper";
+        return $"用于为属性 {m_PropertyName} 选择 {interfaceName} 的具体实现类型。";
     }
 
     /// <summary>

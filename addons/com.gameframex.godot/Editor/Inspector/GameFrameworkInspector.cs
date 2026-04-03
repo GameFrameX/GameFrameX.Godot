@@ -1,4 +1,4 @@
-﻿#if TOOLS
+#if TOOLS
 using System;
 using System.Collections.Generic;
 using Godot;
@@ -110,7 +110,7 @@ namespace GameFrameX.Editor
                 return false;
             }
 
-            AddPropertyEditor(name, new HelperTypeEditorProperty(name, helperInterfaceType, type));
+            AddPropertyEditor(name, new HelperTypeEditorProperty(name, helperInterfaceType, type, BuildHelperPropertyTooltip(name, helperInterfaceType)));
             return true;
         }
 
@@ -147,6 +147,18 @@ namespace GameFrameX.Editor
             }
 
             return count == 0 ? string.Empty : new string(buffer, 0, count);
+        }
+
+        /// <summary>
+        /// 构建 Helper 属性提示文本。
+        /// </summary>
+        /// <param name="propertyName">属性名称。</param>
+        /// <param name="helperInterfaceType">Helper 接口类型。</param>
+        /// <returns>属性提示文本。</returns>
+        private static string BuildHelperPropertyTooltip(string propertyName, System.Type helperInterfaceType)
+        {
+            var interfaceName = helperInterfaceType?.Name ?? "UnknownHelper";
+            return $"用于为属性 {propertyName} 选择 {interfaceName} 的具体实现类型。";
         }
 
         protected abstract System.Type GetComponentType();
