@@ -30,6 +30,7 @@
 // ==========================================================================================
 
 #if TOOLS
+using System.Collections.Generic;
 using GameFrameX.Editor;
 using GameFrameX.Setting.Runtime;
 using Godot;
@@ -78,6 +79,16 @@ namespace GameFrameX.Setting.Editor
         protected override Type GetManagerType()
         {
             return typeof(ISettingManager);
+        }
+
+        public override Dictionary<string, Type> GetHelperPropertyTypeMap()
+        {
+            return new Dictionary<string, Type>(System.StringComparer.OrdinalIgnoreCase)
+            {
+                { "componentType", GetManagerType() },
+                { "mSettingHelperTypeName", typeof(SettingHelperBase) },
+                { "SettingHelperTypeName", typeof(SettingHelperBase) },
+            };
         }
     }
 }

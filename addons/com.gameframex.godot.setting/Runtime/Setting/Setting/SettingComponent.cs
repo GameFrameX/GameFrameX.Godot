@@ -47,7 +47,6 @@ namespace GameFrameX.Setting.Runtime
         [Export] private string m_SettingHelperTypeName = "GameFrameX.Setting.Runtime.DefaultSettingHelper";
 
         private ISettingManager m_SettingManager = null;
-        [Export] private SettingHelperBase m_CustomSettingHelper = null;
 
         /// <summary>
         /// 获取游戏配置项数量。
@@ -69,7 +68,7 @@ namespace GameFrameX.Setting.Runtime
                 return;
             }
 
-            ISettingHelper settingHelper = Helper.CreateHelper(this, m_SettingHelperTypeName, m_CustomSettingHelper, 0);
+            ISettingHelper settingHelper = Helper.CreateHelper<SettingHelperBase>(this, m_SettingHelperTypeName, null, 0);
             if (settingHelper == null)
             {
                 Log.Fatal("Setting helper is invalid.");
