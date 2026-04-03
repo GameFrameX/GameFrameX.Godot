@@ -60,8 +60,6 @@ namespace GameFrameX.Localization.Runtime
 
         [Export] private string m_LocalizationHelperTypeName = "GameFrameX.Localization.Runtime.DefaultLocalizationHelper";
 
-        [Export] private LocalizationHelperBase m_CustomLocalizationHelper = null;
-
 
         /// <summary>
         /// 获取或设置编辑器语言（仅编辑器内有效）。
@@ -199,7 +197,7 @@ namespace GameFrameX.Localization.Runtime
             }
 
 
-            LocalizationHelperBase localizationHelper = Helper.CreateHelper(m_LocalizationHelperTypeName, m_CustomLocalizationHelper);
+            LocalizationHelperBase localizationHelper = Helper.CreateHelper<LocalizationHelperBase>(m_LocalizationHelperTypeName, null);
             if (localizationHelper == null)
             {
                 Log.Error("Can not create localization helper.");

@@ -30,6 +30,7 @@
 // ==========================================================================================
 
 #if TOOLS
+using System.Collections.Generic;
 using GameFrameX.Editor;
 using GameFrameX.Localization.Runtime;
 using Godot;
@@ -77,6 +78,16 @@ namespace GameFrameX.Localization.Editor
         protected override System.Type GetManagerType()
         {
             return typeof(ILocalizationManager);
+        }
+
+        public override Dictionary<string, System.Type> GetHelperPropertyTypeMap()
+        {
+            return new Dictionary<string, System.Type>(System.StringComparer.OrdinalIgnoreCase)
+            {
+                { "componentType", GetManagerType() },
+                { "mLocalizationHelperTypeName", typeof(LocalizationHelperBase) },
+                { "LocalizationHelperTypeName", typeof(LocalizationHelperBase) },
+            };
         }
     }
 }
