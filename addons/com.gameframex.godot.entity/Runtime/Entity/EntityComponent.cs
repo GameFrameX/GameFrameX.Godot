@@ -58,11 +58,7 @@ namespace GameFrameX.Entity.Runtime
 
         [Export] private string m_EntityHelperTypeName = "GameFrameX.Entity.Runtime.DefaultEntityHelper";
 
-        [Export] private EntityHelperBase m_CustomEntityHelper = null;
-
         [Export] private string m_EntityGroupHelperTypeName = "GameFrameX.Entity.Runtime.DefaultEntityGroupHelper";
-
-        [Export] private EntityGroupHelperBase m_CustomEntityGroupHelper = null;
 
         private EntityGroup[] m_EntityGroups = null;
 
@@ -143,7 +139,7 @@ namespace GameFrameX.Entity.Runtime
 
             m_EntityManager.SetObjectPoolManager(GameFrameworkEntry.GetModule<IObjectPoolManager>());
 
-            EntityHelperBase entityHelper = Helper.CreateHelper(m_EntityHelperTypeName, m_CustomEntityHelper);
+            EntityHelperBase entityHelper = Helper.CreateHelper<EntityHelperBase>(m_EntityHelperTypeName, null);
             if (entityHelper == null)
             {
                 Log.Error("Can not create entity helper.");
@@ -246,7 +242,7 @@ namespace GameFrameX.Entity.Runtime
                 return false;
             }
 
-            EntityGroupHelperBase entityGroupHelper = Helper.CreateHelper(m_EntityGroupHelperTypeName, m_CustomEntityGroupHelper, EntityGroupCount);
+            EntityGroupHelperBase entityGroupHelper = Helper.CreateHelper<EntityGroupHelperBase>(m_EntityGroupHelperTypeName, null, EntityGroupCount);
             if (entityGroupHelper == null)
             {
                 Log.Error("Can not create entity group helper.");

@@ -30,6 +30,7 @@
 // ==========================================================================================
 
 #if TOOLS
+using System.Collections.Generic;
 using GameFrameX.Editor;
 using GameFrameX.Entity.Runtime;
 using Godot;
@@ -50,6 +51,18 @@ namespace GameFrameX.Entity.Editor
         protected override System.Type GetManagerType()
         {
             return typeof(IEntityManager);
+        }
+
+        public override Dictionary<string, System.Type> GetHelperPropertyTypeMap()
+        {
+            return new Dictionary<string, System.Type>(System.StringComparer.OrdinalIgnoreCase)
+            {
+                { "componentType", GetManagerType() },
+                { "mEntityHelperTypeName", typeof(EntityHelperBase) },
+                { "EntityHelperTypeName", typeof(EntityHelperBase) },
+                { "mEntityGroupHelperTypeName", typeof(EntityGroupHelperBase) },
+                { "EntityGroupHelperTypeName", typeof(EntityGroupHelperBase) },
+            };
         }
         // public override void _ParseBegin(GodotObject @object)
         // {
