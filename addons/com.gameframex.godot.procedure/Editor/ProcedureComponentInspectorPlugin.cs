@@ -115,6 +115,27 @@ namespace GameFrameX.Procedure.Editor
             return count == 0 ? string.Empty : new string(buffer, 0, count);
         }
 
+        /// <summary>
+        /// 将完整类型名转换为仅类名，用于 Inspector 展示。
+        /// </summary>
+        /// <param name="fullTypeName">完整类型名。</param>
+        /// <returns>类名。</returns>
+        private static string GetDisplayTypeName(string fullTypeName)
+        {
+            if (string.IsNullOrEmpty(fullTypeName))
+            {
+                return string.Empty;
+            }
+
+            var lastDot = fullTypeName.LastIndexOf('.');
+            if (lastDot < 0 || lastDot >= fullTypeName.Length - 1)
+            {
+                return fullTypeName;
+            }
+
+            return fullTypeName.Substring(lastDot + 1);
+        }
+
         private sealed partial class ProcedureMultiSelectEditorProperty : EditorProperty
         {
             private readonly string m_PropertyName;
@@ -142,7 +163,8 @@ namespace GameFrameX.Procedure.Editor
                 foreach (var fullName in m_AllProcedureTypeNames)
                 {
                     var cb = new CheckBox();
-                    cb.Text = fullName;
+                    cb.Text = GetDisplayTypeName(fullName);
+                    cb.TooltipText = fullName;
                     cb.Toggled += OnToggled;
                     m_Checks[fullName] = cb;
                     m_Root.AddChild(cb);
@@ -275,8 +297,7 @@ namespace GameFrameX.Procedure.Editor
 
             private void OnItemSelected(long index)
             {
-                var text = m_OptionButton.GetItemText((int)index);
-                var selectedTypeName = string.Equals(text, NoneOptionName, StringComparison.Ordinal) ? string.Empty : text;
+                var selectedTypeName = m_OptionButton.GetItemMetadata((int)index).AsString();
                 EmitChanged(m_PropertyName, selectedTypeName);
             }
 
@@ -292,9 +313,12 @@ namespace GameFrameX.Procedure.Editor
 
                 m_OptionButton.Clear();
                 m_OptionButton.AddItem(NoneOptionName);
+                m_OptionButton.SetItemMetadata(0, string.Empty);
                 foreach (var name in available.OrderBy(n => n, StringComparer.Ordinal))
                 {
-                    m_OptionButton.AddItem(name);
+                    m_OptionButton.AddItem(GetDisplayTypeName(name));
+                    var index = m_OptionButton.ItemCount - 1;
+                    m_OptionButton.SetItemMetadata(index, name);
                 }
 
                 var hasAvailable = available.Length > 0;
@@ -311,7 +335,8 @@ namespace GameFrameX.Procedure.Editor
 
                 for (var i = 0; i < m_OptionButton.ItemCount; i++)
                 {
-                    if (string.Equals(m_OptionButton.GetItemText(i), typeName, StringComparison.Ordinal))
+                    var metadataTypeName = m_OptionButton.GetItemMetadata(i).AsString();
+                    if (string.Equals(metadataTypeName, typeName, StringComparison.Ordinal))
                     {
                         return i;
                     }
