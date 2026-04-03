@@ -30,8 +30,6 @@ namespace GameFrameX.Download.Runtime
 
         [Export] private string m_DownloadAgentHelperTypeName = "GameFrameX.Download.Runtime.UnityWebRequestDownloadAgentHelper";
 
-        [Export] private DownloadAgentHelperBase m_CustomDownloadAgentHelper = null;
-
         [Export] private int m_DownloadAgentHelperCount = 3;
 
         [Export] private float m_Timeout = 30f;
@@ -393,7 +391,7 @@ namespace GameFrameX.Download.Runtime
         /// <param name="index">下载代理辅助器索引。</param>
         private void AddDownloadAgentHelper(int index)
         {
-            DownloadAgentHelperBase downloadAgentHelper = Helper.CreateHelper(m_DownloadAgentHelperTypeName, m_CustomDownloadAgentHelper, index);
+            DownloadAgentHelperBase downloadAgentHelper = Helper.CreateHelper<DownloadAgentHelperBase>(m_DownloadAgentHelperTypeName, null, index);
             if (downloadAgentHelper == null)
             {
                 Log.Error("Can not create download agent helper.");

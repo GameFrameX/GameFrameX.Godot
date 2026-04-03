@@ -30,6 +30,7 @@
 // ==========================================================================================
 
 #if TOOLS
+using System.Collections.Generic;
 using GameFrameX.Download.Runtime;
 using GameFrameX.Editor;
 using Godot;
@@ -81,6 +82,16 @@ namespace GameFrameX.Download.Editor
         protected override Type GetManagerType()
         {
             return typeof(IDownloadManager);
+        }
+
+        public override Dictionary<string, Type> GetHelperPropertyTypeMap()
+        {
+            return new Dictionary<string, Type>(System.StringComparer.OrdinalIgnoreCase)
+            {
+                { "componentType", GetManagerType() },
+                { "mDownloadAgentHelperTypeName", typeof(DownloadAgentHelperBase) },
+                { "DownloadAgentHelperTypeName", typeof(DownloadAgentHelperBase) },
+            };
         }
     }
 }
