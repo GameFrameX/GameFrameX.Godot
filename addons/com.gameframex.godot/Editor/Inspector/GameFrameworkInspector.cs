@@ -110,7 +110,7 @@ namespace GameFrameX.Editor
                 return false;
             }
 
-            AddPropertyEditor(name, new HelperTypeEditorProperty(name, helperInterfaceType));
+            AddPropertyEditor(name, new HelperTypeEditorProperty(name, helperInterfaceType, type));
             return true;
         }
 

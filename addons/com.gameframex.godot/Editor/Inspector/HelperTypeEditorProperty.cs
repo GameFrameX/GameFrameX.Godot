@@ -70,6 +70,7 @@ public partial class HelperTypeEditorProperty : EditorProperty
     /// Array of selectable type names, including "&lt;None&gt;" and all implementation types.
     /// </remarks>
     private readonly string[] m_TypeNames;
+    private readonly Variant.Type m_PropertyType;
 
     /// <summary>
     /// 初始化 HelperTypeEditorProperty 的新实例。
@@ -79,9 +80,10 @@ public partial class HelperTypeEditorProperty : EditorProperty
     /// </remarks>
     /// <param name="propertyName">要编辑的属性名称 / The property name to edit</param>
     /// <param name="helperInterfaceType">Helper 接口类型，用于查找所有实现类型 / The Helper interface type to find all implementations</param>
-    public HelperTypeEditorProperty(string propertyName, System.Type helperInterfaceType)
+    public HelperTypeEditorProperty(string propertyName, System.Type helperInterfaceType, Variant.Type propertyType)
     {
         m_PropertyName = propertyName;
+        m_PropertyType = propertyType;
         m_TypeNames = BuildTypeNames(helperInterfaceType);
         m_OptionButton = new OptionButton();
         m_OptionButton.SizeFlagsHorizontal = SizeFlags.ExpandFill;
@@ -99,7 +101,17 @@ public partial class HelperTypeEditorProperty : EditorProperty
     /// </remarks>
     public override void _UpdateProperty()
     {
-        string selectedTypeName = GetEditedObject().Get(m_PropertyName).AsString();
+        string selectedTypeName = string.Empty;
+        Variant currentValue = GetEditedObject().Get(m_PropertyName);
+        if (m_PropertyType == Variant.Type.Object && currentValue.Obj is GodotObject helperObject)
+        {
+            selectedTypeName = helperObject.GetType().FullName ?? string.Empty;
+        }
+        else
+        {
+            selectedTypeName = currentValue.AsString();
+        }
+
         int selectedIndex = Array.IndexOf(m_TypeNames, selectedTypeName);
         if (selectedIndex < 0)
         {
@@ -153,6 +165,26 @@ public partial class HelperTypeEditorProperty : EditorProperty
     /// <param name="index">选中的项索引 / The index of the selected item</param>
     private void OnItemSelected(long index)
     {
+        if (m_PropertyType == Variant.Type.Object)
+        {
+            if (index <= 0)
+            {
+                EmitChanged(m_PropertyName, (GodotObject)null);
+                return;
+            }
+
+            System.Type helperType = Utility.Assembly.GetType(m_TypeNames[index]);
+            if (helperType == null || !typeof(GodotObject).IsAssignableFrom(helperType))
+            {
+                EmitChanged(m_PropertyName, (GodotObject)null);
+                return;
+            }
+
+            GodotObject helperObject = Activator.CreateInstance(helperType) as GodotObject;
+            EmitChanged(m_PropertyName, helperObject);
+            return;
+        }
+
         string selectedTypeName = index <= 0 ? string.Empty : m_TypeNames[index];
         EmitChanged(m_PropertyName, selectedTypeName);
     }
