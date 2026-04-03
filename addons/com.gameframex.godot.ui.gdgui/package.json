@@ -1,0 +1,21 @@
+{
+  "name": "com.gameframex.godot.ui.gdgui",
+  "version": "1.0.0",
+  "displayName": "GameFrameX UI GDGUI",
+  "description": "GameFrameX UI GDGUI adapter for Godot",
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.ui": "2.7.0"
+  },
+  "keywords": [
+    "gameframex",
+    "godot",
+    "ui",
+    "gdgui"
+  ],
+  "author": {
+    "name": "GameFrameX",
+    "email": "gameframex@example.com",
+    "url": "https://github.com/GameFrameX"
+  }
+}

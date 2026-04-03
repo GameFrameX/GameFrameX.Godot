@@ -1,0 +1,60 @@
+using GameFrameX.UI.Runtime;
+using Godot;
+
+namespace GameFrameX.UI.GDGUI.Runtime
+{
+    /// <summary>
+    /// GDGUI 界面组辅助器。
+    /// </summary>
+    public partial class UGUIUIGroupHelper : UIGroupHelperBase
+    {
+        private int m_Depth;
+
+        /// <summary>
+        /// 获取界面组深度。
+        /// </summary>
+        public override int Depth
+        {
+            get { return m_Depth; }
+            protected set { m_Depth = value; }
+        }
+
+        /// <summary>
+        /// 设置界面组深度。
+        /// </summary>
+        /// <param name="depth">界面组深度。</param>
+        public override void SetDepth(int depth)
+        {
+            m_Depth = depth;
+        }
+
+        /// <summary>
+        /// 创建并挂载界面组辅助器。
+        /// </summary>
+        /// <param name="root">UI 根节点。</param>
+        /// <param name="groupName">界面组名称。</param>
+        /// <param name="uiGroupHelperTypeName">界面组辅助器类型名。</param>
+        /// <param name="customUIGroupHelper">自定义界面组辅助器。</param>
+        /// <param name="depth">界面组深度。</param>
+        /// <returns>界面组辅助器实例。</returns>
+        public override IUIGroupHelper Handler(Node root, string groupName, string uiGroupHelperTypeName, IUIGroupHelper customUIGroupHelper, int depth = 0)
+        {
+            if (root == null)
+            {
+                return null;
+            }
+
+            var container = new Control
+            {
+                Name = groupName
+            };
+            container.MakeFullScreen();
+            root.AddChild(container);
+
+            Name = "UIGroupHelper";
+            container.AddChild(this);
+            SetDepth(depth);
+            return this;
+        }
+    }
+}
