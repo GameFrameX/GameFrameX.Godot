@@ -1,18 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Godot.NET.Sdk/4.5.1">
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
-        <EnableDynamicLoading>true</EnableDynamicLoading>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="SharpZipLib" Version="1.4.2"/>
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Remove="com.gameframex.godot/Editor/**/*.cs"/>
-        <Compile Remove="com.gameframex.godot.asset/Runtime/Asset/AssetComponent.cs"/>
-        <Compile Remove="com.gameframex.godot.asset/Tests/**/*.cs"/>
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <NoWarn>$(NoWarn);CS8981</NoWarn>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DefineConstants>ENABLE_LOG</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- 排除所有 Editor 目录 -->
+    <!-- <Compile Remove="addons/com.gameframex.godot/Editor/**/*.cs"/> -->
+    <Compile Remove="addons/com.gameframex.godot.asset/Editor/**/*.cs" />
+    <Compile Remove="addons/com.gameframex.godot.assetsystem/Editor/**/*.cs" />
+    <!-- 排除所有 Tests 目录 -->
+    <Compile Remove="addons/com.gameframex.godot.asset/Tests/**/*.cs" />
+    <Compile Remove="tests/**/*.cs" />
+    <!-- 排除有问题的文件 -->
+    <Compile Remove="AssetSystemVerification.cs" />
+    <Compile Remove="addons/com.gameframex.godot.asset/Runtime/Compatibility/**/*.cs" />
+    <Compile Remove="addons/com.gameframex.godot.assetsystem/Runtime/Compatibility/**/*.cs" />
+    <Compile Remove="addons/com.gameframex.godot.google.protobuf/Runtime/Compatibility/**/*.cs" />
+    <!-- 排除整个 assetsystem 包（Unity 特定，174/292 文件使用 UnityEngine）-->
+    <Compile Remove="addons/com.gameframex.godot.assetsystem/**/*.cs" />
+    <!-- 排除 asset 包中的 Unity 特定代码 -->
+    <Compile Remove="addons/com.gameframex.godot.asset/Runtime/Asset/**/*.cs" />
+    <Compile Remove="addons/com.gameframex.godot.asset/Runtime/GameFrameXAssetCroppingHelper.cs" />
+    <Compile Remove="addons/com.gameframex.godot.asset/Runtime/GameFrameXAssetCroppingHelper.cs" />
+    <!-- 排除 yooasset_assetsystem 包（依赖 YooAsset） -->
+    <Compile Remove="addons/yooasset_assetsystem/**/*.cs" />
+    <!-- 排除旧目录（如果存在）-->
+    <Compile Remove="com.gameframex.godot/Editor/**/*.cs" />
+    <Compile Remove="com.gameframex.godot.asset/Tests/**/*.cs" />
+    <Compile Remove="com.gameframex.godot.asset/Runtime/Asset/AssetComponent.cs" />
+  </ItemGroup>
 </Project>
