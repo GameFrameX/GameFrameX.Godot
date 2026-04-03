@@ -34,6 +34,9 @@ using GameFrameX.Editor;
 using GameFrameX.Procedure.Runtime;
 using Godot;
 using Type = System.Type;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GameFrameX.Procedure.Editor
 {
@@ -53,33 +56,239 @@ namespace GameFrameX.Procedure.Editor
             return typeof(IProcedureManager);
         }
 
-        // public override void _ParseBegin(GodotObject @object)
-        // {
-        //     if (!(@object is ProcedureComponent procedureComponent))
-        //     {
-        //         return;
-        //     }
-        //
-        //     var infoLabel = new Label();
-        //     infoLabel.Text = "Procedure Component - Runtime Info";
-        //     infoLabel.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
-        //     AddCustomControl(infoLabel);
-        //
-        //     if (!Engine.IsEditorHint())
-        //     {
-        //         var currentProcedure = procedureComponent.CurrentProcedure;
-        //         var runtimeInfo = new Label();
-        //         runtimeInfo.Text = $"Current Procedure: {(currentProcedure != null ? currentProcedure.GetType().Name : "None")}";
-        //         AddCustomControl(runtimeInfo);
-        //     }
-        //     else
-        //     {
-        //         var hintLabel = new Label();
-        //         hintLabel.Text = "Available during runtime only.";
-        //         hintLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.6f));
-        //         AddCustomControl(hintLabel);
-        //     }
-        // }
+        public override bool _ParseProperty(GodotObject @object, Variant.Type type, string name, PropertyHint hintType, string hintString, PropertyUsageFlags usageFlags, bool wide)
+        {
+            var normalized = NormalizeLower(name);
+            if (normalized is "mavailableproceduretypenames" or "availableproceduretypenames" ||
+                normalized.Contains("availableproceduretypenames", StringComparison.Ordinal))
+            {
+                AddPropertyEditor(name, new ProcedureMultiSelectEditorProperty(name));
+                return true;
+            }
+
+            var isEntranceProperty =
+                normalized is "mentranceproceduretypename" or "entranceproceduretypename" ||
+                normalized.Contains("entranceproceduretypename", StringComparison.Ordinal) ||
+                (normalized.Contains("entrance", StringComparison.Ordinal) &&
+                 normalized.Contains("procedure", StringComparison.Ordinal) &&
+                 normalized.Contains("type", StringComparison.Ordinal));
+            if (isEntranceProperty)
+            {
+                AddPropertyEditor(name, new EntranceProcedureDropdownEditorProperty(name));
+                return true;
+            }
+
+            return base._ParseProperty(@object, type, name, hintType, hintString, usageFlags, wide);
+        }
+
+        private static string NormalizeLower(string propertyName)
+        {
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                return string.Empty;
+            }
+
+            var buffer = new char[propertyName.Length];
+            var count = 0;
+            foreach (var c in propertyName)
+            {
+                if (char.IsLetterOrDigit(c))
+                {
+                    buffer[count++] = char.ToLowerInvariant(c);
+                }
+            }
+
+            return count == 0 ? string.Empty : new string(buffer, 0, count);
+        }
+
+        private sealed partial class ProcedureMultiSelectEditorProperty : EditorProperty
+        {
+            private readonly string m_PropertyName;
+            private readonly VBoxContainer m_Root;
+            private readonly Dictionary<string, CheckBox> m_Checks = new Dictionary<string, CheckBox>(StringComparer.Ordinal);
+            private readonly string[] m_AllProcedureTypeNames;
+            private readonly Label m_EmptyHintLabel;
+
+            /// <summary>
+            /// 初始化多选流程列表编辑器
+            /// </summary>
+            public ProcedureMultiSelectEditorProperty(string propertyName)
+            {
+                m_PropertyName = propertyName;
+                m_AllProcedureTypeNames = BuildAllProcedures();
+
+                m_Root = new VBoxContainer();
+                var title = new Label();
+                title.Text = "Available Procedures";
+                title.AddThemeColorOverride("font_color", new Color(0.8f, 0.8f, 0.8f));
+                m_Root.AddChild(title);
+
+                foreach (var fullName in m_AllProcedureTypeNames)
+                {
+                    var cb = new CheckBox();
+                    cb.Text = fullName;
+                    cb.Toggled += OnToggled;
+                    m_Checks[fullName] = cb;
+                    m_Root.AddChild(cb);
+                }
+
+                m_EmptyHintLabel = new Label();
+                m_EmptyHintLabel.Text = "There is no available procedure.";
+                m_EmptyHintLabel.AddThemeColorOverride("font_color", new Color(0.9f, 0.7f, 0.2f));
+                m_EmptyHintLabel.Visible = m_AllProcedureTypeNames.Length == 0;
+                m_Root.AddChild(m_EmptyHintLabel);
+
+                AddChild(m_Root);
+            }
+
+            public override void _UpdateProperty()
+            {
+                var selected = GetCurrentSelected();
+                foreach (var pair in m_Checks)
+                {
+                    var should = selected.Contains(pair.Key);
+                    if (pair.Value.ButtonPressed != should)
+                    {
+                        pair.Value.SetPressedNoSignal(should);
+                    }
+                }
+            }
+
+            private void OnToggled(bool _pressed)
+            {
+                var selected = new List<string>();
+                foreach (var pair in m_Checks)
+                {
+                    if (pair.Value.ButtonPressed)
+                    {
+                        selected.Add(pair.Key);
+                    }
+                }
+
+                selected.Sort(StringComparer.Ordinal);
+                EmitChanged(m_PropertyName, selected.ToArray());
+
+                // 如果入口流程不在已选列表中, 自动回退
+                var entrance = GetEditedObject().Get("m_EntranceProcedureTypeName").AsString();
+                if (!string.IsNullOrEmpty(entrance) && !selected.Contains(entrance))
+                {
+                    var fallback = selected.Count > 0 ? selected[0] : string.Empty;
+                    EmitChanged("m_EntranceProcedureTypeName", fallback);
+                }
+            }
+
+            private static string[] BuildAllProcedures()
+            {
+                var names = GameFrameX.Runtime.Utility.Assembly.GetRuntimeTypeNames(typeof(ProcedureBase));
+                names.Sort(StringComparer.Ordinal);
+                return names.ToArray();
+            }
+
+            private HashSet<string> GetCurrentSelected()
+            {
+                var array = GetEditedObject().Get(m_PropertyName).AsStringArray();
+                return array != null ? new HashSet<string>(array, StringComparer.Ordinal) : new HashSet<string>(StringComparer.Ordinal);
+            }
+        }
+
+        private sealed partial class EntranceProcedureDropdownEditorProperty : EditorProperty
+        {
+            private const string NoneOptionName = "<None>";
+            private readonly string m_PropertyName;
+            private readonly OptionButton m_OptionButton;
+            private readonly Label m_EmptyHintLabel;
+
+            /// <summary>
+            /// 初始化入口流程下拉编辑器
+            /// </summary>
+            public EntranceProcedureDropdownEditorProperty(string propertyName)
+            {
+                m_PropertyName = propertyName;
+
+                var root = new VBoxContainer();
+                var container = new HBoxContainer();
+                var label = new Label();
+                label.Text = "Entrance Procedure";
+                label.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                container.AddChild(label);
+
+                m_OptionButton = new OptionButton();
+                m_OptionButton.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                m_OptionButton.ItemSelected += OnItemSelected;
+                container.AddChild(m_OptionButton);
+
+                root.AddChild(container);
+
+                m_EmptyHintLabel = new Label();
+                m_EmptyHintLabel.Text = "Select available procedures first.";
+                m_EmptyHintLabel.AddThemeColorOverride("font_color", new Color(0.9f, 0.7f, 0.2f));
+                root.AddChild(m_EmptyHintLabel);
+
+                AddChild(root);
+                AddFocusable(m_OptionButton);
+                RefreshItems();
+            }
+
+            public override void _UpdateProperty()
+            {
+                RefreshItems();
+                var selectedTypeName = GetEditedObject().Get(m_PropertyName).AsString();
+                var idx = IndexOfItem(selectedTypeName);
+                if (idx < 0)
+                {
+                    idx = 0;
+                }
+                if (m_OptionButton.Selected != idx)
+                {
+                    m_OptionButton.Select(idx);
+                }
+            }
+
+            private void OnItemSelected(long index)
+            {
+                var text = m_OptionButton.GetItemText((int)index);
+                var selectedTypeName = string.Equals(text, NoneOptionName, StringComparison.Ordinal) ? string.Empty : text;
+                EmitChanged(m_PropertyName, selectedTypeName);
+            }
+
+            private void RefreshItems()
+            {
+                var editedObject = GetEditedObject();
+                var available = Array.Empty<string>();
+                if (editedObject != null)
+                {
+                    available = editedObject.Get("m_AvailableProcedureTypeNames").AsStringArray() ?? Array.Empty<string>();
+                }
+
+                m_OptionButton.Clear();
+                m_OptionButton.AddItem(NoneOptionName);
+                foreach (var name in available.OrderBy(n => n, StringComparer.Ordinal))
+                {
+                    m_OptionButton.AddItem(name);
+                }
+
+                var hasAvailable = available.Length > 0;
+                m_OptionButton.Disabled = !hasAvailable;
+                m_EmptyHintLabel.Visible = !hasAvailable;
+            }
+
+            private int IndexOfItem(string typeName)
+            {
+                if (string.IsNullOrEmpty(typeName))
+                {
+                    return 0;
+                }
+
+                for (var i = 0; i < m_OptionButton.ItemCount; i++)
+                {
+                    if (string.Equals(m_OptionButton.GetItemText(i), typeName, StringComparison.Ordinal))
+                    {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+        }
     }
 }
 #endif

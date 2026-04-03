@@ -32,6 +32,7 @@
 // ==========================================================================================
 
 using System;
+using System.Collections.Generic;
 using GameFrameX.Fsm.Runtime;
 using GameFrameX.Runtime;
 using Godot;
@@ -96,24 +97,45 @@ namespace GameFrameX.Procedure.Runtime
         /// </summary>
         private void StartProcedureInternal()
         {
-            ProcedureBase[] procedures = new ProcedureBase[m_AvailableProcedureTypeNames.Length];
-            for (int i = 0; i < m_AvailableProcedureTypeNames.Length; i++)
+            var availableProcedureTypeNames = BuildValidProcedureTypeNames();
+            if (availableProcedureTypeNames.Length == 0)
             {
-                Type procedureType = Utility.Assembly.GetType(m_AvailableProcedureTypeNames[i]);
+                Log.Error("Available procedures are empty.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(m_EntranceProcedureTypeName))
+            {
+                Log.Error("Entrance procedure is invalid.");
+                return;
+            }
+
+            if (!Array.Exists(availableProcedureTypeNames, m => string.Equals(m, m_EntranceProcedureTypeName, StringComparison.Ordinal)))
+            {
+                Log.Error("Entrance procedure '{0}' is not in available procedures.", m_EntranceProcedureTypeName);
+                return;
+            }
+
+            m_AvailableProcedureTypeNames = availableProcedureTypeNames;
+            m_EntranceProcedure = null;
+            ProcedureBase[] procedures = new ProcedureBase[availableProcedureTypeNames.Length];
+            for (int i = 0; i < availableProcedureTypeNames.Length; i++)
+            {
+                Type procedureType = Utility.Assembly.GetType(availableProcedureTypeNames[i]);
                 if (procedureType == null)
                 {
-                    Log.Error("Can not find procedure type '{0}'.", m_AvailableProcedureTypeNames[i]);
+                    Log.Error("Can not find procedure type '{0}'.", availableProcedureTypeNames[i]);
                     return;
                 }
 
                 procedures[i] = (ProcedureBase)Activator.CreateInstance(procedureType);
                 if (procedures[i] == null)
                 {
-                    Log.Error("Can not create procedure instance '{0}'.", m_AvailableProcedureTypeNames[i]);
+                    Log.Error("Can not create procedure instance '{0}'.", availableProcedureTypeNames[i]);
                     return;
                 }
 
-                if (m_EntranceProcedureTypeName == m_AvailableProcedureTypeNames[i])
+                if (m_EntranceProcedureTypeName == availableProcedureTypeNames[i])
                 {
                     m_EntranceProcedure = procedures[i];
                 }
@@ -127,6 +149,33 @@ namespace GameFrameX.Procedure.Runtime
 
             m_ProcedureManager.Initialize(GameFrameworkEntry.GetModule<IFsmManager>(), procedures);
             m_ProcedureManager.StartProcedure(m_EntranceProcedure.GetType());
+        }
+
+        private string[] BuildValidProcedureTypeNames()
+        {
+            if (m_AvailableProcedureTypeNames == null || m_AvailableProcedureTypeNames.Length == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            var result = new List<string>(m_AvailableProcedureTypeNames.Length);
+            var deduplicate = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var typeName in m_AvailableProcedureTypeNames)
+            {
+                if (string.IsNullOrWhiteSpace(typeName))
+                {
+                    continue;
+                }
+
+                if (!deduplicate.Add(typeName))
+                {
+                    continue;
+                }
+
+                result.Add(typeName);
+            }
+
+            return result.ToArray();
         }
 
         /// <summary>
