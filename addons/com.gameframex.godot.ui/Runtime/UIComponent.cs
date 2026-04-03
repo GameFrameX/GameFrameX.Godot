@@ -73,11 +73,11 @@ namespace GameFrameX.UI.Runtime
 
         [Export] private NodePath m_UIRootPath;
 
-        [Export] private string m_UIFormHelperTypeName = "GameFrameX.UI.GodotGUI.Runtime.UGUIFormHelper";
+        [Export] private string m_UIFormHelperTypeName = "GameFrameX.UI.GDGUI.Runtime.UGUIFormHelper";
 
         [Export] private UIFormHelperBase m_CustomUIFormHelper = null;
 
-        [Export] private string m_UIGroupHelperTypeName = "GameFrameX.UI.GodotGUI.Runtime.UGUIUIGroupHelper";
+        [Export] private string m_UIGroupHelperTypeName = "GameFrameX.UI.GDGUI.Runtime.UGUIUIGroupHelper";
 
         [Export] private UIGroupHelperBase m_CustomUIGroupHelper = null;
 
@@ -235,10 +235,10 @@ namespace GameFrameX.UI.Runtime
                 return componentType;
             }
 
-            const string godotGuiUIManagerType = "GameFrameX.UI.GodotGUI.Runtime.UIManager";
-            if (Utility.Assembly.GetType(godotGuiUIManagerType) != null)
+            const string gdGuiUIManagerType = "GameFrameX.UI.GDGUI.Runtime.UIManager";
+            if (Utility.Assembly.GetType(gdGuiUIManagerType) != null)
             {
-                return godotGuiUIManagerType;
+                return gdGuiUIManagerType;
             }
 
             return "GameFrameX.UI.Runtime.UIManager";
