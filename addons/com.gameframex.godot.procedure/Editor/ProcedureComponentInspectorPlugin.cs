@@ -46,6 +46,16 @@ namespace GameFrameX.Procedure.Editor
     [Tool]
     public partial class ProcedureComponentInspectorPlugin : ComponentTypeComponentInspector
     {
+        /// <summary>
+        /// 记录当前检查器实例命中的“可用流程”属性名，避免不同命名风格导致读写错位。
+        /// </summary>
+        private string m_AvailablePropertyName = "m_AvailableProcedureTypeNames";
+
+        /// <summary>
+        /// 记录当前检查器实例命中的“入口流程”属性名，确保入口与可用列表始终绑定到同一对象属性。
+        /// </summary>
+        private string m_EntrancePropertyName = "m_EntranceProcedureTypeName";
+
         protected override Type GetComponentType()
         {
             return typeof(ProcedureComponent);
@@ -62,7 +72,9 @@ namespace GameFrameX.Procedure.Editor
             if (normalized is "mavailableproceduretypenames" or "availableproceduretypenames" ||
                 normalized.Contains("availableproceduretypenames", StringComparison.Ordinal))
             {
-                AddPropertyEditor(name, new ProcedureMultiSelectEditorProperty(name));
+                // 命中可用流程字段后，使用自定义多选渲染替代默认数组编辑器。
+                m_AvailablePropertyName = name;
+                AddPropertyEditor(name, new ProcedureMultiSelectEditorProperty(name, m_EntrancePropertyName));
                 return true;
             }
 
@@ -74,7 +86,9 @@ namespace GameFrameX.Procedure.Editor
                  normalized.Contains("type", StringComparison.Ordinal));
             if (isEntranceProperty)
             {
-                AddPropertyEditor(name, new EntranceProcedureDropdownEditorProperty(name));
+                // 命中入口流程字段后，使用下拉渲染并绑定上一步识别到的可用流程字段名。
+                m_EntrancePropertyName = name;
+                AddPropertyEditor(name, new EntranceProcedureDropdownEditorProperty(name, m_AvailablePropertyName));
                 return true;
             }
 
@@ -104,6 +118,7 @@ namespace GameFrameX.Procedure.Editor
         private sealed partial class ProcedureMultiSelectEditorProperty : EditorProperty
         {
             private readonly string m_PropertyName;
+            private readonly string m_EntrancePropertyName;
             private readonly VBoxContainer m_Root;
             private readonly Dictionary<string, CheckBox> m_Checks = new Dictionary<string, CheckBox>(StringComparer.Ordinal);
             private readonly string[] m_AllProcedureTypeNames;
@@ -112,9 +127,10 @@ namespace GameFrameX.Procedure.Editor
             /// <summary>
             /// 初始化多选流程列表编辑器
             /// </summary>
-            public ProcedureMultiSelectEditorProperty(string propertyName)
+            public ProcedureMultiSelectEditorProperty(string propertyName, string entrancePropertyName)
             {
                 m_PropertyName = propertyName;
+                m_EntrancePropertyName = entrancePropertyName;
                 m_AllProcedureTypeNames = BuildAllProcedures();
 
                 m_Root = new VBoxContainer();
@@ -166,14 +182,25 @@ namespace GameFrameX.Procedure.Editor
                 }
 
                 selected.Sort(StringComparer.Ordinal);
-                EmitChanged(m_PropertyName, selected.ToArray());
+                var selectedArray = selected.ToArray();
+                var currentSelected = GetEditedObject().Get(m_PropertyName).AsStringArray() ?? Array.Empty<string>();
+                var isAvailableChanged = !selectedArray.SequenceEqual(currentSelected, StringComparer.Ordinal);
+                if (isAvailableChanged)
+                {
+                    EmitChanged(m_PropertyName, selectedArray);
+                }
 
-                // 如果入口流程不在已选列表中, 自动回退
-                var entrance = GetEditedObject().Get("m_EntranceProcedureTypeName").AsString();
+                var entrance = GetEditedObject().Get(m_EntrancePropertyName).AsString();
+                var nextEntrance = entrance;
                 if (!string.IsNullOrEmpty(entrance) && !selected.Contains(entrance))
                 {
-                    var fallback = selected.Count > 0 ? selected[0] : string.Empty;
-                    EmitChanged("m_EntranceProcedureTypeName", fallback);
+                    nextEntrance = selected.Count > 0 ? selected[0] : string.Empty;
+                }
+
+                // 入口值仅在实际变化时写回，避免无意义的属性写入日志刷屏。
+                if (!string.Equals(entrance, nextEntrance, StringComparison.Ordinal))
+                {
+                    EmitChanged(m_EntrancePropertyName, nextEntrance);
                 }
             }
 
@@ -195,15 +222,17 @@ namespace GameFrameX.Procedure.Editor
         {
             private const string NoneOptionName = "<None>";
             private readonly string m_PropertyName;
+            private readonly string m_AvailablePropertyName;
             private readonly OptionButton m_OptionButton;
             private readonly Label m_EmptyHintLabel;
 
             /// <summary>
             /// 初始化入口流程下拉编辑器
             /// </summary>
-            public EntranceProcedureDropdownEditorProperty(string propertyName)
+            public EntranceProcedureDropdownEditorProperty(string propertyName, string availablePropertyName)
             {
                 m_PropertyName = propertyName;
+                m_AvailablePropertyName = availablePropertyName;
 
                 var root = new VBoxContainer();
                 var container = new HBoxContainer();
@@ -257,7 +286,8 @@ namespace GameFrameX.Procedure.Editor
                 var available = Array.Empty<string>();
                 if (editedObject != null)
                 {
-                    available = editedObject.Get("m_AvailableProcedureTypeNames").AsStringArray() ?? Array.Empty<string>();
+                    // 下拉候选只读取当前绑定的可用流程属性，确保与上方勾选列表完全同源。
+                    available = editedObject.Get(m_AvailablePropertyName).AsStringArray() ?? Array.Empty<string>();
                 }
 
                 m_OptionButton.Clear();
