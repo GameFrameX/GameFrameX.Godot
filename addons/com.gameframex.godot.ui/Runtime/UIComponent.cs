@@ -29,8 +29,8 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
+using System;
 using System.Collections.Generic;
-using GameFrameX.Asset.Runtime;
 using GameFrameX.Event.Runtime;
 using GameFrameX.ObjectPool;
 using GameFrameX.Runtime;
@@ -44,6 +44,8 @@ namespace GameFrameX.UI.Runtime
     public partial class UIComponent : GameFrameworkComponent
     {
         private const int DefaultPriority = 0;
+        private const string GDGUIRootNodeName = "GDGUIRoot";
+        private const string FairyGUIRootNodeName = "FairyGUIRoot";
 
         private IUIManager m_UIManager = null;
         private EventComponent m_EventComponent = null;
@@ -193,17 +195,7 @@ namespace GameFrameX.UI.Runtime
             ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(IUIManager);
             base._Ready();
-
-            if (!string.IsNullOrEmpty(m_UIRootPath) && HasNode(m_UIRootPath))
-            {
-                m_GDGUIRoot = GetNode<Node>(m_UIRootPath);
-            }
-            else
-            {
-                m_GDGUIRoot = new Node();
-                m_GDGUIRoot.Name = "UIRoot";
-                AddChild(m_GDGUIRoot);
-            }
+            InitializeUIRoots();
 
             m_UIManager = GameFrameworkEntry.GetModule<IUIManager>();
             if (m_UIManager == null)
@@ -323,6 +315,90 @@ namespace GameFrameX.UI.Runtime
                     continue;
                 }
             }
+        }
+
+        /// <summary>
+        /// 功能：初始化 GDGUI 与 FairyGUI 根节点，并根据当前 Helper 名称选择主根节点。
+        /// </summary>
+        private void InitializeUIRoots()
+        {
+            Node configuredRoot = null;
+            if (!string.IsNullOrEmpty(m_UIRootPath) && HasNode(m_UIRootPath))
+            {
+                configuredRoot = GetNode<Node>(m_UIRootPath);
+            }
+
+            if (IsFairyGUIRuntime())
+            {
+                m_FairyGUIRoot = configuredRoot ?? FindOrCreateRoot(FairyGUIRootNodeName);
+                m_GDGUIRoot = FindOrCreateRoot(GDGUIRootNodeName);
+                return;
+            }
+
+            m_GDGUIRoot = configuredRoot ?? FindOrCreateRoot(GDGUIRootNodeName);
+            m_FairyGUIRoot = FindOrCreateRoot(FairyGUIRootNodeName);
+        }
+
+        /// <summary>
+        /// 功能：根据 Helper 类型名称判断当前是否为 FairyGUI 运行模式。
+        /// </summary>
+        /// <returns>若命中 FairyGUI 关键字返回 true，否则返回 false。</returns>
+        private bool IsFairyGUIRuntime()
+        {
+            if (ContainsFairyGUIKeyword(m_UIGroupHelperTypeName))
+            {
+                return true;
+            }
+
+            if (ContainsFairyGUIKeyword(m_UIFormHelperTypeName))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 功能：判断类型名称中是否包含 FairyGUI 关键字。
+        /// </summary>
+        /// <param name="typeName">待判断的类型名称。</param>
+        /// <returns>包含 FairyGUI 关键字返回 true，否则返回 false。</returns>
+        private static bool ContainsFairyGUIKeyword(string typeName)
+        {
+            if (string.IsNullOrWhiteSpace(typeName))
+            {
+                return false;
+            }
+
+            return typeName.IndexOf("fairygui", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        /// 功能：获取当前 UI 系统应使用的根节点。
+        /// </summary>
+        /// <returns>当前系统对应的根节点。</returns>
+        private Node GetCurrentUIRoot()
+        {
+            return IsFairyGUIRuntime() ? m_FairyGUIRoot : m_GDGUIRoot;
+        }
+
+        /// <summary>
+        /// 功能：按名称查找或创建根节点。
+        /// </summary>
+        /// <param name="rootNodeName">根节点名称。</param>
+        /// <returns>已存在或新建的根节点。</returns>
+        private Node FindOrCreateRoot(string rootNodeName)
+        {
+            Node rootNode = GetNodeOrNull<Node>(rootNodeName);
+            if (rootNode != null)
+            {
+                return rootNode;
+            }
+
+            rootNode = new Node();
+            rootNode.Name = rootNodeName;
+            AddChild(rootNode);
+            return rootNode;
         }
 
         /// <summary>
