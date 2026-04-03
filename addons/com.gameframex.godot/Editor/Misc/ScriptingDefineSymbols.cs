@@ -1,73 +1,37 @@
-
-#if false // Unity 特定代码，Godot 不支持
-
-﻿// ==========================================================================================
-//  GameFrameX 组织及其衍生项目的版权、商标、专利及其他相关权利
-//  GameFrameX organization and its derivative projects' copyrights, trademarks, patents, and related rights
-//  均受中华人民共和国及相关国际法律法规保护。
-//  are protected by the laws of the People's Republic of China and relevant international regulations.
-// 
-//  使用本项目须严格遵守相应法律法规及开源许可证之规定。
-//  Usage of this project must strictly comply with applicable laws, regulations, and open-source licenses.
-// 
-//  本项目采用 MIT 许可证与 Apache License 2.0 双许可证分发，
-//  This project is dual-licensed under the MIT License and Apache License 2.0,
-//  完整许可证文本请参见源代码根目录下的 LICENSE 文件。
-//  please refer to the LICENSE file in the root directory of the source code for the full license text.
-// 
-//  禁止利用本项目实施任何危害国家安全、破坏社会秩序、
-//  It is prohibited to use this project to engage in any activities that endanger national security, disrupt social order,
-//  侵犯他人合法权益等法律法规所禁止的行为！
-//  or infringe upon the legitimate rights and interests of others, as prohibited by laws and regulations!
-//  因基于本项目二次开发所产生的一切法律纠纷与责任，
-//  Any legal disputes and liabilities arising from secondary development based on this project
-//  本项目组织与贡献者概不承担。
-//  shall be borne solely by the developer; the project organization and contributors assume no responsibility.
-// 
-//  GitHub 仓库：https://github.com/GameFrameX
-//  GitHub Repository: https://github.com/GameFrameX
-//  Gitee  仓库：https://gitee.com/GameFrameX
-//  Gitee Repository:  https://gitee.com/GameFrameX
-//  官方文档：https://gameframex.doc.alianblank.com/
-//  Official Documentation: https://gameframex.doc.alianblank.com/
-// ==========================================================================================
-
+#if TOOLS
+using System;
 using System.Collections.Generic;
-using UnityEditor;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
+using Godot;
 
 namespace GameFrameX.Editor
 {
     /// <summary>
-    /// 脚本宏定义。
+    /// 脚本宏定义帮助类。
     /// </summary>
     public static class ScriptingDefineSymbols
     {
-        private static readonly BuildTargetGroup[] BuildTargetGroups = new BuildTargetGroup[]
-        {
-            BuildTargetGroup.Standalone,
-            BuildTargetGroup.iOS,
-            BuildTargetGroup.Android,
-            BuildTargetGroup.WSA,
-            BuildTargetGroup.WebGL
-        };
+        private const string CsprojFileName = "Godot.csproj";
+        private const string CompileTriggerStampFilePath = "res://addons/com.gameframex.godot/Editor/Misc/CompileTriggerStamp.cs";
 
         /// <summary>
-        /// 检查指定平台是否存在指定的脚本宏定义。
+        /// 检查是否存在指定的脚本宏定义。
         /// </summary>
-        /// <param name="buildTargetGroup">要检查脚本宏定义的平台。</param>
         /// <param name="scriptingDefineSymbol">要检查的脚本宏定义。</param>
-        /// <returns>指定平台是否存在指定的脚本宏定义。</returns>
-        public static bool HasScriptingDefineSymbol(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbol)
+        /// <returns>是否存在指定宏定义。</returns>
+        public static bool HasScriptingDefineSymbol(string scriptingDefineSymbol)
         {
             if (string.IsNullOrEmpty(scriptingDefineSymbol))
             {
                 return false;
             }
 
-            string[] scriptingDefineSymbols = GetScriptingDefineSymbols(buildTargetGroup);
+            string[] scriptingDefineSymbols = GetScriptingDefineSymbols();
             foreach (string i in scriptingDefineSymbols)
             {
-                if (i == scriptingDefineSymbol)
+                if (string.Equals(i, scriptingDefineSymbol, StringComparison.Ordinal))
                 {
                     return true;
                 }
@@ -77,58 +41,7 @@ namespace GameFrameX.Editor
         }
 
         /// <summary>
-        /// 为指定平台增加指定的脚本宏定义。
-        /// </summary>
-        /// <param name="buildTargetGroup">要增加脚本宏定义的平台。</param>
-        /// <param name="scriptingDefineSymbol">要增加的脚本宏定义。</param>
-        public static void AddScriptingDefineSymbol(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbol)
-        {
-            if (string.IsNullOrEmpty(scriptingDefineSymbol))
-            {
-                return;
-            }
-
-            if (HasScriptingDefineSymbol(buildTargetGroup, scriptingDefineSymbol))
-            {
-                return;
-            }
-
-            List<string> scriptingDefineSymbols = new List<string>(GetScriptingDefineSymbols(buildTargetGroup))
-            {
-                scriptingDefineSymbol
-            };
-
-            SetScriptingDefineSymbols(buildTargetGroup, scriptingDefineSymbols.ToArray());
-        }
-
-        /// <summary>
-        /// 为指定平台移除指定的脚本宏定义。
-        /// </summary>
-        /// <param name="buildTargetGroup">要移除脚本宏定义的平台。</param>
-        /// <param name="scriptingDefineSymbol">要移除的脚本宏定义。</param>
-        public static void RemoveScriptingDefineSymbol(BuildTargetGroup buildTargetGroup, string scriptingDefineSymbol)
-        {
-            if (string.IsNullOrEmpty(scriptingDefineSymbol))
-            {
-                return;
-            }
-
-            if (!HasScriptingDefineSymbol(buildTargetGroup, scriptingDefineSymbol))
-            {
-                return;
-            }
-
-            List<string> scriptingDefineSymbols = new List<string>(GetScriptingDefineSymbols(buildTargetGroup));
-            while (scriptingDefineSymbols.Contains(scriptingDefineSymbol))
-            {
-                scriptingDefineSymbols.Remove(scriptingDefineSymbol);
-            }
-
-            SetScriptingDefineSymbols(buildTargetGroup, scriptingDefineSymbols.ToArray());
-        }
-
-        /// <summary>
-        /// 为所有平台增加指定的脚本宏定义。
+        /// 增加指定的脚本宏定义。
         /// </summary>
         /// <param name="scriptingDefineSymbol">要增加的脚本宏定义。</param>
         public static void AddScriptingDefineSymbol(string scriptingDefineSymbol)
@@ -138,14 +51,20 @@ namespace GameFrameX.Editor
                 return;
             }
 
-            foreach (BuildTargetGroup buildTargetGroup in BuildTargetGroups)
+            if (HasScriptingDefineSymbol(scriptingDefineSymbol))
             {
-                AddScriptingDefineSymbol(buildTargetGroup, scriptingDefineSymbol);
+                return;
             }
+
+            List<string> scriptingDefineSymbols = new List<string>(GetScriptingDefineSymbols())
+            {
+                scriptingDefineSymbol
+            };
+            SetScriptingDefineSymbols(scriptingDefineSymbols.ToArray());
         }
 
         /// <summary>
-        /// 为所有平台移除指定的脚本宏定义。
+        /// 移除指定的脚本宏定义。
         /// </summary>
         /// <param name="scriptingDefineSymbol">要移除的脚本宏定义。</param>
         public static void RemoveScriptingDefineSymbol(string scriptingDefineSymbol)
@@ -155,31 +74,159 @@ namespace GameFrameX.Editor
                 return;
             }
 
-            foreach (BuildTargetGroup buildTargetGroup in BuildTargetGroups)
+            if (!HasScriptingDefineSymbol(scriptingDefineSymbol))
             {
-                RemoveScriptingDefineSymbol(buildTargetGroup, scriptingDefineSymbol);
+                return;
+            }
+
+            List<string> scriptingDefineSymbols = new List<string>(GetScriptingDefineSymbols());
+            while (scriptingDefineSymbols.Contains(scriptingDefineSymbol))
+            {
+                scriptingDefineSymbols.Remove(scriptingDefineSymbol);
+            }
+
+            SetScriptingDefineSymbols(scriptingDefineSymbols.ToArray());
+        }
+
+        /// <summary>
+        /// 获取当前工程的脚本宏定义。
+        /// </summary>
+        /// <returns>脚本宏定义数组。</returns>
+        public static string[] GetScriptingDefineSymbols()
+        {
+            string defineValue = LoadDefineConstantsValue();
+            return defineValue
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// 设置当前工程的脚本宏定义。
+        /// </summary>
+        /// <param name="scriptingDefineSymbols">要设置的脚本宏定义。</param>
+        public static void SetScriptingDefineSymbols(string[] scriptingDefineSymbols)
+        {
+            string[] symbols = scriptingDefineSymbols ?? Array.Empty<string>();
+            string defineValue = string.Join(";",
+                symbols
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => x.Trim())
+                    .Distinct(StringComparer.Ordinal));
+            bool changed = SaveDefineConstantsValue(defineValue);
+            if (changed)
+            {
+                TriggerSafeRecompile();
             }
         }
 
         /// <summary>
-        /// 获取指定平台的脚本宏定义。
+        /// 读取工程文件中的 DefineConstants 字符串。
         /// </summary>
-        /// <param name="buildTargetGroup">要获取脚本宏定义的平台。</param>
-        /// <returns>平台的脚本宏定义。</returns>
-        public static string[] GetScriptingDefineSymbols(BuildTargetGroup buildTargetGroup)
+        /// <returns>DefineConstants 原始字符串。</returns>
+        private static string LoadDefineConstantsValue()
         {
-            return PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup).Split(';');
+            string csprojPath = GetCsprojPath();
+            if (string.IsNullOrEmpty(csprojPath) || !File.Exists(csprojPath))
+            {
+                return string.Empty;
+            }
+
+            XDocument doc = XDocument.Load(csprojPath);
+            return doc.Descendants("DefineConstants").FirstOrDefault()?.Value ?? string.Empty;
         }
 
         /// <summary>
-        /// 设置指定平台的脚本宏定义。
+        /// 将 DefineConstants 字符串写回工程文件。
         /// </summary>
-        /// <param name="buildTargetGroup">要设置脚本宏定义的平台。</param>
-        /// <param name="scriptingDefineSymbols">要设置的脚本宏定义。</param>
-        public static void SetScriptingDefineSymbols(BuildTargetGroup buildTargetGroup, string[] scriptingDefineSymbols)
+        /// <param name="defineConstantsValue">要写入的 DefineConstants 内容。</param>
+        /// <returns>是否发生了实际变更。</returns>
+        private static bool SaveDefineConstantsValue(string defineConstantsValue)
         {
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, string.Join(";", scriptingDefineSymbols));
+            string csprojPath = GetCsprojPath();
+            if (string.IsNullOrEmpty(csprojPath))
+            {
+                return false;
+            }
+
+            XDocument doc;
+            if (File.Exists(csprojPath))
+            {
+                doc = XDocument.Load(csprojPath);
+            }
+            else
+            {
+                doc = new XDocument(new XElement("Project", new XElement("PropertyGroup")));
+            }
+
+            XElement project = doc.Root;
+            if (project == null)
+            {
+                return false;
+            }
+
+            XElement propertyGroup = project.Elements("PropertyGroup").FirstOrDefault();
+            if (propertyGroup == null)
+            {
+                propertyGroup = new XElement("PropertyGroup");
+                project.AddFirst(propertyGroup);
+            }
+
+            XElement defineNode = propertyGroup.Element("DefineConstants");
+            if (defineNode == null)
+            {
+                defineNode = new XElement("DefineConstants");
+                propertyGroup.Add(defineNode);
+            }
+
+            string targetValue = defineConstantsValue ?? string.Empty;
+            if (string.Equals(defineNode.Value, targetValue, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            defineNode.Value = targetValue;
+            doc.Save(csprojPath);
+            return true;
+        }
+
+        /// <summary>
+        /// 通过更新 C# 标记文件安全触发 Godot 自动重编译。
+        /// </summary>
+        private static void TriggerSafeRecompile()
+        {
+            try
+            {
+                string stampFilePath = ProjectSettings.GlobalizePath(CompileTriggerStampFilePath);
+                string stampValue = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture);
+                string content =
+                    "// Auto-generated by ScriptingDefineSymbols. Do not edit.\n" +
+                    "namespace GameFrameX.Editor\n" +
+                    "{\n" +
+                    "    /// <summary>\n" +
+                    "    /// 编译触发标记文件。\n" +
+                    "    /// </summary>\n" +
+                    "    internal static class CompileTriggerStamp\n" +
+                    "    {\n" +
+                    $"        internal const string Value = \"{stampValue}\";\n" +
+                    "    }\n" +
+                    "}\n";
+                File.WriteAllText(stampFilePath, content);
+            }
+            catch (Exception exception)
+            {
+                GD.PushWarning($"触发自动重编译失败: {exception.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 获取 Godot.csproj 的绝对路径。
+        /// </summary>
+        /// <returns>工程文件绝对路径。</returns>
+        private static string GetCsprojPath()
+        {
+            return ProjectSettings.GlobalizePath($"res://{CsprojFileName}");
         }
     }
 }
-#endif // Unity 特定代码结束
+#endif
