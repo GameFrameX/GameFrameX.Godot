@@ -73,6 +73,13 @@ public partial class HelperTypeEditorProperty : EditorProperty
     private readonly Variant.Type m_PropertyType;
 
     /// <summary>
+    /// 初始化 HelperTypeEditorProperty 的无参实例，供 Godot 反射创建脚本实例使用。
+    /// </summary>
+    public HelperTypeEditorProperty() : this(string.Empty, null, Variant.Type.String, "Helper 类型选择器。")
+    {
+    }
+
+    /// <summary>
     /// 初始化 HelperTypeEditorProperty 的新实例。
     /// </summary>
     /// <remarks>
@@ -102,8 +109,19 @@ public partial class HelperTypeEditorProperty : EditorProperty
     /// </remarks>
     public override void _UpdateProperty()
     {
+        if (string.IsNullOrEmpty(m_PropertyName))
+        {
+            return;
+        }
+
+        GodotObject editedObject = GetEditedObject();
+        if (editedObject == null)
+        {
+            return;
+        }
+
         string selectedTypeName = string.Empty;
-        Variant currentValue = GetEditedObject().Get(m_PropertyName);
+        Variant currentValue = editedObject.Get(m_PropertyName);
         if (m_PropertyType == Variant.Type.Object && currentValue.Obj is GodotObject helperObject)
         {
             selectedTypeName = helperObject.GetType().FullName ?? string.Empty;
@@ -136,6 +154,11 @@ public partial class HelperTypeEditorProperty : EditorProperty
     private static string[] BuildTypeNames(System.Type helperInterfaceType)
     {
         List<string> typeNames = new List<string> { NoneOptionName };
+        if (helperInterfaceType == null)
+        {
+            return typeNames.ToArray();
+        }
+
         List<string> runtimeTypeNames = Utility.Assembly.GetRuntimeTypeNames(helperInterfaceType);
         runtimeTypeNames.Sort(StringComparer.Ordinal);
         typeNames.AddRange(runtimeTypeNames);
