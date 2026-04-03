@@ -47,7 +47,8 @@ namespace GameFrameX.UI.Runtime
 
         private IUIManager m_UIManager = null;
         private EventComponent m_EventComponent = null;
-        private Node m_UIRoot = null;
+        private Node m_GDGUIRoot = null;
+        private Node m_FairyGUIRoot = null;
 
         private readonly List<IUIForm> m_InternalUIFormResults = new List<IUIForm>();
 
@@ -108,11 +109,19 @@ namespace GameFrameX.UI.Runtime
         };
 
         /// <summary>
-        /// 获取 UI 根节点。
+        /// 获取 FairyGUI UI 根节点。
         /// </summary>
-        public Node UIRoot
+        public Node FairyGUIRoot
         {
-            get { return m_UIRoot; }
+            get { return m_FairyGUIRoot; }
+        }
+
+        /// <summary>
+        /// 获取 GDGUI  UI 根节点。
+        /// </summary>
+        public Node GdguiRoot
+        {
+            get { return m_GDGUIRoot; }
         }
 
         /// <summary>
@@ -187,13 +196,13 @@ namespace GameFrameX.UI.Runtime
 
             if (!string.IsNullOrEmpty(m_UIRootPath) && HasNode(m_UIRootPath))
             {
-                m_UIRoot = GetNode<Node>(m_UIRootPath);
+                m_GDGUIRoot = GetNode<Node>(m_UIRootPath);
             }
             else
             {
-                m_UIRoot = new Node();
-                m_UIRoot.Name = "UIRoot";
-                AddChild(m_UIRoot);
+                m_GDGUIRoot = new Node();
+                m_GDGUIRoot.Name = "UIRoot";
+                AddChild(m_GDGUIRoot);
             }
 
             m_UIManager = GameFrameworkEntry.GetModule<IUIManager>();
