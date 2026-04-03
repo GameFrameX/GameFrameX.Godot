@@ -30,10 +30,11 @@
 // ==========================================================================================
 
 #if TOOLS
-using System;
 using System.Collections.Generic;
+using GameFrameX.Editor;
 using GameFrameX.UI.Runtime;
 using Godot;
+using Type = System.Type;
 
 namespace GameFrameX.UI.Editor
 {
@@ -41,71 +42,56 @@ namespace GameFrameX.UI.Editor
     /// UI 组件检查器插件。
     /// </summary>
     [Tool]
-    public partial class UIComponentInspectorPlugin : EditorInspectorPlugin
+    public partial class UIComponentInspectorPlugin : ComponentTypeComponentInspector
     {
-        private static readonly Dictionary<string, Type> PropertyTypeMap = new Dictionary<string, Type>(StringComparer.Ordinal)
+        /// <summary>
+        /// 获取组件类型。
+        /// </summary>
+        /// <returns>UI 组件类型。</returns>
+        protected override Type GetComponentType()
         {
-            { "mcomponenttype", typeof(IUIManager) },
-            { "componenttype", typeof(IUIManager) },
-            { "muiformhelpertypename", typeof(IUIFormHelper) },
-            { "uiformhelpertypename", typeof(IUIFormHelper) },
-            { "muigrouphelpertypename", typeof(IUIGroupHelper) },
-            { "uigrouphelpertypename", typeof(IUIGroupHelper) },
-            { "mcustomuiformhelper", typeof(UIFormHelperBase) },
-            { "customuiformhelper", typeof(UIFormHelperBase) },
-            { "mcustomuigrouphelper", typeof(UIGroupHelperBase) },
-            { "customuigrouphelper", typeof(UIGroupHelperBase) },
-        };
-
-        public override bool _CanHandle(GodotObject @object)
-        {
-            return @object is UIComponent;
-        }
-
-        public override bool _ParseProperty(GodotObject @object, Variant.Type type, string name, PropertyHint hintType, string hintString, PropertyUsageFlags usageFlags, bool wide)
-        {
-            var normalizedPropertyName = NormalizePropertyName(name);
-            if (!PropertyTypeMap.TryGetValue(normalizedPropertyName, out var interfaceType))
-            {
-                return false;
-            }
-
-            AddPropertyEditor(name, new GameFrameX.Editor.HelperTypeEditorProperty(name, interfaceType, type, BuildHelperPropertyTooltip(name, interfaceType)));
-            return true;
-        }
-
-        private static string NormalizePropertyName(string propertyName)
-        {
-            if (string.IsNullOrEmpty(propertyName))
-            {
-                return string.Empty;
-            }
-
-            var buffer = new char[propertyName.Length];
-            var count = 0;
-            foreach (var c in propertyName)
-            {
-                if (char.IsLetterOrDigit(c))
-                {
-                    buffer[count++] = char.ToLowerInvariant(c);
-                }
-            }
-
-            return count == 0 ? string.Empty : new string(buffer, 0, count);
+            return typeof(UIComponent);
         }
 
         /// <summary>
-        /// 构建 Helper 属性提示文本。
+        /// 获取管理器接口类型。
         /// </summary>
-        /// <param name="propertyName">属性名称。</param>
-        /// <param name="interfaceType">Helper 接口类型。</param>
-        /// <returns>属性提示文本。</returns>
-        private static string BuildHelperPropertyTooltip(string propertyName, Type interfaceType)
+        /// <returns>UI 管理器接口类型。</returns>
+        protected override Type GetManagerType()
         {
-            var interfaceName = interfaceType?.Name ?? "UnknownHelper";
-            return $"用于为属性 {propertyName} 选择 {interfaceName} 的具体实现类型。";
+            return typeof(IUIManager);
         }
 
+        /// <summary>
+        /// 获取 Helper 属性与类型映射。
+        /// </summary>
+        /// <returns>属性与类型映射。</returns>
+        public override Dictionary<string, Type> GetHelperPropertyTypeMap()
+        {
+            return new Dictionary<string, Type>(System.StringComparer.OrdinalIgnoreCase)
+            {
+                { "componentType", GetManagerType() },
+                { "mUIFormHelperTypeName", typeof(IUIFormHelper) },
+                { "UIFormHelperTypeName", typeof(IUIFormHelper) },
+                { "mUIGroupHelperTypeName", typeof(IUIGroupHelper) },
+                { "UIGroupHelperTypeName", typeof(IUIGroupHelper) },
+            };
+        }
+
+        /// <summary>
+        /// 获取需要隐藏的属性名称集合。
+        /// </summary>
+        /// <returns>需要隐藏的属性名称集合。</returns>
+        public override HashSet<string> GetHiddenPropertyNames()
+        {
+            return new HashSet<string>(System.StringComparer.OrdinalIgnoreCase)
+            {
+                "mCustomUIFormHelper",
+                "CustomUIFormHelper",
+                "mCustomUIGroupHelper",
+                "CustomUIGroupHelper",
+            };
+        }
     }
 }
 #endif

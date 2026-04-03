@@ -63,13 +63,17 @@ namespace GameFrameX.UI.Runtime
         [Export] private bool m_IsEnableUIShowAnimation = false;
         [Export] private bool m_IsEnableUIHideAnimation = false;
 
-        [Export] private float m_InstanceAutoReleaseInterval = 60f;
+        [Export(PropertyHint.Range, "30,120,1")]
+        private float m_InstanceAutoReleaseInterval = 60f;
 
-        [Export] private int m_InstanceCapacity = 16;
+        // [Export(PropertyHint.Range, "16,120,1")] 
+        private int m_InstanceCapacity = 16;
 
-        [Export] private float m_InstanceExpireTime = 60f;
+        [Export(PropertyHint.Range, "30,1200,1")]
+        private float m_InstanceExpireTime = 60f;
 
-        [Export] private int m_RecycleInterval = 60;
+        // [Export(PropertyHint.Range, "30.0,120.0,1.0")] 
+        private int m_RecycleInterval = 60;
 
         [Export] private NodePath m_UIRootPath;
 
