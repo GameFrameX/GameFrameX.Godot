@@ -46,7 +46,7 @@ namespace GameFrameX.Runtime
         /// <param name="message">日志内容。</param>
         public void Log(GameFrameworkLogLevel level, object message)
         {
-            var time = $"[Unity]:[{DateTime.Now:HH:mm:ss.fff}]:";
+            var time = $"[Godot]:[{DateTime.Now:HH:mm:ss.fff}]:";
 
             switch (level)
             {
