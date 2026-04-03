@@ -178,8 +178,10 @@ namespace GameFrameX.Editor
 
             m_TopPopupMenu = m_TopMenuButton.GetPopup();
             BuildLogDefineSubmenu();
-            m_TopPopupMenu.AddSubmenuItem(L("脚本宏定义", "Scripting Define Symbols"), TopMenuScriptDefineSubmenuName);
-            m_TopPopupMenu.AddSubmenuNodeItem(L("脚本宏定义", "Scripting Define Symbols"), new PopupMenu(), 1);
+            if (m_LogDefinePopupMenu != null)
+            {
+                m_TopPopupMenu.AddSubmenuNodeItem(L("脚本宏定义", "Scripting Define Symbols"), m_LogDefinePopupMenu);
+            }
 
             AddControlToContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
         }
