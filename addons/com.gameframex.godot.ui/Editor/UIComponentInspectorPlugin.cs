@@ -32,7 +32,6 @@
 #if TOOLS
 using System;
 using System.Collections.Generic;
-using GameFrameX.Runtime;
 using GameFrameX.UI.Runtime;
 using Godot;
 
@@ -71,7 +70,7 @@ namespace GameFrameX.UI.Editor
                 return false;
             }
 
-            AddPropertyEditor(name, new TypeDropdownEditorProperty(name, interfaceType));
+            AddPropertyEditor(name, new GameFrameX.Editor.HelperTypeEditorProperty(name, interfaceType, type, BuildHelperPropertyTooltip(name, interfaceType)));
             return true;
         }
 
@@ -95,64 +94,18 @@ namespace GameFrameX.UI.Editor
             return count == 0 ? string.Empty : new string(buffer, 0, count);
         }
 
-        private sealed partial class TypeDropdownEditorProperty : EditorProperty
+        /// <summary>
+        /// 构建 Helper 属性提示文本。
+        /// </summary>
+        /// <param name="propertyName">属性名称。</param>
+        /// <param name="interfaceType">Helper 接口类型。</param>
+        /// <returns>属性提示文本。</returns>
+        private static string BuildHelperPropertyTooltip(string propertyName, Type interfaceType)
         {
-            private const string NoneOptionName = "<None>";
-            private readonly string m_PropertyName;
-            private readonly OptionButton m_OptionButton;
-            private readonly string[] m_TypeNames;
-
-            public TypeDropdownEditorProperty(string propertyName, Type interfaceType)
-            {
-                m_PropertyName = propertyName;
-                m_TypeNames = BuildTypeNames(interfaceType);
-                m_OptionButton = new OptionButton();
-                m_OptionButton.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-                m_OptionButton.ItemSelected += OnItemSelected;
-                AddChild(m_OptionButton);
-                AddFocusable(m_OptionButton);
-                RefreshItems();
-            }
-
-            public override void _UpdateProperty()
-            {
-                var selectedTypeName = GetEditedObject().Get(m_PropertyName).AsString();
-                var selectedIndex = Array.IndexOf(m_TypeNames, selectedTypeName);
-                if (selectedIndex < 0)
-                {
-                    selectedIndex = 0;
-                }
-
-                if (m_OptionButton.Selected != selectedIndex)
-                {
-                    m_OptionButton.Select(selectedIndex);
-                }
-            }
-
-            private static string[] BuildTypeNames(Type interfaceType)
-            {
-                var typeNames = new List<string> { NoneOptionName };
-                var runtimeTypeNames = Utility.Assembly.GetRuntimeTypeNames(interfaceType);
-                runtimeTypeNames.Sort(StringComparer.Ordinal);
-                typeNames.AddRange(runtimeTypeNames);
-                return typeNames.ToArray();
-            }
-
-            private void RefreshItems()
-            {
-                m_OptionButton.Clear();
-                for (var i = 0; i < m_TypeNames.Length; i++)
-                {
-                    m_OptionButton.AddItem(m_TypeNames[i]);
-                }
-            }
-
-            private void OnItemSelected(long index)
-            {
-                var selectedTypeName = index <= 0 ? string.Empty : m_TypeNames[index];
-                EmitChanged(m_PropertyName, selectedTypeName);
-            }
+            var interfaceName = interfaceType?.Name ?? "UnknownHelper";
+            return $"用于为属性 {propertyName} 选择 {interfaceName} 的具体实现类型。";
         }
+
     }
 }
 #endif
