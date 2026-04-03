@@ -18,7 +18,7 @@ namespace GameFrameX.Editor
         /// <summary>
         /// 顶部菜单项：日志宏定义子菜单。
         /// </summary>
-        private const string TopMenuLogDefineSubmenuName = "LogScriptingDefineSymbolsSubmenu";
+        private const string TopMenuScriptDefineSubmenuName = "ScriptingDefineSymbolsSubmenu";
 
         /// <summary>
         /// 日志宏定义菜单项：禁用所有日志。
@@ -178,7 +178,8 @@ namespace GameFrameX.Editor
 
             m_TopPopupMenu = m_TopMenuButton.GetPopup();
             BuildLogDefineSubmenu();
-            m_TopPopupMenu.AddSubmenuItem(L("日志宏定义", "Log Symbols"), TopMenuLogDefineSubmenuName);
+            m_TopPopupMenu.AddSubmenuItem(L("脚本宏定义", "Scripting Define Symbols"), TopMenuScriptDefineSubmenuName);
+            m_TopPopupMenu.AddSubmenuNodeItem(L("脚本宏定义", "Scripting Define Symbols"), new PopupMenu(), 1);
 
             AddControlToContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
         }
@@ -203,7 +204,7 @@ namespace GameFrameX.Editor
             }
 
             m_LogDefinePopupMenu = new PopupMenu();
-            m_LogDefinePopupMenu.Name = TopMenuLogDefineSubmenuName;
+            m_LogDefinePopupMenu.Name = TopMenuScriptDefineSubmenuName;
             m_LogDefinePopupMenu.AddItem(L("禁用所有日志", "Disable All Logs"), LogDefineDisableAllLogsId);
             m_LogDefinePopupMenu.AddItem(L("开启所有日志", "Enable All Logs"), LogDefineEnableAllLogsId);
             m_LogDefinePopupMenu.AddSeparator();
