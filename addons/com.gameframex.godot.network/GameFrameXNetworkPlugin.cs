@@ -100,7 +100,7 @@ namespace GameFrameX.Network.Editor
                 return;
             }
 
-            Control editorBaseControl = GetEditorInterface()?.GetBaseControl();
+            Control editorBaseControl = EditorInterface.Singleton?.GetBaseControl();
             if (editorBaseControl == null)
             {
                 return;
@@ -172,7 +172,8 @@ namespace GameFrameX.Network.Editor
             int itemCount = m_TopPopupMenu.ItemCount;
             for (int i = itemCount - 1; i >= 0; i--)
             {
-                if (!string.Equals(m_TopPopupMenu.GetItemSubmenu(i), submenuName, StringComparison.Ordinal))
+                PopupMenu submenuNode = m_TopPopupMenu.GetItemSubmenuNode(i);
+                if (submenuNode == null || !string.Equals(submenuNode.Name, submenuName, StringComparison.Ordinal))
                 {
                     continue;
                 }
@@ -263,7 +264,7 @@ namespace GameFrameX.Network.Editor
         /// </summary>
         private void CleanupLegacyNetworkToolbarMenu()
         {
-            Control editorBaseControl = GetEditorInterface()?.GetBaseControl();
+            Control editorBaseControl = EditorInterface.Singleton?.GetBaseControl();
             if (editorBaseControl == null)
             {
                 return;
