@@ -69,7 +69,7 @@ namespace GameFrameX.Network.Runtime
                 }
 
                 base.Connect(address, userData);
-                PSocket = new WebSocketNetSocket(address.ToString(), ReceiveCallback, CloseCallback);
+                PSocket = new WebSocketNetSocket(address.ToString(), ReceiveCallback, CloseCallback, ErrorCallback);
                 if (PSocket == null)
                 {
                     const string errorMessage = "Initialize network channel failure.";
@@ -89,6 +89,16 @@ namespace GameFrameX.Network.Runtime
             private void CloseCallback(string reason, ushort code)
             {
                 Close(reason, code);
+            }
+            
+            /// <summary>
+            /// 套接字错误回调。
+            /// </summary>
+            /// <param name="errorCode">网络错误码。</param>
+            /// <param name="errorMessage">错误消息。</param>
+            private void ErrorCallback(NetworkErrorCode errorCode, string errorMessage)
+            {
+                NetworkChannelError?.Invoke(this, errorCode, SocketError.Success, errorMessage);
             }
 
             public override void Close(string reason, ushort code = 0)

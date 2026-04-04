@@ -24,13 +24,22 @@ namespace GameFrameX.Network.Runtime
             private TaskCompletionSource<bool> _connectTask = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             private readonly Action<byte[]> _onReceiveAction;
             private readonly Action<string, ushort> _onCloseAction;
+            private readonly Action<NetworkErrorCode, string> _onErrorAction;
 
-            public WebSocketNetSocket(string url, Action<byte[]> onReceiveAction, Action<string, ushort> onCloseAction)
+            /// <summary>
+            /// 初始化 WebSocket 套接字。
+            /// </summary>
+            /// <param name="url">连接地址。</param>
+            /// <param name="onReceiveAction">收到二进制消息时的回调。</param>
+            /// <param name="onCloseAction">连接关闭时的回调。</param>
+            /// <param name="onErrorAction">发生错误时的回调。</param>
+            public WebSocketNetSocket(string url, Action<byte[]> onReceiveAction, Action<string, ushort> onCloseAction, Action<NetworkErrorCode, string> onErrorAction)
             {
                 _url = url;
                 _client = new WebSocketPeer();
                 _onReceiveAction = onReceiveAction;
                 _onCloseAction = onCloseAction;
+                _onErrorAction = onErrorAction;
             }
 
 
@@ -44,7 +53,7 @@ namespace GameFrameX.Network.Runtime
                 if (error != Godot.Error.Ok)
                 {
                     _isConnecting = false;
-                    Log.Error($"WebSocket connect error: {error}");
+                    _onErrorAction?.Invoke(NetworkErrorCode.ConnectError, $"WebSocket connect error: {error}");
                     _connectTask.TrySetResult(false);
                 }
 
@@ -93,8 +102,9 @@ namespace GameFrameX.Network.Runtime
                     {
                         _hasCloseNotified = true;
                         var closeCode = _client.GetCloseCode();
+                        var closeReason = _client.GetCloseReason();
                         ushort code = closeCode >= 0 ? (ushort)closeCode : (ushort)0;
-                        _onCloseAction?.Invoke(string.Empty, code);
+                        _onCloseAction?.Invoke(closeReason, code);
                     }
                 }
             }
@@ -110,7 +120,11 @@ namespace GameFrameX.Network.Runtime
                     return;
                 }
 
-                _client.Send(buffer);
+                var error = _client.Send(buffer);
+                if (error != Godot.Error.Ok)
+                {
+                    _onErrorAction?.Invoke(NetworkErrorCode.SendError, $"WebSocket send error: {error}");
+                }
             }
 
             public bool IsConnected
