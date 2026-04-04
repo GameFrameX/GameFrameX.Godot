@@ -1,4 +1,4 @@
-﻿// ==========================================================================================
+// ==========================================================================================
 //  GameFrameX 组织及其衍生项目的版权、商标、专利及其他相关权利
 //  GameFrameX organization and its derivative projects' copyrights, trademarks, patents, and related rights
 //  均受中华人民共和国及相关国际法律法规保护。
@@ -145,6 +145,7 @@ namespace GameFrameX.Runtime
         /// </summary>
         public override void _Ready()
         {
+            PreserveDefaultHelperTypes();
             IsAutoRegister = false;
             base._Ready();
 
@@ -176,6 +177,18 @@ namespace GameFrameX.Runtime
             Engine.TimeScale = m_GameSpeed;
             // Application.runInBackground = m_RunInBackground; // TODO: No direct equivalent
             // Screen.sleepTimeout = m_NeverSleep ? SleepTimeout.NeverSleep : SleepTimeout.SystemSetting; // TODO: No direct equivalent
+        }
+
+        /// <summary>
+        /// 保活基础模块默认 Helper 类型，避免导出裁剪后反射创建失败。
+        /// </summary>
+        private static void PreserveDefaultHelperTypes()
+        {
+            _ = typeof(DefaultTextHelper);
+            _ = typeof(DefaultVersionHelper);
+            _ = typeof(DefaultLogHelper);
+            _ = typeof(DefaultCompressionHelper);
+            _ = typeof(NewtonsoftJsonHelper);
         }
 
         // TODO: Consider if Start() is needed in Godot or if logic should move to _Ready()
