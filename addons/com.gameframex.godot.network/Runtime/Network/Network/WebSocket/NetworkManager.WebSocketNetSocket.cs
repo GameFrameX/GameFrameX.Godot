@@ -87,7 +87,9 @@ namespace GameFrameX.Network.Runtime
                         }
                         else
                         {
-                            Log.Warning("WebSocket received text frame in binary protocol channel, ignored.");
+                            _onErrorAction?.Invoke(NetworkErrorCode.DeserializePacketError, "WebSocket received text frame, but current channel only supports binary frames.");
+                            _client.Close(1003, "Binary only protocol");
+                            return;
                         }
                     }
 
