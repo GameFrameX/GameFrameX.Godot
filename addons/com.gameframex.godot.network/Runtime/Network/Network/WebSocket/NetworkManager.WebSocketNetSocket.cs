@@ -1,4 +1,4 @@
-#if ENABLE_GAME_FRAME_X_WEB_SOCKET
+#if (ENABLE_GAME_FRAME_X_WEB_SOCKET && UNITY_WEBGL) || FORCE_ENABLE_GAME_FRAME_X_WEB_SOCKET
 using System;
 using System.Net;
 using System.Threading.Tasks;
