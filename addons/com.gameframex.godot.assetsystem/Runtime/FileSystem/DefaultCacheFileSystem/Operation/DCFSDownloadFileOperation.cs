@@ -8,6 +8,7 @@ namespace YooAsset
     internal sealed class DCFSDownloadNormalFileOperation : DefaultDownloadFileOperation
     {
         private readonly DefaultCacheFileSystem _fileSystem;
+        private HttpDataRequestOperation _httpDataRequestOp;
         private VerifyTempFileOperation _verifyOperation;
         private string _tempFilePath;
         private ESteps _steps = ESteps.None;
@@ -73,27 +74,56 @@ namespace YooAsset
             // 检测下载结果
             if (_steps == ESteps.CheckRequest)
             {
-                DownloadProgress = _webRequest.downloadProgress;
-                DownloadedBytes = (long)_webRequest.downloadedBytes;
-                Progress = DownloadProgress;
-                if (_webRequest.isDone == false)
+                if (_httpDataRequestOp != null)
                 {
-                    CheckRequestTimeout();
-                    return;
-                }
+                    DownloadProgress = _httpDataRequestOp.Progress;
+                    Progress = DownloadProgress;
+                    if (_httpDataRequestOp.IsDone == false)
+                    {
+                        return;
+                    }
 
-                // 检查网络错误
-                if (CheckRequestResult())
-                {
-                    _steps = ESteps.VerifyTempFile;
+                    if (_httpDataRequestOp.Status == EOperationStatus.Succeed && WriteHttpDownloadedTempFile(_httpDataRequestOp.Result))
+                    {
+                        DownloadedBytes = Bundle.FileSize;
+                        _steps = ESteps.VerifyTempFile;
+                    }
+                    else
+                    {
+                        Error = _httpDataRequestOp.Status == EOperationStatus.Succeed ? $"Write temp file failed : {_tempFilePath}" : _httpDataRequestOp.Error;
+                        IsRetryableError = true;
+                        _steps = IsRetryableError ? ESteps.TryAgain : ESteps.Done;
+                        if (_steps == ESteps.Done)
+                        {
+                            Status = EOperationStatus.Failed;
+                            YooLogger.Error(Error);
+                        }
+                    }
                 }
                 else
                 {
-                    _steps = IsRetryableError ? ESteps.TryAgain : ESteps.Done;
-                    if (_steps == ESteps.Done)
+                    DownloadProgress = _webRequest.downloadProgress;
+                    DownloadedBytes = (long)_webRequest.downloadedBytes;
+                    Progress = DownloadProgress;
+                    if (_webRequest.isDone == false)
                     {
-                        Status = EOperationStatus.Failed;
-                        YooLogger.Error(Error);
+                        CheckRequestTimeout();
+                        return;
+                    }
+
+                    // 检查网络错误
+                    if (CheckRequestResult())
+                    {
+                        _steps = ESteps.VerifyTempFile;
+                    }
+                    else
+                    {
+                        _steps = IsRetryableError ? ESteps.TryAgain : ESteps.Done;
+                        if (_steps == ESteps.Done)
+                        {
+                            Status = EOperationStatus.Failed;
+                            YooLogger.Error(Error);
+                        }
                     }
                 }
 
@@ -171,6 +201,12 @@ namespace YooAsset
         internal override void InternalOnAbort()
         {
             _steps = ESteps.Done;
+            if (_httpDataRequestOp != null)
+            {
+                _httpDataRequestOp.SetAbort();
+                _httpDataRequestOp = null;
+            }
+
             DisposeWebRequest();
         }
 
@@ -181,6 +217,11 @@ namespace YooAsset
 
             while (true)
             {
+                if (_httpDataRequestOp != null)
+                {
+                    _httpDataRequestOp.WaitForAsyncComplete();
+                }
+
                 if (_verifyOperation != null)
                 {
                     _verifyOperation.WaitForAsyncComplete();
@@ -209,12 +250,32 @@ namespace YooAsset
         [UnityEngine.Scripting.Preserve]
         private void CreateWebRequest()
         {
+            if (DownloadSystemHelper.HttpTransport != null)
+            {
+                _httpDataRequestOp = new HttpDataRequestOperation(_requestURL, Param.Timeout, appendTimeTicks: false);
+                OperationSystem.StartOperation(_fileSystem.PackageName, _httpDataRequestOp);
+                return;
+            }
+
             _webRequest = DownloadSystemHelper.NewUnityWebRequestGet(_requestURL, Param.Timeout);
             var handler = new DownloadHandlerFile(_tempFilePath);
             handler.removeFileOnAbort = true;
             _webRequest.downloadHandler = handler;
             _webRequest.disposeDownloadHandlerOnDispose = true;
             DownloadSystemHelper.SendRequest(_webRequest);
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        private bool WriteHttpDownloadedTempFile(byte[] data)
+        {
+            if (data == null || data.Length == 0)
+            {
+                return false;
+            }
+
+            FileUtility.CreateFileDirectory(_tempFilePath);
+            File.WriteAllBytes(_tempFilePath, data);
+            return true;
         }
 
         [UnityEngine.Scripting.Preserve]

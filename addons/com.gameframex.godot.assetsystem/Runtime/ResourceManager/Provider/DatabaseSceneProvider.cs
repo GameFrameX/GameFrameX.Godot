@@ -142,6 +142,8 @@ namespace YooAsset
                         {
                             return;
                         }
+
+                        SceneObject = SceneManager.GetSceneByName(SceneName);
                     }
                 }
 
@@ -206,7 +208,6 @@ namespace YooAsset
                 {
                     _asyncOperation.allowSceneActivation = !_suspendLoadMode;
                     _asyncOperation.priority = 100;
-                    SceneObject = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
                     SceneName = Path.GetFileNameWithoutExtension(scenePath);
                     return true;
                 }

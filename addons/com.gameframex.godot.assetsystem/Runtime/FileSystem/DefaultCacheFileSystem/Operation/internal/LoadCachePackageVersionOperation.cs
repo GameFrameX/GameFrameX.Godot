@@ -16,6 +16,7 @@ namespace YooAsset
 
         private readonly DefaultCacheFileSystem _fileSystem;
         private UnityWebTextRequestOperation _webTextRequestOp;
+        private HttpTextRequestOperation _httpTextRequestOp;
         private ESteps _steps = ESteps.None;
 
         /// <summary>
@@ -50,21 +51,37 @@ namespace YooAsset
                 var filePath = PathUtility.Combine(_fileSystem.FileRoot, fileName);
                 if (File.Exists(filePath))
                 {
-                    if (_webTextRequestOp == null)
+                    if (_webTextRequestOp == null && _httpTextRequestOp == null)
                     {
                         var url = DownloadSystemHelper.ConvertToWWWPath(filePath);
-                        _webTextRequestOp = new UnityWebTextRequestOperation(url);
-                        OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
+                        if (DownloadSystemHelper.HttpTransport != null)
+                        {
+                            _httpTextRequestOp = new HttpTextRequestOperation(url, timeout: 10, appendTimeTicks: false);
+                            OperationSystem.StartOperation(_fileSystem.PackageName, _httpTextRequestOp);
+                        }
+                        else
+                        {
+                            _webTextRequestOp = new UnityWebTextRequestOperation(url);
+                            OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
+                        }
                     }
 
-                    if (_webTextRequestOp.IsDone == false)
+                    var currentOperation = (AsyncOperationBase)_httpTextRequestOp ?? _webTextRequestOp;
+                    if (currentOperation == null)
                     {
                         return;
                     }
 
-                    if (_webTextRequestOp.Status == EOperationStatus.Succeed)
+                    Progress = currentOperation.Progress;
+                    if (currentOperation.IsDone == false)
                     {
-                        PackageVersion = _webTextRequestOp.Result;
+                        return;
+                    }
+
+                    if (currentOperation.Status == EOperationStatus.Succeed)
+                    {
+                        var rawVersion = _httpTextRequestOp != null ? _httpTextRequestOp.Result : _webTextRequestOp.Result;
+                        PackageVersion = NormalizeText(rawVersion);
                         Debug.Log($"LoadCachePackageVersionOperation 加载本地沙盒版本成功：{PackageVersion}");
                         if (string.IsNullOrEmpty(PackageVersion))
                         {
@@ -82,7 +99,7 @@ namespace YooAsset
                     {
                         _steps = ESteps.Done;
                         Status = EOperationStatus.Failed;
-                        Error = _webTextRequestOp.Error;
+                        Error = currentOperation.Error;
                     }
                 }
                 else
@@ -92,6 +109,11 @@ namespace YooAsset
                     Error = $"Can not found cache version file : {filePath}";
                 }
             }
+        }
+
+        private static string NormalizeText(string value)
+        {
+            return (value ?? string.Empty).Replace("\uFEFF", string.Empty).Trim();
         }
     }
 }

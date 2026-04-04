@@ -107,7 +107,7 @@ namespace YooAsset
         {
             if (Result != null)
             {
-                UnityEngine.Object.Destroy(Result);
+                BundleAssetLoaderFactory.Backend.Destroy(Result);
                 Result = null;
             }
         }
@@ -129,32 +129,7 @@ namespace YooAsset
                 return null;
             }
 
-            if (setPositionAndRotation)
-            {
-                if (parent != null)
-                {
-                    var clone = UnityEngine.Object.Instantiate(assetObject as GameObject, position, rotation, parent);
-                    return clone;
-                }
-                else
-                {
-                    var clone = UnityEngine.Object.Instantiate(assetObject as GameObject, position, rotation);
-                    return clone;
-                }
-            }
-            else
-            {
-                if (parent != null)
-                {
-                    var clone = UnityEngine.Object.Instantiate(assetObject as GameObject, parent, worldPositionStays);
-                    return clone;
-                }
-                else
-                {
-                    var clone = UnityEngine.Object.Instantiate(assetObject as GameObject);
-                    return clone;
-                }
-            }
+            return BundleAssetLoaderFactory.Backend.Instantiate(assetObject, setPositionAndRotation, position, rotation, parent, worldPositionStays);
         }
     }
 }

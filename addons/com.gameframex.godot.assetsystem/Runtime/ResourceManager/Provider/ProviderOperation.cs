@@ -461,18 +461,17 @@ namespace YooAsset
 
     internal static class BundleAssetLoaderFactory
     {
+        private static IResourceBackend _backend = new GodotResourceBackend();
+
+        public static IResourceBackend Backend
+        {
+            get { return _backend; }
+            set { _backend = value ?? new GodotResourceBackend(); }
+        }
+
         public static bool TryCreate(object bundleResult, out IBundleAssetLoader loader, out string error)
         {
-            if (bundleResult is UnityEngine.AssetBundle assetBundle)
-            {
-                loader = new UnityAssetBundleLoader(assetBundle);
-                error = string.Empty;
-                return true;
-            }
-
-            loader = null;
-            error = "Try load raw file using bundle asset loader method !";
-            return false;
+            return Backend.TryCreateBundleAssetLoader(bundleResult, out loader, out error);
         }
     }
 

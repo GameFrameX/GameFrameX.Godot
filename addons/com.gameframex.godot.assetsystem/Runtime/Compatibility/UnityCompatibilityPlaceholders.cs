@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -118,29 +119,40 @@ namespace UnityEngine
 
     public class AssetBundle : Object
     {
+        private readonly string _sourcePath;
+
+        public AssetBundle(string sourcePath = "")
+        {
+            _sourcePath = sourcePath ?? string.Empty;
+        }
+
         public static AssetBundle LoadFromFile(string path)
         {
-            return new AssetBundle();
+            return new AssetBundle(path);
         }
 
         public static AssetBundleCreateRequest LoadFromFileAsync(string path)
         {
-            return new AssetBundleCreateRequest { assetBundle = new AssetBundle() };
+            return new AssetBundleCreateRequest { assetBundle = new AssetBundle(path) };
         }
 
         public static AssetBundle LoadFromMemory(byte[] binary)
         {
-            return new AssetBundle();
+            var key = binary == null ? "memory://empty" : $"memory://{binary.Length}";
+            return new AssetBundle(key);
         }
 
         public static AssetBundleCreateRequest LoadFromMemoryAsync(byte[] binary)
         {
-            return new AssetBundleCreateRequest { assetBundle = new AssetBundle() };
+            return new AssetBundleCreateRequest { assetBundle = LoadFromMemory(binary) };
         }
 
         public AssetBundleRequest LoadAssetAsync(string name, Type type)
         {
-            return new AssetBundleRequest();
+            return new AssetBundleRequest
+            {
+                asset = CreatePlaceholderAsset(name, type)
+            };
         }
 
         public AssetBundleRequest LoadAssetAsync(string name)
@@ -150,7 +162,10 @@ namespace UnityEngine
 
         public AssetBundleRequest LoadAssetWithSubAssetsAsync(string name, Type type)
         {
-            return new AssetBundleRequest();
+            return new AssetBundleRequest
+            {
+                allAssets = CreatePlaceholderAssets(name, type)
+            };
         }
 
         public AssetBundleRequest LoadAssetWithSubAssetsAsync(string name)
@@ -160,7 +175,10 @@ namespace UnityEngine
 
         public AssetBundleRequest LoadAllAssetsAsync(Type type)
         {
-            return new AssetBundleRequest();
+            return new AssetBundleRequest
+            {
+                allAssets = CreatePlaceholderAssets(_sourcePath, type)
+            };
         }
 
         public AssetBundleRequest LoadAllAssetsAsync()
@@ -170,7 +188,7 @@ namespace UnityEngine
 
         public Object LoadAsset(string name, Type type)
         {
-            return null;
+            return CreatePlaceholderAsset(name, type);
         }
 
         public Object LoadAsset(string name)
@@ -180,7 +198,7 @@ namespace UnityEngine
 
         public Object[] LoadAssetWithSubAssets(string name, Type type)
         {
-            return Array.Empty<Object>();
+            return CreatePlaceholderAssets(name, type);
         }
 
         public Object[] LoadAssetWithSubAssets(string name)
@@ -190,7 +208,7 @@ namespace UnityEngine
 
         public Object[] LoadAllAssets(Type type)
         {
-            return Array.Empty<Object>();
+            return CreatePlaceholderAssets(_sourcePath, type);
         }
 
         public Object[] LoadAllAssets()
@@ -200,6 +218,67 @@ namespace UnityEngine
 
         public void Unload(bool unloadAllLoadedObjects)
         {
+        }
+
+        private static Object[] CreatePlaceholderAssets(string name, Type type)
+        {
+            var asset = CreatePlaceholderAsset(name, type);
+            if (asset == null)
+            {
+                return Array.Empty<Object>();
+            }
+
+            return new[] { asset };
+        }
+
+        private static Object CreatePlaceholderAsset(string name, Type type)
+        {
+            var assetName = string.IsNullOrWhiteSpace(name) ? "placeholder_asset" : Path.GetFileNameWithoutExtension(name);
+            if (string.IsNullOrEmpty(assetName))
+            {
+                assetName = "placeholder_asset";
+            }
+
+            var targetType = type ?? typeof(Object);
+            if (targetType == typeof(Object))
+            {
+                return new Object { name = assetName };
+            }
+
+            if (typeof(GameObject).IsAssignableFrom(targetType))
+            {
+                return new GameObject(assetName);
+            }
+
+            if (typeof(ScriptableObject).IsAssignableFrom(targetType))
+            {
+                var instance = ScriptableObject.CreateInstance(targetType);
+                if (instance != null)
+                {
+                    instance.name = assetName;
+                    return instance;
+                }
+            }
+
+            if (typeof(Object).IsAssignableFrom(targetType))
+            {
+                try
+                {
+                    if (Activator.CreateInstance(targetType) is Object instance)
+                    {
+                        instance.name = assetName;
+                        return instance;
+                    }
+                }
+                catch
+                {
+                    // Ignore reflection failures and fallback to a plain placeholder.
+                }
+
+                return new Object { name = assetName };
+            }
+
+            return null;
         }
     }
 
@@ -402,12 +481,119 @@ namespace UnityEngine
     {
         public static T Load<T>(string path) where T : class
         {
+            var resolvedPath = ResolveResourcePath(path);
+            if (string.IsNullOrEmpty(resolvedPath))
+            {
+                return null;
+            }
+
+            var targetType = typeof(T);
+            var assetName = Path.GetFileNameWithoutExtension(resolvedPath);
+            if (string.IsNullOrEmpty(assetName))
+            {
+                assetName = "resource";
+            }
+
+            if (typeof(ScriptableObject).IsAssignableFrom(targetType))
+            {
+                var scriptable = ScriptableObject.CreateInstance(targetType);
+                if (scriptable != null)
+                {
+                    scriptable.name = assetName;
+                    return scriptable as T;
+                }
+            }
+
+            if (typeof(GameObject).IsAssignableFrom(targetType))
+            {
+                return new GameObject(assetName) as T;
+            }
+
+            if (typeof(Object).IsAssignableFrom(targetType))
+            {
+                if (targetType == typeof(Object))
+                {
+                    return new Object { name = assetName } as T;
+                }
+
+                try
+                {
+                    if (Activator.CreateInstance(targetType) is Object instance)
+                    {
+                        instance.name = assetName;
+                        return instance as T;
+                    }
+                }
+                catch
+                {
+                    return new Object { name = assetName } as T;
+                }
+            }
+
+            if (targetType == typeof(string))
+            {
+                return File.ReadAllText(resolvedPath) as T;
+            }
+
             return null;
         }
 
         public static AsyncOperation UnloadUnusedAssets()
         {
             return new AsyncOperation();
+        }
+
+        private static string ResolveResourcePath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return string.Empty;
+            }
+
+            var candidates = new List<string>(8);
+            AddPathCandidate(candidates, path);
+
+            if (path.StartsWith("res://", StringComparison.OrdinalIgnoreCase))
+            {
+                AddPathCandidate(candidates, global::Godot.ProjectSettings.GlobalizePath(path));
+            }
+            else if (Path.IsPathRooted(path))
+            {
+                AddPathCandidate(candidates, path);
+            }
+            else
+            {
+                var normalized = path.Replace('\\', '/');
+                AddPathCandidate(candidates, global::Godot.ProjectSettings.GlobalizePath($"res://{normalized}"));
+                AddPathCandidate(candidates, global::Godot.ProjectSettings.GlobalizePath($"res://{normalized}.tres"));
+                AddPathCandidate(candidates, global::Godot.ProjectSettings.GlobalizePath($"res://{normalized}.res"));
+                AddPathCandidate(candidates, global::Godot.ProjectSettings.GlobalizePath($"res://{normalized}.txt"));
+                AddPathCandidate(candidates, global::Godot.ProjectSettings.GlobalizePath($"res://{normalized}.png"));
+                AddPathCandidate(candidates, global::Godot.ProjectSettings.GlobalizePath($"res://{normalized}.webp"));
+            }
+
+            for (var i = 0; i < candidates.Count; i++)
+            {
+                if (File.Exists(candidates[i]))
+                {
+                    return candidates[i];
+                }
+            }
+
+            return string.Empty;
+        }
+
+        private static void AddPathCandidate(List<string> candidates, string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            if (!candidates.Contains(path))
+            {
+                candidates.Add(path);
+            }
         }
     }
 
@@ -472,45 +658,172 @@ namespace UnityEngine.SceneManagement
     {
         public string name { get; set; }
         public bool isLoaded { get; set; }
+        internal bool isValid { get; set; }
 
         public bool IsValid()
         {
-            return true;
+            return isValid;
         }
     }
 
     public static class SceneManager
     {
-        public static int sceneCount => 1;
+        private static readonly System.Collections.Generic.List<Scene> _scenes = new System.Collections.Generic.List<Scene>();
+        private static Scene _activeScene;
+
+        public static int sceneCount
+        {
+            get
+            {
+                EnsureBootstrapScene();
+                return _scenes.Count;
+            }
+        }
 
         public static Scene LoadScene(string sceneName, LoadSceneParameters parameters)
         {
-            return new Scene { name = sceneName, isLoaded = true };
+            EnsureBootstrapScene();
+
+            if (parameters.loadSceneMode == LoadSceneMode.Single)
+            {
+                _scenes.Clear();
+            }
+
+            var scene = new Scene
+            {
+                name = sceneName ?? string.Empty,
+                isLoaded = true,
+                isValid = !string.IsNullOrEmpty(sceneName)
+            };
+
+            if (scene.IsValid())
+            {
+                _scenes.Add(scene);
+                _activeScene = scene;
+            }
+
+            return scene;
         }
 
         public static UnityEngine.AsyncOperation LoadSceneAsync(string sceneName, LoadSceneParameters parameters)
         {
-            return new UnityEngine.AsyncOperation();
+            LoadScene(sceneName, parameters);
+            return new UnityEngine.AsyncOperation
+            {
+                isDone = true,
+                progress = 1f
+            };
         }
 
         public static UnityEngine.AsyncOperation UnloadSceneAsync(Scene scene)
         {
-            return new UnityEngine.AsyncOperation();
+            EnsureBootstrapScene();
+
+            var index = FindSceneIndex(scene.name);
+            if (index < 0)
+            {
+                return null;
+            }
+
+            _scenes.RemoveAt(index);
+            if (_scenes.Count == 0)
+            {
+                EnsureBootstrapScene();
+            }
+
+            if (_activeScene.IsValid() == false || _activeScene.name == scene.name)
+            {
+                _activeScene = _scenes[0];
+            }
+
+            return new UnityEngine.AsyncOperation
+            {
+                isDone = true,
+                progress = 1f
+            };
         }
 
         public static bool SetActiveScene(Scene scene)
         {
+            EnsureBootstrapScene();
+            var index = FindSceneIndex(scene.name);
+            if (index < 0)
+            {
+                return false;
+            }
+
+            var target = _scenes[index];
+            if (target.IsValid() == false || target.isLoaded == false)
+            {
+                return false;
+            }
+
+            _activeScene = target;
             return true;
         }
 
         public static Scene GetSceneAt(int index)
         {
-            return new Scene { name = $"Scene_{index}", isLoaded = true };
+            EnsureBootstrapScene();
+            if (index < 0 || index >= _scenes.Count)
+            {
+                return default;
+            }
+
+            return _scenes[index];
+        }
+
+        public static Scene GetSceneByName(string sceneName)
+        {
+            EnsureBootstrapScene();
+            var index = FindSceneIndex(sceneName);
+            if (index < 0)
+            {
+                return default;
+            }
+
+            return _scenes[index];
         }
 
         public static Scene GetActiveScene()
         {
-            return new Scene { name = "ActiveScene", isLoaded = true };
+            EnsureBootstrapScene();
+            return _activeScene;
+        }
+
+        private static int FindSceneIndex(string sceneName)
+        {
+            if (string.IsNullOrEmpty(sceneName))
+            {
+                return -1;
+            }
+
+            for (var i = 0; i < _scenes.Count; i++)
+            {
+                if (string.Equals(_scenes[i].name, sceneName, StringComparison.Ordinal))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private static void EnsureBootstrapScene()
+        {
+            if (_scenes.Count > 0)
+            {
+                return;
+            }
+
+            var bootstrap = new Scene
+            {
+                name = "BootstrapScene",
+                isLoaded = true,
+                isValid = true
+            };
+            _scenes.Add(bootstrap);
+            _activeScene = bootstrap;
         }
     }
 }

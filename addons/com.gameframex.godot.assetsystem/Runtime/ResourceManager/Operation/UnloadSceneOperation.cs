@@ -104,6 +104,14 @@ namespace YooAsset
                 if (_asyncOp == null)
                 {
                     _asyncOp = SceneManager.UnloadSceneAsync(_provider.SceneObject);
+                    if (_asyncOp == null)
+                    {
+                        _steps = ESteps.Done;
+                        Status = EOperationStatus.Failed;
+                        Error = "Scene unload request failed !";
+                        return;
+                    }
+
                     _provider.ResourceMgr.UnloadSubScene(_provider.SceneName);
                 }
 

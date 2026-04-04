@@ -18,6 +18,7 @@ namespace YooAsset
         private readonly string _packageVersion;
         private readonly int _timeout;
         private UnityWebFileRequestOperation _webFileRequestOp;
+        private HttpDataRequestOperation _httpDataRequestOp;
         private int _requestCount = 0;
         private ESteps _steps = ESteps.None;
 
@@ -61,22 +62,50 @@ namespace YooAsset
 
             if (_steps == ESteps.DownloadFile)
             {
-                if (_webFileRequestOp == null)
+                if (_webFileRequestOp == null && _httpDataRequestOp == null)
                 {
                     var savePath = _fileSystem.GetCachePackageHashFilePath(_packageVersion);
                     var fileName = YooAssetSettingsData.GetPackageHashFileName(_fileSystem.PackageName, _packageVersion);
-                    var webURL = GetWebRequestURL(fileName);
-                    _webFileRequestOp = new UnityWebFileRequestOperation(webURL, savePath, _timeout);
-                    OperationSystem.StartOperation(_fileSystem.PackageName, _webFileRequestOp);
+                    var webURL = DownloadSystemHelper.ConvertToWWWPath(GetWebRequestURL(fileName));
+                    if (DownloadSystemHelper.HttpTransport != null)
+                    {
+                        _httpDataRequestOp = new HttpDataRequestOperation(webURL, _timeout, appendTimeTicks: false);
+                        OperationSystem.StartOperation(_fileSystem.PackageName, _httpDataRequestOp);
+                    }
+                    else
+                    {
+                        _webFileRequestOp = new UnityWebFileRequestOperation(webURL, savePath, _timeout);
+                        OperationSystem.StartOperation(_fileSystem.PackageName, _webFileRequestOp);
+                    }
                 }
 
-                if (_webFileRequestOp.IsDone == false)
+                var currentOperation = (AsyncOperationBase)_httpDataRequestOp ?? _webFileRequestOp;
+                if (currentOperation == null)
                 {
                     return;
                 }
 
-                if (_webFileRequestOp.Status == EOperationStatus.Succeed)
+                Progress = currentOperation.Progress;
+                if (currentOperation.IsDone == false)
                 {
+                    return;
+                }
+
+                if (currentOperation.Status == EOperationStatus.Succeed)
+                {
+                    if (_httpDataRequestOp != null)
+                    {
+                        var savePath = _fileSystem.GetCachePackageHashFilePath(_packageVersion);
+                        if (WriteDownloadedData(savePath, _httpDataRequestOp.Result) == false)
+                        {
+                            _steps = ESteps.Done;
+                            Status = EOperationStatus.Failed;
+                            Error = $"Failed to write hash file : {savePath}";
+                            WebRequestCounter.RecordRequestFailed(_fileSystem.PackageName, nameof(DownloadPackageHashOperation));
+                            return;
+                        }
+                    }
+
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Succeed;
                 }
@@ -84,10 +113,22 @@ namespace YooAsset
                 {
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
-                    Error = _webFileRequestOp.Error;
+                    Error = currentOperation.Error;
                     WebRequestCounter.RecordRequestFailed(_fileSystem.PackageName, nameof(DownloadPackageHashOperation));
                 }
             }
+        }
+
+        private static bool WriteDownloadedData(string savePath, byte[] data)
+        {
+            if (data == null || data.Length == 0)
+            {
+                return false;
+            }
+
+            FileUtility.CreateFileDirectory(savePath);
+            File.WriteAllBytes(savePath, data);
+            return true;
         }
 
         [UnityEngine.Scripting.Preserve]

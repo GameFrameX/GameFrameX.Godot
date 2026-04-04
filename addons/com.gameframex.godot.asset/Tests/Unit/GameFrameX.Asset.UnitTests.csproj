@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="TestStubs/UnityDebug.cs" />
     <Compile Include="../../Runtime/PreserveAttribute.cs" Link="Runtime/PreserveAttribute.cs" />
     <Compile Include="../../Runtime/Core/GfAssetSystem.cs" Link="Runtime/Core/GfAssetSystem.cs" />
     <Compile Include="../../Runtime/Operation/OperationStatus.cs" Link="Runtime/Operation/OperationStatus.cs" />
@@ -25,9 +26,12 @@
     <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/OperationSystem/EOperationStatus.cs" Link="YooAsset/OperationSystem/EOperationStatus.cs" />
     <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/OperationSystem/AsyncOperationBase.cs" Link="YooAsset/OperationSystem/AsyncOperationBase.cs" />
     <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/OperationSystem/OperationSystem.cs" Link="YooAsset/OperationSystem/OperationSystem.cs" />
+    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/ResourcePackage/Operation/RequestPackageVersionOperation.cs" Link="YooAsset/ResourcePackage/Operation/RequestPackageVersionOperation.cs" />
+    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/ResourcePackage/Operation/LoadLocalManifestOperation.cs" Link="YooAsset/ResourcePackage/Operation/LoadLocalManifestOperation.cs" />
     <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/ResourcePackage/Operation/UpdatePackageManifestOperation.cs" Link="YooAsset/ResourcePackage/Operation/UpdatePackageManifestOperation.cs" />
     <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Utility/YooUtility.cs" Link="YooAsset/Utility/YooUtility.cs" />
     <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Utility/CRC32Algorithm.cs" Link="YooAsset/Utility/CRC32Algorithm.cs" />
     <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Utility/YooLogger.cs" Link="YooAsset/Utility/YooLogger.cs" />
+    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Compatibility/UnityCompatibilityPlaceholders.cs" Link="YooAsset/Compatibility/UnityCompatibilityPlaceholders.cs" />
   </ItemGroup>
 </Project>

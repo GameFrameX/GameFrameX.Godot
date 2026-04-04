@@ -16,6 +16,7 @@ namespace YooAsset
         private readonly int _timeout;
         private int _failedTryAgain = 1;
         private UnityWebTextRequestOperation _webTextRequestOp;
+        private HttpTextRequestOperation _httpTextRequestOp;
         private int _requestCount = 0;
         private ESteps _steps = ESteps.None;
 
@@ -50,23 +51,38 @@ namespace YooAsset
 
             if (_steps == ESteps.RequestPackageVersion)
             {
-                if (_webTextRequestOp == null)
+                if (_webTextRequestOp == null && _httpTextRequestOp == null)
                 {
                     var fileName = YooAssetSettingsData.GetPackageVersionFileName(_fileSystem.PackageName);
-                    var url = GetWebRequestURL(fileName);
-                    _webTextRequestOp = new UnityWebTextRequestOperation(url, _timeout, _appendTimeTicks);
-                    OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
+                    var url = DownloadSystemHelper.ConvertToWWWPath(GetWebRequestURL(fileName));
+                    if (DownloadSystemHelper.HttpTransport != null)
+                    {
+                        _httpTextRequestOp = new HttpTextRequestOperation(url, _timeout, _appendTimeTicks);
+                        OperationSystem.StartOperation(_fileSystem.PackageName, _httpTextRequestOp);
+                    }
+                    else
+                    {
+                        _webTextRequestOp = new UnityWebTextRequestOperation(url, _timeout, _appendTimeTicks);
+                        OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
+                    }
                 }
 
-                Progress = _webTextRequestOp.Progress;
-                if (_webTextRequestOp.IsDone == false)
+                var currentOperation = (AsyncOperationBase)_httpTextRequestOp ?? _webTextRequestOp;
+                if (currentOperation == null)
                 {
                     return;
                 }
 
-                if (_webTextRequestOp.Status == EOperationStatus.Succeed)
+                Progress = currentOperation.Progress;
+                if (currentOperation.IsDone == false)
                 {
-                    PackageVersion = _webTextRequestOp.Result;
+                    return;
+                }
+
+                if (currentOperation.Status == EOperationStatus.Succeed)
+                {
+                    var rawVersion = _httpTextRequestOp != null ? _httpTextRequestOp.Result : _webTextRequestOp.Result;
+                    PackageVersion = NormalizeText(rawVersion);
                     if (string.IsNullOrEmpty(PackageVersion))
                     {
                         _steps = ESteps.Done;
@@ -86,15 +102,21 @@ namespace YooAsset
                         _failedTryAgain--;
                         _requestCount++;
                         _webTextRequestOp = null;
+                        _httpTextRequestOp = null;
                         return;
                     }
 
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
-                    Error = _webTextRequestOp.Error;
+                    Error = currentOperation.Error;
                     WebRequestCounter.RecordRequestFailed(_fileSystem.PackageName, nameof(RequestRemotePackageVersionOperation));
                 }
             }
+        }
+
+        private static string NormalizeText(string value)
+        {
+            return (value ?? string.Empty).Replace("\uFEFF", string.Empty).Trim();
         }
 
         [UnityEngine.Scripting.Preserve]
