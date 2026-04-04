@@ -1,5 +1,7 @@
 .idea
 .godot
+docs/
+migration-progress/
 
 # Build outputs
 [Bb]in/

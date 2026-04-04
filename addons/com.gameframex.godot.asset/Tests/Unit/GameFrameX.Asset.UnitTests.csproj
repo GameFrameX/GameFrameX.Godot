@@ -23,15 +23,15 @@
     <Compile Include="../../Runtime/Operation/OperationStatus.cs" Link="Runtime/Operation/OperationStatus.cs" />
     <Compile Include="../../Runtime/Operation/AsyncOperationBase.cs" Link="Runtime/Operation/AsyncOperationBase.cs" />
     <Compile Include="../../Runtime/Operation/OperationScheduler.cs" Link="Runtime/Operation/OperationScheduler.cs" />
-    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/OperationSystem/EOperationStatus.cs" Link="YooAsset/OperationSystem/EOperationStatus.cs" />
-    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/OperationSystem/AsyncOperationBase.cs" Link="YooAsset/OperationSystem/AsyncOperationBase.cs" />
-    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/OperationSystem/OperationSystem.cs" Link="YooAsset/OperationSystem/OperationSystem.cs" />
-    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/ResourcePackage/Operation/RequestPackageVersionOperation.cs" Link="YooAsset/ResourcePackage/Operation/RequestPackageVersionOperation.cs" />
-    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/ResourcePackage/Operation/LoadLocalManifestOperation.cs" Link="YooAsset/ResourcePackage/Operation/LoadLocalManifestOperation.cs" />
-    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/ResourcePackage/Operation/UpdatePackageManifestOperation.cs" Link="YooAsset/ResourcePackage/Operation/UpdatePackageManifestOperation.cs" />
-    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Utility/YooUtility.cs" Link="YooAsset/Utility/YooUtility.cs" />
-    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Utility/CRC32Algorithm.cs" Link="YooAsset/Utility/CRC32Algorithm.cs" />
-    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Utility/YooLogger.cs" Link="YooAsset/Utility/YooLogger.cs" />
-    <Compile Include="../../../com.gameframex.godot.assetsystem/Runtime/Compatibility/UnityCompatibilityPlaceholders.cs" Link="YooAsset/Compatibility/UnityCompatibilityPlaceholders.cs" />
+    <Compile Include="../../../GameFrameXAssetSystem/Runtime/OperationSystem/EOperationStatus.cs" Link="YooAsset/OperationSystem/EOperationStatus.cs" />
+    <Compile Include="../../../GameFrameXAssetSystem/Runtime/OperationSystem/AsyncOperationBase.cs" Link="YooAsset/OperationSystem/AsyncOperationBase.cs" />
+    <Compile Include="../../../GameFrameXAssetSystem/Runtime/OperationSystem/OperationSystem.cs" Link="YooAsset/OperationSystem/OperationSystem.cs" />
+    <Compile Include="../../../GameFrameXAssetSystem/Runtime/ResourcePackage/Operation/RequestPackageVersionOperation.cs" Link="YooAsset/ResourcePackage/Operation/RequestPackageVersionOperation.cs" />
+    <Compile Include="../../../GameFrameXAssetSystem/Runtime/ResourcePackage/Operation/LoadLocalManifestOperation.cs" Link="YooAsset/ResourcePackage/Operation/LoadLocalManifestOperation.cs" />
+    <Compile Include="../../../GameFrameXAssetSystem/Runtime/ResourcePackage/Operation/UpdatePackageManifestOperation.cs" Link="YooAsset/ResourcePackage/Operation/UpdatePackageManifestOperation.cs" />
+    <Compile Include="../../../GameFrameXAssetSystem/Runtime/Utility/YooUtility.cs" Link="YooAsset/Utility/YooUtility.cs" />
+    <Compile Include="../../../GameFrameXAssetSystem/Runtime/Utility/CRC32Algorithm.cs" Link="YooAsset/Utility/CRC32Algorithm.cs" />
+    <Compile Include="../../../GameFrameXAssetSystem/Runtime/Utility/YooLogger.cs" Link="YooAsset/Utility/YooLogger.cs" />
+    <Compile Include="../../../GameFrameXAssetSystem/Runtime/Compatibility/UnityCompatibilityPlaceholders.cs" Link="YooAsset/Compatibility/UnityCompatibilityPlaceholders.cs" />
   </ItemGroup>
 </Project>
