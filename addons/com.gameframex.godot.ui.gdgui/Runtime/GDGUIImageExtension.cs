@@ -8,7 +8,7 @@ namespace GameFrameX.UI.GDGUI.Runtime
     /// <summary>
     /// GDGUI 图片扩展。
     /// </summary>
-    public static class UGUIImageExtension
+    public static class GDGUIImageExtension
     {
         /// <summary>
         /// 异步设置图标。

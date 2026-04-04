@@ -80,11 +80,11 @@ namespace GameFrameX.UI.Runtime
 
         [Export] private NodePath m_UIRootPath;
 
-        [Export] private string m_UIFormHelperTypeName = "GameFrameX.UI.GDGUI.Runtime.UGUIFormHelper";
+        [Export] private string m_UIFormHelperTypeName = "GameFrameX.UI.GDGUI.Runtime.GDGUIFormHelper";
 
         [Export] private UIFormHelperBase m_CustomUIFormHelper = null;
 
-        [Export] private string m_UIGroupHelperTypeName = "GameFrameX.UI.GDGUI.Runtime.UGUIUIGroupHelper";
+        [Export] private string m_UIGroupHelperTypeName = "GameFrameX.UI.GDGUI.Runtime.GDGUIUIGroupHelper";
 
         [Export] private UIGroupHelperBase m_CustomUIGroupHelper = null;
 

@@ -19,13 +19,13 @@ namespace GameFrameX.UI.GDGUI.Runtime
             {
                 typeof(ControlExtension),
                 typeof(UIManager),
-                typeof(UGUIFormHelper),
-                typeof(UGUI),
-                typeof(UGUIButtonExtension),
-                typeof(UGUIElementPropertyAttribute),
-                typeof(UGUIUIGroupHelper),
+                typeof(GDGUIFormHelper),
+                typeof(GDGUI),
+                typeof(GDGUIButtonExtension),
+                typeof(GDGUIElementPropertyAttribute),
+                typeof(GDGUIUIGroupHelper),
                 typeof(UIImage),
-                typeof(UGUIImageExtension),
+                typeof(GDGUIImageExtension),
             };
         }
     }

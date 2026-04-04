@@ -9,7 +9,7 @@ namespace GameFrameX.UI.GDGUI.Runtime
     /// <summary>
     /// GDGUI 界面辅助器。
     /// </summary>
-    public partial class UGUIFormHelper : UIFormHelperBase
+    public partial class GDGUIFormHelper : UIFormHelperBase
     {
         private UIComponent m_UIComponent;
 

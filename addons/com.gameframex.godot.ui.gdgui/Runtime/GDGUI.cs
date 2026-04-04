@@ -6,7 +6,7 @@ namespace GameFrameX.UI.GDGUI.Runtime
     /// <summary>
     /// GDGUI 界面基类。
     /// </summary>
-    public partial class UGUI : UIForm
+    public partial class GDGUI : UIForm
     {
         /// <summary>
         /// 执行界面显示。

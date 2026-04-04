@@ -8,7 +8,7 @@ namespace GameFrameX.UI.GDGUI.Runtime
     /// <summary>
     /// GDGUI 按钮扩展。
     /// </summary>
-    public static class UGUIButtonExtension
+    public static class GDGUIButtonExtension
     {
         private static readonly Dictionary<BaseButton, Dictionary<Delegate, Action>> s_CallbackMap = new Dictionary<BaseButton, Dictionary<Delegate, Action>>();
 

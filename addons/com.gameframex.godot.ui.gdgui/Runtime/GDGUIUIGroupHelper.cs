@@ -6,7 +6,7 @@ namespace GameFrameX.UI.GDGUI.Runtime
     /// <summary>
     /// GDGUI 界面组辅助器。
     /// </summary>
-    public partial class UGUIUIGroupHelper : UIGroupHelperBase
+    public partial class GDGUIUIGroupHelper : UIGroupHelperBase
     {
         private int m_Depth;
 

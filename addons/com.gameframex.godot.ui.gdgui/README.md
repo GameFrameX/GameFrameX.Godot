@@ -1,6 +1,6 @@
 # com.gameframex.godot.ui.gdgui
 
-GameFrameX 在 Godot 下的 `UGUI` 风格适配层，提供 UIManager、UIFormHelper、UIGroupHelper、按钮/图片扩展与裁剪保活辅助。
+GameFrameX 在 Godot 下的 `GDGUI` 风格适配层，提供 UIManager、UIFormHelper、UIGroupHelper、按钮/图片扩展与裁剪保活辅助。
 
 ## 依赖
 
@@ -10,19 +10,19 @@ GameFrameX 在 Godot 下的 `UGUI` 风格适配层，提供 UIManager、UIFormHe
 ## 已提供内容
 
 - `UIManager`：基于 `BaseUIManager` 的 GDGUI 实现。
-- `UGUIFormHelper`：使用 `PackedScene.Instantiate()` 创建 UI，使用 `QueueFree()` 释放。
-- `UGUIUIGroupHelper`：按 UIGroup 创建容器并管理深度。
-- `UGUI`：UI 基类，适配显示/隐藏处理器。
-- `UGUIButtonExtension`：按钮事件 `Add/Remove/Set/Clear`。
-- `UGUIImageExtension` + `UIImage`：图片异步设置纹理能力。
+- `GDGUIFormHelper`：使用 `PackedScene.Instantiate()` 创建 UI，使用 `QueueFree()` 释放。
+- `GDGUIUIGroupHelper`：按 UIGroup 创建容器并管理深度。
+- `GDGUI`：UI 基类，适配显示/隐藏处理器。
+- `GDGUIButtonExtension`：按钮事件 `Add/Remove/Set/Clear`。
+- `GDGUIImageExtension` + `UIImage`：图片异步设置纹理能力。
 - `GameFrameXUIGDGUICroppingHelper`：防裁剪类型引用保活。
 
 ## 默认接入行为
 
 项目已支持自动接入：
 
-- `UIComponent` 的默认 `UIFormHelper` 指向 `GameFrameX.UI.GDGUI.Runtime.UGUIFormHelper`。
-- `UIComponent` 的默认 `UIGroupHelper` 指向 `GameFrameX.UI.GDGUI.Runtime.UGUIUIGroupHelper`。
+- `UIComponent` 的默认 `UIFormHelper` 指向 `GameFrameX.UI.GDGUI.Runtime.GDGUIFormHelper`。
+- `UIComponent` 的默认 `UIGroupHelper` 指向 `GameFrameX.UI.GDGUI.Runtime.GDGUIUIGroupHelper`。
 - 当 `componentType` 为空时，优先解析 `GameFrameX.UI.GDGUI.Runtime.UIManager`。
 
 ## 回退策略
@@ -53,7 +53,7 @@ namespace Demo
     /// <summary>
     /// 示例界面。
     /// </summary>
-    public partial class DemoMainUI : UGUI
+    public partial class DemoMainUI : GDGUI
     {
     }
 }
