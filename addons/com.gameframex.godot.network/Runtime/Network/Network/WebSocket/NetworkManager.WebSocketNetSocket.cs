@@ -14,6 +14,8 @@ namespace GameFrameX.Network.Runtime
         {
             private readonly WebSocketPeer _client;
             private readonly string _url;
+            private int _receiveBufferSize = 65535;
+            private int _sendBufferSize = 65535;
 
             /// <summary>
             /// 是否正在连接
@@ -37,6 +39,8 @@ namespace GameFrameX.Network.Runtime
             {
                 _url = url;
                 _client = new WebSocketPeer();
+                _client.InboundBufferSize = _receiveBufferSize;
+                _client.OutboundBufferSize = _sendBufferSize;
                 _onReceiveAction = onReceiveAction;
                 _onCloseAction = onCloseAction;
                 _onErrorAction = onErrorAction;
@@ -80,6 +84,10 @@ namespace GameFrameX.Network.Runtime
                         if (!_client.WasStringPacket())
                         {
                             _onReceiveAction?.Invoke(packet);
+                        }
+                        else
+                        {
+                            Log.Warning("WebSocket received text frame in binary protocol channel, ignored.");
                         }
                     }
 
@@ -144,8 +152,35 @@ namespace GameFrameX.Network.Runtime
                 get { return null; }
             }
 
-            public int ReceiveBufferSize { get; set; }
-            public int SendBufferSize { get; set; }
+            public int ReceiveBufferSize
+            {
+                get { return _receiveBufferSize; }
+                set
+                {
+                    if (value <= 0)
+                    {
+                        throw new ArgumentException("Receive buffer size is invalid.", nameof(value));
+                    }
+
+                    _receiveBufferSize = value;
+                    _client.InboundBufferSize = value;
+                }
+            }
+
+            public int SendBufferSize
+            {
+                get { return _sendBufferSize; }
+                set
+                {
+                    if (value <= 0)
+                    {
+                        throw new ArgumentException("Send buffer size is invalid.", nameof(value));
+                    }
+
+                    _sendBufferSize = value;
+                    _client.OutboundBufferSize = value;
+                }
+            }
 
             public void Shutdown()
             {
