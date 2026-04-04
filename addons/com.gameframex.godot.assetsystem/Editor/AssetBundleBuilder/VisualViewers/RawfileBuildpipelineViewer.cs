@@ -13,7 +13,7 @@ namespace YooAsset.Editor
     internal class RawfileBuildpipelineViewer : BuildPipelineViewerBase
     {
         public RawfileBuildpipelineViewer(string packageName, BuildTarget buildTarget, VisualElement parent)
-            : base(packageName, EBuildPipeline.RawFileBuildPipeline, buildTarget, parent)
+            : base(packageName, EBuildPipeline.GodotFileBuildPipeline, buildTarget, parent)
         {
             var compressionField = Root.Q<EnumField>("Compression");
             UIElementsTools.SetElementVisible(compressionField, false);

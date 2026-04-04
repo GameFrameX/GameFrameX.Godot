@@ -2,6 +2,8 @@ using System;
 using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using Godot;
 using UnityEngine.SceneManagement;
 
 namespace YooAsset
@@ -9,6 +11,7 @@ namespace YooAsset
     public static partial class YooAssets
     {
         private static ResourcePackage _defaultPackage;
+        private static readonly HashSet<string> MountedGodotResourcePacks = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// 设置默认的资源包
@@ -179,6 +182,243 @@ namespace YooAsset
         {
             DebugCheckDefaultPackageValid();
             return _defaultPackage.LoadRawFileAsync(location, priority);
+        }
+
+        /// <summary>
+        /// 通过原生文件句柄加载 Godot 资源。
+        /// </summary>
+        /// <param name="rawFileHandle">原生文件句柄</param>
+        /// <param name="typeHint">资源类型提示，可为空</param>
+        [UnityEngine.Scripting.Preserve]
+        public static Resource LoadGodotResourceFromRawFile(RawFileHandle rawFileHandle, string typeHint = "")
+        {
+            if (rawFileHandle == null)
+            {
+                YooLogger.Warning("Raw file handle is null.");
+                return null;
+            }
+
+            var rawFilePath = rawFileHandle.GetRawFilePath();
+            if (string.IsNullOrWhiteSpace(rawFilePath))
+            {
+                YooLogger.Warning("Raw file path is empty.");
+                return null;
+            }
+
+            return LoadGodotResourceFromPath(rawFilePath, typeHint);
+        }
+
+        /// <summary>
+        /// 同步加载原生文件并转换为 Godot 资源。
+        /// </summary>
+        /// <param name="location">资源定位地址</param>
+        /// <param name="typeHint">资源类型提示，可为空</param>
+        [UnityEngine.Scripting.Preserve]
+        public static Resource LoadGodotResourceFromRawFileSync(string location, string typeHint = "")
+        {
+            DebugCheckDefaultPackageValid();
+            var rawFileHandle = _defaultPackage.LoadRawFileSync(location);
+            try
+            {
+                return LoadGodotResourceFromRawFile(rawFileHandle, typeHint);
+            }
+            finally
+            {
+                rawFileHandle?.Release();
+            }
+        }
+
+        /// <summary>
+        /// 同步加载原生文件并转换为指定类型的 Godot 资源。
+        /// </summary>
+        [UnityEngine.Scripting.Preserve]
+        public static TResource LoadGodotResourceFromRawFileSync<TResource>(string location) where TResource : Resource
+        {
+            var resource = LoadGodotResourceFromRawFileSync(location, typeof(TResource).Name);
+            return resource as TResource;
+        }
+
+        /// <summary>
+        /// 同步加载原生文件并转换为 Godot 资源。
+        /// </summary>
+        /// <param name="assetInfo">资源信息</param>
+        /// <param name="typeHint">资源类型提示，可为空</param>
+        [UnityEngine.Scripting.Preserve]
+        public static Resource LoadGodotResourceFromRawFileSync(AssetInfo assetInfo, string typeHint = "")
+        {
+            DebugCheckDefaultPackageValid();
+            var rawFileHandle = _defaultPackage.LoadRawFileSync(assetInfo);
+            try
+            {
+                return LoadGodotResourceFromRawFile(rawFileHandle, typeHint);
+            }
+            finally
+            {
+                rawFileHandle?.Release();
+            }
+        }
+
+        /// <summary>
+        /// 同步加载原生文件并转换为指定类型的 Godot 资源。
+        /// </summary>
+        [UnityEngine.Scripting.Preserve]
+        public static TResource LoadGodotResourceFromRawFileSync<TResource>(AssetInfo assetInfo) where TResource : Resource
+        {
+            var resource = LoadGodotResourceFromRawFileSync(assetInfo, typeof(TResource).Name);
+            return resource as TResource;
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        private static Resource LoadGodotResourceFromPath(string rawFilePath, string typeHint)
+        {
+            var pathCandidates = new List<string>(2);
+            if (rawFilePath.StartsWith("res://") || rawFilePath.StartsWith("user://"))
+            {
+                pathCandidates.Add(rawFilePath);
+            }
+            else
+            {
+                var localizedPath = ProjectSettings.LocalizePath(rawFilePath);
+                if (string.IsNullOrWhiteSpace(localizedPath) == false)
+                {
+                    pathCandidates.Add(localizedPath);
+                }
+            }
+
+            for (var i = 0; i < pathCandidates.Count; i++)
+            {
+                var candidate = pathCandidates[i];
+                if (ResourceLoader.Exists(candidate) == false)
+                {
+                    continue;
+                }
+
+                var resource = ResourceLoader.Load(candidate, typeHint);
+                if (resource != null)
+                {
+                    return resource;
+                }
+            }
+
+            YooLogger.Warning($"Can not load Godot resource from raw file path : {rawFilePath}");
+            return null;
+        }
+
+        /// <summary>
+        /// 挂载原生文件句柄对应的 Godot 资源包（PCK）。
+        /// </summary>
+        [UnityEngine.Scripting.Preserve]
+        public static bool MountGodotResourcePackFromRawFile(RawFileHandle rawFileHandle, bool replaceFiles = false, int offset = 0)
+        {
+            if (rawFileHandle == null)
+            {
+                YooLogger.Warning("Raw file handle is null.");
+                return false;
+            }
+
+            var rawFilePath = rawFileHandle.GetRawFilePath();
+            if (string.IsNullOrWhiteSpace(rawFilePath))
+            {
+                YooLogger.Warning("Raw file path is empty.");
+                return false;
+            }
+
+            return MountGodotResourcePack(rawFilePath, replaceFiles, offset);
+        }
+
+        /// <summary>
+        /// 同步加载原生文件并挂载 Godot 资源包（PCK）。
+        /// </summary>
+        [UnityEngine.Scripting.Preserve]
+        public static bool MountGodotResourcePackFromRawFileSync(string location, bool replaceFiles = false, int offset = 0)
+        {
+            DebugCheckDefaultPackageValid();
+            var rawFileHandle = _defaultPackage.LoadRawFileSync(location);
+            try
+            {
+                return MountGodotResourcePackFromRawFile(rawFileHandle, replaceFiles, offset);
+            }
+            finally
+            {
+                rawFileHandle?.Release();
+            }
+        }
+
+        /// <summary>
+        /// 同步加载原生文件并挂载 Godot 资源包（PCK）。
+        /// </summary>
+        [UnityEngine.Scripting.Preserve]
+        public static bool MountGodotResourcePackFromRawFileSync(AssetInfo assetInfo, bool replaceFiles = false, int offset = 0)
+        {
+            DebugCheckDefaultPackageValid();
+            var rawFileHandle = _defaultPackage.LoadRawFileSync(assetInfo);
+            try
+            {
+                return MountGodotResourcePackFromRawFile(rawFileHandle, replaceFiles, offset);
+            }
+            finally
+            {
+                rawFileHandle?.Release();
+            }
+        }
+
+        /// <summary>
+        /// 通过路径挂载 Godot 资源包（PCK）。
+        /// </summary>
+        [UnityEngine.Scripting.Preserve]
+        public static bool MountGodotResourcePackByPath(string pckPath, bool replaceFiles = false, int offset = 0)
+        {
+            return MountGodotResourcePack(pckPath, replaceFiles, offset);
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        private static bool MountGodotResourcePack(string rawFilePath, bool replaceFiles, int offset)
+        {
+            var physicalPath = ResolvePhysicalPath(rawFilePath);
+            if (string.IsNullOrWhiteSpace(physicalPath))
+            {
+                YooLogger.Warning($"Invalid pck path : {rawFilePath}");
+                return false;
+            }
+
+            if (File.Exists(physicalPath) == false)
+            {
+                YooLogger.Warning($"PCK file not found : {physicalPath}");
+                return false;
+            }
+
+            if (MountedGodotResourcePacks.Contains(physicalPath))
+            {
+                YooLogger.Log($"Godot resource pack already mounted : {physicalPath}");
+                return true;
+            }
+
+            var mounted = ProjectSettings.LoadResourcePack(physicalPath, replaceFiles, offset);
+            if (mounted == false)
+            {
+                YooLogger.Warning($"Failed to mount Godot resource pack : {physicalPath}");
+                return false;
+            }
+
+            MountedGodotResourcePacks.Add(physicalPath);
+            YooLogger.Log($"Mounted Godot resource pack : {physicalPath}");
+            return true;
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        private static string ResolvePhysicalPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return string.Empty;
+            }
+
+            if (path.StartsWith("res://", StringComparison.OrdinalIgnoreCase) || path.StartsWith("user://", StringComparison.OrdinalIgnoreCase))
+            {
+                return ProjectSettings.GlobalizePath(path);
+            }
+
+            return path;
         }
 
         #endregion
