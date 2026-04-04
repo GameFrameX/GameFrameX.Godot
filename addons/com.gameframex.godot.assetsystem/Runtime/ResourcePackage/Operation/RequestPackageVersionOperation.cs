@@ -26,6 +26,8 @@
         private readonly IFileSystem _fileSystem;
         private readonly bool _appendTimeTicks;
         private readonly int _timeout;
+        private const int MaxRetryCount = 1;
+        private int _retryCount = 0;
         private FSRequestPackageVersionOperation _requestPackageVersionOp;
         private ESteps _steps = ESteps.None;
 
@@ -71,6 +73,13 @@
                 }
                 else
                 {
+                    if (_retryCount < MaxRetryCount)
+                    {
+                        _retryCount++;
+                        _requestPackageVersionOp = null;
+                        return;
+                    }
+
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
                     Error = _requestPackageVersionOp.Error;

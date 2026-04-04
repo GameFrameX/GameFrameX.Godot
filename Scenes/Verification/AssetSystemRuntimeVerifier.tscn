@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Verification/AssetSystemRuntimeVerifier.cs" id="1"]
+
+[node name="AssetSystemRuntimeVerifier" type="Node"]
+script = ExtResource("1")
+PackageName = "runtime_verify"
+PackageVersion = "v1"
+SceneLocation = "verify_scene"
+FixtureVirtualRoot = "user://assetsystem_runtime_verify/yoo"
+AutoRunOnReady = true
+AutoQuitOnFinish = true

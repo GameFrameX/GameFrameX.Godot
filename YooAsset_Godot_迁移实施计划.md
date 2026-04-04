@@ -5,6 +5,21 @@
 本计划基于 YooAsset 源码结构，设计一个 Godot 4.5（C#）可落地的资源系统转换方案。  
 执行方式采用“**一次只做一件事**”的递进模式，每个阶段完成后必须通过测试门禁，再进入下一阶段。
 
+### 1.1 当前执行快照（assetsystem runtime 分支，2026-04-04）
+
+- 已完成：`M1.1 / M1.2 / M1.3 / M2.1`
+- 已完成（部分）：`M2.2`（资源后端抽象已接入 Provider loader 与 Instantiate 路径）
+- 已完成（部分）：`L1.1`（场景生命周期兼容语义测试与基础实现已落地）
+- 已完成（部分）：`L1.2`（operation 级 E2E 链路测试、版本重试、manifest 本地回退已落地）
+- 已完成（准备）：`L1.2-RT`（Godot 场景级验证脚本与场景已落地，待本机 Godot 可执行环境实跑）
+- 当前验证结果：
+  - `dotnet build Godot.sln -v minimal`：通过
+  - `dotnet build Godot.sln -v minimal -p:IncludeAssetSystemRuntime=true`：通过
+  - `dotnet test addons/com.gameframex.godot.asset/Tests/Unit/GameFrameX.Asset.UnitTests.csproj -v minimal`：通过（30）
+- 下一执行项（按顺序）：
+  - `L1.2-RT`：Godot 场景级真实链路验证（真实资源下载/加载）
+  - `L2.1`：移除长期编译排除并做最终矩阵验证
+
 ---
 
 ## 2. 参考源码范围（Unity YooAsset）

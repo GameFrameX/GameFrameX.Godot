@@ -8,13 +8,24 @@ namespace YooAsset.Editor
 {
     public static class AssetBundleBuilderHelper
     {
+        private static bool UseLegacyUnityPathLayout()
+        {
+            string key = $"{Application.productName}_{nameof(AssetBundleBuilderHelper)}_UseLegacyUnityPathLayout";
+            return EditorPrefs.GetBool(key, false);
+        }
+
         /// <summary>
         /// 获取默认的输出根目录
         /// </summary>
         public static string GetDefaultBuildOutputRoot()
         {
             string projectPath = EditorTools.GetProjectPath();
-            return $"{projectPath}/Bundles";
+            if (UseLegacyUnityPathLayout())
+            {
+                return $"{projectPath}/Bundles";
+            }
+
+            return $"{projectPath}/Builds/Godot";
         }
 
         /// <summary>
@@ -22,7 +33,13 @@ namespace YooAsset.Editor
         /// </summary>
         public static string GetStreamingAssetsRoot()
         {
-            return $"{Application.dataPath}/StreamingAssets/{YooAssetSettingsData.Setting.DefaultYooFolderName}/";
+            if (UseLegacyUnityPathLayout())
+            {
+                return $"{Application.dataPath}/StreamingAssets/{YooAssetSettingsData.Setting.DefaultYooFolderName}/";
+            }
+
+            string projectPath = EditorTools.GetProjectPath();
+            return $"{projectPath}/Builds/GodotBuiltin";
         }
     }
 }

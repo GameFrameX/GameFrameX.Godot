@@ -69,9 +69,9 @@ namespace YooAsset.Editor
                 {
                     _pipelineMenu = new ToolbarMenu();
                     _pipelineMenu.style.width = 200;
-                    _pipelineMenu.menu.AppendAction(EBuildPipeline.BuiltinBuildPipeline.ToString(), PipelineMenuAction, PipelineMenuFun, EBuildPipeline.BuiltinBuildPipeline);
-                    _pipelineMenu.menu.AppendAction(EBuildPipeline.ScriptableBuildPipeline.ToString(), PipelineMenuAction, PipelineMenuFun, EBuildPipeline.ScriptableBuildPipeline);
-                    _pipelineMenu.menu.AppendAction(EBuildPipeline.RawFileBuildPipeline.ToString(), PipelineMenuAction, PipelineMenuFun, EBuildPipeline.RawFileBuildPipeline);
+                    _pipelineMenu.menu.AppendAction(GetPipelineDisplayName(EBuildPipeline.GodotFileBuildPipeline), PipelineMenuAction, PipelineMenuFun, EBuildPipeline.GodotFileBuildPipeline);
+                    _pipelineMenu.menu.AppendAction(GetPipelineDisplayName(EBuildPipeline.BuiltinBuildPipeline), PipelineMenuAction, PipelineMenuFun, EBuildPipeline.BuiltinBuildPipeline);
+                    _pipelineMenu.menu.AppendAction(GetPipelineDisplayName(EBuildPipeline.ScriptableBuildPipeline), PipelineMenuAction, PipelineMenuFun, EBuildPipeline.ScriptableBuildPipeline);
                     _toolbar.Add(_pipelineMenu);
                 }
 
@@ -90,7 +90,7 @@ namespace YooAsset.Editor
 
             _buildPipeline = AssetBundleBuilderSetting.GetPackageBuildPipeline(_buildPackage);
             _packageMenu.text = _buildPackage;
-            _pipelineMenu.text = _buildPipeline.ToString();
+            _pipelineMenu.text = GetPipelineDisplayName(_buildPipeline);
 
             var buildTarget = EditorUserBuildSettings.activeBuildTarget;
             if (_buildPipeline == EBuildPipeline.BuiltinBuildPipeline)
@@ -101,7 +101,7 @@ namespace YooAsset.Editor
             {
                 var viewer = new ScriptableBuildPipelineViewer(_buildPackage, buildTarget, _container);
             }
-            else if (_buildPipeline == EBuildPipeline.RawFileBuildPipeline)
+            else if (_buildPipeline == EBuildPipeline.RawFileBuildPipeline || _buildPipeline == EBuildPipeline.GodotFileBuildPipeline)
             {
                 var viewer = new RawfileBuildpipelineViewer(_buildPackage, buildTarget, _container);
             }
@@ -155,6 +155,26 @@ namespace YooAsset.Editor
                 return DropdownMenuAction.Status.Checked;
             else
                 return DropdownMenuAction.Status.Normal;
+        }
+
+        private static string GetPipelineDisplayName(EBuildPipeline buildPipeline)
+        {
+            if (buildPipeline == EBuildPipeline.GodotFileBuildPipeline || buildPipeline == EBuildPipeline.RawFileBuildPipeline)
+            {
+                return "GodotFileBuildPipeline";
+            }
+
+            if (buildPipeline == EBuildPipeline.BuiltinBuildPipeline)
+            {
+                return "BuiltinBuildPipeline (Legacy)";
+            }
+
+            if (buildPipeline == EBuildPipeline.ScriptableBuildPipeline)
+            {
+                return "ScriptableBuildPipeline (Legacy)";
+            }
+
+            return buildPipeline.ToString();
         }
     }
 }

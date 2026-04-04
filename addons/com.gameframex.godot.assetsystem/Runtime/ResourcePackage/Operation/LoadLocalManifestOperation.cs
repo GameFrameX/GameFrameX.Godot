@@ -91,6 +91,12 @@ namespace YooAsset
 
             if (_steps == ESteps.TryLoadCacheManifest)
             {
+                if (_cacheFileSystem == null)
+                {
+                    _steps = ESteps.LoadBuildinManifest;
+                    return;
+                }
+
                 if (_loadCacheManifestOp == null)
                 {
                     _loadCacheManifestOp = _cacheFileSystem.LoadLocalPackageManifestAsync(_packageVersion, _timeout);
@@ -119,9 +125,17 @@ namespace YooAsset
 
             if (_steps == ESteps.LoadBuildinManifest)
             {
+                if (_buildinFileSystem == null)
+                {
+                    _steps = ESteps.Done;
+                    Status = EOperationStatus.Failed;
+                    Error = "Buildin file system is null.";
+                    return;
+                }
+
                 if (_loadBuildinManifestOp == null)
                 {
-                    _loadBuildinManifestOp = _buildinFileSystem.RequestRemotePackageManifestAsync(_packageVersion, _timeout);
+                    _loadBuildinManifestOp = _buildinFileSystem.LoadLocalPackageManifestAsync(_packageVersion, _timeout);
                 }
 
                 if (_loadBuildinManifestOp.IsDone == false)
@@ -149,7 +163,7 @@ namespace YooAsset
         [UnityEngine.Scripting.Preserve]
         public void SavePackageVersion()
         {
-            if (_impl.ActiveManifest != null)
+            if (_impl.ActiveManifest != null && _cacheFileSystem != null)
             {
                 var fileName = YooAssetSettingsData.GetPackageVersionFileName(_buildinFileSystem.PackageName);
                 var _manifestFileRoot = PathUtility.Combine(_cacheFileSystem.FileRoot, DefaultCacheFileSystemDefine.ManifestFilesFolderName);

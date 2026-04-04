@@ -16,6 +16,7 @@ namespace YooAsset
         private readonly bool _appendTimeTicks;
         private int _failedTryAgain = 1;
         private UnityWebTextRequestOperation _webTextRequestOp;
+        private HttpTextRequestOperation _httpTextRequestOp;
         private ESteps _steps = ESteps.None;
 
         /// <summary>
@@ -48,23 +49,37 @@ namespace YooAsset
 
             if (_steps == ESteps.RequestPackageVersion)
             {
-                if (_webTextRequestOp == null)
+                if (_webTextRequestOp == null && _httpTextRequestOp == null)
                 {
                     var filePath = _fileSystem.GetWebPackageVersionFilePath();
                     var url = DownloadSystemHelper.ConvertToWWWPath(filePath);
-                    _webTextRequestOp = new UnityWebTextRequestOperation(url, _timeout, _appendTimeTicks);
-                    OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
+                    if (DownloadSystemHelper.HttpTransport != null)
+                    {
+                        _httpTextRequestOp = new HttpTextRequestOperation(url, _timeout, _appendTimeTicks);
+                        OperationSystem.StartOperation(_fileSystem.PackageName, _httpTextRequestOp);
+                    }
+                    else
+                    {
+                        _webTextRequestOp = new UnityWebTextRequestOperation(url, _timeout, _appendTimeTicks);
+                        OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
+                    }
                 }
 
-                Progress = _webTextRequestOp.Progress;
-                if (_webTextRequestOp.IsDone == false)
+                var currentOperation = (AsyncOperationBase)_httpTextRequestOp ?? _webTextRequestOp;
+                if (currentOperation == null)
                 {
                     return;
                 }
 
-                if (_webTextRequestOp.Status == EOperationStatus.Succeed)
+                Progress = currentOperation.Progress;
+                if (currentOperation.IsDone == false)
                 {
-                    PackageVersion = _webTextRequestOp.Result;
+                    return;
+                }
+
+                if (currentOperation.Status == EOperationStatus.Succeed)
+                {
+                    PackageVersion = _httpTextRequestOp != null ? _httpTextRequestOp.Result : _webTextRequestOp.Result;
                     if (string.IsNullOrEmpty(PackageVersion))
                     {
                         _steps = ESteps.Done;
@@ -83,12 +98,13 @@ namespace YooAsset
                     {
                         _failedTryAgain--;
                         _webTextRequestOp = null;
+                        _httpTextRequestOp = null;
                         return;
                     }
 
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
-                    Error = _webTextRequestOp.Error;
+                    Error = currentOperation.Error;
                 }
             }
         }

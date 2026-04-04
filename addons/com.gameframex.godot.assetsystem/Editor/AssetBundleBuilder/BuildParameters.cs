@@ -168,7 +168,7 @@ namespace YooAsset.Editor
         {
             if (string.IsNullOrEmpty(_pipelineOutputDirectory))
             {
-                _pipelineOutputDirectory = $"{BuildOutputRoot}/{BuildTarget}/{PackageName}/{YooAssetSettings.OutputFolderName}";
+                _pipelineOutputDirectory = NormalizePath(Path.Combine(BuildOutputRoot, BuildTarget.ToString(), PackageName, YooAssetSettings.OutputFolderName));
             }
             return _pipelineOutputDirectory;
         }
@@ -180,7 +180,7 @@ namespace YooAsset.Editor
         {
             if (string.IsNullOrEmpty(_packageOutputDirectory))
             {
-                _packageOutputDirectory = $"{BuildOutputRoot}/{BuildTarget}/{PackageName}/{PackageVersion}";
+                _packageOutputDirectory = NormalizePath(Path.Combine(BuildOutputRoot, BuildTarget.ToString(), PackageName, PackageVersion));
             }
             return _packageOutputDirectory;
         }
@@ -192,7 +192,7 @@ namespace YooAsset.Editor
         {
             if (string.IsNullOrEmpty(_packageRootDirectory))
             {
-                _packageRootDirectory = $"{BuildOutputRoot}/{BuildTarget}/{PackageName}";
+                _packageRootDirectory = NormalizePath(Path.Combine(BuildOutputRoot, BuildTarget.ToString(), PackageName));
             }
             return _packageRootDirectory;
         }
@@ -204,9 +204,14 @@ namespace YooAsset.Editor
         {
             if (string.IsNullOrEmpty(_buildinRootDirectory))
             {
-                _buildinRootDirectory = $"{BuildinFileRoot}/{PackageName}";
+                _buildinRootDirectory = NormalizePath(Path.Combine(BuildinFileRoot, PackageName));
             }
             return _buildinRootDirectory;
+        }
+
+        private static string NormalizePath(string path)
+        {
+            return path?.Replace('\\', '/');
         }
     }
 }

@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine.Networking;
 
 namespace YooAsset
@@ -13,6 +15,7 @@ namespace YooAsset
     public class DownloadSystemHelper
     {
         public static UnityWebRequestDelegate UnityWebRequestCreater = null;
+        public static IHttpTransport HttpTransport = new GodotHttpTransport();
 
         [UnityEngine.Scripting.Preserve]
         public static UnityWebRequest NewUnityWebRequestGet(string requestURL)
@@ -141,6 +144,36 @@ namespace YooAsset
             var requestError = webRequest != null ? webRequest.error : "request is null";
             var responseCode = webRequest != null ? webRequest.responseCode : 0;
             return $"[{errorCode}] URL : {requestURL} HTTP : {responseCode} Error : {requestError}";
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public static Task<HttpResponse> RequestTextAsync(string requestURL, int timeout, bool appendTimeTicks, CancellationToken cancellationToken)
+        {
+            if (HttpTransport == null)
+            {
+                return Task.FromResult<HttpResponse>(new HttpResponse
+                {
+                    Success = false,
+                    Error = "http transport is null.",
+                });
+            }
+
+            return HttpTransport.GetTextAsync(requestURL, timeout, appendTimeTicks, cancellationToken);
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public static Task<HttpResponse> RequestDataAsync(string requestURL, int timeout, bool appendTimeTicks, CancellationToken cancellationToken)
+        {
+            if (HttpTransport == null)
+            {
+                return Task.FromResult<HttpResponse>(new HttpResponse
+                {
+                    Success = false,
+                    Error = "http transport is null.",
+                });
+            }
+
+            return HttpTransport.GetDataAsync(requestURL, timeout, appendTimeTicks, cancellationToken);
         }
 
         /// <summary>
