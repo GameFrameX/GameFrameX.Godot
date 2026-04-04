@@ -6,16 +6,19 @@ namespace YooAsset.Editor
 {
     public static class AssetBundleBuilderSetting
     {
+        private static readonly EBuildPipeline DefaultBuildPipeline = EBuildPipeline.GodotFileBuildPipeline;
+
         // EBuildPipeline
         public static EBuildPipeline GetPackageBuildPipeline(string packageName)
         {
             string key = $"{Application.productName}_{packageName}_{nameof(EBuildPipeline)}";
-            return (EBuildPipeline)EditorPrefs.GetInt(key, (int)EBuildPipeline.BuiltinBuildPipeline);
+            var pipelineValue = EditorPrefs.GetInt(key, (int)DefaultBuildPipeline);
+            return NormalizeBuildPipeline((EBuildPipeline)pipelineValue);
         }
         public static void SetPackageBuildPipeline(string packageName, EBuildPipeline buildPipeline)
         {
             string key = $"{Application.productName}_{packageName}_{nameof(EBuildPipeline)}";
-            EditorPrefs.SetInt(key, (int)buildPipeline);
+            EditorPrefs.SetInt(key, (int)NormalizeBuildPipeline(buildPipeline));
         }
 
         // EBuildMode
@@ -88,6 +91,21 @@ namespace YooAsset.Editor
         {
             string key = $"{Application.productName}_{packageName}_{buildPipeline}_EncyptionClassName";
             EditorPrefs.SetString(key, encyptionClassName);
+        }
+
+        private static EBuildPipeline NormalizeBuildPipeline(EBuildPipeline buildPipeline)
+        {
+            if (buildPipeline == EBuildPipeline.RawFileBuildPipeline)
+            {
+                return EBuildPipeline.GodotFileBuildPipeline;
+            }
+
+            if (buildPipeline == EBuildPipeline.BuiltinBuildPipeline || buildPipeline == EBuildPipeline.ScriptableBuildPipeline)
+            {
+                return buildPipeline;
+            }
+
+            return DefaultBuildPipeline;
         }
     }
 }
