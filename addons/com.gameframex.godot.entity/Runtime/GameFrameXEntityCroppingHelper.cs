@@ -4,7 +4,7 @@ namespace GameFrameX.Entity.Runtime
 {
     public partial class GameFrameXEntityCroppingHelper : Node
     {
-        private void Start()
+        public override void _Ready()
         {
             _ = typeof(EntityManager);
             _ = typeof(HideEntityCompleteEventArgs);
