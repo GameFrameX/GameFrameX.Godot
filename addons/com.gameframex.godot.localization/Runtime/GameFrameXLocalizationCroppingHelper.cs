@@ -45,6 +45,7 @@ namespace GameFrameX.Localization.Runtime
             _ = typeof(LocalizationManager);
             _ = typeof(LocalizationComponent);
             _ = typeof(LocalizationHelperBase);
+            _ = typeof(DefaultLocalizationHelper);
         }
     }
 }
