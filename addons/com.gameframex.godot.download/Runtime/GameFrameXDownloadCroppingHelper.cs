@@ -6,7 +6,7 @@ namespace GameFrameX.Download.Runtime
     {
         public override void _Ready()
         {
-            _ = typeof(UnityWebRequestDownloadAgentHelper);
+            _ = typeof(GodotWebRequestDownloadAgentHelper);
             _ = typeof(Constant);
             _ = typeof(DownloadAgentHelperCompleteEventArgs);
             _ = typeof(DownloadAgentHelperErrorEventArgs);

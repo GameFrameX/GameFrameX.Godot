@@ -16,9 +16,9 @@ using GameFrameX.Runtime;
 namespace GameFrameX.Download.Runtime
 {
     /// <summary>
-    /// 使用 UnityWebRequest 实现的下载代理辅助器。
+    /// 使用 Godot 标记前缀的下载代理辅助器。
     /// </summary>
-    public sealed partial class UnityWebRequestDownloadAgentHelper : DownloadAgentHelperBase
+    public sealed partial class GodotWebRequestDownloadAgentHelper : DownloadAgentHelperBase
     {
         private const int CachedBytesLength = 0x1000;
         private static readonly HttpClient s_HttpClient = new HttpClient(new HttpClientHandler

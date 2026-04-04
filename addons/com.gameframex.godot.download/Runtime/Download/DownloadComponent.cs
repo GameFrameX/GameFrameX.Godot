@@ -28,11 +28,11 @@ namespace GameFrameX.Download.Runtime
 
         [Export] private Node m_InstanceRoot = null;
 
-        [Export] private string m_DownloadAgentHelperTypeName = "GameFrameX.Download.Runtime.UnityWebRequestDownloadAgentHelper";
+        [Export] private string m_DownloadAgentHelperTypeName = "GameFrameX.Download.Runtime.GodotWebRequestDownloadAgentHelper";
 
         [Export] private int m_DownloadAgentHelperCount = 3;
 
-        [Export] private float m_Timeout = 30f;
+        [Export(PropertyHint.Range, "30,3000,1")] private float m_Timeout = 30f;
 
         [Export] private int m_FlushSize = OneMegaBytes;
 
