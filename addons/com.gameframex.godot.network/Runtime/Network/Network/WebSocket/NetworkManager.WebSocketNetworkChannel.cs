@@ -34,7 +34,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using GameFrameX.Runtime;
 
 namespace GameFrameX.Network.Runtime
@@ -47,8 +46,6 @@ namespace GameFrameX.Network.Runtime
         
         private sealed class WebSocketNetworkChannel : NetworkChannelBase
         {
-            private readonly CancellationTokenSource m_CancellationTokenSource = new CancellationTokenSource();
-
             /// <summary>
             /// 初始化网络频道的新实例。
             /// </summary>
@@ -97,12 +94,21 @@ namespace GameFrameX.Network.Runtime
             public override void Close(string reason, ushort code = 0)
             {
                 base.Close(reason, code);
-                m_CancellationTokenSource.Cancel();
             }
-
-            private bool IsClose()
+            
+            /// <summary>
+            /// 网络频道轮询。
+            /// </summary>
+            /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
+            /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
+            public override void Update(float elapseSeconds, float realElapseSeconds)
             {
-                return !PSocket.IsConnected && m_CancellationTokenSource.IsCancellationRequested;
+                if (PSocket is WebSocketNetSocket socket)
+                {
+                    socket.Poll();
+                }
+                
+                base.Update(elapseSeconds, realElapseSeconds);
             }
 
             protected override bool ProcessSend()
@@ -169,7 +175,8 @@ namespace GameFrameX.Network.Runtime
             /// <exception cref="InvalidOperationException"></exception>
             protected override bool ProcessSendMessage(MessageObject messageObject)
             {
-                if (IsClose())
+                var webSocketClientNetSocket = (WebSocketNetSocket)PSocket;
+                if (!webSocketClientNetSocket.IsConnected)
                 {
                     PActive = false;
                     const string errorMessage = "Network channel is closing.";
@@ -181,13 +188,11 @@ namespace GameFrameX.Network.Runtime
                 bool serializeResult = base.ProcessSendMessage(messageObject);
                 if (serializeResult)
                 {
-                    var webSocketClientNetSocket = (WebSocketNetSocket)PSocket;
-
                     byte[] buffer = new byte[PSendState.Stream.Length];
                     PSendState.Stream.Seek(0, SeekOrigin.Begin);
                     _ = PSendState.Stream.Read(buffer, 0, buffer.Length);
 
-                    webSocketClientNetSocket.Client.SendAsync(buffer);
+                    webSocketClientNetSocket.Send(buffer);
                 }
                 else
                 {

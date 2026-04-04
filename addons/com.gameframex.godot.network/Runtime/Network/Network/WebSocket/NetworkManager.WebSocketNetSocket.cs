@@ -3,7 +3,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using GameFrameX.Runtime;
-using UnityWebSocket;
+using Godot;
 
 namespace GameFrameX.Network.Runtime
 {
@@ -12,12 +12,14 @@ namespace GameFrameX.Network.Runtime
         
         private sealed class WebSocketNetSocket : INetworkSocket
         {
-            private readonly IWebSocket _client;
+            private readonly WebSocketPeer _client;
+            private readonly string _url;
 
             /// <summary>
             /// 是否正在连接
             /// </summary>
             private bool _isConnecting = false;
+            private bool _hasCloseNotified = false;
 
             private TaskCompletionSource<bool> _connectTask = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             private readonly Action<byte[]> _onReceiveAction;
@@ -25,66 +27,95 @@ namespace GameFrameX.Network.Runtime
 
             public WebSocketNetSocket(string url, Action<byte[]> onReceiveAction, Action<string, ushort> onCloseAction)
             {
-                _client = new WebSocket(url);
+                _url = url;
+                _client = new WebSocketPeer();
                 _onReceiveAction = onReceiveAction;
                 _onCloseAction = onCloseAction;
-                _client.OnOpen += OnOpen;
-                _client.OnError += OnError;
-                _client.OnClose += OnClose;
-                _client.OnMessage += OnMessage;
-            }
-
-            private void OnMessage(object sender, MessageEventArgs e)
-            {
-                if (e.IsBinary)
-                {
-                    _onReceiveAction.Invoke(e.RawData);
-                }
-            }
-
-            private void OnClose(object sender, CloseEventArgs e)
-            {
-                _onCloseAction?.Invoke(e.Reason, e.Code);
-            }
-
-            private void OnError(object sender, ErrorEventArgs e)
-            {
-                if (_isConnecting)
-                {
-                    // 连接错误
-                }
-                else
-                {
-                    // 非连接错误
-                }
-
-                Log.Error(e.Message);
-                _connectTask.TrySetResult(false);
-            }
-
-            private void OnOpen(object sender, OpenEventArgs e)
-            {
-                _isConnecting = false;
-                _connectTask.TrySetResult(true);
             }
 
 
             public async Task ConnectAsync()
             {
                 _isConnecting = true;
-                _connectTask = new TaskCompletionSource<bool>();
-                _client.ConnectAsync();
+                _connectTask = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                _hasCloseNotified = false;
+                IsClosed = false;
+                var error = _client.ConnectToUrl(_url);
+                if (error != Godot.Error.Ok)
+                {
+                    _isConnecting = false;
+                    Log.Error($"WebSocket connect error: {error}");
+                    _connectTask.TrySetResult(false);
+                }
+
                 await _connectTask.Task;
             }
 
-            public IWebSocket Client
+            /// <summary>
+            /// 轮询 WebSocket 状态并处理消息。
+            /// </summary>
+            public void Poll()
             {
-                get { return _client; }
+                if (IsClosed)
+                {
+                    return;
+                }
+
+                _client.Poll();
+                var state = _client.GetReadyState();
+                if (state == WebSocketPeer.State.Open)
+                {
+                    while (_client.GetAvailablePacketCount() > 0)
+                    {
+                        var packet = _client.GetPacket();
+                        if (!_client.WasStringPacket())
+                        {
+                            _onReceiveAction?.Invoke(packet);
+                        }
+                    }
+
+                    if (_isConnecting)
+                    {
+                        _isConnecting = false;
+                        _connectTask.TrySetResult(true);
+                    }
+                }
+                else if (state == WebSocketPeer.State.Closed)
+                {
+                    IsClosed = true;
+                    if (_isConnecting)
+                    {
+                        _isConnecting = false;
+                        _connectTask.TrySetResult(false);
+                    }
+
+                    if (!_hasCloseNotified)
+                    {
+                        _hasCloseNotified = true;
+                        var closeCode = _client.GetCloseCode();
+                        ushort code = closeCode >= 0 ? (ushort)closeCode : (ushort)0;
+                        _onCloseAction?.Invoke(string.Empty, code);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// 发送二进制数据。
+            /// </summary>
+            /// <param name="buffer">要发送的数据。</param>
+            public void Send(byte[] buffer)
+            {
+                if (buffer == null || buffer.Length <= 0)
+                {
+                    return;
+                }
+
+                _client.Send(buffer);
             }
 
             public bool IsConnected
             {
-                get { return _client.IsConnected; }
+                get { return _client.GetReadyState() == WebSocketPeer.State.Open; }
             }
 
             public bool IsClosed { get; private set; }
@@ -109,7 +140,7 @@ namespace GameFrameX.Network.Runtime
                     return;
                 }
 
-                _client.CloseAsync();
+                _client.Close();
             }
 
             public void Close()
@@ -119,7 +150,7 @@ namespace GameFrameX.Network.Runtime
                     return;
                 }
 
-                _client.CloseAsync();
+                _client.Close();
                 IsClosed = true;
             }
         }
