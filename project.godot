@@ -8,6 +8,8 @@
 
 config_version=5
 
+"ï»¿config_version"=5
+
 [animation]
 
 compatibility/default_parent_skeleton_in_mesh_instance_3d=true
@@ -19,13 +21,18 @@ run/main_scene="uid://cg2gy3wpkudjy"
 config/features=PackedStringArray("4.6", "C#", "Mobile")
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/viewport_width=1366
+window/size/viewport_height=768
+
 [dotnet]
 
 project/assembly_name="Godot"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/com.gameframex.godot.asset/plugin.cfg", "res://addons/GameFrameXAssetSystem/plugin.cfg", "res://addons/com.gameframex.godot.config/plugin.cfg", "res://addons/com.gameframex.godot.download/plugin.cfg", "res://addons/com.gameframex.godot.entity/plugin.cfg", "res://addons/com.gameframex.godot.entry/plugin.cfg", "res://addons/com.gameframex.godot.event/plugin.cfg", "res://addons/com.gameframex.godot.fsm/plugin.cfg", "res://addons/com.gameframex.godot.getchannel/plugin.cfg", "res://addons/com.gameframex.godot.globalconfig/plugin.cfg", "res://addons/com.gameframex.godot.google.protobuf/plugin.cfg", "res://addons/com.gameframex.godot.localization/plugin.cfg", "res://addons/com.gameframex.godot.network/plugin.cfg", "res://addons/com.gameframex.godot.procedure/plugin.cfg", "res://addons/com.gameframex.godot.setting/plugin.cfg", "res://addons/com.gameframex.godot.timer/plugin.cfg", "res://addons/com.gameframex.godot.ui.gdgui/plugin.cfg", "res://addons/com.gameframex.godot.ui/plugin.cfg", "res://addons/com.gameframex.godot.web.protobuff/plugin.cfg", "res://addons/com.gameframex.godot.web/plugin.cfg", "res://addons/com.gameframex.godot/plugin.cfg")
+enabled=PackedStringArray("res://addons/com.gameframex.godot.asset/plugin.cfg", "res://addons/GameFrameXAssetSystem/plugin.cfg", "res://addons/com.gameframex.godot.config/plugin.cfg", "res://addons/com.gameframex.godot.download/plugin.cfg", "res://addons/com.gameframex.godot.entity/plugin.cfg", "res://addons/com.gameframex.godot.entry/plugin.cfg", "res://addons/com.gameframex.godot.event/plugin.cfg", "res://addons/com.gameframex.godot.fsm/plugin.cfg", "res://addons/com.gameframex.godot.getchannel/plugin.cfg", "res://addons/com.gameframex.godot.globalconfig/plugin.cfg", "res://addons/com.gameframex.godot.google.protobuf/plugin.cfg", "res://addons/com.gameframex.godot.localization/plugin.cfg", "res://addons/com.gameframex.godot.network/plugin.cfg", "res://addons/com.gameframex.godot.procedure/plugin.cfg", "res://addons/com.gameframex.godot.setting/plugin.cfg", "res://addons/com.gameframex.godot.timer/plugin.cfg", "res://addons/com.gameframex.godot.ui.gdgui/plugin.cfg", "res://addons/com.gameframex.godot.fairygui.godot/plugin.cfg", "res://addons/com.gameframex.godot.ui/plugin.cfg", "res://addons/com.gameframex.godot.web.protobuff/plugin.cfg", "res://addons/com.gameframex.godot.web/plugin.cfg", "res://addons/com.gameframex.godot/plugin.cfg")
 
 [rendering]
 
