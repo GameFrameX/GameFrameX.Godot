@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://b0lp8nsdgvgbb"
+path="res://.godot/imported/YellowNumberFont.fnt-9dd37ca467355511b93703fbda0d0861.fontdata"
+
+[deps]
+
+source_file="res://FairyGUIProject/assets/UICommon/字体/YellowNumberFont.fnt"
+dest_files=["res://.godot/imported/YellowNumberFont.fnt-9dd37ca467355511b93703fbda0d0861.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2
