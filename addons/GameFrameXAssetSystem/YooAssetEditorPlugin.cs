@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using Godot;
 using YooAsset;
@@ -112,6 +114,12 @@ public partial class YooAssetEditorPlugin : EditorPlugin
     private const string BuilderRunLogPipelinePrefix = "Pipeline: ";
     private const string BuilderRunLogScanRootPrefix = "Scan Root: ";
     private const string BuilderRunLogKeywordsPrefix = "Keywords: ";
+    private const string BuilderRunLogBuildModePrefix = "Build Mode: ";
+    private const string BuilderRunLogEncryptionPrefix = "Encryption: ";
+    private const string BuilderRunLogCompressionPrefix = "Compression: ";
+    private const string BuilderRunLogFileNameStylePrefix = "File Name Style: ";
+    private const string BuilderRunLogCopyBuildinOptionPrefix = "Copy Buildin File Option: ";
+    private const string BuilderRunLogCopyBuildinParamPrefix = "Copy Buildin File Param: ";
     private const string BuilderRunLogCompleted = "构建执行完成。";
     private const string BuilderRunStatusCompletedPrefix = "Builder 构建完成：";
     private const string BuilderRunLogBuildFailedPrefix = "构建失败：";
@@ -121,10 +129,12 @@ public partial class YooAssetEditorPlugin : EditorPlugin
     private const string BuilderStagePackage = "Package";
     private const string BuilderStageManifest = "Manifest";
     private const string BuilderStageRuntimeLink = "RuntimeLink";
+    private const string BuilderStageCopyBuildin = "CopyBuildin";
     private const string BuilderStageVerify = "Verify";
     private const string BuilderStageStartPrefix = "阶段开始: ";
     private const string BuilderStageCompletedPrefix = "阶段完成: ";
     private const string BuilderVerifyErrorOutputRootMissing = "构建校验失败：输出目录不存在。";
+    private const string BuilderVerifyErrorOutputAlreadyExists = "构建校验失败：当前版本输出目录已存在。";
     private const string BuilderVerifyErrorManifestMissing = "构建校验失败：清单文件不存在。";
     private const string BuilderVerifyErrorVersionFileMissing = "构建校验失败：版本文件不存在。";
     private const string BuilderVerifyErrorRuntimeVersionFileMissing = "构建校验失败：Runtime 版本文件不存在。";
@@ -132,6 +142,13 @@ public partial class YooAssetEditorPlugin : EditorPlugin
     private const string BuilderVerifyErrorRuntimeHashFileMissing = "构建校验失败：Runtime 哈希文件不存在。";
     private const string BuilderVerifyErrorFileCountMismatch = "构建校验失败：复制文件数与收集文件数不一致。";
     private const string BuilderVerifyErrorFileMissingPrefix = "构建校验失败：缺少输出文件 ";
+    private const string BuilderModeNoOutputLog = "当前构建模式不会生成磁盘产物：";
+    private const string BuilderCopyBuildinSkippedLog = "CopyBuildin 跳过：当前模式未生成可复制产物。";
+    private const string BuilderCopyBuildinDisabledLog = "CopyBuildin 跳过：拷贝选项为 None。";
+    private const string BuilderCopyBuildinRootPrefix = "CopyBuildin Root: ";
+    private const string BuilderCopyBuildinCopiedPrefix = "CopyBuildin Copied: ";
+    private const string BuilderCopyBuildinNoMatchLog = "CopyBuildin: 按标签筛选后无匹配文件。";
+    private const string BuilderCompressionIgnoredLog = "Compression 在当前 Godot Builder 原型中仅作为配置记录，不改变输出字节。";
     private const string BuilderSyncReporterLogPrefix = "已同步 Reporter 参数：Scan Root=";
     private const string BuilderSyncReporterLogMid = ", Keywords=";
     private const string BuilderSyncReporterToReporterLog = "已从最近一次 Builder 同步 Scan Root 与 Filter Keyword。";
@@ -194,6 +211,33 @@ public partial class YooAssetEditorPlugin : EditorPlugin
     private const string BuilderParamErrorOutputPathLog = CommonRunLogFailedPrefix + OutputPathEmptyError;
     private const string BuilderBuildTimestampFormat = "yyyyMMdd_HHmmss";
     private const string BuilderPackageVersionFormat = "yyyyMMddHHmmss";
+    private const string BuilderDefaultBuildMode = "ForceRebuild";
+    private const string BuilderDefaultCompression = "LZ4";
+    private const string BuilderDefaultFileNameStyle = "BundleName";
+    private const string BuilderDefaultCopyBuildinFileOption = "None";
+    private const string BuilderDefaultEncryption = "None";
+    private const string BuilderDefaultCopyBuildinFileParam = "";
+    private const string BuilderSettingsPath = "user://yooasset_builder_profiles.cfg";
+    private const string BuilderSettingsSectionPrefix = "BuilderProfiles/";
+    private const string BuilderSettingsKeyBuildMode = "BuildMode";
+    private const string BuilderSettingsKeyEncryption = "Encryption";
+    private const string BuilderSettingsKeyCompression = "Compression";
+    private const string BuilderSettingsKeyFileNameStyle = "FileNameStyle";
+    private const string BuilderSettingsKeyCopyBuildinFileOption = "CopyBuildinFileOption";
+    private const string BuilderSettingsKeyCopyBuildinFileParam = "CopyBuildinFileParam";
+    private const string BuilderSettingsKeyPackageVersion = "PackageVersion";
+    private const string BuilderFileNameStyleHashName = "HashName";
+    private const string BuilderFileNameStyleBundleName = "BundleName";
+    private const string BuilderFileNameStyleBundleNameHashName = "BundleName_HashName";
+    private const string BuilderCopyBuildinFileOptionNone = "None";
+    private const string BuilderCopyBuildinFileOptionClearAndCopyAll = "ClearAndCopyAll";
+    private const string BuilderCopyBuildinFileOptionClearAndCopyByTags = "ClearAndCopyByTags";
+    private const string BuilderCopyBuildinFileOptionOnlyCopyAll = "OnlyCopyAll";
+    private const string BuilderCopyBuildinFileOptionOnlyCopyByTags = "OnlyCopyByTags";
+    private const string BuilderBuildModeForceRebuild = "ForceRebuild";
+    private const string BuilderBuildModeIncrementalBuild = "IncrementalBuild";
+    private const string BuilderBuildModeDryRunBuild = "DryRunBuild";
+    private const string BuilderBuildModeSimulateBuild = "SimulateBuild";
     private const string BuilderFilesDirectoryName = "files";
     private const string BuilderManifestFileName = "build_manifest.txt";
     private const string BuilderVersionFileName = "build_version.txt";
@@ -236,6 +280,14 @@ public partial class YooAssetEditorPlugin : EditorPlugin
     private const string ReporterSubtitleText = "最小报告原型：扫描汇总、筛选统计、导出占位。";
     private const string DebuggerSubtitleText = "最小调试原型：运行状态检查、路径诊断、日志输出。";
     private const string FieldLabelPackageName = "Package Name";
+    private const string FieldLabelBuildOutput = "Build Output";
+    private const string FieldLabelBuildVersion = "Build Version";
+    private const string FieldLabelBuildMode = "Build Mode";
+    private const string FieldLabelEncryption = "Encryption";
+    private const string FieldLabelCompression = "Compression";
+    private const string FieldLabelFileNameStyle = "File Name Style";
+    private const string FieldLabelCopyBuildinFileOption = "Copy Buildin File Option";
+    private const string FieldLabelCopyBuildinFileParam = "Copy Buildin File Param";
     private const string FieldLabelOutputPath = "Output Path";
     private const string FieldLabelPipeline = "Pipeline";
     private const string FieldLabelScanRoot = "Scan Root";
@@ -244,7 +296,14 @@ public partial class YooAssetEditorPlugin : EditorPlugin
     private const string FieldLabelSortMode = "Sort Mode";
     private const string BuilderDefaultPackageName = "DefaultPackage";
     private const string BuilderDefaultOutputPath = "user://yooasset_builds";
+    private const string BuilderPipelineGodotDisplay = "GodotFileBuildPipeline";
+    private const string BuilderPipelineBuiltinDisplay = "BuiltinBuildPipeline (Legacy)";
+    private const string BuilderPipelineScriptableDisplay = "ScriptableBuildPipeline (Legacy)";
+    private const string BuilderPipelineBuiltin = "BuiltinBuildPipeline";
     private const string BuilderPipelineScriptable = "ScriptableBuildPipeline";
+    private const string FieldLabelPackageNameManual = "Package Name (Manual)";
+    private const string ButtonRefreshBuilderPackages = "Refresh Package List";
+    private const string ButtonBuildNewVersionNumber = "生成新版本号";
     private const string CollectorDefaultKeywords = ".png;.tres;.tscn";
     private const string ButtonRunBuilderBuild = "Run Builder Build";
     private const string ButtonRunCollectorPrototype = "Run Collector Prototype";
@@ -300,6 +359,12 @@ public partial class YooAssetEditorPlugin : EditorPlugin
     private const string ManifestFieldPipeline = "Pipeline";
     private const string ManifestFieldBuildVersion = "BuildVersion";
     private const string ManifestFieldBuildTime = "BuildTime";
+    private const string ManifestFieldBuildMode = "BuildMode";
+    private const string ManifestFieldEncryption = "Encryption";
+    private const string ManifestFieldCompression = "Compression";
+    private const string ManifestFieldFileNameStyle = "FileNameStyle";
+    private const string ManifestFieldCopyBuildinFileOption = "CopyBuildinFileOption";
+    private const string ManifestFieldCopyBuildinFileParam = "CopyBuildinFileParam";
     private const string ManifestFieldSourceRoot = "SourceRoot";
     private const string ManifestFieldOutputFilesRoot = "OutputFilesRoot";
     private const string ManifestFieldFileCount = "FileCount";
@@ -340,9 +405,20 @@ public partial class YooAssetEditorPlugin : EditorPlugin
     private Control _dock;
     private TabContainer _tabContainer;
     private RichTextLabel _statusView;
+    private OptionButton _builderPackageOptions;
     private LineEdit _builderPackageNameInput;
     private LineEdit _builderOutputPathInput;
+    private LineEdit _builderBuildOutputInput;
+    private LineEdit _builderBuildVersionInput;
     private OptionButton _builderPipelineOptions;
+    private OptionButton _builderBuildModeOptions;
+    private OptionButton _builderEncryptionOptions;
+    private OptionButton _builderCompressionOptions;
+    private OptionButton _builderFileNameStyleOptions;
+    private OptionButton _builderCopyBuildinFileOptions;
+    private Label _builderCompressionLabel;
+    private Label _builderCopyBuildinParamLabel;
+    private LineEdit _builderCopyBuildinParamInput;
     private RichTextLabel _builderLogView;
     private LineEdit _collectorScanRootInput;
     private LineEdit _collectorKeywordInput;
@@ -371,7 +447,9 @@ public partial class YooAssetEditorPlugin : EditorPlugin
     private DebugReport _lastRuntimeDebugReport;
     private bool _isLifecycleMounted;
     private bool _toolMenusRegistered;
+    private bool _builderProfileSyncing;
     private int _lastOpenedTabIndex = DefaultTabIndex;
+    private ConfigFile _builderSettings;
     private IEditorPlatformBridge _editorPlatformBridge;
 
     /// <summary>
@@ -562,9 +640,20 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         }
         _tabContainer = null;
         _statusView = null;
+        _builderPackageOptions = null;
         _builderPackageNameInput = null;
         _builderOutputPathInput = null;
+        _builderBuildOutputInput = null;
+        _builderBuildVersionInput = null;
         _builderPipelineOptions = null;
+        _builderBuildModeOptions = null;
+        _builderEncryptionOptions = null;
+        _builderCompressionOptions = null;
+        _builderFileNameStyleOptions = null;
+        _builderCopyBuildinFileOptions = null;
+        _builderCompressionLabel = null;
+        _builderCopyBuildinParamLabel = null;
+        _builderCopyBuildinParamInput = null;
         _builderLogView = null;
         _collectorScanRootInput = null;
         _collectorKeywordInput = null;
@@ -632,6 +721,7 @@ public partial class YooAssetEditorPlugin : EditorPlugin
 
     private Control CreateBuilderPage()
     {
+        EnsureBuilderSettingsLoaded();
         var page = new VBoxContainer();
         page.Name = BuilderModuleName;
         page.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
@@ -647,24 +737,87 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         page.AddChild(subtitleLabel);
 
         page.AddChild(CreateFieldLabel(FieldLabelPackageName));
+        _builderPackageOptions = new OptionButton();
+        _builderPackageOptions.ItemSelected += OnBuilderPackageSelected;
+        page.AddChild(_builderPackageOptions);
+
+        var refreshPackagesButton = new Button();
+        refreshPackagesButton.Text = ButtonRefreshBuilderPackages;
+        refreshPackagesButton.Pressed += RefreshBuilderPackageOptions;
+        page.AddChild(refreshPackagesButton);
+
+        page.AddChild(CreateFieldLabel(FieldLabelPackageNameManual));
         _builderPackageNameInput = new LineEdit();
         _builderPackageNameInput.Text = BuilderDefaultPackageName;
+        _builderPackageNameInput.TextChanged += OnBuilderProfileFieldEdited;
         page.AddChild(_builderPackageNameInput);
 
         page.AddChild(CreateFieldLabel(FieldLabelOutputPath));
         _builderOutputPathInput = new LineEdit();
         _builderOutputPathInput.Text = BuilderDefaultOutputPath;
+        _builderOutputPathInput.TextChanged += OnBuilderOutputPathEdited;
         page.AddChild(_builderOutputPathInput);
+
+        page.AddChild(CreateFieldLabel(FieldLabelBuildOutput));
+        _builderBuildOutputInput = new LineEdit();
+        _builderBuildOutputInput.Editable = false;
+        page.AddChild(_builderBuildOutputInput);
+
+        page.AddChild(CreateFieldLabel(FieldLabelBuildVersion));
+        _builderBuildVersionInput = new LineEdit();
+        _builderBuildVersionInput.Editable = false;
+        page.AddChild(_builderBuildVersionInput);
+
+        var buildNewVersionButton = new Button();
+        buildNewVersionButton.Text = ButtonBuildNewVersionNumber;
+        buildNewVersionButton.Pressed += BuildNewBuilderVersionNumber;
+        page.AddChild(buildNewVersionButton);
 
         page.AddChild(CreateFieldLabel(FieldLabelPipeline));
         _builderPipelineOptions = new OptionButton();
-        _builderPipelineOptions.AddItem(ReporterDefaultPipeline);
-        _builderPipelineOptions.AddItem(BuilderPipelineScriptable);
+        _builderPipelineOptions.AddItem(BuilderPipelineGodotDisplay);
+        _builderPipelineOptions.AddItem(BuilderPipelineBuiltinDisplay);
+        _builderPipelineOptions.AddItem(BuilderPipelineScriptableDisplay);
+        _builderPipelineOptions.ItemSelected += OnBuilderPipelineSelected;
         page.AddChild(_builderPipelineOptions);
+
+        page.AddChild(CreateFieldLabel(FieldLabelBuildMode));
+        _builderBuildModeOptions = new OptionButton();
+        _builderBuildModeOptions.ItemSelected += OnBuilderProfileOptionSelected;
+        page.AddChild(_builderBuildModeOptions);
+
+        page.AddChild(CreateFieldLabel(FieldLabelEncryption));
+        _builderEncryptionOptions = new OptionButton();
+        _builderEncryptionOptions.ItemSelected += OnBuilderProfileOptionSelected;
+        page.AddChild(_builderEncryptionOptions);
+
+        _builderCompressionLabel = CreateFieldLabel(FieldLabelCompression);
+        page.AddChild(_builderCompressionLabel);
+        _builderCompressionOptions = new OptionButton();
+        _builderCompressionOptions.ItemSelected += OnBuilderProfileOptionSelected;
+        page.AddChild(_builderCompressionOptions);
+
+        page.AddChild(CreateFieldLabel(FieldLabelFileNameStyle));
+        _builderFileNameStyleOptions = new OptionButton();
+        _builderFileNameStyleOptions.ItemSelected += OnBuilderProfileOptionSelected;
+        page.AddChild(_builderFileNameStyleOptions);
+
+        page.AddChild(CreateFieldLabel(FieldLabelCopyBuildinFileOption));
+        _builderCopyBuildinFileOptions = new OptionButton();
+        _builderCopyBuildinFileOptions.ItemSelected += OnBuilderCopyBuildinOptionSelected;
+        page.AddChild(_builderCopyBuildinFileOptions);
+
+        _builderCopyBuildinParamLabel = CreateFieldLabel(FieldLabelCopyBuildinFileParam);
+        page.AddChild(_builderCopyBuildinParamLabel);
+        _builderCopyBuildinParamInput = new LineEdit();
+        _builderCopyBuildinParamInput.TextChanged += OnBuilderProfileFieldEdited;
+        page.AddChild(_builderCopyBuildinParamInput);
 
         var runButton = new Button();
         runButton.Text = ButtonRunBuilderBuild;
-        runButton.Pressed += RunBuilderPrototype;
+        // Legacy wire-up preserved for rollback reference:
+        // runButton.Pressed += RunBuilderPrototypeLegacy;
+        runButton.Pressed += RunBuilderAligned;
         page.AddChild(runButton);
 
         _builderLogView = new RichTextLabel();
@@ -673,8 +826,546 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         _builderLogView.CustomMinimumSize = new Vector2(UiMinWidthAuto, BuilderLogMinHeight);
         page.AddChild(_builderLogView);
 
+        PopulateBuilderStaticOptionItems();
         AppendBuilderLog(BuilderReadyLog);
+        BuildNewBuilderVersionNumber();
+        RefreshBuilderBuildOutputDisplay();
+        RefreshBuilderPackageOptions();
         return page;
+    }
+
+    private void RefreshBuilderPackageOptions()
+    {
+        if (_builderPackageOptions == null)
+        {
+            return;
+        }
+
+        var selectedPackage = _builderPackageNameInput?.Text?.Trim() ?? string.Empty;
+        var packageNames = CollectBuilderPackageCandidates();
+        _builderPackageOptions.Clear();
+        for (var index = 0; index < packageNames.Count; index++)
+        {
+            _builderPackageOptions.AddItem(packageNames[index]);
+        }
+
+        if (_builderPackageOptions.ItemCount == 0)
+        {
+            _builderPackageOptions.AddItem(BuilderDefaultPackageName);
+        }
+
+        var selectedIndex = 0;
+        for (var index = 0; index < _builderPackageOptions.ItemCount; index++)
+        {
+            if (string.Equals(_builderPackageOptions.GetItemText(index), selectedPackage, StringComparison.OrdinalIgnoreCase))
+            {
+                selectedIndex = index;
+                break;
+            }
+        }
+
+        _builderPackageOptions.Select(selectedIndex);
+        OnBuilderPackageSelected(selectedIndex);
+    }
+
+    private List<string> CollectBuilderPackageCandidates()
+    {
+        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            BuilderDefaultPackageName
+        };
+        var manualPackage = _builderPackageNameInput?.Text?.Trim();
+        if (!string.IsNullOrEmpty(manualPackage))
+        {
+            names.Add(manualPackage);
+        }
+
+        if (!string.IsNullOrEmpty(_lastBuildPackageName))
+        {
+            names.Add(_lastBuildPackageName);
+        }
+
+        var outputPath = _builderOutputPathInput?.Text?.Trim() ?? string.Empty;
+        if (!string.IsNullOrEmpty(outputPath))
+        {
+            try
+            {
+                var globalOutputPath = _editorPlatformBridge.GlobalizePath(outputPath);
+                if (Directory.Exists(globalOutputPath))
+                {
+                    var directories = Directory.GetDirectories(globalOutputPath);
+                    for (var index = 0; index < directories.Length; index++)
+                    {
+                        var packageName = Path.GetFileName(directories[index]);
+                        if (!string.IsNullOrWhiteSpace(packageName))
+                        {
+                            names.Add(packageName);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore package auto-discovery errors and keep fallback list.
+            }
+        }
+
+        var result = names.ToList();
+        result.Sort(StringComparer.OrdinalIgnoreCase);
+        return result;
+    }
+
+    private void OnBuilderPackageSelected(long index)
+    {
+        if (_builderPackageOptions == null || _builderPackageNameInput == null)
+        {
+            return;
+        }
+
+        if (index < 0 || index >= _builderPackageOptions.ItemCount)
+        {
+            return;
+        }
+
+        _builderProfileSyncing = true;
+        _builderPackageNameInput.Text = _builderPackageOptions.GetItemText((int)index);
+        _builderProfileSyncing = false;
+        RefreshBuilderProfileForSelection();
+    }
+
+    private void BuildNewBuilderVersionNumber()
+    {
+        if (_builderBuildVersionInput == null)
+        {
+            return;
+        }
+
+        _builderProfileSyncing = true;
+        _builderBuildVersionInput.Text = DateTime.Now.ToString(BuilderPackageVersionFormat);
+        _builderProfileSyncing = false;
+        SaveBuilderProfileFromControls();
+    }
+
+    private void OnBuilderOutputPathEdited(string value)
+    {
+        RefreshBuilderBuildOutputDisplay();
+        SaveBuilderProfileFromControls();
+    }
+
+    private void OnBuilderPipelineSelected(long index)
+    {
+        RefreshBuilderProfileForSelection();
+    }
+
+    private void OnBuilderProfileOptionSelected(long index)
+    {
+        if (_builderProfileSyncing)
+        {
+            return;
+        }
+
+        SaveBuilderProfileFromControls();
+    }
+
+    private void OnBuilderCopyBuildinOptionSelected(long index)
+    {
+        RefreshBuilderCopyBuildinParamVisibility();
+        if (_builderProfileSyncing)
+        {
+            return;
+        }
+
+        SaveBuilderProfileFromControls();
+    }
+
+    private void OnBuilderProfileFieldEdited(string value)
+    {
+        if (_builderProfileSyncing)
+        {
+            return;
+        }
+
+        SaveBuilderProfileFromControls();
+    }
+
+    private void PopulateBuilderStaticOptionItems()
+    {
+        _builderCompressionOptions?.Clear();
+        _builderCompressionOptions?.AddItem("Uncompressed");
+        _builderCompressionOptions?.AddItem("LZMA");
+        _builderCompressionOptions?.AddItem(BuilderDefaultCompression);
+
+        _builderFileNameStyleOptions?.Clear();
+        _builderFileNameStyleOptions?.AddItem(BuilderFileNameStyleHashName);
+        _builderFileNameStyleOptions?.AddItem(BuilderFileNameStyleBundleName);
+        _builderFileNameStyleOptions?.AddItem(BuilderFileNameStyleBundleNameHashName);
+
+        _builderCopyBuildinFileOptions?.Clear();
+        _builderCopyBuildinFileOptions?.AddItem(BuilderCopyBuildinFileOptionNone);
+        _builderCopyBuildinFileOptions?.AddItem(BuilderCopyBuildinFileOptionClearAndCopyAll);
+        _builderCopyBuildinFileOptions?.AddItem(BuilderCopyBuildinFileOptionClearAndCopyByTags);
+        _builderCopyBuildinFileOptions?.AddItem(BuilderCopyBuildinFileOptionOnlyCopyAll);
+        _builderCopyBuildinFileOptions?.AddItem(BuilderCopyBuildinFileOptionOnlyCopyByTags);
+    }
+
+    private void RefreshBuilderProfileForSelection()
+    {
+        if (_builderPipelineOptions == null)
+        {
+            return;
+        }
+
+        var packageName = _builderPackageNameInput?.Text?.Trim();
+        if (string.IsNullOrEmpty(packageName))
+        {
+            packageName = BuilderDefaultPackageName;
+        }
+
+        var selectedPipeline = _builderPipelineOptions.GetItemText(_builderPipelineOptions.Selected);
+        var pipeline = NormalizeBuilderPipeline(selectedPipeline);
+        var settings = LoadBuilderProfile(packageName, pipeline);
+        ApplyBuilderProfile(settings, pipeline);
+        RefreshBuilderPipelineVisibility(pipeline);
+    }
+
+    private void RefreshBuilderBuildOutputDisplay()
+    {
+        if (_builderBuildOutputInput == null || _builderOutputPathInput == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _builderBuildOutputInput.Text = _editorPlatformBridge.GlobalizePath(_builderOutputPathInput.Text);
+        }
+        catch
+        {
+            _builderBuildOutputInput.Text = _builderOutputPathInput.Text;
+        }
+    }
+
+    private void RefreshBuilderCopyBuildinParamVisibility()
+    {
+        if (_builderCopyBuildinFileOptions == null || _builderCopyBuildinParamInput == null || _builderCopyBuildinParamLabel == null)
+        {
+            return;
+        }
+
+        var option = _builderCopyBuildinFileOptions.GetItemText(_builderCopyBuildinFileOptions.Selected);
+        var visible = string.Equals(option, BuilderCopyBuildinFileOptionClearAndCopyByTags, StringComparison.OrdinalIgnoreCase)
+                      || string.Equals(option, BuilderCopyBuildinFileOptionOnlyCopyByTags, StringComparison.OrdinalIgnoreCase);
+        _builderCopyBuildinParamInput.Visible = visible;
+        _builderCopyBuildinParamLabel.Visible = visible;
+    }
+
+    private void RefreshBuilderPipelineVisibility(string pipeline)
+    {
+        var compressionVisible = !string.Equals(pipeline, ReporterDefaultPipeline, StringComparison.OrdinalIgnoreCase);
+        if (_builderCompressionLabel != null)
+        {
+            _builderCompressionLabel.Visible = compressionVisible;
+        }
+
+        if (_builderCompressionOptions != null)
+        {
+            _builderCompressionOptions.Visible = compressionVisible;
+        }
+    }
+
+    private void EnsureBuilderSettingsLoaded()
+    {
+        if (_builderSettings != null)
+        {
+            return;
+        }
+
+        _builderSettings = new ConfigFile();
+        var error = _builderSettings.Load(BuilderSettingsPath);
+        if (error != Error.Ok && error != Error.FileNotFound)
+        {
+            GD.PushWarning($"Load builder profile failed: {error}");
+        }
+    }
+
+    private BuilderProfileSettings LoadBuilderProfile(string packageName, string pipeline)
+    {
+        EnsureBuilderSettingsLoaded();
+        var settings = CreateDefaultBuilderProfileSettings();
+        var section = GetBuilderSettingsSection(packageName, pipeline);
+        settings.BuildMode = GetBuilderSettingValue(section, BuilderSettingsKeyBuildMode, settings.BuildMode);
+        settings.Encryption = GetBuilderSettingValue(section, BuilderSettingsKeyEncryption, settings.Encryption);
+        settings.Compression = GetBuilderSettingValue(section, BuilderSettingsKeyCompression, settings.Compression);
+        settings.FileNameStyle = GetBuilderSettingValue(section, BuilderSettingsKeyFileNameStyle, settings.FileNameStyle);
+        settings.CopyBuildinFileOption = GetBuilderSettingValue(section, BuilderSettingsKeyCopyBuildinFileOption, settings.CopyBuildinFileOption);
+        settings.CopyBuildinFileParam = GetBuilderSettingValue(section, BuilderSettingsKeyCopyBuildinFileParam, settings.CopyBuildinFileParam);
+        settings.PackageVersion = GetBuilderSettingValue(section, BuilderSettingsKeyPackageVersion, settings.PackageVersion);
+        return settings;
+    }
+
+    private string GetBuilderSettingValue(string section, string key, string defaultValue)
+    {
+        if (_builderSettings == null)
+        {
+            return defaultValue;
+        }
+
+        if (!_builderSettings.HasSectionKey(section, key))
+        {
+            return defaultValue;
+        }
+
+        var value = _builderSettings.GetValue(section, key, defaultValue);
+        var text = value.ToString();
+        return string.IsNullOrEmpty(text) ? defaultValue : text;
+    }
+
+    private static BuilderProfileSettings CreateDefaultBuilderProfileSettings()
+    {
+        return new BuilderProfileSettings
+        {
+            BuildMode = BuilderDefaultBuildMode,
+            Encryption = BuilderDefaultEncryption,
+            Compression = BuilderDefaultCompression,
+            FileNameStyle = BuilderDefaultFileNameStyle,
+            CopyBuildinFileOption = BuilderDefaultCopyBuildinFileOption,
+            CopyBuildinFileParam = BuilderDefaultCopyBuildinFileParam,
+            PackageVersion = DateTime.Now.ToString(BuilderPackageVersionFormat)
+        };
+    }
+
+    private void ApplyBuilderProfile(BuilderProfileSettings settings, string pipeline)
+    {
+        _builderProfileSyncing = true;
+        PopulateBuilderBuildModeOptions(pipeline, settings.BuildMode);
+        PopulateBuilderEncryptionOptions(settings.Encryption);
+        SetOptionButtonSelectionByText(_builderCompressionOptions, settings.Compression, BuilderDefaultCompression);
+        SetOptionButtonSelectionByText(_builderFileNameStyleOptions, settings.FileNameStyle, BuilderDefaultFileNameStyle);
+        SetOptionButtonSelectionByText(_builderCopyBuildinFileOptions, settings.CopyBuildinFileOption, BuilderDefaultCopyBuildinFileOption);
+        if (_builderBuildVersionInput != null)
+        {
+            _builderBuildVersionInput.Text = string.IsNullOrWhiteSpace(settings.PackageVersion)
+                ? DateTime.Now.ToString(BuilderPackageVersionFormat)
+                : settings.PackageVersion;
+        }
+
+        if (_builderCopyBuildinParamInput != null)
+        {
+            _builderCopyBuildinParamInput.Text = settings.CopyBuildinFileParam ?? string.Empty;
+        }
+
+        _builderProfileSyncing = false;
+        RefreshBuilderCopyBuildinParamVisibility();
+    }
+
+    private void PopulateBuilderBuildModeOptions(string pipeline, string selectedMode)
+    {
+        if (_builderBuildModeOptions == null)
+        {
+            return;
+        }
+
+        _builderBuildModeOptions.Clear();
+        var supportedModes = GetSupportedBuilderModes(pipeline);
+        for (var index = 0; index < supportedModes.Count; index++)
+        {
+            _builderBuildModeOptions.AddItem(supportedModes[index]);
+        }
+
+        SetOptionButtonSelectionByText(_builderBuildModeOptions, selectedMode, supportedModes[0]);
+    }
+
+    private static List<string> GetSupportedBuilderModes(string pipeline)
+    {
+        if (string.Equals(pipeline, BuilderPipelineBuiltin, StringComparison.OrdinalIgnoreCase))
+        {
+            return new List<string>
+            {
+                BuilderBuildModeForceRebuild,
+                BuilderBuildModeIncrementalBuild,
+                BuilderBuildModeDryRunBuild,
+                BuilderBuildModeSimulateBuild
+            };
+        }
+
+        if (string.Equals(pipeline, BuilderPipelineScriptable, StringComparison.OrdinalIgnoreCase))
+        {
+            return new List<string>
+            {
+                BuilderBuildModeIncrementalBuild,
+                BuilderBuildModeSimulateBuild
+            };
+        }
+
+        return new List<string>
+        {
+            BuilderBuildModeForceRebuild,
+            BuilderBuildModeSimulateBuild
+        };
+    }
+
+    private void PopulateBuilderEncryptionOptions(string selectedEncryption)
+    {
+        if (_builderEncryptionOptions == null)
+        {
+            return;
+        }
+
+        _builderEncryptionOptions.Clear();
+        _builderEncryptionOptions.AddItem(BuilderDefaultEncryption);
+
+        var encryptionTypes = FindEncryptionImplementations();
+        for (var index = 0; index < encryptionTypes.Count; index++)
+        {
+            var fullName = encryptionTypes[index].FullName;
+            if (string.IsNullOrEmpty(fullName))
+            {
+                continue;
+            }
+
+            _builderEncryptionOptions.AddItem(fullName);
+        }
+
+        SetOptionButtonSelectionByText(_builderEncryptionOptions, selectedEncryption, BuilderDefaultEncryption);
+    }
+
+    private static List<Type> FindEncryptionImplementations()
+    {
+        var result = new List<Type>();
+        var candidateType = typeof(IEncryptionServices);
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        for (var assemblyIndex = 0; assemblyIndex < assemblies.Length; assemblyIndex++)
+        {
+            Type[] assemblyTypes;
+            try
+            {
+                assemblyTypes = assemblies[assemblyIndex].GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                assemblyTypes = ex.Types;
+            }
+
+            for (var typeIndex = 0; typeIndex < assemblyTypes.Length; typeIndex++)
+            {
+                var type = assemblyTypes[typeIndex];
+                if (type == null || type.IsAbstract || type.IsInterface)
+                {
+                    continue;
+                }
+
+                if (candidateType.IsAssignableFrom(type))
+                {
+                    result.Add(type);
+                }
+            }
+        }
+
+        result.Sort(static (left, right) => string.Compare(left.FullName, right.FullName, StringComparison.Ordinal));
+        return result;
+    }
+
+    private static void SetOptionButtonSelectionByText(OptionButton optionButton, string expectedText, string fallbackText)
+    {
+        if (optionButton == null || optionButton.ItemCount == 0)
+        {
+            return;
+        }
+
+        var selectedText = string.IsNullOrWhiteSpace(expectedText) ? fallbackText : expectedText;
+        for (var index = 0; index < optionButton.ItemCount; index++)
+        {
+            if (string.Equals(optionButton.GetItemText(index), selectedText, StringComparison.OrdinalIgnoreCase))
+            {
+                optionButton.Select(index);
+                return;
+            }
+        }
+
+        for (var index = 0; index < optionButton.ItemCount; index++)
+        {
+            if (string.Equals(optionButton.GetItemText(index), fallbackText, StringComparison.OrdinalIgnoreCase))
+            {
+                optionButton.Select(index);
+                return;
+            }
+        }
+
+        optionButton.Select(0);
+    }
+
+    private void SaveBuilderProfileFromControls()
+    {
+        if (_builderProfileSyncing)
+        {
+            return;
+        }
+
+        if (_builderPipelineOptions == null || _builderPackageNameInput == null)
+        {
+            return;
+        }
+
+        EnsureBuilderSettingsLoaded();
+        if (_builderSettings == null)
+        {
+            return;
+        }
+
+        var packageName = _builderPackageNameInput.Text?.Trim();
+        if (string.IsNullOrEmpty(packageName))
+        {
+            packageName = BuilderDefaultPackageName;
+        }
+
+        var pipeline = NormalizeBuilderPipeline(_builderPipelineOptions.GetItemText(_builderPipelineOptions.Selected));
+        var profile = CaptureBuilderProfileFromControls();
+        var section = GetBuilderSettingsSection(packageName, pipeline);
+        _builderSettings.SetValue(section, BuilderSettingsKeyBuildMode, profile.BuildMode);
+        _builderSettings.SetValue(section, BuilderSettingsKeyEncryption, profile.Encryption);
+        _builderSettings.SetValue(section, BuilderSettingsKeyCompression, profile.Compression);
+        _builderSettings.SetValue(section, BuilderSettingsKeyFileNameStyle, profile.FileNameStyle);
+        _builderSettings.SetValue(section, BuilderSettingsKeyCopyBuildinFileOption, profile.CopyBuildinFileOption);
+        _builderSettings.SetValue(section, BuilderSettingsKeyCopyBuildinFileParam, profile.CopyBuildinFileParam);
+        _builderSettings.SetValue(section, BuilderSettingsKeyPackageVersion, profile.PackageVersion);
+        _builderSettings.Save(BuilderSettingsPath);
+    }
+
+    private BuilderProfileSettings CaptureBuilderProfileFromControls()
+    {
+        return new BuilderProfileSettings
+        {
+            BuildMode = GetOptionButtonText(_builderBuildModeOptions, BuilderDefaultBuildMode),
+            Encryption = GetOptionButtonText(_builderEncryptionOptions, BuilderDefaultEncryption),
+            Compression = GetOptionButtonText(_builderCompressionOptions, BuilderDefaultCompression),
+            FileNameStyle = GetOptionButtonText(_builderFileNameStyleOptions, BuilderDefaultFileNameStyle),
+            CopyBuildinFileOption = GetOptionButtonText(_builderCopyBuildinFileOptions, BuilderDefaultCopyBuildinFileOption),
+            CopyBuildinFileParam = _builderCopyBuildinParamInput?.Text?.Trim() ?? string.Empty,
+            PackageVersion = _builderBuildVersionInput?.Text?.Trim() ?? DateTime.Now.ToString(BuilderPackageVersionFormat)
+        };
+    }
+
+    private static string GetOptionButtonText(OptionButton optionButton, string fallback)
+    {
+        if (optionButton == null || optionButton.ItemCount == 0)
+        {
+            return fallback;
+        }
+
+        var selectedIndex = optionButton.Selected;
+        if (selectedIndex < 0 || selectedIndex >= optionButton.ItemCount)
+        {
+            return fallback;
+        }
+
+        return optionButton.GetItemText(selectedIndex);
+    }
+
+    private static string GetBuilderSettingsSection(string packageName, string pipeline)
+    {
+        var packagePart = string.IsNullOrWhiteSpace(packageName) ? BuilderDefaultPackageName : packageName.Trim();
+        var pipelinePart = string.IsNullOrWhiteSpace(pipeline) ? ReporterDefaultPipeline : pipeline.Trim();
+        return $"{BuilderSettingsSectionPrefix}{packagePart}/{pipelinePart}";
     }
 
     private static Label CreateFieldLabel(string text)
@@ -927,11 +1618,27 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         return page;
     }
 
-    private void RunBuilderPrototype()
+    private void RunBuilderAligned()
+    {
+        if (_builderPackageOptions != null && string.IsNullOrWhiteSpace(_builderPackageNameInput?.Text))
+        {
+            OnBuilderPackageSelected(_builderPackageOptions.Selected);
+        }
+
+        SaveBuilderProfileFromControls();
+        RunBuilderPrototypeLegacy();
+    }
+
+    // Legacy builder implementation is retained for rollback/reference.
+    // New builder UI flow should enter from RunBuilderAligned().
+    private void RunBuilderPrototypeLegacy()
     {
         var packageName = _builderPackageNameInput?.Text?.Trim() ?? string.Empty;
         var outputPath = _builderOutputPathInput?.Text?.Trim() ?? string.Empty;
-        var pipeline = _builderPipelineOptions == null ? string.Empty : _builderPipelineOptions.GetItemText(_builderPipelineOptions.Selected);
+        var selectedPipeline = _builderPipelineOptions == null ? string.Empty : _builderPipelineOptions.GetItemText(_builderPipelineOptions.Selected);
+        var pipeline = NormalizeBuilderPipeline(selectedPipeline);
+        var profile = CaptureBuilderProfileFromControls();
+        profile.BuildMode = NormalizeBuilderBuildMode(profile.BuildMode, pipeline);
         var collectorScanRoot = _collectorScanRootInput?.Text?.Trim();
         if (string.IsNullOrEmpty(collectorScanRoot))
         {
@@ -978,10 +1685,16 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         AppendBuilderLog($"{BuilderRunLogPipelinePrefix}{pipeline}");
         AppendBuilderLog($"{BuilderRunLogScanRootPrefix}{collectorScanRoot}");
         AppendBuilderLog($"{BuilderRunLogKeywordsPrefix}{collectorKeywords}");
+        AppendBuilderLog($"{BuilderRunLogBuildModePrefix}{profile.BuildMode}");
+        AppendBuilderLog($"{BuilderRunLogEncryptionPrefix}{profile.Encryption}");
+        AppendBuilderLog($"{BuilderRunLogCompressionPrefix}{profile.Compression}");
+        AppendBuilderLog($"{BuilderRunLogFileNameStylePrefix}{profile.FileNameStyle}");
+        AppendBuilderLog($"{BuilderRunLogCopyBuildinOptionPrefix}{profile.CopyBuildinFileOption}");
+        AppendBuilderLog($"{BuilderRunLogCopyBuildinParamPrefix}{profile.CopyBuildinFileParam}");
 
         try
         {
-            var buildResult = ExecuteBuilderBuild(packageName, globalOutputPath, pipeline, collectorScanRoot, collectorKeywords);
+            var buildResult = ExecuteBuilderBuild(packageName, globalOutputPath, pipeline, collectorScanRoot, collectorKeywords, profile);
             _lastBuildPackageName = buildResult.PackageName;
             _lastBuildPipeline = buildResult.Pipeline;
             _lastBuildOutputDirectory = buildResult.OutputDirectory;
@@ -1023,7 +1736,7 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         AppendReporterLog(BuilderSyncReporterToReporterLog);
     }
 
-    private BuildExecutionResult ExecuteBuilderBuild(string packageName, string globalOutputPath, string pipeline, string scanRoot, string keywordsText)
+    private BuildExecutionResult ExecuteBuilderBuild(string packageName, string globalOutputPath, string pipeline, string scanRoot, string keywordsText, BuilderProfileSettings profile)
     {
         var context = new BuildOrchestrationContext
         {
@@ -1031,13 +1744,21 @@ public partial class YooAssetEditorPlugin : EditorPlugin
             GlobalOutputPath = globalOutputPath,
             Pipeline = pipeline,
             ScanRoot = scanRoot,
-            KeywordsText = keywordsText
+            KeywordsText = keywordsText,
+            BuildMode = profile.BuildMode,
+            Encryption = profile.Encryption,
+            Compression = profile.Compression,
+            FileNameStyle = profile.FileNameStyle,
+            CopyBuildinFileOption = profile.CopyBuildinFileOption,
+            CopyBuildinFileParam = profile.CopyBuildinFileParam,
+            RequestedPackageVersion = profile.PackageVersion
         };
 
         RunPrepareBuildStage(context);
         RunPackageBuildStage(context);
         RunManifestBuildStage(context);
         RunRuntimeLinkBuildStage(context);
+        RunCopyBuildinStage(context);
         RunVerifyBuildStage(context);
         return new BuildExecutionResult
         {
@@ -1073,10 +1794,46 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         context.ScanLimitHit = scanLimitHit;
         context.BuildTime = DateTime.Now;
         context.BuildTimestamp = context.BuildTime.ToString(BuilderBuildTimestampFormat);
-        context.PackageVersion = context.BuildTime.ToString(BuilderPackageVersionFormat);
+        context.PackageVersion = string.IsNullOrWhiteSpace(context.RequestedPackageVersion)
+            ? context.BuildTime.ToString(BuilderPackageVersionFormat)
+            : context.RequestedPackageVersion;
+        context.RuntimeOutputNameStyle = ResolveRuntimeOutputNameStyle(context.FileNameStyle);
+        context.SkipWriteOutputs = IsBuilderNoOutputMode(context.BuildMode);
+        context.EncryptionServices = CreateBuilderEncryptionInstance(context.Encryption);
+        context.BuildinRoot = ResolveBuildinPackageRoot(context.PackageName);
         context.PackageRoot = Path.Combine(context.GlobalOutputPath, context.PackageName, context.PackageVersion);
-        context.FilesRoot = Path.Combine(context.PackageRoot, BuilderFilesDirectoryName);
-        Directory.CreateDirectory(context.FilesRoot);
+        if (context.RuntimeOutputNameStyle == 1)
+        {
+            context.FilesRoot = Path.Combine(context.PackageRoot, BuilderFilesDirectoryName);
+        }
+        else
+        {
+            context.FilesRoot = context.PackageRoot;
+        }
+
+        if (context.SkipWriteOutputs)
+        {
+            AppendBuilderLog($"{BuilderModeNoOutputLog}{context.BuildMode}");
+            AppendBuilderLog(BuilderCopyBuildinSkippedLog);
+            AppendBuilderLog(BuilderCompressionIgnoredLog);
+        }
+        else
+        {
+            if (IsBuilderForceRebuildMode(context.BuildMode) && Directory.Exists(context.PackageRoot))
+            {
+                Directory.Delete(context.PackageRoot, true);
+            }
+
+            if (Directory.Exists(context.PackageRoot) && !IsBuilderIncrementalMode(context.BuildMode))
+            {
+                throw new InvalidOperationException(BuilderVerifyErrorOutputAlreadyExists);
+            }
+
+            Directory.CreateDirectory(context.PackageRoot);
+            Directory.CreateDirectory(context.FilesRoot);
+            AppendBuilderLog(BuilderCompressionIgnoredLog);
+        }
+
         AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStagePrepare}");
     }
 
@@ -1084,19 +1841,35 @@ public partial class YooAssetEditorPlugin : EditorPlugin
     {
         AppendBuilderLog($"{BuilderStageStartPrefix}{BuilderStagePackage}");
         context.CopiedCount = 0;
-        context.DestinationFiles.Clear();
+        context.BundleEntries.Clear();
         foreach (var sourceFile in context.CollectedFiles)
         {
             var relativePath = Path.GetRelativePath(context.SourceRoot, sourceFile);
-            var destinationPath = Path.Combine(context.FilesRoot, relativePath);
-            var destinationDir = Path.GetDirectoryName(destinationPath);
-            if (!string.IsNullOrEmpty(destinationDir))
+            var bundleName = NormalizePathForDisplay(Path.Combine(BuilderFilesDirectoryName, relativePath));
+            var sourceBytes = File.ReadAllBytes(sourceFile);
+            var (outputBytes, encrypted) = EncryptBuilderFileData(context, bundleName, sourceFile, sourceBytes);
+            var fileHash = HashUtility.BytesMD5(outputBytes);
+            var fileCrc = HashUtility.BytesCRC32(outputBytes);
+            var fileExtension = ManifestTools.GetRemoteBundleFileExtension(bundleName);
+            var outputFileName = ManifestTools.GetRemoteBundleFileName(context.RuntimeOutputNameStyle, bundleName, fileExtension, fileHash);
+            var destinationPath = Path.Combine(context.PackageRoot, outputFileName);
+            if (!context.SkipWriteOutputs)
             {
-                Directory.CreateDirectory(destinationDir);
+                WriteBuilderOutputFile(context, destinationPath, outputBytes);
             }
 
-            File.Copy(sourceFile, destinationPath, true);
-            context.DestinationFiles.Add(destinationPath);
+            context.BundleEntries.Add(new BuilderBundleEntry
+            {
+                SourceFilePath = sourceFile,
+                BundleName = bundleName,
+                OutputFileName = outputFileName,
+                DestinationFilePath = destinationPath,
+                FileHash = fileHash,
+                FileCRC = fileCrc,
+                FileSize = outputBytes.LongLength,
+                Encrypted = encrypted,
+                Tags = InferBuilderTags(relativePath, sourceFile)
+            });
             context.CopiedCount++;
         }
 
@@ -1108,49 +1881,63 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         AppendBuilderLog($"{BuilderStageStartPrefix}{BuilderStageManifest}");
         context.ManifestPath = Path.Combine(context.PackageRoot, BuilderManifestFileName);
         context.VersionFilePath = Path.Combine(context.PackageRoot, BuilderVersionFileName);
-        File.WriteAllText(context.ManifestPath, BuildManifestText(context.PackageName, context.Pipeline, context.PackageVersion, context.SourceRoot, context.FilesRoot, context.CollectedFiles, context.BuildTime), Encoding.UTF8);
-        File.WriteAllText(context.VersionFilePath, BuildVersionText(context), Encoding.UTF8);
+        if (!context.SkipWriteOutputs)
+        {
+            File.WriteAllText(context.ManifestPath, BuildManifestText(context), Encoding.UTF8);
+            File.WriteAllText(context.VersionFilePath, BuildVersionText(context), Encoding.UTF8);
+        }
+
         AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageManifest}");
     }
 
     private void RunRuntimeLinkBuildStage(BuildOrchestrationContext context)
     {
         AppendBuilderLog($"{BuilderStageStartPrefix}{BuilderStageRuntimeLink}");
+        context.RuntimeVersionFilePath = Path.Combine(context.PackageRoot, YooAssetSettingsData.GetPackageVersionFileName(context.PackageName));
+        context.RuntimeManifestFilePath = Path.Combine(context.PackageRoot, YooAssetSettingsData.GetManifestBinaryFileName(context.PackageName, context.PackageVersion));
+        context.RuntimeHashFilePath = Path.Combine(context.PackageRoot, YooAssetSettingsData.GetPackageHashFileName(context.PackageName, context.PackageVersion));
+        if (context.SkipWriteOutputs)
+        {
+            AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageRuntimeLink}");
+            return;
+        }
+
+        var outputNameStyle = context.RuntimeOutputNameStyle;
+        if (outputNameStyle != 1)
+        {
+            AppendBuilderLog($"{BuilderRunLogFileNameStylePrefix}{context.FileNameStyle}");
+        }
+
         var runtimeManifest = new PackageManifest
         {
             FileVersion = YooAssetSettings.ManifestFileVersion,
             EnableAddressable = false,
             LocationToLower = false,
             IncludeAssetGUID = false,
-            OutputNameStyle = 1,
+            OutputNameStyle = outputNameStyle,
             BuildPipeline = context.Pipeline,
             PackageName = context.PackageName,
             PackageVersion = context.PackageVersion,
-            AssetList = new List<PackageAsset>(context.CollectedFiles.Count),
-            BundleList = new List<PackageBundle>(context.CollectedFiles.Count)
+            AssetList = new List<PackageAsset>(context.BundleEntries.Count),
+            BundleList = new List<PackageBundle>(context.BundleEntries.Count)
         };
 
-        for (var index = 0; index < context.CollectedFiles.Count; index++)
+        for (var index = 0; index < context.BundleEntries.Count; index++)
         {
-            var sourceFile = context.CollectedFiles[index];
-            var destinationFile = context.DestinationFiles[index];
-            var bundleName = NormalizePathForDisplay(Path.GetRelativePath(context.PackageRoot, destinationFile));
-            var fileHash = HashUtility.FileMD5(destinationFile);
-            var fileCrc = HashUtility.FileCRC32(destinationFile);
-            var fileSize = new FileInfo(destinationFile).Length;
+            var entry = context.BundleEntries[index];
             runtimeManifest.BundleList.Add(new PackageBundle
             {
-                BundleName = bundleName,
+                BundleName = entry.BundleName,
                 UnityCRC = 0,
-                FileHash = fileHash,
-                FileCRC = fileCrc,
-                FileSize = fileSize,
-                Encrypted = false,
-                Tags = Array.Empty<string>(),
+                FileHash = entry.FileHash,
+                FileCRC = entry.FileCRC,
+                FileSize = entry.FileSize,
+                Encrypted = entry.Encrypted,
+                Tags = entry.Tags,
                 DependIDs = Array.Empty<int>()
             });
 
-            var assetPath = BuildRuntimeManifestAssetPath(sourceFile);
+            var assetPath = BuildRuntimeManifestAssetPath(entry.SourceFilePath);
             runtimeManifest.AssetList.Add(new PackageAsset
             {
                 Address = assetPath,
@@ -1161,9 +1948,6 @@ public partial class YooAssetEditorPlugin : EditorPlugin
             });
         }
 
-        context.RuntimeVersionFilePath = Path.Combine(context.PackageRoot, YooAssetSettingsData.GetPackageVersionFileName(context.PackageName));
-        context.RuntimeManifestFilePath = Path.Combine(context.PackageRoot, YooAssetSettingsData.GetManifestBinaryFileName(context.PackageName, context.PackageVersion));
-        context.RuntimeHashFilePath = Path.Combine(context.PackageRoot, YooAssetSettingsData.GetPackageHashFileName(context.PackageName, context.PackageVersion));
         SerializeRuntimeManifestBinary(context.RuntimeManifestFilePath, runtimeManifest);
         var runtimeManifestHash = HashUtility.FileMD5(context.RuntimeManifestFilePath);
         File.WriteAllText(context.RuntimeVersionFilePath, context.PackageVersion, Encoding.UTF8);
@@ -1171,9 +1955,75 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageRuntimeLink}");
     }
 
+    private void RunCopyBuildinStage(BuildOrchestrationContext context)
+    {
+        AppendBuilderLog($"{BuilderStageStartPrefix}{BuilderStageCopyBuildin}");
+        if (context.SkipWriteOutputs)
+        {
+            AppendBuilderLog(BuilderCopyBuildinSkippedLog);
+            AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageCopyBuildin}");
+            return;
+        }
+
+        if (string.Equals(context.CopyBuildinFileOption, BuilderCopyBuildinFileOptionNone, StringComparison.OrdinalIgnoreCase))
+        {
+            AppendBuilderLog(BuilderCopyBuildinDisabledLog);
+            AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageCopyBuildin}");
+            return;
+        }
+
+        var copyAll = string.Equals(context.CopyBuildinFileOption, BuilderCopyBuildinFileOptionClearAndCopyAll, StringComparison.OrdinalIgnoreCase)
+                      || string.Equals(context.CopyBuildinFileOption, BuilderCopyBuildinFileOptionOnlyCopyAll, StringComparison.OrdinalIgnoreCase);
+        var clearFirst = string.Equals(context.CopyBuildinFileOption, BuilderCopyBuildinFileOptionClearAndCopyAll, StringComparison.OrdinalIgnoreCase)
+                         || string.Equals(context.CopyBuildinFileOption, BuilderCopyBuildinFileOptionClearAndCopyByTags, StringComparison.OrdinalIgnoreCase);
+        var targets = copyAll
+            ? context.BundleEntries
+            : FilterBuildinCopyTargets(context.BundleEntries, context.CopyBuildinFileParam);
+        if (clearFirst && Directory.Exists(context.BuildinRoot))
+        {
+            Directory.Delete(context.BuildinRoot, true);
+        }
+
+        Directory.CreateDirectory(context.BuildinRoot);
+        AppendBuilderLog($"{BuilderCopyBuildinRootPrefix}{context.BuildinRoot}");
+        CopyFileToBuildinRoot(context.RuntimeVersionFilePath, context.BuildinRoot);
+        CopyFileToBuildinRoot(context.RuntimeManifestFilePath, context.BuildinRoot);
+        CopyFileToBuildinRoot(context.RuntimeHashFilePath, context.BuildinRoot);
+        if (!copyAll && targets.Count == 0)
+        {
+            AppendBuilderLog(BuilderCopyBuildinNoMatchLog);
+            AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageCopyBuildin}");
+            return;
+        }
+
+        var copiedCount = 0;
+        for (var index = 0; index < targets.Count; index++)
+        {
+            var entry = targets[index];
+            var destinationPath = Path.Combine(context.BuildinRoot, entry.OutputFileName);
+            var destinationDir = Path.GetDirectoryName(destinationPath);
+            if (!string.IsNullOrEmpty(destinationDir))
+            {
+                Directory.CreateDirectory(destinationDir);
+            }
+
+            File.Copy(entry.DestinationFilePath, destinationPath, true);
+            copiedCount++;
+        }
+
+        AppendBuilderLog($"{BuilderCopyBuildinCopiedPrefix}{copiedCount}");
+        AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageCopyBuildin}");
+    }
+
     private void RunVerifyBuildStage(BuildOrchestrationContext context)
     {
         AppendBuilderLog($"{BuilderStageStartPrefix}{BuilderStageVerify}");
+        if (context.SkipWriteOutputs)
+        {
+            AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageVerify}");
+            return;
+        }
+
         if (!Directory.Exists(context.FilesRoot))
         {
             throw new InvalidOperationException(BuilderVerifyErrorOutputRootMissing);
@@ -1209,11 +2059,11 @@ public partial class YooAssetEditorPlugin : EditorPlugin
             throw new InvalidOperationException(BuilderVerifyErrorFileCountMismatch);
         }
 
-        foreach (var destinationFile in context.DestinationFiles)
+        foreach (var entry in context.BundleEntries)
         {
-            if (!File.Exists(destinationFile))
+            if (!File.Exists(entry.DestinationFilePath))
             {
-                throw new InvalidOperationException($"{BuilderVerifyErrorFileMissingPrefix}{destinationFile}");
+                throw new InvalidOperationException($"{BuilderVerifyErrorFileMissingPrefix}{entry.DestinationFilePath}");
             }
         }
 
@@ -1247,6 +2097,246 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         }
 
         return ScenePipelineExtensions.Contains(extension);
+    }
+
+    private static string NormalizeBuilderPipeline(string pipeline)
+    {
+        if (string.IsNullOrWhiteSpace(pipeline))
+        {
+            return ReporterDefaultPipeline;
+        }
+
+        if (string.Equals(pipeline, BuilderPipelineGodotDisplay, StringComparison.OrdinalIgnoreCase))
+        {
+            return ReporterDefaultPipeline;
+        }
+
+        if (string.Equals(pipeline, BuilderPipelineBuiltinDisplay, StringComparison.OrdinalIgnoreCase))
+        {
+            return BuilderPipelineBuiltin;
+        }
+
+        if (string.Equals(pipeline, BuilderPipelineScriptableDisplay, StringComparison.OrdinalIgnoreCase))
+        {
+            return BuilderPipelineScriptable;
+        }
+
+        return pipeline;
+    }
+
+    private static string NormalizeBuilderBuildMode(string buildMode, string pipeline)
+    {
+        var supportedModes = GetSupportedBuilderModes(pipeline);
+        if (supportedModes.Count == 0)
+        {
+            return BuilderDefaultBuildMode;
+        }
+
+        for (var index = 0; index < supportedModes.Count; index++)
+        {
+            if (string.Equals(supportedModes[index], buildMode, StringComparison.OrdinalIgnoreCase))
+            {
+                return supportedModes[index];
+            }
+        }
+
+        return supportedModes[0];
+    }
+
+    private static int ResolveRuntimeOutputNameStyle(string fileNameStyle)
+    {
+        if (string.Equals(fileNameStyle, BuilderFileNameStyleHashName, StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+
+        if (string.Equals(fileNameStyle, BuilderFileNameStyleBundleNameHashName, StringComparison.OrdinalIgnoreCase))
+        {
+            return 2;
+        }
+
+        return 1;
+    }
+
+    private static bool IsBuilderNoOutputMode(string buildMode)
+    {
+        return string.Equals(buildMode, BuilderBuildModeDryRunBuild, StringComparison.OrdinalIgnoreCase)
+               || string.Equals(buildMode, BuilderBuildModeSimulateBuild, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsBuilderForceRebuildMode(string buildMode)
+    {
+        return string.Equals(buildMode, BuilderBuildModeForceRebuild, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsBuilderIncrementalMode(string buildMode)
+    {
+        return string.Equals(buildMode, BuilderBuildModeIncrementalBuild, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private IEncryptionServices CreateBuilderEncryptionInstance(string encryptionTypeName)
+    {
+        if (string.IsNullOrWhiteSpace(encryptionTypeName) || string.Equals(encryptionTypeName, BuilderDefaultEncryption, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var encryptionTypes = FindEncryptionImplementations();
+        for (var index = 0; index < encryptionTypes.Count; index++)
+        {
+            var type = encryptionTypes[index];
+            if (!string.Equals(type.FullName, encryptionTypeName, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (Activator.CreateInstance(type) is IEncryptionServices services)
+            {
+                return services;
+            }
+        }
+
+        throw new InvalidOperationException($"Encryption type not found: {encryptionTypeName}");
+    }
+
+    private static (byte[] OutputBytes, bool Encrypted) EncryptBuilderFileData(BuildOrchestrationContext context, string bundleName, string sourceFilePath, byte[] sourceBytes)
+    {
+        if (context.EncryptionServices == null)
+        {
+            return (sourceBytes, false);
+        }
+
+        var fileInfo = new EncryptFileInfo
+        {
+            BundleName = bundleName,
+            FileLoadPath = sourceFilePath
+        };
+        var result = context.EncryptionServices.Encrypt(fileInfo);
+        if (!result.Encrypted)
+        {
+            return (sourceBytes, false);
+        }
+
+        if (result.EncryptedData == null || result.EncryptedData.Length == 0)
+        {
+            throw new InvalidOperationException($"Encryption output invalid: {bundleName}");
+        }
+
+        return (result.EncryptedData, true);
+    }
+
+    private static void WriteBuilderOutputFile(BuildOrchestrationContext context, string destinationPath, byte[] outputBytes)
+    {
+        var destinationDir = Path.GetDirectoryName(destinationPath);
+        if (!string.IsNullOrEmpty(destinationDir))
+        {
+            Directory.CreateDirectory(destinationDir);
+        }
+
+        if (IsBuilderIncrementalMode(context.BuildMode) && File.Exists(destinationPath))
+        {
+            var existsHash = HashUtility.FileMD5(destinationPath);
+            var targetHash = HashUtility.BytesMD5(outputBytes);
+            if (string.Equals(existsHash, targetHash, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+        }
+
+        File.WriteAllBytes(destinationPath, outputBytes);
+    }
+
+    private static string[] InferBuilderTags(string relativePath, string sourceFilePath)
+    {
+        var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var extension = Path.GetExtension(sourceFilePath)?.TrimStart('.');
+        if (!string.IsNullOrEmpty(extension))
+        {
+            tags.Add(extension.ToLowerInvariant());
+        }
+
+        var normalizedRelative = NormalizePathForDisplay(relativePath);
+        var segments = normalizedRelative.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        for (var index = 0; index < segments.Length - 1; index++)
+        {
+            tags.Add(segments[index].ToLowerInvariant());
+        }
+
+        return tags.ToArray();
+    }
+
+    private static string ResolveBuildinPackageRoot(string packageName)
+    {
+        var defaultFolderName = YooAssetSettingsData.Setting.DefaultYooFolderName;
+        var rootPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, defaultFolderName, packageName);
+        return NormalizePathForDisplay(rootPath);
+    }
+
+    private static List<BuilderBundleEntry> FilterBuildinCopyTargets(List<BuilderBundleEntry> entries, string copyParams)
+    {
+        var tokens = copyParams
+            .Split(new[] { ';', ',', '|', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (tokens.Length == 0)
+        {
+            return new List<BuilderBundleEntry>();
+        }
+
+        var result = new List<BuilderBundleEntry>();
+        for (var index = 0; index < entries.Count; index++)
+        {
+            var entry = entries[index];
+            if (IsBuilderBundleTagMatched(entry, tokens))
+            {
+                result.Add(entry);
+            }
+        }
+
+        return result;
+    }
+
+    private static bool IsBuilderBundleTagMatched(BuilderBundleEntry entry, string[] tokens)
+    {
+        if (entry.Tags == null || entry.Tags.Length == 0)
+        {
+            return false;
+        }
+
+        for (var tokenIndex = 0; tokenIndex < tokens.Length; tokenIndex++)
+        {
+            var token = tokens[tokenIndex];
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                continue;
+            }
+
+            var normalizedToken = token.Trim().TrimStart('.').ToLowerInvariant();
+            for (var tagIndex = 0; tagIndex < entry.Tags.Length; tagIndex++)
+            {
+                if (string.Equals(entry.Tags[tagIndex], normalizedToken, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            if (entry.BundleName.Contains(token, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void CopyFileToBuildinRoot(string sourcePath, string buildinRoot)
+    {
+        if (string.IsNullOrEmpty(sourcePath) || !File.Exists(sourcePath))
+        {
+            return;
+        }
+
+        var fileName = Path.GetFileName(sourcePath);
+        var destinationPath = Path.Combine(buildinRoot, fileName);
+        File.Copy(sourcePath, destinationPath, true);
     }
 
     private static string GetDefaultPipelineKeywords(string pipeline)
@@ -1439,19 +2529,25 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         return true;
     }
 
-    private string BuildManifestText(string packageName, string pipeline, string packageVersion, string sourceRoot, string filesRoot, List<string> collectedFiles, DateTime buildTime)
+    private string BuildManifestText(BuildOrchestrationContext context)
     {
         var builder = new StringBuilder();
-        builder.AppendLine($"{ManifestFieldPackageName}={packageName}");
-        builder.AppendLine($"{ManifestFieldPipeline}={pipeline}");
-        builder.AppendLine($"{ManifestFieldBuildVersion}={packageVersion}");
-        builder.AppendLine($"{ManifestFieldBuildTime}={buildTime.ToString(ExportIsoDateTimeFormat)}");
-        builder.AppendLine($"{ManifestFieldSourceRoot}={NormalizePathForDisplay(sourceRoot)}");
-        builder.AppendLine($"{ManifestFieldOutputFilesRoot}={NormalizePathForDisplay(filesRoot)}");
-        builder.AppendLine($"{ManifestFieldFileCount}={collectedFiles.Count}");
+        builder.AppendLine($"{ManifestFieldPackageName}={context.PackageName}");
+        builder.AppendLine($"{ManifestFieldPipeline}={context.Pipeline}");
+        builder.AppendLine($"{ManifestFieldBuildVersion}={context.PackageVersion}");
+        builder.AppendLine($"{ManifestFieldBuildTime}={context.BuildTime.ToString(ExportIsoDateTimeFormat)}");
+        builder.AppendLine($"{ManifestFieldBuildMode}={context.BuildMode}");
+        builder.AppendLine($"{ManifestFieldEncryption}={context.Encryption}");
+        builder.AppendLine($"{ManifestFieldCompression}={context.Compression}");
+        builder.AppendLine($"{ManifestFieldFileNameStyle}={context.FileNameStyle}");
+        builder.AppendLine($"{ManifestFieldCopyBuildinFileOption}={context.CopyBuildinFileOption}");
+        builder.AppendLine($"{ManifestFieldCopyBuildinFileParam}={context.CopyBuildinFileParam}");
+        builder.AppendLine($"{ManifestFieldSourceRoot}={NormalizePathForDisplay(context.SourceRoot)}");
+        builder.AppendLine($"{ManifestFieldOutputFilesRoot}={NormalizePathForDisplay(context.FilesRoot)}");
+        builder.AppendLine($"{ManifestFieldFileCount}={context.CollectedFiles.Count}");
         builder.AppendLine(ManifestSectionFiles);
 
-        foreach (var file in collectedFiles)
+        foreach (var file in context.CollectedFiles)
         {
             builder.AppendLine(Path.GetFileName(file));
             builder.AppendLine(ToProjectDisplayPath(file));
@@ -1467,6 +2563,12 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         builder.AppendLine($"{ManifestFieldPipeline}={context.Pipeline}");
         builder.AppendLine($"{ManifestFieldBuildVersion}={context.PackageVersion}");
         builder.AppendLine($"{ManifestFieldBuildTime}={context.BuildTime.ToString(ExportIsoDateTimeFormat)}");
+        builder.AppendLine($"{ManifestFieldBuildMode}={context.BuildMode}");
+        builder.AppendLine($"{ManifestFieldEncryption}={context.Encryption}");
+        builder.AppendLine($"{ManifestFieldCompression}={context.Compression}");
+        builder.AppendLine($"{ManifestFieldFileNameStyle}={context.FileNameStyle}");
+        builder.AppendLine($"{ManifestFieldCopyBuildinFileOption}={context.CopyBuildinFileOption}");
+        builder.AppendLine($"{ManifestFieldCopyBuildinFileParam}={context.CopyBuildinFileParam}");
         builder.AppendLine($"{ManifestFieldOutputFilesRoot}={NormalizePathForDisplay(context.FilesRoot)}");
         builder.AppendLine($"{ManifestFieldFileCount}={context.CopiedCount}");
         builder.AppendLine($"{BuilderManifestFileName}={Path.GetFileName(context.ManifestPath)}");
@@ -2537,16 +3639,51 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         public string Summary { get; set; }
     }
 
+    private sealed class BuilderProfileSettings
+    {
+        public string BuildMode { get; set; }
+        public string Encryption { get; set; }
+        public string Compression { get; set; }
+        public string FileNameStyle { get; set; }
+        public string CopyBuildinFileOption { get; set; }
+        public string CopyBuildinFileParam { get; set; }
+        public string PackageVersion { get; set; }
+    }
+
+    private sealed class BuilderBundleEntry
+    {
+        public string SourceFilePath { get; set; }
+        public string BundleName { get; set; }
+        public string OutputFileName { get; set; }
+        public string DestinationFilePath { get; set; }
+        public string FileHash { get; set; }
+        public string FileCRC { get; set; }
+        public long FileSize { get; set; }
+        public bool Encrypted { get; set; }
+        public string[] Tags { get; set; } = Array.Empty<string>();
+    }
+
     private sealed class BuildOrchestrationContext
     {
         public string PackageName { get; set; }
         public string GlobalOutputPath { get; set; }
         public string Pipeline { get; set; }
+        public string BuildMode { get; set; }
+        public string Encryption { get; set; }
+        public string Compression { get; set; }
+        public string FileNameStyle { get; set; }
+        public string CopyBuildinFileOption { get; set; }
+        public string CopyBuildinFileParam { get; set; }
+        public string RequestedPackageVersion { get; set; }
+        public int RuntimeOutputNameStyle { get; set; }
+        public bool SkipWriteOutputs { get; set; }
+        public IEncryptionServices EncryptionServices { get; set; }
         public string ScanRoot { get; set; }
         public string KeywordsText { get; set; }
         public DateTime BuildTime { get; set; }
         public string BuildTimestamp { get; set; }
         public string PackageVersion { get; set; }
+        public string BuildinRoot { get; set; }
         public string SourceRoot { get; set; }
         public string PackageRoot { get; set; }
         public string FilesRoot { get; set; }
@@ -2559,7 +3696,7 @@ public partial class YooAssetEditorPlugin : EditorPlugin
         public int ScannedCount { get; set; }
         public bool ScanLimitHit { get; set; }
         public List<string> CollectedFiles { get; set; } = new List<string>();
-        public List<string> DestinationFiles { get; } = new List<string>();
+        public List<BuilderBundleEntry> BundleEntries { get; } = new List<BuilderBundleEntry>();
     }
 
     private sealed class CollectorRuleModel
