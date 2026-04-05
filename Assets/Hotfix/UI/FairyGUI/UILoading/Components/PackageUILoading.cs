@@ -4,9 +4,9 @@
 
 namespace Hotfix.UI
 {
-    public static partial class FUIPackage
-    {
+	public static partial class FUIPackage
+	{
 		public const string UILoading = "UILoading";
-    }
+	}
 }
 #endif

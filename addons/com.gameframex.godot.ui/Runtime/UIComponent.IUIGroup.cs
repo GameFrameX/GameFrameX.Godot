@@ -97,13 +97,16 @@ namespace GameFrameX.UI.Runtime
                 return false;
             }
 
-            if (m_CustomUIGroupHelper == null)
+            // 传入 index=1 可避免 custom helper 在树内时直接复用原节点，确保每个组拿到独立实例。
+            UIGroupHelperBase helperInstance = Helper.CreateHelper(m_UIGroupHelperTypeName, m_CustomUIGroupHelper, 1);
+            if (helperInstance == null)
             {
                 Log.Error("Can not create UI group helper.");
                 return false;
             }
 
-            UIGroupHelperBase uiGroupHelper = (UIGroupHelperBase)m_CustomUIGroupHelper.Handler(GetCurrentUIRoot(), uiGroupName, m_UIGroupHelperTypeName, m_CustomUIGroupHelper, depth);
+            helperInstance.Name = $"UIGroupHelper_{uiGroupName}";
+            UIGroupHelperBase uiGroupHelper = (UIGroupHelperBase)helperInstance.Handler(GetCurrentUIRoot(), uiGroupName, m_UIGroupHelperTypeName, m_CustomUIGroupHelper, depth);
             if (uiGroupHelper == null)
             {
                 Log.Error("Can not create UI group helper.");

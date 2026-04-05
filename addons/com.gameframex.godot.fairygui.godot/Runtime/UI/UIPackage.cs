@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Godot;
@@ -1446,13 +1446,5 @@ namespace FairyGUI
         }
 
 
-#if UNITY_2019_3_OR_NEWER
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void InitializeOnLoad()
-        {
-            RemoveAllPackages();
-            UIPackage.branch = null;
-        }
-#endif
-    }
+}
 }

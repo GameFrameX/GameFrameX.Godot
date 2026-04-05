@@ -133,7 +133,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		Log.Info("[Resources] SKIP runtime-disabled (build with IncludeAssetSystemRuntime=true for full probe)");
 		Log.Info("[AB] SKIP runtime-disabled");
 		Log.Info("[Remote] SKIP runtime-disabled");
-		ShowBuiltinResourcePreview();
+		Log.Info("[Preview] SKIP builtin preview disabled.");
 		ChangeState<ProcedurePatchDone>(procedureOwner);
 #endif
 	}
@@ -326,10 +326,10 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 
 			if (_stage == LoadProbeStage.ShowingPreview)
 			{
-				ProbeGodotPckMounting();
-				ProbeGodotRawResourceLoading();
-				ShowBuiltinResourcePreview();
-				MoveToStage(LoadProbeStage.ShowingRemoteImage, "preview shown");
+				Log.Info("[Preview] SKIP pck/raw/builtin preview disabled.");
+				// MoveToStage(LoadProbeStage.ShowingRemoteImage, "preview shown");
+				// 按调试需求临时关闭远程图片加载入口，预览完成后直接结束探针流程。
+				MoveToStage(LoadProbeStage.Completed, "preview shown (remote image entry disabled)");
 				return;
 			}
 
@@ -400,7 +400,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 	{
 		Log.Warning(message);
 		Log.Info(message);
-		ShowBuiltinResourcePreview();
+		Log.Info("[Preview] SKIP builtin preview disabled in fail path.");
 		MoveToStage(LoadProbeStage.Failed, "pipeline failed");
 	}
 
@@ -441,16 +441,9 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			}
 			else
 			{
-				var fallbackScene = ResourceLoader.Load<PackedScene>(BuiltinSceneProbePath);
-				if (fallbackScene != null)
-				{
-					Log.Info("[GodotRaw] PASS fallback path={0} type=PackedScene", BuiltinSceneProbePath);
-				}
-				else
-				{
-					Log.Warning("[GodotRaw] FAIL location={0} type=PackedScene", ProbeAssetLocation);
-					Log.Info("[GodotRaw] FAIL location={0} type=PackedScene", ProbeAssetLocation);
-				}
+				// var fallbackScene = ResourceLoader.Load<PackedScene>(BuiltinSceneProbePath);
+				// AssetSystemRuntimeVerifier 场景探针入口已按需求禁用，不再触发其脚本加载链路。
+				Log.Info("[GodotRaw] SKIP fallback scene probe path={0}", BuiltinSceneProbePath);
 			}
 		}
 		catch (Exception exception)

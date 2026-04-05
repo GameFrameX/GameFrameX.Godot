@@ -108,6 +108,7 @@ namespace GameFrameX.Editor
         /// 当前语言代码缓存。
         /// </summary>
         private string m_CurrentLocale;
+        private RuntimeLogBridge m_RuntimeLogBridge;
 
         /// <summary>
         /// 当插件进入场景树时调用，注册 Inspector 插件。
@@ -133,6 +134,7 @@ namespace GameFrameX.Editor
 
             // 初始化顶部菜单
             RegisterTopToolbarMenu();
+            m_RuntimeLogBridge = new RuntimeLogBridge();
             SetProcess(true);
         }
 
@@ -156,6 +158,7 @@ namespace GameFrameX.Editor
             m_LogDefinePopupMenu = null;
             m_AssetSystemBuilderDialog = null;
             m_CurrentLocale = null;
+            m_RuntimeLogBridge = null;
         }
 
         /// <summary>
@@ -164,6 +167,7 @@ namespace GameFrameX.Editor
         /// <param name="delta">帧间隔时间。</param>
         public override void _Process(double delta)
         {
+            m_RuntimeLogBridge?.Tick(delta);
             string locale = TranslationServer.GetLocale();
             if (string.Equals(locale, m_CurrentLocale, StringComparison.Ordinal))
             {

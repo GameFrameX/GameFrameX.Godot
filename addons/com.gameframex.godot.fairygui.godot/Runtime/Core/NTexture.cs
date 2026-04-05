@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using System;
 using System.Collections.Generic;
 
@@ -108,16 +108,7 @@ namespace FairyGUI
             }
         }
 
-#if UNITY_2019_3_OR_NEWER
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void InitializeOnLoad()
-        {
-            DisposeEmpty();
-            CustomDestroyMethod = null;
-        }
-#endif
-
-        /// <summary>
+/// <summary>
         /// 
         /// </summary>
         /// <param name="texture"></param>

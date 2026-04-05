@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Godot;
@@ -26,15 +26,7 @@ namespace FairyGUI.Utils
         static List<string> sHelperList1 = new List<string>();
         static List<string> sHelperList2 = new List<string>();
 
-#if UNITY_2019_3_OR_NEWER
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void InitializeOnLoad()
-        {
-            inst = new HtmlParser();
-        }
-#endif
-
-        public HtmlParser()
+public HtmlParser()
         {
             _textFormatStack = new List<TextFormat2>();
             _format = new TextFormat2();

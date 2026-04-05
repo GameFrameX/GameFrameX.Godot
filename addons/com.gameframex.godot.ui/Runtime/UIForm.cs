@@ -116,8 +116,8 @@ namespace GameFrameX.UI.Runtime
         /// </summary>
         public new string Name
         {
-            get { return this.Name; }
-            set { this.Name = value; }
+            get { return base.Name; }
+            set { base.Name = value; }
         }
 
         /// <summary>
@@ -172,7 +172,8 @@ namespace GameFrameX.UI.Runtime
             get { return m_Available && m_Visible; }
             protected set
             {
-                if (!m_Available)
+                // 允许在不可用状态下关闭可见性，避免关闭流程中旧界面残留在前景层拦截输入。
+                if (!m_Available && value)
                 {
                     Log.Warning("UI form '{0}' is not available.", Name);
                     return;

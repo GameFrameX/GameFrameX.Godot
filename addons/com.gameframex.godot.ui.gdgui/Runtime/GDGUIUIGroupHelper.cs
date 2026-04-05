@@ -9,6 +9,7 @@ namespace GameFrameX.UI.GDGUI.Runtime
     public partial class GDGUIUIGroupHelper : UIGroupHelperBase
     {
         private int m_Depth;
+        private Control m_Container;
 
         /// <summary>
         /// 获取界面组深度。
@@ -26,6 +27,10 @@ namespace GameFrameX.UI.GDGUI.Runtime
         public override void SetDepth(int depth)
         {
             m_Depth = depth;
+            if (m_Container != null)
+            {
+                m_Container.ZIndex = depth;
+            }
         }
 
         /// <summary>
@@ -49,7 +54,9 @@ namespace GameFrameX.UI.GDGUI.Runtime
                 Name = groupName
             };
             container.MakeFullScreen();
+            container.MouseFilter = Control.MouseFilterEnum.Ignore;
             root.AddChild(container);
+            m_Container = container;
 
             Name = "UIGroupHelper";
             container.AddChild(this);

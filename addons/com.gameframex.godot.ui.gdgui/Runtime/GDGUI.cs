@@ -1,5 +1,6 @@
 using System;
 using GameFrameX.UI.Runtime;
+using Godot;
 
 namespace GameFrameX.UI.GDGUI.Runtime
 {
@@ -46,12 +47,13 @@ namespace GameFrameX.UI.GDGUI.Runtime
         /// <param name="visible">是否可见。</param>
         protected override void InternalSetVisible(bool visible)
         {
-            if (Visible == visible)
+            var currentVisible = ((CanvasItem)this).Visible;
+            if (currentVisible == visible)
             {
                 return;
             }
 
-            Visible = visible;
+            ((CanvasItem)this).Visible = visible;
         }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace GameFrameX.UI.GDGUI.Runtime
         /// </summary>
         protected internal override void MakeFullScreen()
         {
-            this.MakeFullScreen();
+            ControlExtension.MakeFullScreen(this);
         }
     }
 }
