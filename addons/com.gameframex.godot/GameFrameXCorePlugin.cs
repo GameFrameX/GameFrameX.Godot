@@ -56,6 +56,11 @@ namespace GameFrameX.Editor
         private const int LogDefineEnableFatalAndAboveLogsId = 106;
 
         /// <summary>
+        /// 顶部菜单项：打开资源打包窗口。
+        /// </summary>
+        private const int TopMenuOpenAssetBuilderId = 200;
+
+        /// <summary>
         /// BaseComponent 的 Inspector 插件实例。
         /// </summary>
         /// <remarks>
@@ -93,6 +98,11 @@ namespace GameFrameX.Editor
         /// 日志宏定义二级菜单实例。
         /// </summary>
         private PopupMenu m_LogDefinePopupMenu;
+
+        /// <summary>
+        /// Godot 资源打包窗口实例。
+        /// </summary>
+        private AssetSystemBuilderDialog m_AssetSystemBuilderDialog;
 
         /// <summary>
         /// 当前语言代码缓存。
@@ -144,6 +154,7 @@ namespace GameFrameX.Editor
             m_TopMenuButton = null;
             m_TopPopupMenu = null;
             m_LogDefinePopupMenu = null;
+            m_AssetSystemBuilderDialog = null;
             m_CurrentLocale = null;
         }
 
@@ -182,6 +193,10 @@ namespace GameFrameX.Editor
             {
                 m_TopPopupMenu.AddSubmenuNodeItem(L("脚本宏定义", "Scripting Define Symbols"), m_LogDefinePopupMenu);
             }
+
+            m_TopPopupMenu.AddSeparator();
+            m_TopPopupMenu.AddItem(L("资源打包器", "Asset Builder"), TopMenuOpenAssetBuilderId);
+            m_TopPopupMenu.IdPressed += OnTopMenuIdPressed;
 
             AddControlToContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
         }
@@ -233,6 +248,7 @@ namespace GameFrameX.Editor
 
             if (m_TopPopupMenu != null)
             {
+                m_TopPopupMenu.IdPressed -= OnTopMenuIdPressed;
                 m_TopPopupMenu = null;
             }
 
@@ -242,6 +258,40 @@ namespace GameFrameX.Editor
                 m_TopMenuButton.QueueFree();
                 m_TopMenuButton = null;
             }
+
+            if (m_AssetSystemBuilderDialog != null)
+            {
+                m_AssetSystemBuilderDialog.QueueFree();
+                m_AssetSystemBuilderDialog = null;
+            }
+        }
+
+        /// <summary>
+        /// 功能：处理顶部菜单点击事件。
+        /// </summary>
+        /// <param name="id">菜单项标识。</param>
+        private void OnTopMenuIdPressed(long id)
+        {
+            if (id == TopMenuOpenAssetBuilderId)
+            {
+                OpenAssetBuilderDialog();
+            }
+        }
+
+        /// <summary>
+        /// 功能：打开 Godot 资源打包窗口。
+        /// </summary>
+        private void OpenAssetBuilderDialog()
+        {
+            if (m_AssetSystemBuilderDialog == null || IsInstanceValid(m_AssetSystemBuilderDialog) == false)
+            {
+                m_AssetSystemBuilderDialog = new AssetSystemBuilderDialog();
+                var baseControl = EditorInterface.Singleton?.GetBaseControl();
+                baseControl?.AddChild(m_AssetSystemBuilderDialog);
+            }
+
+            m_AssetSystemBuilderDialog.PopupCentered(new Vector2I(900, 560));
+            m_AssetSystemBuilderDialog.GrabFocus();
         }
 
         /// <summary>

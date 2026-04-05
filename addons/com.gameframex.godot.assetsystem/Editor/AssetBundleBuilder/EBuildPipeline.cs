@@ -20,5 +20,10 @@ namespace YooAsset.Editor
         /// 原生文件构建管线 (RFBP)
         /// </summary>
         RawFileBuildPipeline,
+
+        /// <summary>
+        /// Godot 文件构建管线（兼容映射到 RFBP）
+        /// </summary>
+        GodotFileBuildPipeline = RawFileBuildPipeline,
     }
 }

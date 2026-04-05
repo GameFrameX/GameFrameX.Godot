@@ -273,6 +273,24 @@ namespace YooAsset
         }
 
         /// <summary>
+        /// 设置下载系统参数，自定义 HTTP 传输层
+        /// </summary>
+        [UnityEngine.Scripting.Preserve]
+        public static void SetDownloadSystemHttpTransport(IHttpTransport transport)
+        {
+            DownloadSystemHelper.HttpTransport = transport;
+        }
+
+        /// <summary>
+        /// 设置资源后端适配器（内部使用）
+        /// </summary>
+        [UnityEngine.Scripting.Preserve]
+        internal static void SetResourceBackend(IResourceBackend backend)
+        {
+            BundleAssetLoaderFactory.Backend = backend;
+        }
+
+        /// <summary>
         /// 设置异步系统参数，每帧执行消耗的最大时间切片（单位：毫秒）
         /// </summary>
         [UnityEngine.Scripting.Preserve]

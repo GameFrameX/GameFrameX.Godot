@@ -20,6 +20,7 @@ namespace YooAsset
         private readonly bool _appendTimeTicks;
         private int _failedTryAgain = 1;
         private UnityWebDataRequestOperation _webDataRequestOp;
+        private HttpDataRequestOperation _httpDataRequestOp;
         private DeserializeManifestOperation _deserializer;
         private ESteps _steps = ESteps.None;
 
@@ -55,21 +56,35 @@ namespace YooAsset
 
             if (_steps == ESteps.RequestFileData)
             {
-                if (_webDataRequestOp == null)
+                if (_webDataRequestOp == null && _httpDataRequestOp == null)
                 {
                     var filePath = _fileSystem.GetWebPackageManifestFilePath(_packageVersion);
                     var url = DownloadSystemHelper.ConvertToWWWPath(filePath);
-                    _webDataRequestOp = new UnityWebDataRequestOperation(url, _timeout, _appendTimeTicks);
-                    OperationSystem.StartOperation(_fileSystem.PackageName, _webDataRequestOp);
+                    if (DownloadSystemHelper.HttpTransport != null)
+                    {
+                        _httpDataRequestOp = new HttpDataRequestOperation(url, _timeout, _appendTimeTicks);
+                        OperationSystem.StartOperation(_fileSystem.PackageName, _httpDataRequestOp);
+                    }
+                    else
+                    {
+                        _webDataRequestOp = new UnityWebDataRequestOperation(url, _timeout, _appendTimeTicks);
+                        OperationSystem.StartOperation(_fileSystem.PackageName, _webDataRequestOp);
+                    }
                 }
 
-                Progress = _webDataRequestOp.Progress;
-                if (_webDataRequestOp.IsDone == false)
+                var currentOperation = (AsyncOperationBase)_httpDataRequestOp ?? _webDataRequestOp;
+                if (currentOperation == null)
                 {
                     return;
                 }
 
-                if (_webDataRequestOp.Status == EOperationStatus.Succeed)
+                Progress = currentOperation.Progress;
+                if (currentOperation.IsDone == false)
+                {
+                    return;
+                }
+
+                if (currentOperation.Status == EOperationStatus.Succeed)
                 {
                     _steps = ESteps.VerifyFileData;
                 }
@@ -79,18 +94,20 @@ namespace YooAsset
                     {
                         _failedTryAgain--;
                         _webDataRequestOp = null;
+                        _httpDataRequestOp = null;
                         return;
                     }
 
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
-                    Error = _webDataRequestOp.Error;
+                    Error = currentOperation.Error;
                 }
             }
 
             if (_steps == ESteps.VerifyFileData)
             {
-                var fileHash = HashUtility.BytesMD5(_webDataRequestOp.Result);
+                var manifestBytes = _httpDataRequestOp != null ? _httpDataRequestOp.Result : _webDataRequestOp.Result;
+                var fileHash = HashUtility.BytesMD5(manifestBytes);
                 if (fileHash == _packageHash)
                 {
                     _steps = ESteps.LoadManifest;
@@ -107,7 +124,8 @@ namespace YooAsset
             {
                 if (_deserializer == null)
                 {
-                    _deserializer = new DeserializeManifestOperation(_webDataRequestOp.Result);
+                    var manifestBytes = _httpDataRequestOp != null ? _httpDataRequestOp.Result : _webDataRequestOp.Result;
+                    _deserializer = new DeserializeManifestOperation(manifestBytes);
                     OperationSystem.StartOperation(_fileSystem.PackageName, _deserializer);
                 }
 
