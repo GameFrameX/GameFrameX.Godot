@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://Scripts/Demo/GodotUI/UILogin.cs" id="1_script"]
+[ext_resource type="Script" path="res://Assets/Hotfix/UI/GodotGUI/UILogin/UILogin.cs" id="1_script"]
 [ext_resource type="Texture2D" path="res://icon.svg" id="2_logo"]
 
 [node name="UILogin" type="Control"]

@@ -1,5 +1,7 @@
 .idea
 .godot
+.vs/
+.dotnet_home/
 docs/
 migration-progress/
 
@@ -9,4 +11,3 @@ migration-progress/
 
 # IDE user settings
 *.DotSettings.user
-.idea

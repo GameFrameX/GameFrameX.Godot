@@ -21,6 +21,11 @@ namespace GameFrameX.Editor
         private const string TopMenuScriptDefineSubmenuName = "ScriptingDefineSymbolsSubmenu";
 
         /// <summary>
+        /// 日志宏定义菜单项：打开宏定义窗口。
+        /// </summary>
+        private const int LogDefineOpenWindowId = 90;
+
+        /// <summary>
         /// 日志宏定义菜单项：禁用所有日志。
         /// </summary>
         private const int LogDefineDisableAllLogsId = 100;
@@ -54,11 +59,11 @@ namespace GameFrameX.Editor
         /// 日志宏定义菜单项：开启严重错误及以上日志。
         /// </summary>
         private const int LogDefineEnableFatalAndAboveLogsId = 106;
-
+        
         /// <summary>
-        /// 顶部菜单项：打开资源打包窗口。
+        /// 顶部菜单项：资源打包器（兼容旧入口）。
         /// </summary>
-        private const int TopMenuOpenAssetBuilderId = 200;
+        private const int TopMenuAssetBuilderId = 20;
 
         /// <summary>
         /// BaseComponent 的 Inspector 插件实例。
@@ -100,15 +105,12 @@ namespace GameFrameX.Editor
         private PopupMenu m_LogDefinePopupMenu;
 
         /// <summary>
-        /// Godot 资源打包窗口实例。
-        /// </summary>
-        private AssetSystemBuilderDialog m_AssetSystemBuilderDialog;
-
-        /// <summary>
         /// 当前语言代码缓存。
         /// </summary>
         private string m_CurrentLocale;
         private RuntimeLogBridge m_RuntimeLogBridge;
+        private AssetSystemBuilderDialog m_AssetSystemBuilderDialog;
+        private ScriptingDefineSymbolsWindow m_ScriptingDefineSymbolsWindow;
 
         /// <summary>
         /// 当插件进入场景树时调用，注册 Inspector 插件。
@@ -148,6 +150,17 @@ namespace GameFrameX.Editor
         {
             SetProcess(false);
             UnregisterTopToolbarMenu();
+            if (m_AssetSystemBuilderDialog != null)
+            {
+                m_AssetSystemBuilderDialog.QueueFree();
+                m_AssetSystemBuilderDialog = null;
+            }
+
+            if (m_ScriptingDefineSymbolsWindow != null)
+            {
+                m_ScriptingDefineSymbolsWindow.QueueFree();
+                m_ScriptingDefineSymbolsWindow = null;
+            }
 
             // Godot 4 会自动清理 InspectorPlugin，无需手动移除 / Godot 4 automatically cleans up InspectorPlugins, no need to remove manually
             m_BaseComponentInspector = null;
@@ -156,7 +169,6 @@ namespace GameFrameX.Editor
             m_TopMenuButton = null;
             m_TopPopupMenu = null;
             m_LogDefinePopupMenu = null;
-            m_AssetSystemBuilderDialog = null;
             m_CurrentLocale = null;
             m_RuntimeLogBridge = null;
         }
@@ -192,15 +204,14 @@ namespace GameFrameX.Editor
             m_TopMenuButton.Text = "GameFrameX";
 
             m_TopPopupMenu = m_TopMenuButton.GetPopup();
+            m_TopPopupMenu.AddItem(L("资源打包器", "Asset Builder"), TopMenuAssetBuilderId);
+            m_TopPopupMenu.AddSeparator();
+            m_TopPopupMenu.IdPressed += OnTopMenuIdPressed;
             BuildLogDefineSubmenu();
             if (m_LogDefinePopupMenu != null)
             {
                 m_TopPopupMenu.AddSubmenuNodeItem(L("脚本宏定义", "Scripting Define Symbols"), m_LogDefinePopupMenu);
             }
-
-            m_TopPopupMenu.AddSeparator();
-            m_TopPopupMenu.AddItem(L("资源打包器", "Asset Builder"), TopMenuOpenAssetBuilderId);
-            m_TopPopupMenu.IdPressed += OnTopMenuIdPressed;
 
             AddControlToContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
         }
@@ -226,6 +237,8 @@ namespace GameFrameX.Editor
 
             m_LogDefinePopupMenu = new PopupMenu();
             m_LogDefinePopupMenu.Name = TopMenuScriptDefineSubmenuName;
+            m_LogDefinePopupMenu.AddItem(L("打开宏窗口", "Open Define Window"), LogDefineOpenWindowId);
+            m_LogDefinePopupMenu.AddSeparator();
             m_LogDefinePopupMenu.AddItem(L("禁用所有日志", "Disable All Logs"), LogDefineDisableAllLogsId);
             m_LogDefinePopupMenu.AddItem(L("开启所有日志", "Enable All Logs"), LogDefineEnableAllLogsId);
             m_LogDefinePopupMenu.AddSeparator();
@@ -250,52 +263,67 @@ namespace GameFrameX.Editor
                 m_LogDefinePopupMenu = null;
             }
 
-            if (m_TopPopupMenu != null)
-            {
-                m_TopPopupMenu.IdPressed -= OnTopMenuIdPressed;
-                m_TopPopupMenu = null;
-            }
+            m_TopPopupMenu = null;
 
             if (m_TopMenuButton != null)
             {
+                PopupMenu popupMenu = m_TopMenuButton.GetPopup();
+                if (popupMenu != null)
+                {
+                    popupMenu.IdPressed -= OnTopMenuIdPressed;
+                }
+
                 RemoveControlFromContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
                 m_TopMenuButton.QueueFree();
                 m_TopMenuButton = null;
             }
 
-            if (m_AssetSystemBuilderDialog != null)
-            {
-                m_AssetSystemBuilderDialog.QueueFree();
-                m_AssetSystemBuilderDialog = null;
-            }
         }
 
         /// <summary>
-        /// 功能：处理顶部菜单点击事件。
+        /// 功能：处理 GameFrameX 顶层菜单点击。
         /// </summary>
         /// <param name="id">菜单项标识。</param>
         private void OnTopMenuIdPressed(long id)
         {
-            if (id == TopMenuOpenAssetBuilderId)
+            if (id != TopMenuAssetBuilderId)
             {
-                OpenAssetBuilderDialog();
+                return;
+            }
+
+            if (!ShowUnifiedAssetBuilderDialog() && global::YooAssetEditorPlugin.RequestOpenBuilderFromCompatibilityEntry() == false)
+            {
+                GD.PrintErr("无法打开资源打包器：统一窗口与 YooAsset 入口均不可用。");
             }
         }
 
-        /// <summary>
-        /// 功能：打开 Godot 资源打包窗口。
-        /// </summary>
-        private void OpenAssetBuilderDialog()
+        private bool ShowUnifiedAssetBuilderDialog()
         {
-            if (m_AssetSystemBuilderDialog == null || IsInstanceValid(m_AssetSystemBuilderDialog) == false)
+            try
             {
-                m_AssetSystemBuilderDialog = new AssetSystemBuilderDialog();
-                var baseControl = EditorInterface.Singleton?.GetBaseControl();
-                baseControl?.AddChild(m_AssetSystemBuilderDialog);
-            }
+                if (m_AssetSystemBuilderDialog == null || !GodotObject.IsInstanceValid(m_AssetSystemBuilderDialog))
+                {
+                    m_AssetSystemBuilderDialog = new AssetSystemBuilderDialog();
+                    var parent = EditorInterface.Singleton?.GetBaseControl();
+                    if (parent == null)
+                    {
+                        return false;
+                    }
 
-            m_AssetSystemBuilderDialog.PopupCentered(new Vector2I(900, 560));
-            m_AssetSystemBuilderDialog.GrabFocus();
+                    parent.AddChild(m_AssetSystemBuilderDialog);
+                }
+
+                m_AssetSystemBuilderDialog.MinSize = new Vector2I(1100, 760);
+                m_AssetSystemBuilderDialog.Size = new Vector2I(1366, 860);
+                m_AssetSystemBuilderDialog.PopupCentered(new Vector2I(1366, 860));
+                m_AssetSystemBuilderDialog.Show();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                GD.PrintErr($"打开统一资源打包窗口失败: {exception.Message}");
+                return false;
+            }
         }
 
         /// <summary>
@@ -304,6 +332,12 @@ namespace GameFrameX.Editor
         /// <param name="id">菜单项标识。</param>
         private void OnLogDefineMenuIdPressed(long id)
         {
+            if (id == LogDefineOpenWindowId)
+            {
+                ShowScriptingDefineSymbolsWindow();
+                return;
+            }
+
             if (id == LogDefineDisableAllLogsId)
             {
                 ApplyLogDefineAction(LogScriptingDefineSymbols.DisableAllLogs, "已禁用所有日志宏定义。");
@@ -343,6 +377,35 @@ namespace GameFrameX.Editor
             if (id == LogDefineEnableFatalAndAboveLogsId)
             {
                 ApplyLogDefineAction(LogScriptingDefineSymbols.EnableFatalAndAboveLogs, "已开启严重错误及以上日志宏定义。");
+            }
+        }
+
+        private bool ShowScriptingDefineSymbolsWindow()
+        {
+            try
+            {
+                if (m_ScriptingDefineSymbolsWindow == null || !GodotObject.IsInstanceValid(m_ScriptingDefineSymbolsWindow))
+                {
+                    m_ScriptingDefineSymbolsWindow = new ScriptingDefineSymbolsWindow();
+                    var parent = EditorInterface.Singleton?.GetBaseControl();
+                    if (parent == null)
+                    {
+                        return false;
+                    }
+
+                    parent.AddChild(m_ScriptingDefineSymbolsWindow);
+                }
+
+                m_ScriptingDefineSymbolsWindow.MinSize = new Vector2I(980, 700);
+                m_ScriptingDefineSymbolsWindow.Size = new Vector2I(1120, 700);
+                m_ScriptingDefineSymbolsWindow.PopupCentered(new Vector2I(1120, 700));
+                m_ScriptingDefineSymbolsWindow.Show();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                GD.PrintErr($"打开脚本宏窗口失败: {exception.Message}");
+                return false;
             }
         }
 

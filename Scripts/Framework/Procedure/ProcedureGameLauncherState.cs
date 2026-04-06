@@ -2,7 +2,7 @@ using GameFrameX.Fsm.Runtime;
 using GameFrameX.Procedure.Runtime;
 using GameFrameX.Runtime;
 using Godot;
-using Godot.Startup.Demo;
+using Godot.Startup.UIFlow;
 
 namespace Godot.Startup.Procedure
 {
@@ -83,7 +83,8 @@ namespace Godot.Startup.Procedure
             var existingFairyDemo = rootNode.GetNodeOrNull<FairyGuiFlowDemo>(FairyGuiDemoNodeName);
             if (existingFairyDemo != null)
             {
-                Log.Info("[UIFlow] FairyGUI 演示流程已存在，跳过重复挂载。 node={0}", existingFairyDemo.Name);
+                Log.Warning("[UIFlow] FairyGuiFlowDemo 已存在，触发重启而非跳过。 node={0}", existingFairyDemo.Name);
+                existingFairyDemo.ForceRestartFlow("ProcedureGameLauncherState re-enter");
                 return;
             }
 
@@ -104,3 +105,4 @@ namespace Godot.Startup.Procedure
         }
     }
 }
+
