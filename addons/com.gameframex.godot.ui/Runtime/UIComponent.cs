@@ -53,6 +53,9 @@ namespace GameFrameX.UI.Runtime
         private Node m_FairyGUIRoot = null;
 
         private readonly List<IUIForm> m_InternalUIFormResults = new List<IUIForm>();
+        private const int MaxInitializeRetryFrames = 600;
+        private int m_InitializeRetryFrames = 0;
+        private bool m_IsRuntimeInitialized = false;
 
         [Export] private bool m_EnableOpenUIFormSuccessEvent = true;
 
@@ -151,6 +154,26 @@ namespace GameFrameX.UI.Runtime
         }
 
         /// <summary>
+        /// 获取 UI 组件是否完成初始化。
+        /// </summary>
+        public bool IsInitialized
+        {
+            get
+            {
+                var baseManager = m_UIManager as BaseUIManager;
+                return m_IsRuntimeInitialized && baseManager != null && baseManager.IsRuntimeReady;
+            }
+        }
+
+        /// <summary>
+        /// 获取当前 UI 管理器后端类型名称。
+        /// </summary>
+        public string RuntimeBackendTypeName
+        {
+            get { return m_UIManager?.GetType().FullName ?? "<null>"; }
+        }
+
+        /// <summary>
         /// 获取或设置界面实例对象池自动回收可回收对象的间隔秒数。
         /// </summary>
         public int RecycleInterval
@@ -204,6 +227,11 @@ namespace GameFrameX.UI.Runtime
                 return;
             }
 
+            Log.Info("[UIComponent] backend type={0}, helperType={1}, groupHelperType={2}",
+                m_UIManager.GetType().FullName,
+                m_UIFormHelperTypeName,
+                m_UIGroupHelperTypeName);
+
             if (m_EnableOpenUIFormSuccessEvent)
             {
                 m_UIManager.OpenUIFormSuccess += OnOpenUIFormSuccess;
@@ -229,6 +257,17 @@ namespace GameFrameX.UI.Runtime
             InitializeUIManager();
         }
 
+        private bool EnsureRuntimeInitialized()
+        {
+            if (IsInitialized)
+            {
+                return true;
+            }
+
+            InitializeUIManager();
+            return IsInitialized;
+        }
+
         /// <summary>
         /// 解析界面管理器实现类型名称。
         /// </summary>
@@ -251,22 +290,34 @@ namespace GameFrameX.UI.Runtime
 
         private void InitializeUIManager()
         {
+            if (m_IsRuntimeInitialized)
+            {
+                return;
+            }
+
             BaseComponent baseComponent = GameEntry.GetComponent<BaseComponent>();
             if (baseComponent == null)
             {
-                Log.Fatal("Base component is invalid.");
+                ScheduleInitializeRetry("BaseComponent not ready");
                 return;
             }
 
             m_EventComponent = GameEntry.GetComponent<EventComponent>();
             if (m_EventComponent == null)
             {
-                Log.Fatal("Event component is invalid.");
+                ScheduleInitializeRetry("EventComponent not ready");
+                return;
+            }
+
+            var objectPoolManager = GameFrameworkEntry.GetModule<IObjectPoolManager>();
+            if (objectPoolManager == null)
+            {
+                ScheduleInitializeRetry("IObjectPoolManager not ready");
                 return;
             }
 
             // m_UIManager.SetResourceManager(GameFrameworkEntry.GetModule<IAssetManager>());
-            m_UIManager.SetObjectPoolManager(GameFrameworkEntry.GetModule<IObjectPoolManager>());
+            m_UIManager.SetObjectPoolManager(objectPoolManager);
             m_UIManager.InstanceAutoReleaseInterval = m_InstanceAutoReleaseInterval;
             m_UIManager.InstanceCapacity = m_InstanceCapacity;
             m_UIManager.InstanceExpireTime = m_InstanceExpireTime;
@@ -283,16 +334,6 @@ namespace GameFrameX.UI.Runtime
             {
                 m_UIFormHelperTypeName = "GameFrameX.UI.Runtime.DefaultUIFormHelper";
             }
-
-            m_CustomUIGroupHelper = Helper.CreateHelper(m_UIGroupHelperTypeName, m_CustomUIGroupHelper);
-            if (m_CustomUIGroupHelper == null)
-            {
-                Log.Error("Can not create UI Group helper.");
-                return;
-            }
-
-            m_CustomUIGroupHelper.Name = "UIGroupHelper";
-            AddChild(m_CustomUIGroupHelper);
 
             UIFormHelperBase uiFormHelper = Helper.CreateHelper(m_UIFormHelperTypeName, m_CustomUIFormHelper);
             if (uiFormHelper == null)
@@ -315,6 +356,42 @@ namespace GameFrameX.UI.Runtime
                     continue;
                 }
             }
+
+            m_IsRuntimeInitialized = true;
+            m_InitializeRetryFrames = 0;
+            Log.Info("[UIComponent] initialized groups={0} gdRoot={1} fairyRoot={2}",
+                m_UIManager.UIGroupCount,
+                m_GDGUIRoot?.Name ?? "<null>",
+                m_FairyGUIRoot?.Name ?? "<null>");
+
+            var baseManager = m_UIManager as BaseUIManager;
+            if (baseManager != null && !baseManager.IsRuntimeReady)
+            {
+                m_IsRuntimeInitialized = false;
+                ScheduleInitializeRetry("UI manager runtime dependencies not ready");
+            }
+        }
+
+        private void ScheduleInitializeRetry(string reason)
+        {
+            if (m_IsRuntimeInitialized)
+            {
+                return;
+            }
+
+            m_InitializeRetryFrames++;
+            if (m_InitializeRetryFrames > MaxInitializeRetryFrames)
+            {
+                GD.PushError($"[UIComponent] initialize failed after {MaxInitializeRetryFrames} retries. reason={reason}");
+                return;
+            }
+
+            if (m_InitializeRetryFrames == 1 || m_InitializeRetryFrames % 60 == 0)
+            {
+                GD.PushWarning($"[UIComponent] initialize deferred retry={m_InitializeRetryFrames}/{MaxInitializeRetryFrames} reason={reason}");
+            }
+
+            CallDeferred(nameof(InitializeUIManager));
         }
 
         /// <summary>

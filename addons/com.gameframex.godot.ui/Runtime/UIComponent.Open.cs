@@ -33,6 +33,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using GameFrameX.Runtime;
+using Godot;
 
 namespace GameFrameX.UI.Runtime
 {
@@ -87,6 +88,12 @@ namespace GameFrameX.UI.Runtime
         /// <returns>界面的序列编号。</returns>
         private async Task<T> OpenUIFormAsync<T>(string uiFormAssetPath, bool pauseCoveredUIForm, object userData = null, bool isFullScreen = false) where T : class, IUIForm
         {
+            if (!EnsureRuntimeInitialized())
+            {
+                GD.PushError($"[UIComponent] OpenUIFormAsync blocked: runtime not initialized. type={typeof(T).FullName} path={uiFormAssetPath}");
+                return null;
+            }
+
             var ui = await m_UIManager.OpenUIFormAsync<T>(uiFormAssetPath, pauseCoveredUIForm, userData, isFullScreen);
             return ui as T;
         }

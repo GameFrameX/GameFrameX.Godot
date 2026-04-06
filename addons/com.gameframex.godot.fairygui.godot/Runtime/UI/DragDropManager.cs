@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
@@ -26,14 +26,7 @@ namespace FairyGUI
             }
         }
 
-#if UNITY_2019_3_OR_NEWER
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void InitializeOnLoad()
-        {
-            _inst = null;
-        }
-#endif
-        public DragDropManager()
+public DragDropManager()
         {
             _agent = (GLoader)UIObjectFactory.NewObject(ObjectType.Loader);
             _agent.name = "DragDropAgent";

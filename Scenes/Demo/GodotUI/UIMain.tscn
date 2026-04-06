@@ -1,0 +1,66 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Assets/Hotfix/UI/GodotGUI/UIMain/UIMain.cs" id="1_script"]
+[ext_resource type="Texture2D" path="res://icon.svg" id="2_logo"]
+
+[node name="UIMain" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.09, 0.13, 0.11, 1)
+
+[node name="TopBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 90.0
+grow_horizontal = 2
+
+[node name="TopBarHBox" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Logo" type="TextureRect" parent="TopBar/TopBarHBox"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+texture = ExtResource("2_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayerNameLabel" type="Label" parent="TopBar/TopBarHBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Player: -"
+vertical_alignment = 1
+
+[node name="PlayerLevelLabel" type="Label" parent="TopBar/TopBarHBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Level: -"
+vertical_alignment = 1
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainLabel" type="Label" parent="Center"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 42
+text = "UIMain"

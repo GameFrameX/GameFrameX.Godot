@@ -148,6 +148,14 @@ namespace GameFrameX.UI.Runtime
         private IUIFormHideHandler m_UIFormHideHandler;
 
         /// <summary>
+        /// 获取 UI 运行时是否具备打开界面的基础依赖。
+        /// </summary>
+        public bool IsRuntimeReady
+        {
+            get { return m_UIFormHelper != null && m_InstancePool != null; }
+        }
+
+        /// <summary>
         /// 界面管理器轮询。
         /// </summary>
         /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>

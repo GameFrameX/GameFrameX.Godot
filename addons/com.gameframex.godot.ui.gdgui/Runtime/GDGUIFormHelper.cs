@@ -34,7 +34,10 @@ namespace GameFrameX.UI.GDGUI.Runtime
         {
             if (uiFormAsset is PackedScene packedScene)
             {
-                return packedScene.Instantiate();
+                Log.Info("[GDGUIFormHelper] Instantiate begin scene={0}", packedScene.ResourcePath);
+                var node = packedScene.Instantiate();
+                Log.Info("[GDGUIFormHelper] Instantiate done nodeType={0}", node?.GetType().FullName ?? "<null>");
+                return node;
             }
 
             Log.Error("UI form asset is not a PackedScene.");
@@ -55,6 +58,8 @@ namespace GameFrameX.UI.GDGUI.Runtime
                 Log.Error("UI form instance is not a Node.");
                 return null;
             }
+
+            Log.Info("[GDGUIFormHelper] CreateUIForm begin type={0} node={1}", uiFormType?.FullName ?? "<null>", node.Name);
 
             var uiForm = node as IUIForm;
             if (uiForm == null)
@@ -77,6 +82,8 @@ namespace GameFrameX.UI.GDGUI.Runtime
             {
                 control.MakeFullScreen();
             }
+
+            Log.Info("[GDGUIFormHelper] CreateUIForm done type={0} group={1}", uiFormType?.FullName ?? "<null>", uiForm.UIGroup?.Name ?? "<null>");
 
             return uiForm;
         }
