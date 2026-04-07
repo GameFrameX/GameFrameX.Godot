@@ -39,6 +39,84 @@ namespace GameFrameX.UI.Runtime
 {
     public partial class UIComponent
     {
+        private const int DefaultOpenRequiredRetryFrames = 300;
+
+        /// <summary>
+        /// 打开并确保成功显示全屏界面。
+        /// </summary>
+        /// <typeparam name="T">UI 的具体类型。</typeparam>
+        /// <param name="userData">传递给 UI 的用户数据。</param>
+        /// <param name="maxRetryFrames">等待运行时初始化的最大帧数。</param>
+        /// <returns>返回打开的 UI 实例。</returns>
+        /// <exception cref="GameFrameworkException">打开失败时抛出异常。</exception>
+        public async Task<T> OpenRequiredFullScreenAsync<T>(object userData = null, int maxRetryFrames = DefaultOpenRequiredRetryFrames) where T : class, IUIForm
+        {
+            if (!await WaitForRuntimeInitializedAsync(maxRetryFrames))
+            {
+                throw new GameFrameworkException($"[UIComponent] OpenRequiredFullScreenAsync failed: runtime not initialized. type={typeof(T).FullName}");
+            }
+
+            var ui = await OpenAsync<T>(userData, true);
+            if (ui != null)
+            {
+                return ui;
+            }
+
+            throw new GameFrameworkException($"[UIComponent] OpenRequiredFullScreenAsync failed: open ui returned null. type={typeof(T).FullName}");
+        }
+
+        /// <summary>
+        /// 打开并确保成功显示全屏界面（简写别名）。
+        /// </summary>
+        /// <typeparam name="T">UI 的具体类型。</typeparam>
+        /// <param name="userData">传递给 UI 的用户数据。</param>
+        /// <param name="maxRetryFrames">等待运行时初始化的最大帧数。</param>
+        /// <returns>返回打开的 UI 实例。</returns>
+        /// <exception cref="GameFrameworkException">打开失败时抛出异常。</exception>
+        public Task<T> OpenRequiredAsync<T>(object userData = null, int maxRetryFrames = DefaultOpenRequiredRetryFrames) where T : class, IUIForm
+        {
+            return OpenRequiredFullScreenAsync<T>(userData, maxRetryFrames);
+        }
+
+        /// <summary>
+        /// 打开并确保成功显示全屏界面。
+        /// </summary>
+        /// <typeparam name="T">UI 的具体类型。</typeparam>
+        /// <param name="uiFormAssetPath">界面所在路径。</param>
+        /// <param name="userData">传递给 UI 的用户数据。</param>
+        /// <param name="maxRetryFrames">等待运行时初始化的最大帧数。</param>
+        /// <returns>返回打开的 UI 实例。</returns>
+        /// <exception cref="GameFrameworkException">打开失败时抛出异常。</exception>
+        public async Task<T> OpenRequiredFullScreenAsync<T>(string uiFormAssetPath, object userData = null, int maxRetryFrames = DefaultOpenRequiredRetryFrames) where T : class, IUIForm
+        {
+            if (!await WaitForRuntimeInitializedAsync(maxRetryFrames))
+            {
+                throw new GameFrameworkException($"[UIComponent] OpenRequiredFullScreenAsync failed: runtime not initialized. type={typeof(T).FullName}, path={uiFormAssetPath}");
+            }
+
+            var ui = await OpenFullScreenAsync<T>(uiFormAssetPath, userData);
+            if (ui != null)
+            {
+                return ui;
+            }
+
+            throw new GameFrameworkException($"[UIComponent] OpenRequiredFullScreenAsync failed: open ui returned null. type={typeof(T).FullName}, path={uiFormAssetPath}");
+        }
+
+        /// <summary>
+        /// 打开并确保成功显示全屏界面（简写别名）。
+        /// </summary>
+        /// <typeparam name="T">UI 的具体类型。</typeparam>
+        /// <param name="uiFormAssetPath">界面所在路径。</param>
+        /// <param name="userData">传递给 UI 的用户数据。</param>
+        /// <param name="maxRetryFrames">等待运行时初始化的最大帧数。</param>
+        /// <returns>返回打开的 UI 实例。</returns>
+        /// <exception cref="GameFrameworkException">打开失败时抛出异常。</exception>
+        public Task<T> OpenRequiredAsync<T>(string uiFormAssetPath, object userData = null, int maxRetryFrames = DefaultOpenRequiredRetryFrames) where T : class, IUIForm
+        {
+            return OpenRequiredFullScreenAsync<T>(uiFormAssetPath, userData, maxRetryFrames);
+        }
+
         /// <summary>
         /// 异步打开全屏UI。
         /// </summary>
@@ -167,6 +245,39 @@ namespace GameFrameX.UI.Runtime
             }
 
             return await OpenAsync<T>(uiFormAssetPath, userData, isFullScreen);
+        }
+
+        private async Task<bool> WaitForRuntimeInitializedAsync(int maxRetryFrames)
+        {
+            var retryFrames = Mathf.Max(1, maxRetryFrames);
+            if (EnsureRuntimeInitialized())
+            {
+                return true;
+            }
+
+            var sceneTree = Engine.GetMainLoop() as SceneTree;
+            if (sceneTree == null)
+            {
+                GD.PushError("[UIComponent] WaitForRuntimeInitializedAsync failed: Engine.MainLoop is not SceneTree.");
+                return false;
+            }
+
+            for (var i = 0; i < retryFrames; i++)
+            {
+                if (EnsureRuntimeInitialized())
+                {
+                    return true;
+                }
+
+                if (i == 0 || i % 60 == 0)
+                {
+                    GD.PushWarning($"[UIComponent] waiting runtime initialization... retry={i}/{retryFrames}");
+                }
+
+                await ToSignal(sceneTree, SceneTree.SignalName.ProcessFrame);
+            }
+
+            return EnsureRuntimeInitialized();
         }
     }
 }

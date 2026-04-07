@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://tgrqqplfgobx"]
+
+[ext_resource type="Script" path="res://addons/ds_inspector/Attributes/IntAttr.gd" id="1_f3jth"]
+
+[node name="IntAttr" type="LineEdit"]
+offset_right = 67.0625
+offset_bottom = 31.0
+size_flags_horizontal = 3
+size_flags_vertical = 5
+size_flags_stretch_ratio = 6.0
+virtual_keyboard_type = 2
+script = ExtResource("1_f3jth")

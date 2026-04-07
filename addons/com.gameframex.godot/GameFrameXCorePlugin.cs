@@ -64,6 +64,11 @@ namespace GameFrameX.Editor
         /// 顶部菜单项：资源打包器（兼容旧入口）。
         /// </summary>
         private const int TopMenuAssetBuilderId = 20;
+        
+        /// <summary>
+        /// 顶部菜单项：生成客户端配置。
+        /// </summary>
+        private const int TopMenuGenerateClientConfigId = 21;
 
         /// <summary>
         /// BaseComponent 的 Inspector 插件实例。
@@ -205,6 +210,7 @@ namespace GameFrameX.Editor
 
             m_TopPopupMenu = m_TopMenuButton.GetPopup();
             m_TopPopupMenu.AddItem(L("资源打包器", "Asset Builder"), TopMenuAssetBuilderId);
+            m_TopPopupMenu.AddItem(L("生成客户端配置", "Generate Client Config"), TopMenuGenerateClientConfigId);
             m_TopPopupMenu.AddSeparator();
             m_TopPopupMenu.IdPressed += OnTopMenuIdPressed;
             BuildLogDefineSubmenu();
@@ -286,15 +292,32 @@ namespace GameFrameX.Editor
         /// <param name="id">菜单项标识。</param>
         private void OnTopMenuIdPressed(long id)
         {
-            if (id != TopMenuAssetBuilderId)
+            if (id == TopMenuAssetBuilderId)
             {
+                if (!ShowUnifiedAssetBuilderDialog() && global::YooAssetEditorPlugin.RequestOpenBuilderFromCompatibilityEntry() == false)
+                {
+                    GD.PrintErr("无法打开资源打包器：统一窗口与 YooAsset 入口均不可用。");
+                }
+
                 return;
             }
 
-            if (!ShowUnifiedAssetBuilderDialog() && global::YooAssetEditorPlugin.RequestOpenBuilderFromCompatibilityEntry() == false)
+            if (id == TopMenuGenerateClientConfigId)
             {
-                GD.PrintErr("无法打开资源打包器：统一窗口与 YooAsset 入口均不可用。");
+                RunGenerateClientConfig();
             }
+        }
+
+        private void RunGenerateClientConfig()
+        {
+            bool success = ConfigGenerationHelper.GenerateClientJson(out string summary);
+            if (success)
+            {
+                GD.Print(summary);
+                return;
+            }
+
+            GD.PrintErr(summary);
         }
 
         private bool ShowUnifiedAssetBuilderDialog()

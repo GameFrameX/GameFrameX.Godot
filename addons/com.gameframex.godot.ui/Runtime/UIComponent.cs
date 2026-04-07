@@ -44,8 +44,10 @@ namespace GameFrameX.UI.Runtime
     public partial class UIComponent : GameFrameworkComponent
     {
         private const int DefaultPriority = 0;
-        private const string GDGUIRootNodeName = "GDGUIRoot";
-        private const string FairyGUIRootNodeName = "FairyGUIRoot";
+        private const string GDGUIRootNodeName = "GDGUI";
+        private const string FairyGUIRootNodeName = "FGUI";
+        private const string LegacyGDGUIRootNodeName = "GDGUIRoot";
+        private const string LegacyFairyGUIRootNodeName = "FairyGUIRoot";
 
         private IUIManager m_UIManager = null;
         private EventComponent m_EventComponent = null;
@@ -83,11 +85,11 @@ namespace GameFrameX.UI.Runtime
 
         [Export] private NodePath m_UIRootPath;
 
-        [Export] private string m_UIFormHelperTypeName = "GameFrameX.UI.GDGUI.Runtime.GDGUIFormHelper";
+        [Export] private string m_UIFormHelperTypeName = GetDefaultUIFormHelperTypeName();
 
         [Export] private UIFormHelperBase m_CustomUIFormHelper = null;
 
-        [Export] private string m_UIGroupHelperTypeName = "GameFrameX.UI.GDGUI.Runtime.GDGUIUIGroupHelper";
+        [Export] private string m_UIGroupHelperTypeName = GetDefaultUIGroupHelperTypeName();
 
         [Export] private UIGroupHelperBase m_CustomUIGroupHelper = null;
 
@@ -274,18 +276,28 @@ namespace GameFrameX.UI.Runtime
         /// <returns>可用的界面管理器实现类型名称。</returns>
         private string ResolveUIManagerComponentTypeName()
         {
+            const string gdGuiUIManagerType = "GameFrameX.UI.GDGUI.Runtime.UIManager";
+            const string runtimeUIManagerType = "GameFrameX.UI.Runtime.UIManager";
+
+#if FAIRY_GUI
+            const string fairyGuiUIManagerType = "GameFrameX.UI.FairyGUI.Runtime.UIManager";
+            if (Utility.Assembly.GetType(fairyGuiUIManagerType) != null)
+            {
+                return fairyGuiUIManagerType;
+            }
+#endif
+
             if (!string.IsNullOrWhiteSpace(componentType))
             {
                 return componentType;
             }
 
-            const string gdGuiUIManagerType = "GameFrameX.UI.GDGUI.Runtime.UIManager";
             if (Utility.Assembly.GetType(gdGuiUIManagerType) != null)
             {
                 return gdGuiUIManagerType;
             }
 
-            return "GameFrameX.UI.Runtime.UIManager";
+            return runtimeUIManagerType;
         }
 
         private void InitializeUIManager()
@@ -324,6 +336,7 @@ namespace GameFrameX.UI.Runtime
             m_UIManager.RecycleInterval = m_RecycleInterval;
             m_UIManager.IsEnableUIHideAnimation = m_IsEnableUIHideAnimation;
             m_UIManager.IsEnableUIShowAnimation = m_IsEnableUIShowAnimation;
+            EnsureBackendHelperDefaults();
 
             if (Utility.Assembly.GetType(m_UIGroupHelperTypeName) == null)
             {
@@ -405,15 +418,10 @@ namespace GameFrameX.UI.Runtime
                 configuredRoot = GetNode<Node>(m_UIRootPath);
             }
 
-            if (IsFairyGUIRuntime())
-            {
-                m_FairyGUIRoot = configuredRoot ?? FindOrCreateRoot(FairyGUIRootNodeName);
-                m_GDGUIRoot = FindOrCreateRoot(GDGUIRootNodeName);
-                return;
-            }
-
-            m_GDGUIRoot = configuredRoot ?? FindOrCreateRoot(GDGUIRootNodeName);
-            m_FairyGUIRoot = FindOrCreateRoot(FairyGUIRootNodeName);
+            var uiContainerRoot = ResolveUIContainerRoot(configuredRoot);
+            m_GDGUIRoot = FindOrCreateRoot(uiContainerRoot, GDGUIRootNodeName, LegacyGDGUIRootNodeName);
+            m_FairyGUIRoot = FindOrCreateRoot(uiContainerRoot, FairyGUIRootNodeName, LegacyFairyGUIRootNodeName);
+            EnsureFairyGuiDisplayRootAttached();
         }
 
         /// <summary>
@@ -450,13 +458,79 @@ namespace GameFrameX.UI.Runtime
             return typeName.IndexOf("fairygui", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
+        private static string GetDefaultUIFormHelperTypeName()
+        {
+#if FAIRY_GUI
+            return "GameFrameX.UI.FairyGUI.Runtime.FairyGUIFormHelper";
+#else
+            return "GameFrameX.UI.GDGUI.Runtime.GDGUIFormHelper";
+#endif
+        }
+
+        private static string GetDefaultUIGroupHelperTypeName()
+        {
+#if FAIRY_GUI
+            return "GameFrameX.UI.FairyGUI.Runtime.FairyGUIUIGroupHelper";
+#else
+            return "GameFrameX.UI.GDGUI.Runtime.GDGUIUIGroupHelper";
+#endif
+        }
+
+        private void EnsureBackendHelperDefaults()
+        {
+            var defaultFormHelper = GetDefaultUIFormHelperTypeName();
+            if (!string.Equals(m_UIFormHelperTypeName, defaultFormHelper, StringComparison.Ordinal))
+            {
+                m_UIFormHelperTypeName = defaultFormHelper;
+            }
+
+            var defaultGroupHelper = GetDefaultUIGroupHelperTypeName();
+            if (!string.Equals(m_UIGroupHelperTypeName, defaultGroupHelper, StringComparison.Ordinal))
+            {
+                m_UIGroupHelperTypeName = defaultGroupHelper;
+            }
+        }
+
         /// <summary>
         /// 功能：获取当前 UI 系统应使用的根节点。
         /// </summary>
         /// <returns>当前系统对应的根节点。</returns>
         private Node GetCurrentUIRoot()
         {
-            return IsFairyGUIRuntime() ? m_FairyGUIRoot : m_GDGUIRoot;
+#if FAIRY_GUI
+            return m_FairyGUIRoot ?? m_GDGUIRoot;
+#else
+            return m_GDGUIRoot ?? m_FairyGUIRoot;
+#endif
+        }
+
+        /// <summary>
+        /// 功能：确保 FairyGUI 的真实显示根节点挂到 UI/FGUI 下，便于与 GDGUI 一致地在场景树观察。
+        /// </summary>
+        private void EnsureFairyGuiDisplayRootAttached()
+        {
+#if FAIRY_GUI
+            if (m_FairyGUIRoot == null)
+            {
+                return;
+            }
+
+            _ = global::FairyGUI.Stage.inst;
+            var displayRoot = global::FairyGUI.GRoot.inst.displayObject?.node;
+            if (displayRoot == null)
+            {
+                return;
+            }
+
+            var currentParent = displayRoot.GetParent();
+            if (currentParent == m_FairyGUIRoot)
+            {
+                return;
+            }
+
+            currentParent?.RemoveChild(displayRoot);
+            m_FairyGUIRoot.AddChild(displayRoot);
+#endif
         }
 
         /// <summary>
@@ -464,17 +538,47 @@ namespace GameFrameX.UI.Runtime
         /// </summary>
         /// <param name="rootNodeName">根节点名称。</param>
         /// <returns>已存在或新建的根节点。</returns>
-        private Node FindOrCreateRoot(string rootNodeName)
+        private Node ResolveUIContainerRoot(Node configuredRoot)
         {
-            Node rootNode = GetNodeOrNull<Node>(rootNodeName);
+            if (configuredRoot == null)
+            {
+                return this;
+            }
+
+            var configuredName = configuredRoot.Name.ToString();
+            if (string.Equals(configuredName, GDGUIRootNodeName, StringComparison.Ordinal) ||
+                string.Equals(configuredName, FairyGUIRootNodeName, StringComparison.Ordinal) ||
+                string.Equals(configuredName, LegacyGDGUIRootNodeName, StringComparison.Ordinal) ||
+                string.Equals(configuredName, LegacyFairyGUIRootNodeName, StringComparison.Ordinal))
+            {
+                return configuredRoot.GetParent() ?? this;
+            }
+
+            return configuredRoot;
+        }
+
+        private Node FindOrCreateRoot(Node parent, string rootNodeName, string legacyNodeName = null)
+        {
+            var rootParent = parent ?? this;
+            Node rootNode = rootParent.GetNodeOrNull<Node>(rootNodeName);
             if (rootNode != null)
             {
                 return rootNode;
             }
 
+            if (!string.IsNullOrWhiteSpace(legacyNodeName))
+            {
+                rootNode = rootParent.GetNodeOrNull<Node>(legacyNodeName);
+                if (rootNode != null)
+                {
+                    rootNode.Name = rootNodeName;
+                    return rootNode;
+                }
+            }
+
             rootNode = new Node();
             rootNode.Name = rootNodeName;
-            AddChild(rootNode);
+            rootParent.AddChild(rootNode);
             return rootNode;
         }
 

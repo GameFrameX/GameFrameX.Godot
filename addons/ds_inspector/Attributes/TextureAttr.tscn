@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://ca4x6j5l2ytuu"]
+
+[ext_resource type="Script" path="res://addons/ds_inspector/Attributes/TextureAttr.gd" id="2"]
+
+[node name="TextureAttr" type="TextureRect"]
+texture_filter = 1
+custom_minimum_size = Vector2(128, 128)
+offset_left = 770.0
+offset_right = 1920.0
+offset_bottom = 1080.0
+size_flags_horizontal = 3
+size_flags_vertical = 5
+size_flags_stretch_ratio = 6.0
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("2")

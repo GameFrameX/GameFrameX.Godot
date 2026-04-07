@@ -9,7 +9,7 @@
   "compressPNG": false,
   "codeGeneration": {
     "allowGenCode": true,
-    "codePath": "../Assets/Hotfix/UI/FairyGUI/",
+    "codePath": "../Assets/Hotfix/UI/FGUI/",
     "classNamePrefix": "",
     "memberNamePrefix": "m_",
     "packageName": null,

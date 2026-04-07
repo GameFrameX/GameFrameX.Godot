@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3 uid="uid://dj6wf7kwqqvvq"]
+
+[ext_resource type="Script" path="res://addons/ds_inspector/ShortcutKeySetting.gd" id="1_8gsyf"]
+[ext_resource type="Theme" uid="uid://bi3tgesxwq7lg" path="res://addons/ds_inspector/DsInspectorTheme.tres" id="2_6whlk"]
+
+[node name="ShortcutKeySetting" type="VBoxContainer" node_paths=PackedStringArray("shortcut_dialog")]
+offset_right = 774.0
+offset_bottom = 685.0
+script = ExtResource("1_8gsyf")
+shortcut_dialog = NodePath("ShortcutKeyDialog")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="HBoxContainer"]
+custom_minimum_size = Vector2(150, 27)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 5
+size_flags_stretch_ratio = 8.0
+text = "启用键盘快捷键"
+autowrap_mode = 3
+
+[node name="CheckBox" type="CheckBox" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 0
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ShortcutKeyDialog" type="ConfirmationDialog" parent="."]
+title = "录制快捷键"
+initial_position = 1
+size = Vector2i(300, 150)
+theme = ExtResource("2_6whlk")
+ok_button_text = "确定"
+cancel_button_text = "取消"

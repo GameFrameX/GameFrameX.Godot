@@ -63,6 +63,10 @@ namespace GameFrameX.UI.Runtime
                 typeof(BaseUIManager),
                 typeof(DefaultUIFormHelper),
                 typeof(DefaultUIGroupHelper),
+                typeof(GameFrameX.UI.FairyGUI.Runtime.FGUI),
+                typeof(GameFrameX.UI.FairyGUI.Runtime.UIManager),
+                typeof(GameFrameX.UI.FairyGUI.Runtime.FairyGUIFormHelper),
+                typeof(GameFrameX.UI.FairyGUI.Runtime.FairyGUIUIGroupHelper),
             };
         }
     }
