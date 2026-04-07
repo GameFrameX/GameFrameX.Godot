@@ -175,6 +175,17 @@ namespace GameFrameX.Procedure.Runtime
                 result.Add(typeName);
             }
 
+            const string configProcedureTypeName = "Godot.Startup.Procedure.ProcedureConfigState";
+            if (!deduplicate.Contains(configProcedureTypeName))
+            {
+                Type configProcedureType = Utility.Assembly.GetType(configProcedureTypeName);
+                if (configProcedureType != null && typeof(ProcedureBase).IsAssignableFrom(configProcedureType))
+                {
+                    deduplicate.Add(configProcedureTypeName);
+                    result.Add(configProcedureTypeName);
+                }
+            }
+
             return result.ToArray();
         }
 

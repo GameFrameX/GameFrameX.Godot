@@ -30,14 +30,21 @@
 using GameFrameX.Fsm.Runtime;
 using GameFrameX.Procedure.Runtime;
 using GameFrameX.Runtime;
+using Godot;
+using System;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
 
 namespace Godot.Startup.Procedure;
 
 /// <summary>
-/// 补丁完成流程。
+/// 配置加载流程（预留配置表/本地化等初始化入口）。
 /// </summary>
-public sealed class ProcedurePatchDone : ProcedureBase
+public sealed class ProcedureConfigState : ProcedureBase
 {
+    private const string ConfigRootPath = "res://Assets/Bundles/Config";
+
     /// <summary>
     /// 进入流程时执行。
     /// </summary>
@@ -45,7 +52,74 @@ public sealed class ProcedurePatchDone : ProcedureBase
     protected internal override void OnEnter(IFsm<IProcedureManager> procedureOwner)
     {
         base.OnEnter(procedureOwner);
-        Log.Info("进入流程：ProcedurePatchDone");
-        ChangeState<ProcedureConfigState>(procedureOwner);
+        Log.Info("进入流程：ProcedureConfigState");
+
+        bool loaded = TryLoadConfigTables(out string summary);
+        if (loaded)
+        {
+            Log.Info("[Config] {0}", summary);
+        }
+        else
+        {
+            Log.Warning("[Config] {0}", summary);
+        }
+
+        ChangeState<ProcedureGameLauncherState>(procedureOwner);
+    }
+
+    private static bool TryLoadConfigTables(out string summary)
+    {
+        try
+        {
+            string configRoot = ProjectSettings.GlobalizePath(ConfigRootPath);
+            if (!Directory.Exists(configRoot))
+            {
+                summary = $"配置目录不存在：{configRoot}";
+                return false;
+            }
+
+            string[] files = Directory
+                .EnumerateFiles(configRoot, "*.json", SearchOption.AllDirectories)
+                .OrderBy(static m => m, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            if (files.Length == 0)
+            {
+                summary = $"配置目录为空：{configRoot}";
+                return false;
+            }
+
+            int totalRows = 0;
+            foreach (string filePath in files)
+            {
+                string jsonText = File.ReadAllText(filePath);
+                using JsonDocument jsonDocument = JsonDocument.Parse(jsonText);
+                int rowCount = GetRowCount(jsonDocument.RootElement);
+                totalRows += rowCount;
+                Log.Info("[Config] Loaded table: {0}, rows={1}", filePath, rowCount);
+            }
+
+            summary = $"配置表加载完成。tableCount={files.Length}, totalRows={totalRows}, root={configRoot}";
+            return true;
+        }
+        catch (Exception exception)
+        {
+            summary = $"配置表加载异常：{exception.Message}";
+            return false;
+        }
+    }
+
+    private static int GetRowCount(JsonElement rootElement)
+    {
+        if (rootElement.ValueKind == JsonValueKind.Array)
+        {
+            return rootElement.GetArrayLength();
+        }
+
+        if (rootElement.ValueKind == JsonValueKind.Object)
+        {
+            return rootElement.EnumerateObject().Count();
+        }
+
+        return 0;
     }
 }

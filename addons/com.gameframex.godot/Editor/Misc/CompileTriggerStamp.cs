@@ -6,6 +6,6 @@ namespace GameFrameX.Editor
     /// </summary>
     internal static class CompileTriggerStamp
     {
-        internal const string Value = "2026-04-07 01:29:29.843";
+        internal const string Value = "2026-04-07 13:06:04.312";
     }
 }

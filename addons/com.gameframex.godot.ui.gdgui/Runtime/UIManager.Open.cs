@@ -31,7 +31,6 @@ namespace GameFrameX.UI.GDGUI.Runtime
 
             var uiFormAssetName = uiFormType.Name;
             var assetPath = PathHelper.Combine(uiFormAssetPath, uiFormAssetName);
-            Log.Info("[UIManager] OpenUIForm request type={0} root={1} assetPath={2}", uiFormType.FullName, uiFormAssetPath, assetPath);
             var uiFormInstanceObject = m_InstancePool.Spawn(assetPath);
             if (uiFormInstanceObject != null)
             {
@@ -83,11 +82,9 @@ namespace GameFrameX.UI.GDGUI.Runtime
             var packedScene = LoadPackedScene(assetPath);
             if (packedScene != null)
             {
-                Log.Info("[UIManager] PackedScene object ready. assetPath={0}", assetPath);
                 return Task.FromResult(LoadAssetSuccessCallback(assetPath, packedScene, 1f, openUIFormInfo));
             }
 
-            Log.Warning("[UIManager] PackedScene load failed. assetPath={0}", assetPath);
             return Task.FromResult(LoadAssetFailureCallback(assetPath, $"PackedScene load failed for path: {assetPath}", openUIFormInfo));
         }
 
@@ -147,7 +144,6 @@ namespace GameFrameX.UI.GDGUI.Runtime
             }
             catch (Exception exception)
             {
-                Log.Error("[UIManager] InternalOpenUIForm exception uiFormAssetName={0} exception={1}", uiFormAssetName, exception);
                 if (m_OpenUIFormFailureEventHandler != null)
                 {
                     var failureArgs = OpenUIFormFailureEventArgs.Create(serialId, uiFormAssetName, pauseCoveredUIForm, exception.ToString(), userData);
@@ -175,11 +171,6 @@ namespace GameFrameX.UI.GDGUI.Runtime
                 throw new GameFrameworkException("Open UI form info is invalid.");
             }
 
-            Log.Info("[UIManager] LoadAssetSuccess begin serial={0} asset={1} type={2}",
-                openUIFormInfo.SerialId,
-                uiFormAssetPath,
-                uiFormAsset?.GetType().FullName ?? "<null>");
-
             if (m_UIFormsToReleaseOnLoad.Contains(openUIFormInfo.SerialId))
             {
                 var form = GetUIForm(openUIFormInfo.SerialId);
@@ -190,7 +181,6 @@ namespace GameFrameX.UI.GDGUI.Runtime
             }
 
             m_UIFormsBeingLoaded.Remove(openUIFormInfo.SerialId);
-            Log.Info("[UIManager] InstantiateUIForm begin asset={0}", uiFormAssetPath);
             var uiFormInstanceObject = UIFormInstanceObject.Create(
                 uiFormAssetPath,
                 openUIFormInfo.AssetName,
@@ -198,11 +188,7 @@ namespace GameFrameX.UI.GDGUI.Runtime
                 m_UIFormHelper.InstantiateUIForm(uiFormAsset),
                 m_UIFormHelper,
                 openUIFormInfo.AssetHandle);
-            Log.Info("[UIManager] InstantiateUIForm done asset={0} targetNull={1}",
-                uiFormAssetPath,
-                uiFormInstanceObject.Target == null);
             m_InstancePool.Register(uiFormInstanceObject, true);
-            Log.Info("[UIManager] InstancePool register done asset={0}", uiFormAssetPath);
 
             var uiForm = InternalOpenUIForm(
                 openUIFormInfo.SerialId,
@@ -214,7 +200,6 @@ namespace GameFrameX.UI.GDGUI.Runtime
                 duration,
                 openUIFormInfo.UserData,
                 openUIFormInfo.IsFullScreen);
-            Log.Info("[UIManager] InternalOpenUIForm done serial={0} formNull={1}", openUIFormInfo.SerialId, uiForm == null);
             ReferencePool.Release(openUIFormInfo);
             return uiForm;
         }
@@ -244,7 +229,6 @@ namespace GameFrameX.UI.GDGUI.Runtime
 
             m_UIFormsBeingLoaded.Remove(openUIFormInfo.SerialId);
             var appendErrorMessage = Utility.Text.Format("Load UI form failure, asset name '{0}', error message '{1}'.", uiFormAssetName, errorMessage);
-            Log.Error("[UIManager] {0}", appendErrorMessage);
             if (m_OpenUIFormFailureEventHandler != null)
             {
                 var failureArgs = OpenUIFormFailureEventArgs.Create(openUIFormInfo.SerialId, uiFormAssetName, openUIFormInfo.PauseCoveredUIForm, appendErrorMessage, openUIFormInfo.UserData);
@@ -282,13 +266,10 @@ namespace GameFrameX.UI.GDGUI.Runtime
                     continue;
                 }
 
-                Log.Info("[UIManager] LoadPackedScene hit path={0}", normalizedPath);
                 var scene = ResourceLoader.Load<PackedScene>(normalizedPath);
-                Log.Info("[UIManager] LoadPackedScene loaded path={0} sceneNull={1}", normalizedPath, scene == null);
                 return scene;
             }
 
-            Log.Warning("[UIManager] LoadPackedScene miss. input={0} candidates={1}|{2}|{3}", assetPath, candidates[0], candidates[1], candidates[2]);
             return null;
         }
 

@@ -89,7 +89,6 @@ namespace GameFrameX.Editor
             if (line.StartsWith("[Godot]:", StringComparison.Ordinal) ||
                 line.StartsWith("[GodotGuiFlowDemo]", StringComparison.Ordinal) ||
                 line.StartsWith("[UILogin]", StringComparison.Ordinal) ||
-                line.StartsWith("[UIManager]", StringComparison.Ordinal) ||
                 line.StartsWith("ERROR:", StringComparison.Ordinal) ||
                 line.StartsWith("WARNING:", StringComparison.Ordinal))
             {

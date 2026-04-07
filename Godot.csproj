@@ -9,7 +9,7 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <NoWarn>$(NoWarn);CS8981</NoWarn>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <DefineConstants>ENABLE_LOG;FAIRY_GUI;INCLUDE_ASSETSYSTEM_RUNTIME</DefineConstants>
+    <DefineConstants>ENABLE_LOG;INCLUDE_ASSETSYSTEM_RUNTIME</DefineConstants>
     <IncludeAssetSystemRuntime>true</IncludeAssetSystemRuntime>
   </PropertyGroup>
   <PropertyGroup Condition="'$(IncludeAssetSystemRuntime)' == 'true'">
@@ -34,6 +34,8 @@
     <Compile Remove="addons/com.gameframex.godot.asset/Tests/**/*.cs" />
     <Compile Remove="tests/**/*.cs" />
     <Compile Remove="addons/com.gameframex.godot.asset/Runtime/Compatibility/**/*.cs" />
+    <!-- 配置生成产物用于热更/外部逻辑，不参与 Godot 主程序集编译 -->
+    <Compile Remove="Assets/Hotfix/Config/Generate/**/*.cs" />
     <!-- 排除 asset 包中的 Unity 特定代码 -->
     <Compile Remove="addons/com.gameframex.godot.asset/Runtime/Asset/**/*.cs" Condition="'$(IncludeAssetSystemRuntime)' != 'true'" />
     <Compile Remove="addons/com.gameframex.godot.asset/Runtime/GameFrameXAssetCroppingHelper.cs" />
