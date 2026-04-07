@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>GameFrameX.Editor</RootNamespace>
+    <AssemblyName>GameFrameX.Editor</AssemblyName>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <DefineConstants>$(DefineConstants);ASMDEF_EDITOR_ONLY;ENABLE_GAME_FRAME_X_HYBRID_CLR;ENABLE_WX_MINI_GAME</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="**/*.cs" Exclude="bin/**;obj/**" />
+    <Compile Remove="**/Runtime/**/*.cs" />
+  </ItemGroup>
+</Project>

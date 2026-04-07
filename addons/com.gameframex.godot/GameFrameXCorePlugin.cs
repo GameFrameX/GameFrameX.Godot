@@ -1,5 +1,7 @@
 #if TOOLS
 using System;
+using System.Linq;
+using GameFrameX.Editor.Asmdef;
 using Godot;
 
 namespace GameFrameX.Editor
@@ -71,6 +73,11 @@ namespace GameFrameX.Editor
         /// 顶部菜单项：生成客户端配置。
         /// </summary>
         private const int TopMenuGenerateClientConfigId = 21;
+        
+        /// <summary>
+        /// 顶部菜单项：打开 asmdef 属性编辑器。
+        /// </summary>
+        private const int TopMenuAsmdefEditorId = 22;
 
         /// <summary>
         /// BaseComponent 的 Inspector 插件实例。
@@ -118,6 +125,10 @@ namespace GameFrameX.Editor
         private RuntimeLogBridge m_RuntimeLogBridge;
         private AssetSystemBuilderDialog m_AssetSystemBuilderDialog;
         private ScriptingDefineSymbolsWindow m_ScriptingDefineSymbolsWindow;
+        private AsmdefEditorWindow m_AsmdefEditorWindow;
+        private AsmdefSyncService m_AsmdefSyncService;
+        private AsmdefResourceFormatLoader m_AsmdefResourceFormatLoader;
+        private AsmdefResourceFormatSaver m_AsmdefResourceFormatSaver;
 
         /// <summary>
         /// 当插件进入场景树时调用，注册 Inspector 插件。
@@ -155,7 +166,11 @@ namespace GameFrameX.Editor
 
             // 初始化顶部菜单
             RegisterTopToolbarMenu();
+            RegisterAsmdefResourceFormats();
             m_RuntimeLogBridge = new RuntimeLogBridge();
+            m_AsmdefSyncService = new AsmdefSyncService();
+            m_AsmdefSyncService.SetCallback(OnAsmdefSynced);
+            m_AsmdefSyncService.RunSync();
             SetProcess(true);
         }
 
@@ -182,6 +197,14 @@ namespace GameFrameX.Editor
                 m_ScriptingDefineSymbolsWindow = null;
             }
 
+            if (m_AsmdefEditorWindow != null)
+            {
+                m_AsmdefEditorWindow.QueueFree();
+                m_AsmdefEditorWindow = null;
+            }
+            
+            UnregisterAsmdefResourceFormats();
+
             // Godot 4 会自动清理 InspectorPlugin，无需手动移除 / Godot 4 automatically cleans up InspectorPlugins, no need to remove manually
             m_BaseComponentInspector = null;
             m_ObjectPoolComponentInspector = null;
@@ -191,6 +214,7 @@ namespace GameFrameX.Editor
             m_LogDefinePopupMenu = null;
             m_CurrentLocale = null;
             m_RuntimeLogBridge = null;
+            m_AsmdefSyncService = null;
         }
 
         private void OnDefineSymbolsChanged()
@@ -229,6 +253,7 @@ namespace GameFrameX.Editor
         public override void _Process(double delta)
         {
             m_RuntimeLogBridge?.Tick(delta);
+            m_AsmdefSyncService?.Tick();
             string locale = TranslationServer.GetLocale();
             if (string.Equals(locale, m_CurrentLocale, StringComparison.Ordinal))
             {
@@ -237,6 +262,33 @@ namespace GameFrameX.Editor
 
             m_CurrentLocale = locale;
             RebuildTopToolbarMenu();
+        }
+
+        public override bool _Handles(GodotObject @object)
+        {
+            bool canHandle = @object is AsmdefResource;
+            string typeName = @object?.GetType().Name ?? "null";
+            GD.Print($"[Asmdef][Handles] type={typeName}, canHandle={canHandle}");
+            return canHandle;
+        }
+
+        public override void _Edit(GodotObject @object)
+        {
+            if (@object is not AsmdefResource asmdefResource)
+            {
+                string wrongTypeName = @object?.GetType().Name ?? "null";
+                GD.Print($"[Asmdef][Edit] skipped, unsupported type={wrongTypeName}");
+                return;
+            }
+
+            string targetPath = asmdefResource.SourcePath;
+            if (string.IsNullOrWhiteSpace(targetPath))
+            {
+                targetPath = asmdefResource.ResourcePath;
+            }
+
+            GD.Print($"[Asmdef][Edit] opening custom window for: {targetPath}");
+            ShowAsmdefEditorWindow(targetPath);
         }
 
         /// <summary>
@@ -258,6 +310,7 @@ namespace GameFrameX.Editor
             m_TopPopupMenu = m_TopMenuButton.GetPopup();
             m_TopPopupMenu.AddItem(L("资源打包器", "Asset Builder"), TopMenuAssetBuilderId);
             m_TopPopupMenu.AddItem(L("生成客户端配置", "Generate Client Config"), TopMenuGenerateClientConfigId);
+            m_TopPopupMenu.AddItem(L("Asmdef 属性编辑器", "Asmdef Editor"), TopMenuAsmdefEditorId);
             m_TopPopupMenu.AddSeparator();
             m_TopPopupMenu.IdPressed -= OnTopMenuIdPressed;
             m_TopPopupMenu.IdPressed += OnTopMenuIdPressed;
@@ -401,6 +454,12 @@ namespace GameFrameX.Editor
             if (id == TopMenuGenerateClientConfigId)
             {
                 RunGenerateClientConfig();
+                return;
+            }
+
+            if (id == TopMenuAsmdefEditorId)
+            {
+                ShowAsmdefEditorWindow();
             }
         }
 
@@ -543,6 +602,65 @@ namespace GameFrameX.Editor
             }
         }
 
+        private bool ShowAsmdefEditorWindow(string focusFilePath = null)
+        {
+            try
+            {
+                GD.Print($"[Asmdef][Window] request open, focus={focusFilePath ?? "<null>"}");
+                if (m_AsmdefEditorWindow == null || !GodotObject.IsInstanceValid(m_AsmdefEditorWindow))
+                {
+                    m_AsmdefEditorWindow = new AsmdefEditorWindow(OnAsmdefFileSaved, OnAsmdefRunSyncRequested);
+                    var parent = EditorInterface.Singleton?.GetBaseControl();
+                    if (parent == null)
+                    {
+                        return false;
+                    }
+
+                    parent.AddChild(m_AsmdefEditorWindow);
+                }
+
+                m_AsmdefEditorWindow.MinSize = new Vector2I(960, 680);
+                m_AsmdefEditorWindow.Size = new Vector2I(1050, 760);
+                m_AsmdefEditorWindow.PopupCentered(new Vector2I(1050, 760));
+                m_AsmdefEditorWindow.OpenAsmdefFile(focusFilePath);
+                m_AsmdefEditorWindow.Show();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                GD.PrintErr($"打开 Asmdef 编辑器失败: {exception.Message}");
+                return false;
+            }
+        }
+
+        private void OnAsmdefFileSaved(string asmdefFilePath)
+        {
+            m_AsmdefSyncService?.MarkDirty(asmdefFilePath);
+        }
+
+        private void OnAsmdefRunSyncRequested()
+        {
+            m_AsmdefSyncService?.RunSync();
+        }
+
+        private static void OnAsmdefSynced(AsmdefSyncSummary summary)
+        {
+            if (summary == null)
+            {
+                return;
+            }
+
+            if (summary.HasError)
+            {
+                AsmdefValidationIssue firstError = summary.Issues.Find(static x => x.Severity == AsmdefIssueSeverity.Error);
+                GD.PrintErr($"[Asmdef] 同步失败：{firstError?.Message}");
+                return;
+            }
+
+            int warningCount = summary.Issues.Count(static x => x.Severity == AsmdefIssueSeverity.Warning);
+            GD.Print($"[Asmdef] 同步完成：asmdef={summary.TotalAsmdefCount}, csproj={summary.GeneratedCsprojCount}, 更新={summary.UpdatedCsprojCount}, 警告={warningCount}");
+        }
+
         /// <summary>
         /// 功能：执行日志宏定义菜单动作并刷新界面状态。
         /// </summary>
@@ -552,6 +670,36 @@ namespace GameFrameX.Editor
         {
             action?.Invoke();
             GD.Print(status);
+        }
+
+        private void RegisterAsmdefResourceFormats()
+        {
+            if (m_AsmdefResourceFormatLoader == null)
+            {
+                m_AsmdefResourceFormatLoader = new AsmdefResourceFormatLoader();
+                ResourceLoader.AddResourceFormatLoader(m_AsmdefResourceFormatLoader, true);
+            }
+
+            if (m_AsmdefResourceFormatSaver == null)
+            {
+                m_AsmdefResourceFormatSaver = new AsmdefResourceFormatSaver();
+                ResourceSaver.AddResourceFormatSaver(m_AsmdefResourceFormatSaver, true);
+            }
+        }
+
+        private void UnregisterAsmdefResourceFormats()
+        {
+            if (m_AsmdefResourceFormatLoader != null)
+            {
+                ResourceLoader.RemoveResourceFormatLoader(m_AsmdefResourceFormatLoader);
+                m_AsmdefResourceFormatLoader = null;
+            }
+
+            if (m_AsmdefResourceFormatSaver != null)
+            {
+                ResourceSaver.RemoveResourceFormatSaver(m_AsmdefResourceFormatSaver);
+                m_AsmdefResourceFormatSaver = null;
+            }
         }
 
         /// <summary>
