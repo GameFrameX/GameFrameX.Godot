@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Godot.NET.Sdk/4.6.1">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -9,7 +9,7 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <NoWarn>$(NoWarn);CS8981</NoWarn>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <DefineConstants>ENABLE_LOG;FAIRY_GUI</DefineConstants>
+    <DefineConstants>ENABLE_LOG;FAIRY_GUI;INCLUDE_ASSETSYSTEM_RUNTIME</DefineConstants>
     <IncludeAssetSystemRuntime>true</IncludeAssetSystemRuntime>
   </PropertyGroup>
   <PropertyGroup Condition="'$(IncludeAssetSystemRuntime)' == 'true'">

@@ -10,5 +10,5 @@
     <image id="i3db1j" name="background_00_title_1920.png" path="/Images/"/>
     <image id="i3db1k" name="Background.png" path="/Images/"/>
   </resources>
-  <publish name="" genCode="true" codePath="../Assets/Scripts/Game/FairyGUI"/>
+  <publish name="" genCode="true"/>
 </packageDescription>

@@ -5,6 +5,7 @@ using Godot;
 namespace Godot.Hotfix.GodotGUI
 {
 	[OptionUIGroup(UIGroupNameConstants.Normal)]
+	[OptionUIConfig(path: "res://Assets/Bundles/Prefabs/UI/GodotUI")]
 	public partial class UIMain : GDGUI
 	{
 		private Label _playerNameLabel;

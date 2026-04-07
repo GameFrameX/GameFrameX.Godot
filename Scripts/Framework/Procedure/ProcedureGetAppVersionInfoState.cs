@@ -38,14 +38,14 @@ namespace Godot.Startup.Procedure;
 /// </summary>
 public sealed class ProcedureGetAppVersionInfoState : ProcedureBase
 {
-    /// <summary>
-    /// 进入流程时执行。
-    /// </summary>
-    /// <param name="procedureOwner">流程持有者。</param>
-    protected internal override void OnEnter(IFsm<IProcedureManager> procedureOwner)
-    {
-        base.OnEnter(procedureOwner);
-        Log.Info("进入流程：ProcedureGetAppVersionInfoState");
-        ChangeState<ProcedureGetGameAssetPackageVersionInfoByDefaultPackageState>(procedureOwner);
-    }
+	/// <summary>
+	/// 进入流程时执行。
+	/// </summary>
+	/// <param name="procedureOwner">流程持有者。</param>
+	protected internal override void OnEnter(IFsm<IProcedureManager> procedureOwner)
+	{
+		base.OnEnter(procedureOwner);
+		Log.Info("进入流程：ProcedureGetAppVersionInfoState");
+		ChangeState<ProcedureGetGameAssetPackageVersionInfoByDefaultPackageState>(procedureOwner);
+	}
 }

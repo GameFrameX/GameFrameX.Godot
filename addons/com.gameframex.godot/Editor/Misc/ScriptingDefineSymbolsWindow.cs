@@ -68,7 +68,7 @@ namespace GameFrameX.Editor
 
             var tipLabel = new Label
             {
-                Text = "勾选表示启用宏。新增/删除后点击“保存并重编译”生效。",
+                Text = "勾选表示启用宏。新增/删除/开关会自动保存并触发重编译。",
                 AutowrapMode = TextServer.AutowrapMode.WordSmart,
                 SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
             };
@@ -181,6 +181,11 @@ namespace GameFrameX.Editor
 
         private void SaveDefineConstants()
         {
+            SaveDefineConstantsInternal(null);
+        }
+
+        private void SaveDefineConstantsInternal(string preferredSymbol)
+        {
             try
             {
                 var symbols = m_CurrentSymbols
@@ -190,7 +195,7 @@ namespace GameFrameX.Editor
                 ScriptingDefineSymbols.SetScriptingDefineSymbols(symbols);
                 m_CurrentSymbols.Clear();
                 m_CurrentSymbols.AddRange(symbols);
-                RefreshSymbolChecklist(m_CurrentSymbols, null);
+                RefreshSymbolChecklist(m_CurrentSymbols, preferredSymbol);
                 SetStatus($"已保存 {symbols.Length} 个宏定义。");
             }
             catch (Exception exception)
@@ -219,8 +224,8 @@ namespace GameFrameX.Editor
                 m_AddSymbolEdit.Clear();
             }
 
-            RefreshSymbolChecklist(m_CurrentSymbols, normalized);
-            SetStatus($"已添加宏：{normalized}（待保存）");
+            SaveDefineConstantsInternal(normalized);
+            SetStatus($"已添加并保存宏：{normalized}");
         }
 
         private void OnRemoveSelectedSymbolPressed()
@@ -245,8 +250,8 @@ namespace GameFrameX.Editor
             }
 
             UpsertSymbol(m_CurrentSymbols, symbol, false);
-            RefreshSymbolChecklist(m_CurrentSymbols, null);
-            SetStatus($"已删除宏：{symbol}（待保存）");
+            SaveDefineConstantsInternal(null);
+            SetStatus($"已删除并保存宏：{symbol}");
         }
 
         private void OnSymbolTreeItemEdited()
@@ -270,7 +275,8 @@ namespace GameFrameX.Editor
 
             var enabled = editedItem.IsChecked(0);
             UpsertSymbol(m_CurrentSymbols, symbol, enabled);
-            SetStatus($"已更新宏：{symbol} = {(enabled ? "ON" : "OFF")}（待保存）");
+            SaveDefineConstantsInternal(symbol);
+            SetStatus($"已更新并保存宏：{symbol} = {(enabled ? "ON" : "OFF")}");
         }
 
         private void RefreshSymbolChecklist(IReadOnlyCollection<string> enabledSymbols, string preferredSymbol)

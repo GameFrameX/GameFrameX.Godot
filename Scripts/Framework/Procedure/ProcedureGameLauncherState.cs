@@ -1,108 +1,78 @@
+using System.Threading.Tasks;
 using GameFrameX.Fsm.Runtime;
 using GameFrameX.Procedure.Runtime;
 using GameFrameX.Runtime;
+using GameFrameX.UI.Runtime;
 using Godot;
-using Godot.Startup.UIFlow;
+
+#if FAIRY_GUI
+using UILauncher = Godot.Hotfix.FairyGUI.UILauncher;
+#else
+using UILauncher = Godot.Hotfix.GodotGUI.UILauncher;
+#endif
 
 namespace Godot.Startup.Procedure
 {
-    /// <summary>
-    /// 启动热更新后游戏流程。
-    /// </summary>
-    public sealed class ProcedureGameLauncherState : ProcedureBase
-    {
-        // 编译开关：定义 FAIRY_GUI 时启用 FairyGUI 流程；未定义时启用 Godot GDGUI 流程。
-        private const string FairyGuiDemoNodeName = "FairyGuiFlowDemo";
-        private const string GodotGuiDemoNodeName = "GodotGuiFlowDemo";
+	/// <summary>
+	/// 启动热更新后游戏流程（框架驱动：UIComponent/UIManager）。
+	/// </summary>
+	public sealed class ProcedureGameLauncherState : ProcedureBase
+	{
+		private static bool s_IsFlowRunning;
 
-        /// <summary>
-        /// 进入流程时执行。
-        /// </summary>
-        /// <param name="procedureOwner">流程持有者。</param>
-        protected internal override void OnEnter(IFsm<IProcedureManager> procedureOwner)
-        {
-            base.OnEnter(procedureOwner);
-            Log.Info("进入流程：ProcedureGameLauncherState");
-            StartUiFlow();
-        }
+		/// <summary>
+		/// 进入流程时执行。
+		/// </summary>
+		/// <param name="procedureOwner">流程持有者。</param>
+		protected internal override void OnEnter(IFsm<IProcedureManager> procedureOwner)
+		{
+			base.OnEnter(procedureOwner);
+			Log.Info("进入流程：ProcedureGameLauncherState");
+			_ = StartUiFlowAsync();
+		}
 
-        private static void StartUiFlow()
-        {
-            var sceneTree = Engine.GetMainLoop() as SceneTree;
-            var rootNode = sceneTree?.CurrentScene ?? sceneTree?.Root;
-            Log.Info("[UIFlow] StartUiFlow sceneTree={0} currentScene={1} root={2}",
-                sceneTree != null,
-                sceneTree?.CurrentScene?.Name ?? "<null>",
-                sceneTree?.Root?.Name ?? "<null>");
+		private static async Task StartUiFlowAsync()
+		{
+			if (s_IsFlowRunning)
+			{
+				Log.Warning("[UIFlow] 已有流程在运行，忽略重复启动。");
+				return;
+			}
 
-            if (rootNode == null)
-            {
-                Log.Warning("[UIFlow] 启动 UI 流程失败：未找到可用场景根节点。 currentScene={0} root={1}",
-                    sceneTree?.CurrentScene?.Name ?? "<null>",
-                    sceneTree?.Root?.Name ?? "<null>");
-                return;
-            }
-
+			s_IsFlowRunning = true;
+			try
+			{
 #if FAIRY_GUI
-            Log.Info("[UIFlow] 编译模式：FAIRY_GUI（走 FairyGUI）");
-            StartFairyGuiFlow(rootNode);
+				Log.Info("[UIFlow] 编译模式：FAIRY_GUI（走框架 UIManager + FairyGUI UIForm）");
 #else
-            Log.Info("[UIFlow] 编译模式：GDGUI（未定义 FAIRY_GUI，走 Godot GUI）");
-            StartGodotGuiFlow(rootNode);
+				Log.Info("[UIFlow] 编译模式：GDGUI（走框架 UIManager + Godot GUI UIForm）");
 #endif
-        }
 
-        private static void StartGodotGuiFlow(Node rootNode)
-        {
-            var existingGodotDemo = rootNode.GetNodeOrNull<GodotGuiFlowDemo>(GodotGuiDemoNodeName);
-            if (existingGodotDemo != null)
-            {
-                Log.Warning("[UIFlow] GodotGuiFlowDemo 已存在，触发重启而非跳过。 node={0}", existingGodotDemo.Name);
-                existingGodotDemo.ForceRestartFlow("ProcedureGameLauncherState re-enter");
-                return;
-            }
+				var UIComp = GameEntry.GetComponent<UIComponent>();
+				if (UIComp == null)
+				{
+					Log.Error("[UIFlow] UIComponent not found.");
+					return;
+				}
 
-            var fairyDemo = rootNode.GetNodeOrNull<FairyGuiFlowDemo>(FairyGuiDemoNodeName);
-            if (fairyDemo != null)
-            {
-                fairyDemo.QueueFree();
-                Log.Info("[UIFlow] 已移除 FairyGUI 演示流程节点。 node={0}", fairyDemo.Name);
-            }
+				var launcher = await UIComp.OpenRequiredAsync<UILauncher>();
+				if (launcher == null)
+				{
+					Log.Error("[UIFlow] 打开 UILauncher 失败。");
+					return;
+				}
 
-            var godotDemo = new GodotGuiFlowDemo
-            {
-                Name = GodotGuiDemoNodeName,
-                AutoRunOnReady = true
-            };
-            rootNode.AddChild(godotDemo);
-            Log.Info("[UIFlow] Godot GUI 演示流程已挂载。 node={0} parent={1}", godotDemo.Name, rootNode.Name);
-        }
+				Log.Info("[UIFlow] UILauncher 已显示，后续切换由 UILauncher 内部逻辑处理。");
+			}
+			catch (System.Exception exception)
+			{
+				Log.Error("[UIFlow] 流程异常：{0}", exception);
+			}
+			finally
+			{
+				s_IsFlowRunning = false;
+			}
+		}
 
-        private static void StartFairyGuiFlow(Node rootNode)
-        {
-            var existingFairyDemo = rootNode.GetNodeOrNull<FairyGuiFlowDemo>(FairyGuiDemoNodeName);
-            if (existingFairyDemo != null)
-            {
-                Log.Warning("[UIFlow] FairyGuiFlowDemo 已存在，触发重启而非跳过。 node={0}", existingFairyDemo.Name);
-                existingFairyDemo.ForceRestartFlow("ProcedureGameLauncherState re-enter");
-                return;
-            }
-
-            var godotDemo = rootNode.GetNodeOrNull<GodotGuiFlowDemo>(GodotGuiDemoNodeName);
-            if (godotDemo != null)
-            {
-                godotDemo.QueueFree();
-                Log.Info("[UIFlow] 已移除 Godot GUI 演示流程节点。 node={0}", godotDemo.Name);
-            }
-
-            var fairyDemo = new FairyGuiFlowDemo
-            {
-                Name = FairyGuiDemoNodeName,
-                AutoRunOnReady = true
-            };
-            rootNode.AddChild(fairyDemo);
-            Log.Info("[UIFlow] FairyGUI 演示流程已挂载。 node={0} parent={1}", fairyDemo.Name, rootNode.Name);
-        }
-    }
+	}
 }
-

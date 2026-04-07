@@ -12,7 +12,7 @@ namespace Godot.Startup.UIFlow
     public partial class FairyGuiFlowDemo : UiFlowDemoBase
     {
         protected override string FlowLogTag => "FairyGuiFlowDemo";
-        protected override string UiAssetRootPath => "res://Scenes/Demo/FairyGUI";
+    protected override string UiAssetRootPath => "res://Assets/Bundles/Prefabs/UI/FGUI";
 
         protected override Task<IUIForm> OpenLauncherFormAsync(UIComponent uiComponent, string rootPath)
         {

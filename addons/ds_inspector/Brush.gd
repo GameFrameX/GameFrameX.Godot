@@ -1,0 +1,492 @@
+@tool
+extends Node2D
+class_name DsBrush
+
+
+# 当前绘制的节点
+var _draw_node: Node = null
+var _has_draw_node: bool = false
+var _in_canvaslayer: bool = false
+
+@export
+var golobal_path_tips: DsNodePathTips
+
+@export
+var viewport_layer_tscn: PackedScene
+
+@export
+var debug_tool: CanvasLayer
+
+# ViewportBrushLayer 实例（用于所有 viewport，包括 window）
+var window_layer_instance: CanvasLayer = null
+
+# 当前绘制节点所在的 viewport
+var _viewport_node: Viewport
+
+var _has_prev_click: bool = false
+var _prev_click_pos: Vector2 = Vector2.ZERO
+var _prev_click_view_size: Vector2 = Vector2.ZERO
+
+var _icon: Texture
+var _show_text: bool = false
+
+var _root_viewport: Viewport = null
+
+func _ready():
+	golobal_path_tips.visible = false
+	_root_viewport = get_viewport()
+	pass
+
+# 为 window 创建或重新创建笔刷层实例
+func _ensure_window_layer_instance() -> bool:
+	if window_layer_instance == null or !is_instance_valid(window_layer_instance) or !window_layer_instance.is_inside_tree():
+		# 如果笔刷层被销毁了，重新创建
+		if viewport_layer_tscn == null:
+			push_error("viewport_layer_tscn is null")
+			return false
+		
+		window_layer_instance = viewport_layer_tscn.instantiate()
+		window_layer_instance.layer = 128
+		window_layer_instance.brush.draw.connect(_on_window_brush_draw)
+		window_layer_instance.node_path_tips.visible = false
+		window_layer_instance.mask.visible = debug_tool.mask.visible
+		
+		# 重置状态
+		_has_prev_click = false
+		return true
+	return false
+
+func _process(_delta):
+	if _has_draw_node and (_draw_node == null or !is_instance_valid(_draw_node) or !_draw_node.is_inside_tree()):
+		set_draw_node(null)
+	
+	# 检查笔刷层是否被销毁，如果被销毁且有绘制节点在 viewport 中，则需要重新创建
+	if _has_draw_node and _viewport_node != null and is_instance_valid(_viewport_node):
+		if _ensure_window_layer_instance():
+			# 笔刷层被重新创建了，需要重新添加到目标 viewport
+			if _draw_node != null and is_instance_valid(_draw_node):
+				_viewport_node.add_child(window_layer_instance)
+				# 重新设置提示信息
+				window_layer_instance.node_path_tips.set_show_icon(_icon)
+				window_layer_instance.node_path_tips.set_show_text(debug_tool.get_node_path(_draw_node), _viewport_node.size.x)
+				
+				if _viewport_node is Window:
+					# Window 情况：显示实例的 path tips，隐藏全局的
+					window_layer_instance.node_path_tips.visible = _show_text
+					golobal_path_tips.visible = false
+				else:
+					# 普通 viewport 情况：显示全局 path tips
+					window_layer_instance.node_path_tips.visible = false
+					golobal_path_tips.visible = _show_text
+	
+	# 同步 mask 可见性
+	if window_layer_instance != null and is_instance_valid(window_layer_instance):
+		window_layer_instance.mask.visible = debug_tool.mask.visible
+
+	queue_redraw()
+	if window_layer_instance != null and is_instance_valid(window_layer_instance):
+		window_layer_instance.brush.queue_redraw()
+	pass
+
+func get_viewport_wscale() -> float:
+	if _viewport_node != null and is_instance_valid(_viewport_node) and \
+		_viewport_node is SubViewport and _viewport_node.size_2d_override_stretch:
+		return float(_viewport_node.size_2d_override.x) / _viewport_node.size.x
+	return 1.0
+
+func get_draw_node() -> Node:
+	if !_has_draw_node:
+		return null
+	if !is_instance_valid(_draw_node):
+		set_draw_node(null)
+		return null
+	return _draw_node
+
+func set_draw_node(node: Node) -> void:
+	if node == null:
+		_draw_node = null
+		_has_draw_node = false
+		set_show_text(false)
+		
+		# 清理 viewport 相关
+		if _viewport_node != null:
+			# 移除并销毁笔刷层实例
+			if window_layer_instance != null and is_instance_valid(window_layer_instance):
+				if is_instance_valid(_viewport_node):
+					_viewport_node.remove_child(window_layer_instance)
+				window_layer_instance.queue_free()
+			window_layer_instance = null
+			_viewport_node = null
+		return
+	_has_prev_click = false
+	_draw_node = node
+	_has_draw_node = true
+	_in_canvaslayer = debug_tool.is_in_canvaslayer(node)
+	
+	var icon_path = debug_tool.window.tree.icon_mapping.get_icon(_draw_node)
+	_icon = load(icon_path)
+	golobal_path_tips.set_show_icon(_icon)
+	# 往上找是否有window节点，如果有则获取窗口大小，否则获取屏幕大小
+	var window: Window = null
+	var curr_node: Node = node.get_parent()
+	while curr_node != null:
+		if curr_node is Window and curr_node != _root_viewport:
+			window = curr_node
+			break
+		curr_node = curr_node.get_parent()
+	if window != null:
+		golobal_path_tips.set_show_text(debug_tool.get_node_path(node), window.size.x)
+	else:
+		golobal_path_tips.set_show_text(debug_tool.get_node_path(node), _root_viewport.size.x)
+	
+	# 如果当前在 window 中，同时更新 window 实例的图标和文本
+	if window_layer_instance != null and is_instance_valid(window_layer_instance):
+		window_layer_instance.node_path_tips.set_show_icon(_icon)
+		if _viewport_node != null and _viewport_node is Window:
+			window_layer_instance.node_path_tips.set_show_text(debug_tool.get_node_path(node), _viewport_node.size.x)
+		else:
+			window_layer_instance.node_path_tips.set_show_text(debug_tool.get_node_path(node), _root_viewport.size.x)
+	pass
+
+func set_show_text(flag: bool):
+	_show_text = flag
+	# 根据当前是否在 window 中来决定显示哪个 path tips
+	if _viewport_node != null and is_instance_valid(_viewport_node) and _viewport_node is Window:
+		# 在 window 中，显示 window 实例的 path tips，隐藏全局的
+		if window_layer_instance != null and is_instance_valid(window_layer_instance):
+			window_layer_instance.node_path_tips.visible = flag
+		golobal_path_tips.visible = false
+	else:
+		# 不在 window 中，显示全局的 path tips
+		golobal_path_tips.visible = flag
+		if window_layer_instance != null and is_instance_valid(window_layer_instance):
+			window_layer_instance.node_path_tips.visible = false
+	pass
+
+
+func _on_window_brush_draw():
+	# print("on_window_brush_draw")
+	if !_has_draw_node:
+		return
+	if _draw_node == null or !is_instance_valid(_draw_node):
+		set_draw_node(null)
+		return
+
+	if window_layer_instance == null or !is_instance_valid(window_layer_instance):
+		return
+	
+	# 根据是否在 window 中来决定使用哪个 path tips
+	var path_tips = window_layer_instance.node_path_tips if (_viewport_node != null and _viewport_node is Window) else golobal_path_tips
+	_draw_border(window_layer_instance.brush, path_tips)
+	pass
+
+func _draw():
+	if !_has_draw_node:
+		return
+	if _draw_node == null or !is_instance_valid(_draw_node):
+		set_draw_node(null)
+		return
+
+	# 检查是否开启视口检查
+	if debug_tool.save_config.get_check_viewport():
+		# 先找是不是在 viewport 中
+		var viewport_node = find_viewport_node(_draw_node)
+		if viewport_node != null:
+			if viewport_node != _viewport_node:
+				# 清理旧的实例
+				if _viewport_node != null:
+					if window_layer_instance != null and is_instance_valid(window_layer_instance):
+						if is_instance_valid(_viewport_node):
+							_viewport_node.remove_child(window_layer_instance)
+						window_layer_instance.queue_free()
+					window_layer_instance = null
+				
+				# 设置新的 viewport
+				_viewport_node = viewport_node
+				
+				# 创建新的笔刷层实例
+				_ensure_window_layer_instance()
+				_viewport_node.add_child(window_layer_instance)
+				
+				# 设置节点路径提示
+				window_layer_instance.node_path_tips.set_show_icon(_icon)
+				window_layer_instance.node_path_tips.set_show_text(debug_tool.get_node_path(_draw_node), _viewport_node.size.x)
+				
+				if viewport_node is Window:
+					# Window 情况：显示实例的 path tips，隐藏全局的
+					window_layer_instance.node_path_tips.visible = _show_text
+					golobal_path_tips.visible = false
+				else:
+					# 普通 viewport 情况：显示全局 path tips
+					window_layer_instance.node_path_tips.visible = false
+					golobal_path_tips.visible = _show_text
+				
+				_has_prev_click = false
+
+			return
+		else:
+			# 不在 viewport 中，清理
+			if _viewport_node != null:
+				if window_layer_instance != null and is_instance_valid(window_layer_instance):
+					if is_instance_valid(_viewport_node):
+						_viewport_node.remove_child(window_layer_instance)
+					window_layer_instance.queue_free()
+				window_layer_instance = null
+				_viewport_node = null
+			
+			golobal_path_tips.visible = _show_text
+			_has_prev_click = false
+
+	_draw_border(self, golobal_path_tips)
+	pass
+
+func _draw_border(brush_node: CanvasItem, path_tips: DsNodePathTips):
+	var trans = calc_node_trans(_draw_node)
+
+	if _draw_node is CollisionShape2D:
+		_draw_node_shape(brush_node, _draw_node.shape, trans.position, trans.scale, trans.rotation)
+	elif _draw_node is CollisionPolygon2D or _draw_node is Polygon2D:
+		_draw_node_polygon(brush_node, _draw_node.polygon, trans.position, trans.scale, trans.rotation)
+	elif _draw_node is LightOccluder2D:
+		if _draw_node.occluder != null:
+			_draw_node_polygon(brush_node, _draw_node.occluder.polygon, trans.position, trans.scale, trans.rotation)
+		else:
+			_draw_node_rect(brush_node, trans.position, trans.scale, trans.size, trans.rotation, false)
+	elif _draw_node is VisibleOnScreenEnabler2D or _draw_node is VisibleOnScreenNotifier2D:
+		_draw_node_rect(brush_node, trans.position, trans.scale, trans.size, trans.rotation, true)
+	elif _draw_node is Path2D:
+		_draw_node_path(brush_node, _draw_node.curve, trans.position, trans.scale, trans.rotation, _draw_node.global_scale)
+	elif _draw_node is Line2D:
+		_draw_node_line(brush_node, _draw_node, trans.position, trans.scale, trans.rotation, _draw_node.global_scale)
+	else:
+		_draw_node_rect(brush_node, trans.position, trans.scale, trans.size, trans.rotation, false)
+
+	if _show_text and path_tips != null and is_instance_valid(path_tips):
+		path_tips.visible = true
+		# 获取 path_tips 的实际尺寸（包括 icon 和 label）
+		var text_size: Vector2 = path_tips.get_show_size()
+		var half_size: Vector2 = text_size / 2.0
+		var center_pos: Vector2
+		var view_size: Vector2
+		var base_pos: Vector2
+		
+		if _viewport_node == null:
+			base_pos = trans.position
+			view_size = brush_node.get_viewport().size
+		else:
+			if !_has_prev_click:
+				_has_prev_click = true
+				if _viewport_node is Window:
+					_prev_click_pos = _viewport_node.get_mouse_position()
+					_prev_click_view_size = _viewport_node.size
+				else:
+					_prev_click_pos = get_global_mouse_position()
+					_prev_click_view_size = get_viewport_rect().size
+			base_pos = _prev_click_pos
+			view_size = _prev_click_view_size
+		
+		# 计算垂直偏移，考虑提示框高度，避免遮挡鼠标点击区域
+		# 基础偏移50像素，加上提示框的半高，确保提示框底部不会遮挡鼠标
+		var vertical_offset: float = 50.0 + half_size.y
+		
+		# 如果提示框高度太大，可能会超出屏幕下方，尝试放在鼠标上方
+		var bottom_edge: float = base_pos.y + vertical_offset + half_size.y
+		if bottom_edge > view_size.y:
+			# 放在鼠标上方
+			vertical_offset = -(50.0 + half_size.y)
+		
+		center_pos = base_pos + Vector2(0, vertical_offset)
+		
+		# path_tips.position 现在是中心点位置，需要计算左上角位置来限制边界
+		var top_left: Vector2 = center_pos - half_size
+		
+		# 限制左上角在屏幕内
+		if top_left.x + text_size.x > view_size.x:
+			top_left.x = view_size.x - text_size.x
+		elif top_left.x < 0:
+			top_left.x = 0
+		if top_left.y + text_size.y > view_size.y:
+			top_left.y = view_size.y - text_size.y
+		elif top_left.y < 0:
+			top_left.y = 0
+		
+		# 将限制后的左上角位置转换回中心点位置
+		center_pos = top_left + half_size
+		path_tips.position = center_pos
+	pass
+
+func calc_node_trans(node: Node) -> DsViewportTransInfo:
+	var in_canvaslayer: bool = false
+	var viewport: Viewport = null
+	var curr_node: Node = node.get_parent()
+	while curr_node != null:
+		if curr_node is CanvasLayer:
+			in_canvaslayer = true
+		elif curr_node is Viewport:
+			viewport = curr_node
+			break
+		curr_node = curr_node.get_parent()
+
+	var camera: Camera2D = null
+	if viewport != null:
+		camera = viewport.get_camera_2d()
+	var node_trans: DsNodeTransInfo = debug_tool.calc_node_rect(node)
+	var view_trans: DsViewportTransInfo = DsViewportTransInfo.new()
+	var tr_scale: Vector2 = Vector2.ONE
+
+	if node is CollisionShape2D:
+		tr_scale = node.global_scale
+	elif node is CollisionPolygon2D or node is Polygon2D:
+		tr_scale = node.global_scale
+	elif node is LightOccluder2D:
+		if node.occluder != null:
+			tr_scale = node.global_scale
+
+	if in_canvaslayer:
+		view_trans.position = node_trans.position
+		view_trans.rotation = node_trans.rotation
+		view_trans.scale = tr_scale
+		view_trans.size = node_trans.size
+	else:
+		var camera_trans: DsCameraTransInfo = debug_tool.get_camera_trans(camera)
+		view_trans.position = debug_tool.scene_to_ui(node_trans.position, camera)
+		view_trans.rotation = node_trans.rotation - camera_trans.rotation
+		view_trans.scale = camera_trans.zoom * tr_scale
+		view_trans.size = node_trans.size
+	return view_trans
+
+# 查找 node 的父级 Viewport 节点，不包括 root_viewport
+func find_viewport_node(node: Node) -> Viewport:
+	var curr_node: Node = node.get_parent()
+	while curr_node != null:
+		if curr_node is Viewport and curr_node != _root_viewport:
+			return curr_node
+		curr_node = curr_node.get_parent()
+	return null
+
+func _draw_node_shape(brush_node: CanvasItem, shape: Shape2D, pos: Vector2, tr_scale: Vector2, rot: float):
+	var wscale: float = get_viewport_wscale()
+	brush_node.draw_circle(pos, 3 * wscale, Color(1, 0, 0))
+	if shape != null:
+		brush_node.draw_set_transform(pos, rot, tr_scale)
+		shape.draw(brush_node.get_canvas_item(), Color(0, 1, 1, 0.5))
+		brush_node.draw_set_transform(Vector2.ZERO, 0, Vector2.ZERO)
+
+func _draw_node_polygon(brush_node: CanvasItem, polygon: PackedVector2Array, pos: Vector2, tr_scale: Vector2, rot: float):
+	var wscale: float = get_viewport_wscale()
+	brush_node.draw_circle(pos, 3 * wscale, Color(1, 0, 0))
+	if polygon != null and polygon.size() > 0:
+		# 画轮廓线
+		var arr: Array[Vector2] = []
+		arr.append_array(polygon)
+		arr.append(polygon[0])
+		brush_node.draw_set_transform(pos, rot, tr_scale)
+		# 画填充多边形
+		brush_node.draw_polygon(polygon, [Color(1, 0, 0, 0.3)])  # 半透明红色
+		brush_node.draw_polyline(arr, Color(1, 0, 0), 2.0 * wscale)  # 闭合线
+		brush_node.draw_set_transform(Vector2.ZERO, 0, Vector2.ZERO)
+
+func _draw_node_rect(brush_node: CanvasItem, pos: Vector2, tr_scale: Vector2, size: Vector2, rot: float, filled: bool):
+	var wscale: float = get_viewport_wscale()
+	brush_node.draw_circle(pos, 3 * wscale, Color(1, 0, 0))
+	if size == Vector2.ZERO:
+		return
+	# 设置绘制变换
+	brush_node.draw_set_transform(pos, rot, tr_scale)
+	# 绘制矩形
+	var rect = Rect2(Vector2.ZERO, size)
+	if filled:
+		brush_node.draw_rect(rect, Color(1,0,0,0.3), true)
+	brush_node.draw_rect(rect, Color(1,0,0), false, 1 / tr_scale.x * 2 * wscale)
+	# 重置变换
+	brush_node.draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+
+func _draw_node_path(brush_node: CanvasItem, curve: Curve2D, pos: Vector2, canvas_scale: Vector2, rot: float, node_scale: Vector2):
+	var wscale: float = get_viewport_wscale()
+	brush_node.draw_circle(pos, 3 * wscale, Color(1, 0, 0))
+	if curve != null and curve.get_point_count() > 0:
+		# 设置变换，保持 canvas_scale 不变
+		brush_node.draw_set_transform(pos, rot, canvas_scale)
+		# 获取曲线的细分点并绘制
+		var points: PackedVector2Array = curve.get_baked_points()
+		if points.size() > 1:
+			# 将每个点应用 node_scale
+			var scaled_points: PackedVector2Array = []
+			for point in points:
+				scaled_points.append(point * node_scale)
+			# 计算矩形范围
+			var min_pos = scaled_points[0]
+			var max_pos = scaled_points[0]
+			for point in scaled_points:
+				min_pos.x = min(min_pos.x, point.x)
+				min_pos.y = min(min_pos.y, point.y)
+				max_pos.x = max(max_pos.x, point.x)
+				max_pos.y = max(max_pos.y, point.y)
+			# 绘制矩形范围
+			var rect = Rect2(min_pos, max_pos - min_pos)
+			brush_node.draw_rect(rect, Color(1, 0, 0), false, 2.0 * wscale)
+			# 绘制曲线路径
+			brush_node.draw_polyline(scaled_points, Color(0, 1, 1, 0.5), 2.0 * wscale)
+			# 绘制方向箭头（每隔指定像素）
+			var arrow_interval = 50
+			var accumulated_distance = 0.0
+			var last_arrow_distance = 0.0
+			for i in range(1, scaled_points.size()):
+				var segment_start = scaled_points[i - 1]
+				var segment_end = scaled_points[i]
+				var segment_vector = segment_end - segment_start
+				var segment_length = segment_vector.length()
+				
+				if segment_length > 0:
+					var segment_dir = segment_vector.normalized()
+					# 检查这段线段内是否需要绘制箭头
+					while accumulated_distance + segment_length >= last_arrow_distance + arrow_interval:
+						var distance_in_segment = (last_arrow_distance + arrow_interval) - accumulated_distance
+						var arrow_pos = segment_start + segment_dir * distance_in_segment
+						# 绘制箭头
+						var arrow_size = 12.0 * wscale
+						var arrow_angle = 0.5  # 箭头张角
+						var left_dir = segment_dir.rotated(PI - arrow_angle)
+						var right_dir = segment_dir.rotated(PI + arrow_angle)
+						var arrow_p1 = arrow_pos + left_dir * arrow_size
+						var arrow_p2 = arrow_pos + right_dir * arrow_size
+						brush_node.draw_line(arrow_pos, arrow_p1, Color(0, 1, 1, 0.5), 2.0 * wscale)
+						brush_node.draw_line(arrow_pos, arrow_p2, Color(0, 1, 1, 0.5), 2.0 * wscale)
+						last_arrow_distance += arrow_interval
+					accumulated_distance += segment_length
+			# 绘制控制点
+			for i in range(curve.get_point_count()):
+				var point_pos = curve.get_point_position(i) * node_scale
+				brush_node.draw_circle(point_pos, 4 * wscale, Color(0, 1, 0, 0.55))
+		# 重置变换
+		brush_node.draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
+
+func _draw_node_line(brush_node: CanvasItem, line: Line2D, pos: Vector2, canvas_scale: Vector2, rot: float, node_scale: Vector2):
+	var wscale: float = get_viewport_wscale()
+	brush_node.draw_circle(pos, 3 * wscale, Color(1, 0, 0))
+	if line != null and line.points.size() > 0:
+		# 设置变换，保持 canvas_scale 不变
+		brush_node.draw_set_transform(pos, rot, canvas_scale)
+		# 将每个点应用 node_scale
+		var scaled_points: PackedVector2Array = []
+		for point in line.points:
+			scaled_points.append(point * node_scale)
+		# 绘制线段
+		brush_node.draw_polyline(scaled_points, Color(0, 1, 1, 0.5), 2.0 * wscale)
+		# 绘制矩形边框和控制点
+		if scaled_points.size() > 0:
+			# 计算矩形范围并绘制控制点
+			var min_pos = scaled_points[0]
+			var max_pos = scaled_points[0]
+			for point in scaled_points:
+				min_pos.x = min(min_pos.x, point.x)
+				min_pos.y = min(min_pos.y, point.y)
+				max_pos.x = max(max_pos.x, point.x)
+				max_pos.y = max(max_pos.y, point.y)
+				brush_node.draw_circle(point, 4 * wscale, Color(0, 1, 0, 0.55))
+			# 绘制矩形范围
+			if scaled_points.size() > 1:
+				var rect = Rect2(min_pos, max_pos - min_pos)
+				brush_node.draw_rect(rect, Color(1, 0, 0), false, 2.0 * wscale)
+		# 重置变换
+		brush_node.draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
