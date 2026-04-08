@@ -4,12 +4,7 @@ using GameFrameX.Procedure.Runtime;
 using GameFrameX.Runtime;
 using GameFrameX.UI.Runtime;
 using Godot;
-
-#if FAIRY_GUI
-using UILauncher = Godot.Hotfix.FairyGUI.UILauncher;
-#else
-using UILauncher = Godot.Hotfix.GodotGUI.UILauncher;
-#endif
+using Godot.Startup.Hotfix;
 
 namespace Godot.Startup.Procedure
 {
@@ -19,6 +14,11 @@ namespace Godot.Startup.Procedure
 	public sealed class ProcedureGameLauncherState : ProcedureBase
 	{
 		private static bool s_IsFlowRunning;
+#if FAIRY_GUI
+		private const string LauncherTypeFullName = "Godot.Hotfix.FairyGUI.UILauncher";
+#else
+		private const string LauncherTypeFullName = "Godot.Hotfix.GodotGUI.UILauncher";
+#endif
 
 		/// <summary>
 		/// 进入流程时执行。
@@ -55,7 +55,14 @@ namespace Godot.Startup.Procedure
 					return;
 				}
 
-				var launcher = await UIComp.OpenRequiredAsync<UILauncher>();
+				var launcherType = HotfixTypeResolver.ResolveOrNull(LauncherTypeFullName);
+				if (launcherType == null)
+				{
+					Log.Error("[UIFlow] 未找到 Hotfix UI 类型：{0}。请先确认 Hotfix.dll 已构建并可加载。", LauncherTypeFullName);
+					return;
+				}
+
+				var launcher = await UIComp.OpenRequiredAsync(launcherType);
 				if (launcher == null)
 				{
 					Log.Error("[UIFlow] 打开 UILauncher 失败。");

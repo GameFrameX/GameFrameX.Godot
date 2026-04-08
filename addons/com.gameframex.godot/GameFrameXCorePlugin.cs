@@ -15,6 +15,8 @@ namespace GameFrameX.Editor
     [Tool]
     public partial class GameFrameXCorePlugin : EditorPlugin
     {
+        private const string TopMenuButtonNodeName = "GameFrameXTopMenuButton";
+
         /// <summary>
         /// 顶部菜单项：日志宏定义子菜单。
         /// </summary>
@@ -116,6 +118,8 @@ namespace GameFrameX.Editor
         private RuntimeLogBridge m_RuntimeLogBridge;
         private AssetSystemBuilderDialog m_AssetSystemBuilderDialog;
         private ScriptingDefineSymbolsWindow m_ScriptingDefineSymbolsWindow;
+        private Callable m_TopMenuIdPressedCallable;
+        private Callable m_LogDefineMenuIdPressedCallable;
 
         /// <summary>
         /// 当插件进入场景树时调用，注册 Inspector 插件。
@@ -176,6 +180,8 @@ namespace GameFrameX.Editor
             m_LogDefinePopupMenu = null;
             m_CurrentLocale = null;
             m_RuntimeLogBridge = null;
+            m_TopMenuIdPressedCallable = default;
+            m_LogDefineMenuIdPressedCallable = default;
         }
 
         /// <summary>
@@ -205,14 +211,21 @@ namespace GameFrameX.Editor
                 return;
             }
 
+            CleanupStaleTopMenuButtons();
+
             m_TopMenuButton = new MenuButton();
+            m_TopMenuButton.Name = TopMenuButtonNodeName;
             m_TopMenuButton.Text = "GameFrameX";
 
             m_TopPopupMenu = m_TopMenuButton.GetPopup();
             m_TopPopupMenu.AddItem(L("资源打包器", "Asset Builder"), TopMenuAssetBuilderId);
             m_TopPopupMenu.AddItem(L("生成客户端配置", "Generate Client Config"), TopMenuGenerateClientConfigId);
             m_TopPopupMenu.AddSeparator();
-            m_TopPopupMenu.IdPressed += OnTopMenuIdPressed;
+            m_TopMenuIdPressedCallable = Callable.From<long>(OnTopMenuIdPressed);
+            if (!m_TopPopupMenu.IsConnected(PopupMenu.SignalName.IdPressed, m_TopMenuIdPressedCallable))
+            {
+                m_TopPopupMenu.Connect(PopupMenu.SignalName.IdPressed, m_TopMenuIdPressedCallable);
+            }
             BuildLogDefineSubmenu();
             if (m_LogDefinePopupMenu != null)
             {
@@ -253,7 +266,11 @@ namespace GameFrameX.Editor
             m_LogDefinePopupMenu.AddItem(L("开启警告及以上日志", "Enable Warning+ Logs"), LogDefineEnableWarningAndAboveLogsId);
             m_LogDefinePopupMenu.AddItem(L("开启错误及以上日志", "Enable Error+ Logs"), LogDefineEnableErrorAndAboveLogsId);
             m_LogDefinePopupMenu.AddItem(L("开启严重错误及以上日志", "Enable Fatal+ Logs"), LogDefineEnableFatalAndAboveLogsId);
-            m_LogDefinePopupMenu.IdPressed += OnLogDefineMenuIdPressed;
+            m_LogDefineMenuIdPressedCallable = Callable.From<long>(OnLogDefineMenuIdPressed);
+            if (!m_LogDefinePopupMenu.IsConnected(PopupMenu.SignalName.IdPressed, m_LogDefineMenuIdPressedCallable))
+            {
+                m_LogDefinePopupMenu.Connect(PopupMenu.SignalName.IdPressed, m_LogDefineMenuIdPressedCallable);
+            }
             m_TopPopupMenu.AddChild(m_LogDefinePopupMenu);
         }
 
@@ -264,7 +281,11 @@ namespace GameFrameX.Editor
         {
             if (m_LogDefinePopupMenu != null)
             {
-                m_LogDefinePopupMenu.IdPressed -= OnLogDefineMenuIdPressed;
+                if (!m_LogDefineMenuIdPressedCallable.IsNull() && m_LogDefinePopupMenu.IsConnected(PopupMenu.SignalName.IdPressed, m_LogDefineMenuIdPressedCallable))
+                {
+                    m_LogDefinePopupMenu.Disconnect(PopupMenu.SignalName.IdPressed, m_LogDefineMenuIdPressedCallable);
+                }
+
                 m_LogDefinePopupMenu.QueueFree();
                 m_LogDefinePopupMenu = null;
             }
@@ -276,7 +297,10 @@ namespace GameFrameX.Editor
                 PopupMenu popupMenu = m_TopMenuButton.GetPopup();
                 if (popupMenu != null)
                 {
-                    popupMenu.IdPressed -= OnTopMenuIdPressed;
+                    if (!m_TopMenuIdPressedCallable.IsNull() && popupMenu.IsConnected(PopupMenu.SignalName.IdPressed, m_TopMenuIdPressedCallable))
+                    {
+                        popupMenu.Disconnect(PopupMenu.SignalName.IdPressed, m_TopMenuIdPressedCallable);
+                    }
                 }
 
                 RemoveControlFromContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
@@ -284,6 +308,46 @@ namespace GameFrameX.Editor
                 m_TopMenuButton = null;
             }
 
+        }
+
+        private void CleanupStaleTopMenuButtons()
+        {
+            var root = EditorInterface.Singleton?.GetBaseControl();
+            if (root == null)
+            {
+                return;
+            }
+
+            CleanupStaleTopMenuButtonsRecursive(root);
+        }
+
+        private void CleanupStaleTopMenuButtonsRecursive(Node node)
+        {
+            foreach (var childObj in node.GetChildren())
+            {
+                if (childObj is not Node childNode)
+                {
+                    continue;
+                }
+
+                CleanupStaleTopMenuButtonsRecursive(childNode);
+                if (childNode is not MenuButton staleButton)
+                {
+                    continue;
+                }
+
+                if (!string.Equals(staleButton.Name, TopMenuButtonNodeName, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                if (staleButton == m_TopMenuButton)
+                {
+                    continue;
+                }
+
+                staleButton.QueueFree();
+            }
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using GameFrameX.UI.Runtime;
+using Godot;
 
 namespace GameFrameX.UI.FairyGUI.Runtime
 {
@@ -20,10 +21,28 @@ namespace GameFrameX.UI.FairyGUI.Runtime
                 return;
             }
 
-            m_InstancePool.Unspawn(uiForm.Handle);
+            object target = uiForm.Handle;
+            try
+            {
+                m_InstancePool.Unspawn(target);
+            }
+            catch (GameFrameX.Runtime.GameFrameworkException)
+            {
+                if (target is Node uiNode && uiNode.HasNode("ViewRoot"))
+                {
+                    var viewRoot = uiNode.GetNode("ViewRoot");
+                    m_InstancePool.Unspawn(viewRoot);
+                    target = viewRoot;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
             if (isDispose)
             {
-                m_InstancePool.ReleaseObject(uiForm.Handle);
+                m_InstancePool.ReleaseObject(target);
             }
         }
     }

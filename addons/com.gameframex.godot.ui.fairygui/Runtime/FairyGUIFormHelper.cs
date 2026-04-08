@@ -64,8 +64,12 @@ namespace GameFrameX.UI.FairyGUI.Runtime
             var uiForm = node as IUIForm;
             if (uiForm == null)
             {
-                Log.Error("UI form instance is not of type IUIForm.");
-                return null;
+                uiForm = CreateUIFormByTypeFallback(node, uiFormType);
+                if (uiForm == null)
+                {
+                    Log.Error("UI form instance is not of type IUIForm.");
+                    return null;
+                }
             }
 
             BindUIGroup(uiForm, uiFormType);
@@ -77,8 +81,14 @@ namespace GameFrameX.UI.FairyGUI.Runtime
                 return null;
             }
 
-            helperNode.AddChild(node);
-            if (node is Control control)
+            if (uiForm is not Node uiFormNode)
+            {
+                Log.Error("UI form is not a Node.");
+                return null;
+            }
+
+            helperNode.AddChild(uiFormNode);
+            if (uiFormNode is Control control)
             {
                 SetFullScreen(control);
             }
@@ -174,6 +184,57 @@ namespace GameFrameX.UI.FairyGUI.Runtime
             control.GrowHorizontal = Control.GrowDirection.Both;
             control.GrowVertical = Control.GrowDirection.Both;
             control.Position = Vector2.Zero;
+        }
+
+        private static IUIForm CreateUIFormByTypeFallback(Node sourceNode, Type uiFormType)
+        {
+            if (sourceNode == null || uiFormType == null || !typeof(IUIForm).IsAssignableFrom(uiFormType))
+            {
+                return null;
+            }
+
+            object created;
+            try
+            {
+                created = Activator.CreateInstance(uiFormType);
+            }
+            catch (Exception exception)
+            {
+                Log.Warning("Create UI form fallback failed: can not create type '{0}', exception '{1}'.", uiFormType.FullName, exception.Message);
+                return null;
+            }
+
+            if (created is not Node targetNode || created is not IUIForm uiForm)
+            {
+                return null;
+            }
+
+            if (sourceNode is Control sourceControl && targetNode is Control targetControl)
+            {
+                targetControl.LayoutMode = sourceControl.LayoutMode;
+                targetControl.AnchorsPreset = sourceControl.AnchorsPreset;
+                targetControl.AnchorLeft = sourceControl.AnchorLeft;
+                targetControl.AnchorTop = sourceControl.AnchorTop;
+                targetControl.AnchorRight = sourceControl.AnchorRight;
+                targetControl.AnchorBottom = sourceControl.AnchorBottom;
+                targetControl.OffsetLeft = sourceControl.OffsetLeft;
+                targetControl.OffsetTop = sourceControl.OffsetTop;
+                targetControl.OffsetRight = sourceControl.OffsetRight;
+                targetControl.OffsetBottom = sourceControl.OffsetBottom;
+                targetControl.GrowHorizontal = sourceControl.GrowHorizontal;
+                targetControl.GrowVertical = sourceControl.GrowVertical;
+            }
+
+            targetNode.Name = sourceNode.Name;
+            sourceNode.Name = "ViewRoot";
+            targetNode.AddChild(sourceNode);
+            if (sourceNode is Control sourceRootControl)
+            {
+                SetFullScreen(sourceRootControl);
+            }
+
+            Log.Warning("UI form fallback created by type '{0}' because scene root script instance is missing IUIForm. attachMode=ViewRootChild", uiFormType.FullName);
+            return uiForm;
         }
     }
 }
