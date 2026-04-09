@@ -1,6 +1,6 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal abstract class FSRequestPackageVersionOperation : AsyncOperationBase
     {
         /// <summary>

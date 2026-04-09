@@ -1,6 +1,6 @@
 /** This is an automatically generated class by FairyGUI. Please do not modify it. **/
 
-#if ENABLE_UI_FAIRYGUI
+#if FAIRY_GUI
 
 namespace Hotfix.UI
 {

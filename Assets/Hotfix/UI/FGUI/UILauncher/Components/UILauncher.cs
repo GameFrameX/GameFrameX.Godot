@@ -1,6 +1,6 @@
 /** This is an automatically generated class by FairyGUI. Please do not modify it. **/
 
-#if ENABLE_UI_FAIRYGUI
+#if FAIRY_GUI
 using FairyGUI;
 using Cysharp.Threading.Tasks;
 using FairyGUI.Utils;
@@ -8,7 +8,6 @@ using GameFrameX.Entity.Runtime;
 using GameFrameX.UI.Runtime;
 using GameFrameX.UI.FairyGUI.Runtime;
 using GameFrameX.Runtime;
-using UnityEngine;
 
 namespace Hotfix.UI
 {

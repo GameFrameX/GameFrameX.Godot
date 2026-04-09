@@ -2,19 +2,19 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class RawFileHandle : HandleBase, IDisposable
     {
         private Action<RawFileHandle> _callback;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal RawFileHandle(ProviderOperation provider) : base(provider)
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal override void InvokeCallback()
         {
             _callback?.Invoke(this);
@@ -55,7 +55,7 @@ namespace YooAsset
         /// <summary>
         /// 等待异步执行完毕
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void WaitForAsyncComplete()
         {
             if (IsValidWithWarning == false)
@@ -69,7 +69,7 @@ namespace YooAsset
         /// <summary>
         /// 释放资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Release()
         {
             ReleaseInternal();
@@ -78,7 +78,7 @@ namespace YooAsset
         /// <summary>
         /// 释放资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Dispose()
         {
             ReleaseInternal();
@@ -88,7 +88,7 @@ namespace YooAsset
         /// <summary>
         /// 获取原生文件的二进制数据
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public byte[] GetRawFileData()
         {
             var rawBundle = GetRawBundleObject();
@@ -103,7 +103,7 @@ namespace YooAsset
         /// <summary>
         /// 获取原生文件的文本数据
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetRawFileText()
         {
             var rawBundle = GetRawBundleObject();
@@ -118,7 +118,7 @@ namespace YooAsset
         /// <summary>
         /// 获取原生文件的路径
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetRawFilePath()
         {
             var rawBundle = GetRawBundleObject();
@@ -133,7 +133,7 @@ namespace YooAsset
         /// <summary>
         /// 获取已完成加载的原生文件对象
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private RawBundle GetRawBundleObject()
         {
             if (IsValidWithWarning == false)
@@ -143,19 +143,19 @@ namespace YooAsset
 
             if (Provider.IsDone == false)
             {
-                YooLogger.Warning("Raw file is still loading.");
+                AssetSystemLogger.Warning("Raw file is still loading.");
                 return null;
             }
 
             if (Provider.Status != EOperationStatus.Succeed)
             {
-                YooLogger.Warning($"Raw file load failed : {Provider.Error}");
+                AssetSystemLogger.Warning($"Raw file load failed : {Provider.Error}");
                 return null;
             }
 
             if (Provider.RawBundleObject == null)
             {
-                YooLogger.Warning("Raw file object is null.");
+                AssetSystemLogger.Warning("Raw file object is null.");
                 return null;
             }
 

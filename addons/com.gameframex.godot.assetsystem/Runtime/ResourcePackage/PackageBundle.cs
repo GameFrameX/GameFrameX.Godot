@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Linq;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     [Serializable]
     public class PackageBundle
     {
@@ -103,7 +103,7 @@ namespace YooAsset
         }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public PackageBundle()
         {
         }
@@ -111,7 +111,7 @@ namespace YooAsset
         /// <summary>
         /// 解析资源包
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void ParseBundle(PackageManifest manifest)
         {
             PackageName = manifest.PackageName;
@@ -123,7 +123,7 @@ namespace YooAsset
         /// <summary>
         /// 是否包含Tag
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool HasTag(string[] tags)
         {
             if (tags == null || tags.Length == 0)
@@ -150,7 +150,7 @@ namespace YooAsset
         /// <summary>
         /// 是否包含任意Tags
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool HasAnyTags()
         {
             if (Tags != null && Tags.Length > 0)
@@ -166,7 +166,7 @@ namespace YooAsset
         /// <summary>
         /// 检测资源包文件内容是否相同
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool Equals(PackageBundle otherBundle)
         {
             if (FileHash == otherBundle.FileHash)

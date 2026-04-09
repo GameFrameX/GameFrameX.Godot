@@ -1,6 +1,6 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public struct DownloadStatus
     {
         /// <summary>
@@ -23,7 +23,7 @@
         /// </summary>
         public long DownloadedBytes;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static DownloadStatus CreateDefaultStatus()
         {
             var status = new DownloadStatus();

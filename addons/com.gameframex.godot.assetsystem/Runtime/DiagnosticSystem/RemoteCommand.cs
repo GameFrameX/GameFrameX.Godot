@@ -1,10 +1,9 @@
 using System;
 using System.Text;
-using UnityEngine;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public enum ERemoteCommand
     {
         /// <summary>
@@ -13,7 +12,7 @@ namespace YooAsset
         SampleOnce = 0,
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     [Serializable]
     public class RemoteCommand
     {
@@ -31,22 +30,22 @@ namespace YooAsset
         /// <summary>
         /// 序列化
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static byte[] Serialize(RemoteCommand command)
         {
-            return Encoding.UTF8.GetBytes(JsonUtility.ToJson(command));
+            return Encoding.UTF8.GetBytes(AssetSystemJson.ToJson(command));
         }
 
         /// <summary>
         /// 反序列化
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static RemoteCommand Deserialize(byte[] data)
         {
-            return JsonUtility.FromJson<RemoteCommand>(Encoding.UTF8.GetString(data));
+            return AssetSystemJson.FromJson<RemoteCommand>(Encoding.UTF8.GetString(data));
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static bool TryParseCommandType(string command, out int commandType)
         {
             commandType = -1;
@@ -65,7 +64,7 @@ namespace YooAsset
             return int.TryParse(normalized, out commandType);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static string ToCommandName(int commandType)
         {
             if (commandType == (int)ERemoteCommand.SampleOnce)

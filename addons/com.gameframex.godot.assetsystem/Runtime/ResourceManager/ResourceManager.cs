@@ -1,13 +1,10 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class ResourceManager
     {
         // 全局场景句柄集合
@@ -26,7 +23,7 @@ namespace YooAsset
         public readonly string PackageName;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceManager(string packageName)
         {
             PackageName = packageName;
@@ -35,7 +32,7 @@ namespace YooAsset
         /// <summary>
         /// 初始化
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Initialize(InitializeParameters initializeParameters, IBundleQuery bundleServices)
         {
             _simulationOnEditor = initializeParameters is EditorSimulateModeParameters;
@@ -45,12 +42,12 @@ namespace YooAsset
         /// <summary>
         /// 尝试卸载指定资源的资源包（包括依赖资源）
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void TryUnloadUnusedAsset(AssetInfo assetInfo)
         {
             if (assetInfo.IsInvalid)
             {
-                YooLogger.Error($"Failed to unload asset ! {assetInfo.Error}");
+                AssetSystemLogger.Error($"Failed to unload asset ! {assetInfo.Error}");
                 return;
             }
 
@@ -90,19 +87,19 @@ namespace YooAsset
         /// 注意：返回的场景句柄是唯一的，每个场景句柄对应自己的场景提供者对象。
         /// 注意：业务逻辑层应该避免同时加载一个子场景。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
-        public SceneHandle LoadSceneAsync(AssetInfo assetInfo, LoadSceneParameters loadSceneParams, bool suspendLoad, uint priority)
+        [AssetSystemPreserve]
+        public SceneHandle LoadSceneAsync(AssetInfo assetInfo, SceneLoadParameters loadSceneParams, bool suspendLoad, uint priority)
         {
             if (assetInfo.IsInvalid)
             {
-                YooLogger.Error($"Failed to load scene ! {assetInfo.Error}");
+                AssetSystemLogger.Error($"Failed to load scene ! {assetInfo.Error}");
                 var completedProvider = new CompletedProvider(this, assetInfo);
                 completedProvider.SetCompleted(assetInfo.Error);
                 return completedProvider.CreateHandle<SceneHandle>();
             }
 
             // 如果加载的是主场景，则卸载所有缓存的场景
-            if (loadSceneParams.loadSceneMode == LoadSceneMode.Single)
+            if (loadSceneParams.SceneMode == SceneLoadMode.Single)
             {
                 UnloadAllScene();
             }
@@ -135,12 +132,12 @@ namespace YooAsset
         /// <summary>
         /// 加载资源对象
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetHandle LoadAssetAsync(AssetInfo assetInfo, uint priority)
         {
             if (assetInfo.IsInvalid)
             {
-                YooLogger.Error($"Failed to load asset ! {assetInfo.Error}");
+                AssetSystemLogger.Error($"Failed to load asset ! {assetInfo.Error}");
                 var completedProvider = new CompletedProvider(this, assetInfo);
                 completedProvider.SetCompleted(assetInfo.Error);
                 return completedProvider.CreateHandle<AssetHandle>();
@@ -171,12 +168,12 @@ namespace YooAsset
         /// <summary>
         /// 加载子资源对象
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public SubAssetsHandle LoadSubAssetsAsync(AssetInfo assetInfo, uint priority)
         {
             if (assetInfo.IsInvalid)
             {
-                YooLogger.Error($"Failed to load sub assets ! {assetInfo.Error}");
+                AssetSystemLogger.Error($"Failed to load sub assets ! {assetInfo.Error}");
                 var completedProvider = new CompletedProvider(this, assetInfo);
                 completedProvider.SetCompleted(assetInfo.Error);
                 return completedProvider.CreateHandle<SubAssetsHandle>();
@@ -207,12 +204,12 @@ namespace YooAsset
         /// <summary>
         /// 加载所有资源对象
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AllAssetsHandle LoadAllAssetsAsync(AssetInfo assetInfo, uint priority)
         {
             if (assetInfo.IsInvalid)
             {
-                YooLogger.Error($"Failed to load all assets ! {assetInfo.Error}");
+                AssetSystemLogger.Error($"Failed to load all assets ! {assetInfo.Error}");
                 var completedProvider = new CompletedProvider(this, assetInfo);
                 completedProvider.SetCompleted(assetInfo.Error);
                 return completedProvider.CreateHandle<AllAssetsHandle>();
@@ -243,12 +240,12 @@ namespace YooAsset
         /// <summary>
         /// 加载原生文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public RawFileHandle LoadRawFileAsync(AssetInfo assetInfo, uint priority)
         {
             if (assetInfo.IsInvalid)
             {
-                YooLogger.Error($"Failed to load raw file ! {assetInfo.Error}");
+                AssetSystemLogger.Error($"Failed to load raw file ! {assetInfo.Error}");
                 var completedProvider = new CompletedProvider(this, assetInfo);
                 completedProvider.SetCompleted(assetInfo.Error);
                 return completedProvider.CreateHandle<RawFileHandle>();
@@ -277,7 +274,7 @@ namespace YooAsset
         }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void UnloadSubScene(string sceneName)
         {
             var removeKeys = new List<string>();
@@ -298,7 +295,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void UnloadAllScene()
         {
             // 释放所有场景句柄
@@ -310,7 +307,7 @@ namespace YooAsset
             _sceneHandles.Clear();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void ClearSceneHandle()
         {
             // 释放资源包下的所有场景
@@ -333,14 +330,14 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal LoadBundleFileOperation CreateMainBundleFileLoader(AssetInfo assetInfo)
         {
             var bundleInfo = _bundleQuery.GetMainBundleInfo(assetInfo);
             return CreateFileLoaderInternal(bundleInfo);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal LoadDependBundleFileOperation CreateDependFileLoaders(AssetInfo assetInfo)
         {
             var bundleInfos = _bundleQuery.GetDependBundleInfos(assetInfo);
@@ -356,7 +353,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void RemoveBundleProviders(List<ProviderOperation> removeList)
         {
             foreach (var provider in removeList)
@@ -365,13 +362,13 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal bool HasAnyLoader()
         {
             return _loaderDic.Count > 0;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private LoadBundleFileOperation CreateFileLoaderInternal(BundleInfo bundleInfo)
         {
             // 如果加载器已经存在
@@ -389,7 +386,7 @@ namespace YooAsset
             return loaderOperation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private LoadBundleFileOperation TryGetFileLoader(string bundleName)
         {
             if (_loaderDic.TryGetValue(bundleName, out var value))
@@ -402,7 +399,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private ProviderOperation TryGetProvider(string providerGUID)
         {
             if (_providerDic.TryGetValue(providerGUID, out var value))
@@ -417,7 +414,7 @@ namespace YooAsset
 
         #region 调试信息
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal List<DebugProviderInfo> GetDebugReportInfos()
         {
             var result = new List<DebugProviderInfo>(_providerDic.Count);

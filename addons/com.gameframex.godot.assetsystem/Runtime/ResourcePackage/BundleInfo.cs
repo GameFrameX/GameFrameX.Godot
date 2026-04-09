@@ -1,6 +1,6 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class BundleInfo
     {
         private readonly string _importFilePath;
@@ -17,7 +17,7 @@
         public string[] IncludeAssetsInEditor;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public BundleInfo(IFileSystem fileSystem, PackageBundle bundle)
         {
             _fileSystem = fileSystem;
@@ -25,7 +25,7 @@
             _importFilePath = null;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public BundleInfo(IFileSystem fileSystem, PackageBundle bundle, string importFilePath)
         {
             _fileSystem = fileSystem;
@@ -36,7 +36,7 @@
         /// <summary>
         /// 加载资源文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public FSLoadBundleOperation LoadBundleFile()
         {
             return _fileSystem.LoadBundleFile(Bundle);
@@ -45,7 +45,7 @@
         /// <summary>
         /// 卸载资源文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void UnloadBundleFile(object result)
         {
             _fileSystem.UnloadBundleFile(Bundle, result);
@@ -54,7 +54,7 @@
         /// <summary>
         /// 创建下载器
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public FSDownloadFileOperation CreateDownloader(int failedTryAgain, int timeout)
         {
             var downloadParam = new DownloadParam(failedTryAgain, timeout);
@@ -65,7 +65,7 @@
         /// <summary>
         /// 是否需要从远端下载
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool IsNeedDownloadFromRemote()
         {
             return _fileSystem.NeedDownload(Bundle);
@@ -74,7 +74,7 @@
         /// <summary>
         /// 下载器合并识别码
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetDownloadCombineGUID()
         {
             return $"{_fileSystem.GetHashCode()}_{Bundle.BundleGUID}";

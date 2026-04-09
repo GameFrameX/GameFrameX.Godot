@@ -1,12 +1,11 @@
-using UnityEngine;
-using UnityEngine.Networking;
+using GameFrameX.AssetSystem.Networking;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal abstract class DefaultDownloadFileOperation : FSDownloadFileOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected enum ESteps
         {
             None,
@@ -38,7 +37,7 @@ namespace YooAsset
         protected bool IsRetryableError;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DefaultDownloadFileOperation(PackageBundle bundle, DownloadParam param) : base(bundle)
         {
             Param = param;
@@ -48,7 +47,7 @@ namespace YooAsset
         /// <summary>
         /// 获取网络请求地址
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected string GetRequestURL()
         {
             // 轮流返回请求地址
@@ -66,21 +65,21 @@ namespace YooAsset
         /// <summary>
         /// 重置请求字段
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected void ResetRequestFiled()
         {
             // 重置变量
             _isAbort = false;
             IsRetryableError = false;
             _latestDownloadBytes = 0;
-            _latestDownloadRealtime = Time.realtimeSinceStartup;
+            _latestDownloadRealtime = AssetSystemTime.RealtimeSinceStartup;
             DownloadProgress = 0f;
             DownloadedBytes = 0;
 
             // 重置计时器
             if (_tryAgainTimer > 0f)
             {
-                YooLogger.Warning($"Try again download : {_requestURL}");
+                AssetSystemLogger.Warning($"Try again download : {_requestURL}");
             }
 
             _tryAgainTimer = 0f;
@@ -89,7 +88,7 @@ namespace YooAsset
         /// <summary>
         /// 检测请求超时
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected void CheckRequestTimeout()
         {
             // 注意：在连续时间段内无新增下载数据及判定为超时
@@ -98,13 +97,13 @@ namespace YooAsset
                 if (_latestDownloadBytes != DownloadedBytes)
                 {
                     _latestDownloadBytes = DownloadedBytes;
-                    _latestDownloadRealtime = Time.realtimeSinceStartup;
+                    _latestDownloadRealtime = AssetSystemTime.RealtimeSinceStartup;
                 }
 
-                var offset = Time.realtimeSinceStartup - _latestDownloadRealtime;
+                var offset = AssetSystemTime.RealtimeSinceStartup - _latestDownloadRealtime;
                 if (offset > Param.Timeout)
                 {
-                    YooLogger.Warning($"Download request timeout : {_requestURL}");
+                    AssetSystemLogger.Warning($"Download request timeout : {_requestURL}");
                     if (_webRequest != null)
                     {
                         DownloadSystemHelper.AbortRequest(_webRequest);
@@ -118,7 +117,7 @@ namespace YooAsset
         /// <summary>
         /// 检测请求结果
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected bool CheckRequestResult()
         {
             HttpCode = _webRequest.responseCode;
@@ -153,7 +152,7 @@ namespace YooAsset
         /// <summary>
         /// 是否请求的本地文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected bool IsRequestLocalFile()
         {
             //TODO : UNITY_STANDALONE_OSX平台目前无法确定

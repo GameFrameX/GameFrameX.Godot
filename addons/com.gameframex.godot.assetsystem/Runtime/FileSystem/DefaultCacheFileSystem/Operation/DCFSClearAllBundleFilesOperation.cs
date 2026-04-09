@@ -1,12 +1,12 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class DCFSClearAllBundleFilesOperation : FSClearAllBundleFilesOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -21,19 +21,19 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DCFSClearAllBundleFilesOperation(DefaultCacheFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.GetAllCacheFiles;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -46,7 +46,7 @@ namespace YooAsset
                 _allBundleGUIDs = _fileSystem.GetAllCachedBundleGUIDs();
                 _fileTotalCount = _allBundleGUIDs.Count;
                 _steps = ESteps.ClearAllCacheFiles;
-                YooLogger.Log($"Found all cache files count : {_fileTotalCount}");
+                AssetSystemLogger.Log($"Found all cache files count : {_fileTotalCount}");
             }
 
             if (_steps == ESteps.ClearAllCacheFiles)

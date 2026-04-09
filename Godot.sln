@@ -1,12 +1,14 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Godot", "Godot.csproj", "{EAD22480-7842-49E7-A0B8-14451CDA9A8C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hotfix", "Assets\Hotfix\Hotfix.csproj", "{52D0FFC9-1BB2-4840-A9CD-670471A506AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-	Debug|Any CPU = Debug|Any CPU
-	ExportDebug|Any CPU = ExportDebug|Any CPU
-	ExportRelease|Any CPU = ExportRelease|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		ExportDebug|Any CPU = ExportDebug|Any CPU
+		ExportRelease|Any CPU = ExportRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{EAD22480-7842-49E7-A0B8-14451CDA9A8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -15,5 +17,11 @@ Global
 		{EAD22480-7842-49E7-A0B8-14451CDA9A8C}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
 		{EAD22480-7842-49E7-A0B8-14451CDA9A8C}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
 		{EAD22480-7842-49E7-A0B8-14451CDA9A8C}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{52D0FFC9-1BB2-4840-A9CD-670471A506AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		
+		{52D0FFC9-1BB2-4840-A9CD-670471A506AE}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		
+		{52D0FFC9-1BB2-4840-A9CD-670471A506AE}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		
 	EndGlobalSection
 EndGlobal

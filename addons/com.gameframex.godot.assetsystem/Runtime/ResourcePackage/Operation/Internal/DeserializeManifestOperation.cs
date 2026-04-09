@@ -1,13 +1,13 @@
-﻿using System.IO;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DeserializeManifestOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -30,19 +30,19 @@ namespace YooAsset
         /// </summary>
         public PackageManifest Manifest { private set; get; }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DeserializeManifestOperation(byte[] binaryData)
         {
             _buffer = new BufferReader(binaryData);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.DeserializeFileHeader;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -64,7 +64,7 @@ namespace YooAsset
 
                     // 读取文件标记
                     var fileSign = _buffer.ReadUInt32();
-                    if (fileSign != YooAssetSettings.ManifestFileSign)
+                    if (fileSign != AssetSystemSettings.ManifestFileSign)
                     {
                         _steps = ESteps.Done;
                         Status = EOperationStatus.Failed;
@@ -74,11 +74,11 @@ namespace YooAsset
 
                     // 读取文件版本
                     var fileVersion = _buffer.ReadUTF8();
-                    if (fileVersion != YooAssetSettings.ManifestFileVersion)
+                    if (fileVersion != AssetSystemSettings.ManifestFileVersion)
                     {
                         _steps = ESteps.Done;
                         Status = EOperationStatus.Failed;
-                        Error = $"The manifest file version are not compatible : {fileVersion} != {YooAssetSettings.ManifestFileVersion}";
+                        Error = $"The manifest file version are not compatible : {fileVersion} != {AssetSystemSettings.ManifestFileVersion}";
                         return;
                     }
 
@@ -177,7 +177,7 @@ namespace YooAsset
                             {
                                 if (Manifest.AssetPathMapping1.ContainsKey(locationWithoutExtension))
                                 {
-                                    YooLogger.Warning($"Location have existed : {locationWithoutExtension}");
+                                    AssetSystemLogger.Warning($"Location have existed : {locationWithoutExtension}");
                                 }
                                 else
                                 {

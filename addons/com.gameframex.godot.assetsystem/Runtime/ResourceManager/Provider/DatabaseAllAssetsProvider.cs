@@ -1,25 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class DatabaseAllAssetsProvider : ProviderOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DatabaseAllAssetsProvider(ResourceManager manager, string providerGUID, AssetInfo assetInfo) : base(manager, providerGUID, assetInfo)
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             BeginLoadTimeRecord();
             DebugBeginRecording();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
 #if UNITY_EDITOR
@@ -35,7 +33,7 @@ namespace YooAsset
                 if (string.IsNullOrEmpty(guid))
                 {
                     var error = $"Not found asset : {MainAssetInfo.AssetPath}";
-                    YooLogger.Error(error);
+                    AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                     return;
                 }
@@ -71,7 +69,7 @@ namespace YooAsset
             {
                 if (MainAssetInfo.AssetType == null)
                 {
-                    var result = new List<Object>();
+                    var result = new List<object>();
                     foreach (var assetPath in LoadBundleFileOp.BundleFileInfo.IncludeAssetsInEditor)
                     {
                         var mainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath(assetPath);
@@ -85,7 +83,7 @@ namespace YooAsset
                 }
                 else
                 {
-                    var result = new List<Object>();
+                    var result = new List<object>();
                     foreach (var assetPath in LoadBundleFileOp.BundleFileInfo.IncludeAssetsInEditor)
                     {
                         var mainAsset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetPath, MainAssetInfo.AssetType);
@@ -116,7 +114,7 @@ namespace YooAsset
                         error = $"Failed to load all assets : {MainAssetInfo.AssetPath} AssetType : {MainAssetInfo.AssetType}";
                     }
 
-                    YooLogger.Error(error);
+                    AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                 }
                 else

@@ -30,7 +30,9 @@
 using GameFrameX.Fsm.Runtime;
 using GameFrameX.Procedure.Runtime;
 using GameFrameX.Runtime;
+using GameFrameX.AssetSystem;
 using Godot;
+using Godot.Startup.AssetSystem;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,8 +42,6 @@ using System.Text;
 #if INCLUDE_ASSETSYSTEM_RUNTIME
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
-using YooAsset;
 #endif
 
 namespace Godot.Startup.Procedure;
@@ -114,6 +114,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		base.OnEnter(procedureOwner);
 		Log.Info("进入流程：ProcedureDownloadWebFiles");
 		Log.Info("[Code] rev={0}", LoadProbeCodeRevision);
+		Log.Info("[UpdateMode] active mode={0}", StartupUpdateModeContext.CurrentMode);
 
 #if INCLUDE_ASSETSYSTEM_RUNTIME
 		_stateChanged = false;
@@ -134,7 +135,11 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		Log.Info("[AB] SKIP runtime-disabled");
 		Log.Info("[Remote] SKIP runtime-disabled");
 		Log.Info("[Preview] SKIP builtin preview disabled.");
-		ChangeState<ProcedurePatchDone>(procedureOwner);
+		if (StartupUpdateModeContext.CurrentMode == StartupUpdateMode.OnlineForceUpdate)
+		{
+			Log.Warning("[UpdateMode] Force update requested but INCLUDE_ASSETSYSTEM_RUNTIME is disabled. Continue startup as fallback.");
+		}
+		GoPatchDone(procedureOwner, "runtime-disabled");
 #endif
 	}
 
@@ -143,12 +148,33 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		base.OnUpdate(procedureOwner, elapseSeconds, realElapseSeconds);
 #if INCLUDE_ASSETSYSTEM_RUNTIME
 		UpdateRuntimeLoadPipeline();
-		if (_stateChanged == false && (_stage == LoadProbeStage.Completed || _stage == LoadProbeStage.Failed))
+		if (_stateChanged || (_stage != LoadProbeStage.Completed && _stage != LoadProbeStage.Failed))
 		{
-			_stateChanged = true;
-			ChangeState<ProcedurePatchDone>(procedureOwner);
+			return;
 		}
+
+		_stateChanged = true;
+		if (_stage == LoadProbeStage.Completed)
+		{
+			GoPatchDone(procedureOwner, "probe-completed");
+			return;
+		}
+
+		if (StartupUpdateModeContext.CurrentMode == StartupUpdateMode.OnlineForceUpdate)
+		{
+			Log.Error("[UpdateMode] Force update failed. startup halted in ProcedureDownloadWebFiles.");
+			return;
+		}
+
+		Log.Warning("[UpdateMode] Optional update failed. continue startup.");
+		GoPatchDone(procedureOwner, "optional-update-failed");
 #endif
+	}
+
+	private void GoPatchDone(IFsm<IProcedureManager> procedureOwner, string reason)
+	{
+		Log.Info("[Flow] {0} -> {1} ({2})", nameof(ProcedureDownloadWebFiles), nameof(ProcedurePatchDone), reason);
+		ChangeState<ProcedurePatchDone>(procedureOwner);
 	}
 
 #if INCLUDE_ASSETSYSTEM_RUNTIME
@@ -175,28 +201,17 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 					_probeFixturePackageRoot = fixturePackageRoot;
 					var fixtureCacheRoot = Path.Combine(fixtureRoot, "_probe_cache").Replace('\\', '/');
 					ResetDirectory(fixtureCacheRoot);
-					YooAssets.Initialize();
-					YooAssets.SetDownloadSystemHttpTransport(new LocalFileHttpTransport());
-					_package = YooAssets.TryGetPackage(ProbePackageName) ?? YooAssets.CreatePackage(ProbePackageName);
-					YooAssets.SetDefaultPackage(_package);
+			_package = AssetPackageUpdateService.PreparePackage(ProbePackageName, new LocalFileHttpTransport());
 					if (OS.HasFeature("web"))
 					{
-						var initParams = new WebPlayModeParameters
-						{
-							WebFileSystemParameters = new FileSystemParameters(typeof(DefaultWebFileSystem).FullName, fixtureRoot)
-						};
 						Log.Info("[Remote] initialize mode=WebPlayMode root={0}", fixtureRoot);
-						_initializeOperation = _package.InitializeAsync(initParams);
+				_initializeOperation = AssetPackageUpdateService.BeginInitializeWeb(_package, fixtureRoot);
 					}
 					else
 					{
 						var remoteServices = new LocalDirectoryRemoteServices(fixturePackageRoot);
-						var initParams = new HostPlayModeParameters
-						{
-							CacheFileSystemParameters = FileSystemParameters.CreateDefaultCacheFileSystemParameters(remoteServices, rootDirectory: fixtureCacheRoot)
-						};
 						Log.Info("[Remote] initialize mode=HostPlayMode root={0} cache={1}", fixturePackageRoot, fixtureCacheRoot);
-						_initializeOperation = _package.InitializeAsync(initParams);
+				_initializeOperation = AssetPackageUpdateService.BeginInitializeHost(_package, remoteServices, fixtureCacheRoot);
 					}
 					return;
 				}
@@ -220,7 +235,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			{
 				if (_versionOperation == null)
 				{
-					_versionOperation = _package.RequestPackageVersionAsync(appendTimeTicks: false, timeout: 10);
+			_versionOperation = AssetPackageUpdateService.BeginRequestPackageVersion(_package, appendTimeTicks: false, timeout: 10);
 					return;
 				}
 
@@ -244,7 +259,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			{
 				if (_manifestOperation == null)
 				{
-					_manifestOperation = _package.UpdatePackageManifestAsync(_packageVersion, timeout: 10);
+			_manifestOperation = AssetPackageUpdateService.BeginUpdatePackageManifest(_package, _packageVersion, timeout: 10);
 					return;
 				}
 
@@ -267,7 +282,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			{
 				if (_downloaderOperation == null)
 				{
-					_downloaderOperation = _package.CreateResourceDownloader(downloadingMaxNumber: 1, failedTryAgain: 0, timeout: 10);
+			_downloaderOperation = AssetPackageUpdateService.BeginCreateDownloader(_package, downloadingMaxNumber: 1, failedTryAgain: 0, timeout: 10);
 					_downloaderOperation.OnStartDownloadFileCallback = data =>
 					{
 						Log.Info("[Remote] downloading file={0} size={1}", data.FileName, data.FileSize);
@@ -277,7 +292,6 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 						Log.Warning("[Remote] download error file={0} info={1}", data.FileName, data.ErrorInfo);
 						Log.Info("[Remote] download error file={0} info={1}", data.FileName, data.ErrorInfo);
 					};
-					_downloaderOperation.BeginDownload();
 					return;
 				}
 
@@ -302,7 +316,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			{
 				if (_assetHandle == null)
 				{
-					_assetHandle = _package.LoadAssetAsync(ProbeAssetLocation, typeof(UnityEngine.Object), priority: 100);
+					_assetHandle = _package.LoadAssetAsync(ProbeAssetLocation, typeof(object), priority: 100);
 					return;
 				}
 
@@ -317,7 +331,10 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 					return;
 				}
 
-				Log.Info("[AB] PASS asset={0}", _assetHandle.AssetObject.name);
+				var assetName = _assetHandle.AssetObject.GetType().GetProperty("name")?.GetValue(_assetHandle.AssetObject)?.ToString()
+								?? _assetHandle.AssetObject.GetType().GetProperty("Name")?.GetValue(_assetHandle.AssetObject)?.ToString()
+								?? _assetHandle.AssetObject.GetType().Name;
+				Log.Info("[AB] PASS asset={0}", assetName);
 				_assetHandle.Release();
 				_assetHandle = null;
 				MoveToStage(LoadProbeStage.ShowingPreview, "asset loaded");
@@ -415,7 +432,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 	{
 		try
 		{
-			var rawTexture = YooAssets.LoadGodotResourceFromRawFileSync<Texture2D>(ProbeAssetLocation);
+			var rawTexture = global::GameFrameX.AssetSystem.AssetSystem.LoadGodotResourceFromRawFileSync<Texture2D>(ProbeAssetLocation);
 			if (rawTexture != null)
 			{
 				Log.Info("[GodotRaw] PASS location={0} type=Texture2D", ProbeAssetLocation);
@@ -434,7 +451,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 				}
 			}
 
-			var rawScene = YooAssets.LoadGodotResourceFromRawFileSync<PackedScene>(ProbeAssetLocation);
+			var rawScene = global::GameFrameX.AssetSystem.AssetSystem.LoadGodotResourceFromRawFileSync<PackedScene>(ProbeAssetLocation);
 			if (rawScene != null)
 			{
 				Log.Info("[GodotRaw] PASS location={0} type=PackedScene", ProbeAssetLocation);
@@ -463,7 +480,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 				return;
 			}
 
-			var mounted = YooAssets.MountGodotResourcePackFromRawFileSync(ProbePckLocation, replaceFiles: false);
+			var mounted = global::GameFrameX.AssetSystem.AssetSystem.MountGodotResourcePackFromRawFileSync(ProbePckLocation, replaceFiles: false);
 			if (mounted == false)
 			{
 				Log.Warning("[GodotPck] raw mount failed location={0}, try direct-path fallback", ProbePckLocation);
@@ -471,7 +488,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 				if (string.IsNullOrWhiteSpace(_probeFixturePackageRoot) == false)
 				{
 					var pckPath = Path.Combine(_probeFixturePackageRoot, ProbePckLocation).Replace('\\', '/');
-					mounted = YooAssets.MountGodotResourcePackByPath(pckPath, replaceFiles: false);
+			mounted = global::GameFrameX.AssetSystem.AssetSystem.MountGodotResourcePackByPath(pckPath, replaceFiles: false);
 					if (mounted)
 					{
 						Log.Info("[GodotPck] mounted via direct path={0}", pckPath);
@@ -614,9 +631,9 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			bundleSizes.ToArray());
 		var packageHash = ToLowerMd5(manifestBytes);
 
-		var versionFileName = YooAssetSettingsData.GetPackageVersionFileName(ProbePackageName);
-		var hashFileName = YooAssetSettingsData.GetPackageHashFileName(ProbePackageName, ProbePackageVersion);
-		var manifestFileName = YooAssetSettingsData.GetManifestBinaryFileName(ProbePackageName, ProbePackageVersion);
+		var versionFileName = AssetSystemSettingsData.GetPackageVersionFileName(ProbePackageName);
+		var hashFileName = AssetSystemSettingsData.GetPackageHashFileName(ProbePackageName, ProbePackageVersion);
+		var manifestFileName = AssetSystemSettingsData.GetManifestBinaryFileName(ProbePackageName, ProbePackageVersion);
 
 		File.WriteAllText(Path.Combine(packageDirectory, versionFileName), ProbePackageVersion, Encoding.UTF8);
 		File.WriteAllText(Path.Combine(packageDirectory, hashFileName), packageHash, Encoding.UTF8);
@@ -668,8 +685,8 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		using var stream = new MemoryStream();
 		using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
 
-		writer.Write(YooAssetSettings.ManifestFileSign);
-		WriteUtf8(writer, YooAssetSettings.ManifestFileVersion);
+		writer.Write(AssetSystemSettings.ManifestFileSign);
+		WriteUtf8(writer, AssetSystemSettings.ManifestFileVersion);
 		writer.Write(true);
 		writer.Write(false);
 		writer.Write(false);

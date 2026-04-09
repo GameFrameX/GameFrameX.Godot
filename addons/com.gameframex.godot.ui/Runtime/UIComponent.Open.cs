@@ -118,6 +118,88 @@ namespace GameFrameX.UI.Runtime
         }
 
         /// <summary>
+        /// 按类型打开并确保成功显示全屏界面（支持运行时反射类型）。
+        /// </summary>
+        /// <param name="uiFormType">界面逻辑类型。</param>
+        /// <param name="uiFormAssetPath">界面所在路径，空时自动使用类型名推导。</param>
+        /// <param name="userData">传递给 UI 的用户数据。</param>
+        /// <param name="maxRetryFrames">等待运行时初始化的最大帧数。</param>
+        /// <returns>返回打开的 UI 实例。</returns>
+        /// <exception cref="GameFrameworkException">参数非法或打开失败时抛出异常。</exception>
+        public async Task<IUIForm> OpenRequiredFullScreenAsync(Type uiFormType, string uiFormAssetPath = null, object userData = null, int maxRetryFrames = DefaultOpenRequiredRetryFrames)
+        {
+            if (uiFormType == null)
+            {
+                throw new GameFrameworkException("[UIComponent] OpenRequiredFullScreenAsync failed: uiFormType is null.");
+            }
+
+            if (!typeof(IUIForm).IsAssignableFrom(uiFormType))
+            {
+                throw new GameFrameworkException($"[UIComponent] OpenRequiredFullScreenAsync failed: type does not implement IUIForm. type={uiFormType.FullName}");
+            }
+
+            uiFormAssetPath = ResolveUIFormAssetPath(uiFormType, uiFormAssetPath);
+
+            if (!await WaitForRuntimeInitializedAsync(maxRetryFrames))
+            {
+                throw new GameFrameworkException($"[UIComponent] OpenRequiredFullScreenAsync failed: runtime not initialized. type={uiFormType.FullName}, path={uiFormAssetPath}");
+            }
+
+            var ui = await OpenUIAsync(uiFormAssetPath, uiFormType, true, userData, true);
+            if (ui != null)
+            {
+                return ui;
+            }
+
+            throw new GameFrameworkException($"[UIComponent] OpenRequiredFullScreenAsync failed: open ui returned null. type={uiFormType.FullName}, path={uiFormAssetPath}");
+        }
+
+        /// <summary>
+        /// 按类型打开并确保成功显示全屏界面（简写别名）。
+        /// </summary>
+        /// <param name="uiFormType">界面逻辑类型。</param>
+        /// <param name="uiFormAssetPath">界面所在路径，空时自动使用类型名推导。</param>
+        /// <param name="userData">传递给 UI 的用户数据。</param>
+        /// <param name="maxRetryFrames">等待运行时初始化的最大帧数。</param>
+        /// <returns>返回打开的 UI 实例。</returns>
+        public Task<IUIForm> OpenRequiredAsync(Type uiFormType, string uiFormAssetPath = null, object userData = null, int maxRetryFrames = DefaultOpenRequiredRetryFrames)
+        {
+            return OpenRequiredFullScreenAsync(uiFormType, uiFormAssetPath, userData, maxRetryFrames);
+        }
+
+        private static string ResolveUIFormAssetPath(Type uiFormType, string uiFormAssetPath)
+        {
+            if (!uiFormAssetPath.IsNullOrWhiteSpace())
+            {
+                return uiFormAssetPath;
+            }
+
+            var resolvedPath = Utility.Asset.Path.GetUIPath(uiFormType.Name);
+            var attribute = uiFormType.GetCustomAttribute(typeof(OptionUIConfigAttribute));
+            if (attribute is not OptionUIConfigAttribute optionUIConfig)
+            {
+                return resolvedPath;
+            }
+
+            if (optionUIConfig.IsResource)
+            {
+                return "UI";
+            }
+
+            if (!optionUIConfig.Path.IsNullOrWhiteSpace())
+            {
+                return optionUIConfig.Path;
+            }
+
+            if (!optionUIConfig.PackageName.IsNullOrWhiteSpace())
+            {
+                return Utility.Asset.Path.GetUIPath(optionUIConfig.PackageName);
+            }
+
+            return resolvedPath;
+        }
+
+        /// <summary>
         /// 异步打开全屏UI。
         /// </summary>
         /// <param name="uiFormAssetPath">界面所在路径</param>

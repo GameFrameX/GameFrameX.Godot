@@ -1,66 +1,45 @@
-﻿#if UNITY_EDITOR
-using System.Reflection;
+#if TOOLS
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public static class EditorSimulateModeHelper
     {
-        private static System.Type _classType;
-
         /// <summary>
         /// 编辑器下模拟构建清单
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static SimulateBuildResult SimulateBuild(string buildPipelineName, string packageName)
         {
-            if (_classType == null)
-            {
-                _classType = Assembly.Load("YooAsset.Editor").GetType("YooAsset.Editor.AssetBundleSimulateBuilder");
-            }
-
-            return (SimulateBuildResult)InvokePublicStaticMethod(_classType, "SimulateBuild", buildPipelineName, packageName);
+            return Editor.AssetSystemEditorSimulateBuilder.SimulateBuild(buildPipelineName, packageName);
         }
 
         /// <summary>
         /// 编辑器下模拟构建清单
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static SimulateBuildResult SimulateBuild(EDefaultBuildPipeline buildPipeline, string packageName)
         {
             return SimulateBuild(buildPipeline.ToString(), packageName);
         }
-
-        [UnityEngine.Scripting.Preserve]
-        private static object InvokePublicStaticMethod(System.Type type, string method, params object[] parameters)
-        {
-            var methodInfo = type.GetMethod(method, BindingFlags.Public | BindingFlags.Static);
-            if (methodInfo == null)
-            {
-                UnityEngine.Debug.LogError($"{type.FullName} not found method : {method}");
-                return null;
-            }
-
-            return methodInfo.Invoke(null, parameters);
-        }
     }
 }
 #else
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 { 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public static class EditorSimulateModeHelper
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static SimulateBuildResult SimulateBuild(string buildPipelineName, string packageName) 
         {
-            throw new System.Exception("Only support in unity editor !");
+            throw new System.Exception("Only support in Godot editor tools mode !");
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static SimulateBuildResult SimulateBuild(EDefaultBuildPipeline buildPipeline, string packageName)
         {
-            throw new System.Exception("Only support in unity editor !");
+            throw new System.Exception("Only support in Godot editor tools mode !");
         }
     }
 }

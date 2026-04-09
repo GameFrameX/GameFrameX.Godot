@@ -2,28 +2,28 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine.Networking;
+using GameFrameX.AssetSystem.Networking;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 自定义下载器的请求委托
     /// </summary>
-    public delegate UnityWebRequest UnityWebRequestDelegate(string url);
+    public delegate UnityWebRequest WebRequestFactory(string url);
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class DownloadSystemHelper
     {
-        public static UnityWebRequestDelegate UnityWebRequestCreater = null;
+        public static WebRequestFactory RequestFactory = null;
         public static IHttpTransport HttpTransport = new GodotHttpTransport();
 
-        [UnityEngine.Scripting.Preserve]
-        public static UnityWebRequest NewUnityWebRequestGet(string requestURL)
+        [AssetSystemPreserve]
+        public static UnityWebRequest CreateWebRequestGet(string requestURL)
         {
             UnityWebRequest webRequest;
-            if (UnityWebRequestCreater != null)
+            if (RequestFactory != null)
             {
-                webRequest = UnityWebRequestCreater.Invoke(requestURL);
+                webRequest = RequestFactory.Invoke(requestURL);
             }
             else
             {
@@ -36,10 +36,10 @@ namespace YooAsset
         /// <summary>
         /// 创建GET请求并设置超时时间
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
-        public static UnityWebRequest NewUnityWebRequestGet(string requestURL, int timeout)
+        [AssetSystemPreserve]
+        public static UnityWebRequest CreateWebRequestGet(string requestURL, int timeout)
         {
-            var webRequest = NewUnityWebRequestGet(requestURL);
+            var webRequest = CreateWebRequestGet(requestURL);
             SetRequestTimeout(webRequest, timeout);
             return webRequest;
         }
@@ -47,7 +47,7 @@ namespace YooAsset
         /// <summary>
         /// 设置请求超时时间
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static void SetRequestTimeout(UnityWebRequest webRequest, int timeout)
         {
             if (webRequest == null)
@@ -64,8 +64,8 @@ namespace YooAsset
         /// <summary>
         /// 发送请求
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
-        public static UnityWebRequestAsyncOperation SendRequest(UnityWebRequest webRequest)
+        [AssetSystemPreserve]
+        public static UnityWebRequestAsyncOperation SendWebRequest(UnityWebRequest webRequest)
         {
             return webRequest.SendWebRequest();
         }
@@ -73,7 +73,7 @@ namespace YooAsset
         /// <summary>
         /// 取消请求
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static void AbortRequest(UnityWebRequest webRequest)
         {
             if (webRequest != null)
@@ -82,7 +82,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static bool IsRetryableRequest(UnityWebRequest webRequest, bool isAbort)
         {
             if (webRequest == null)
@@ -109,7 +109,7 @@ namespace YooAsset
             return responseCode >= 500;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static string GetRequestErrorCode(UnityWebRequest webRequest, bool isAbort)
         {
             if (webRequest == null)
@@ -137,7 +137,7 @@ namespace YooAsset
             };
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static string FormatRequestError(UnityWebRequest webRequest, string requestURL, bool isAbort)
         {
             var errorCode = GetRequestErrorCode(webRequest, isAbort);
@@ -146,7 +146,7 @@ namespace YooAsset
             return $"[{errorCode}] URL : {requestURL} HTTP : {responseCode} Error : {requestError}";
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static Task<HttpResponse> RequestTextAsync(string requestURL, int timeout, bool appendTimeTicks, CancellationToken cancellationToken)
         {
             if (HttpTransport == null)
@@ -161,7 +161,7 @@ namespace YooAsset
             return HttpTransport.GetTextAsync(requestURL, timeout, appendTimeTicks, cancellationToken);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static Task<HttpResponse> RequestDataAsync(string requestURL, int timeout, bool appendTimeTicks, CancellationToken cancellationToken)
         {
             if (HttpTransport == null)
@@ -179,7 +179,7 @@ namespace YooAsset
         /// <summary>
         /// 获取WWW加载本地资源的路径
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static string ConvertToWWWPath(string path)
         {
             if (string.IsNullOrEmpty(path))

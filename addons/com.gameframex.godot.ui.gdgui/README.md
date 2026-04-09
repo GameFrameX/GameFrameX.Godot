@@ -61,5 +61,5 @@ namespace Demo
 
 ## 备注
 
-- 插件元信息见 `plugin.cfg` 与 `package.json`。
+- 插件元信息见 `plugin.cfg`。
 - 若需要切换自定义 Helper，可在 `UIComponent` 的导出字段中覆盖类型名。

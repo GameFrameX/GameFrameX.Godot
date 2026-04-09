@@ -1,9 +1,9 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class RequestBuildinPackageHashOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -13,7 +13,7 @@
 
         private readonly DefaultBuildinFileSystem _fileSystem;
         private readonly string _packageVersion;
-        private UnityWebTextRequestOperation _webTextRequestOp;
+        private WebTextRequestOperation _webTextRequestOp;
         private ESteps _steps = ESteps.None;
 
         /// <summary>
@@ -22,20 +22,20 @@
         public string PackageHash { private set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal RequestBuildinPackageHashOperation(DefaultBuildinFileSystem fileSystem, string packageVersion)
         {
             _fileSystem = fileSystem;
             _packageVersion = packageVersion;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.RequestPackageHash;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -49,7 +49,7 @@
                 {
                     var filePath = _fileSystem.GetBuildinPackageHashFilePath(_packageVersion);
                     var url = DownloadSystemHelper.ConvertToWWWPath(filePath);
-                    _webTextRequestOp = new UnityWebTextRequestOperation(url);
+                    _webTextRequestOp = new WebTextRequestOperation(url);
                     OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
                 }
 

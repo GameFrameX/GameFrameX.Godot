@@ -1,13 +1,12 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public sealed class UnloadUnusedAssetsOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -18,19 +17,19 @@ namespace YooAsset
         private readonly ResourceManager _resManager;
         private ESteps _steps = ESteps.None;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal UnloadUnusedAssetsOperation(ResourceManager resourceManager)
         {
             _resManager = resourceManager;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.UnloadUnused;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -66,15 +65,15 @@ namespace YooAsset
                     _resManager._loaderDic.Remove(bundleName);
                 }
 
-                // 注意：调用底层接口释放所有资源
-                Resources.UnloadUnusedAssets();
+                // Godot runtime has no direct equivalent for Unity global unused-resource unload API.
+                // Loader/provider destruction above is the authoritative cleanup path.
 
                 _steps = ESteps.Done;
                 Status = EOperationStatus.Succeed;
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             while (true)

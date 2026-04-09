@@ -1,9 +1,9 @@
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 获取本地的最新版本
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public abstract class LoadLocalVersionOperation : AsyncOperationBase
     {
         /// <summary>
@@ -15,10 +15,10 @@ namespace YooAsset
     /// <summary>
     /// 获取本地的最新版本
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class LoadLocalVersionImplOperation : LoadLocalVersionOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -35,7 +35,7 @@ namespace YooAsset
         private FSRequestPackageVersionOperation _loadBuildinPackageVersionOp;
         private ESteps _steps = ESteps.None;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal LoadLocalVersionImplOperation(IFileSystem fileSystem, IFileSystem cacheSystem, bool appendTimeTicks, int timeout)
         {
             _buildinFileSystem = fileSystem;
@@ -44,7 +44,7 @@ namespace YooAsset
             _timeout = timeout;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             if (_cacheFileSystem != null)
@@ -57,7 +57,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)

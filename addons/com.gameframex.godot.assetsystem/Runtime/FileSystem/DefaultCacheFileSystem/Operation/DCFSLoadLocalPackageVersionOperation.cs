@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DCFSLoadLocalPackageVersionOperation : FSRequestPackageVersionOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -24,7 +24,7 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DCFSLoadLocalPackageVersionOperation(DefaultCacheFileSystem fileSystem, bool appendTimeTicks, int timeout)
         {
             _fileSystem = fileSystem;
@@ -32,13 +32,13 @@ namespace YooAsset
             _timeout = timeout;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.GetPackageVersion;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)

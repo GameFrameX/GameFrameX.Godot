@@ -1,9 +1,9 @@
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DWFSRequestPackageVersionOperation : FSRequestPackageVersionOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -18,7 +18,7 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DWFSRequestPackageVersionOperation(DefaultWebFileSystem fileSystem, bool appendTimeTicks, int timeout)
         {
             _fileSystem = fileSystem;
@@ -26,13 +26,13 @@ namespace YooAsset
             _timeout = timeout;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.RequestPackageVersion;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)

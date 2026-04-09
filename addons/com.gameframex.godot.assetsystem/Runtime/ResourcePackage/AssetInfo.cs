@@ -1,6 +1,6 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class AssetInfo
     {
         private readonly PackageAsset _packageAsset;
@@ -87,7 +87,7 @@
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal AssetInfo(string packageName, PackageAsset packageAsset, System.Type assetType)
         {
             if (packageAsset == null)
@@ -102,7 +102,7 @@
             Error = string.Empty;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal AssetInfo(string packageName, string error)
         {
             _providerGUID = string.Empty;

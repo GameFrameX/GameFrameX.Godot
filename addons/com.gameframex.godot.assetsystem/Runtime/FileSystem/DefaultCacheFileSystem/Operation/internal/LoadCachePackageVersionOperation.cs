@@ -1,12 +1,11 @@
-﻿using System.IO;
-using UnityEngine;
+using System.IO;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class LoadCachePackageVersionOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -15,7 +14,7 @@ namespace YooAsset
         }
 
         private readonly DefaultCacheFileSystem _fileSystem;
-        private UnityWebTextRequestOperation _webTextRequestOp;
+        private WebTextRequestOperation _webTextRequestOp;
         private HttpTextRequestOperation _httpTextRequestOp;
         private ESteps _steps = ESteps.None;
 
@@ -25,19 +24,19 @@ namespace YooAsset
         public string PackageVersion { private set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal LoadCachePackageVersionOperation(DefaultCacheFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.RequestPackageVersion;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -47,7 +46,7 @@ namespace YooAsset
 
             if (_steps == ESteps.RequestPackageVersion)
             {
-                var fileName = YooAssetSettingsData.GetPackageVersionFileName(_fileSystem.PackageName);
+                var fileName = AssetSystemSettingsData.GetPackageVersionFileName(_fileSystem.PackageName);
                 var filePath = PathUtility.Combine(_fileSystem.FileRoot, fileName);
                 if (File.Exists(filePath))
                 {
@@ -61,7 +60,7 @@ namespace YooAsset
                         }
                         else
                         {
-                            _webTextRequestOp = new UnityWebTextRequestOperation(url);
+                            _webTextRequestOp = new WebTextRequestOperation(url);
                             OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
                         }
                     }
@@ -82,7 +81,7 @@ namespace YooAsset
                     {
                         var rawVersion = _httpTextRequestOp != null ? _httpTextRequestOp.Result : _webTextRequestOp.Result;
                         PackageVersion = NormalizeText(rawVersion);
-                        Debug.Log($"LoadCachePackageVersionOperation 加载本地沙盒版本成功：{PackageVersion}");
+                    AssetSystemLogger.Log($"LoadCachePackageVersionOperation 加载本地沙盒版本成功：{PackageVersion}");
                         if (string.IsNullOrEmpty(PackageVersion))
                         {
                             _steps = ESteps.Done;

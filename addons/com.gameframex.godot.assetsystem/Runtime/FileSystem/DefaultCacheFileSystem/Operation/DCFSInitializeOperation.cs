@@ -1,9 +1,9 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DCFSInitializeOperation : FSInitializeFileSystemOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -19,19 +19,19 @@
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DCFSInitializeOperation(DefaultCacheFileSystem fileSystem)
         {
             _fileSytem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CheckAppFootPrint;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -49,7 +49,7 @@
                 {
                     //_fileSytem.DeleteAllManifestFiles();
                     appFootPrint.Coverage(_fileSytem.PackageName);
-                    YooLogger.Warning("Delete manifest files when application foot print dirty !");
+                    AssetSystemLogger.Warning("Delete manifest files when application foot print dirty !");
                 }
 
                 _steps = ESteps.SearchCacheFiles;
@@ -90,7 +90,7 @@
                 {
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Succeed;
-                    YooLogger.Log($"Package '{_fileSytem.PackageName}' cached files count : {_fileSytem.FileCount}");
+                    AssetSystemLogger.Log($"Package '{_fileSytem.PackageName}' cached files count : {_fileSytem.FileCount}");
                 }
                 else
                 {

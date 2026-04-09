@@ -9,7 +9,7 @@ namespace GameFrameX.Runtime
     public static class PathHelper
     {
         /// <summary>
-        /// 等效 Unity 的 Application.productName
+        /// 获取项目名称
         /// </summary>
         /// <returns>项目/产品名称字符串</returns>
         public static string GetProductName()
@@ -35,7 +35,7 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 等效 Unity 的 Application.persistentDataPath（返回绝对系统路径）
+        /// 获取持久化目录（返回绝对系统路径）
         /// </summary>
         /// <returns>跨平台持久化目录的绝对路径</returns>
         public static string GetPersistentDataPath()
@@ -60,28 +60,32 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 应用程序内部资源路径存放路径(www/webrequest专用)
+        /// 应用程序内部资源路径存放路径（网络请求专用）
         /// </summary>
         public static string AppResPath4Web
         {
             get
             {
-#if UNITY_IOS || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN || UNITY_EDITOR
-                return $"file://{Application.streamingAssetsPath}";
-#else
-                return NormalizePath(GetStreamingAssetsPath());
-#endif
+                var absoluteOrVirtual = NormalizePath(GetStreamingAssetsPath());
+                if (absoluteOrVirtual.StartsWith("res://", StringComparison.OrdinalIgnoreCase) ||
+                    absoluteOrVirtual.StartsWith("user://", StringComparison.OrdinalIgnoreCase) ||
+                    absoluteOrVirtual.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+                {
+                    return absoluteOrVirtual;
+                }
+
+                return $"file://{absoluteOrVirtual}";
             }
         }
 
         /// <summary>
-        /// 等效 Unity 的 Application.streamingAssetsPath
+        /// 获取 StreamingAssets 路径
         /// </summary>
         /// <returns>跨平台的 StreamingAssets 路径</returns>
         public static string GetStreamingAssetsPath()
         {
             string basePath;
-            if (OS.HasFeature("editor"))
+            if (Engine.IsEditorHint())
             {
                 // 开发期（编辑器内）：直接使用 res:// 下的 streaming_assets 目录
                 basePath = ProjectSettings.GlobalizePath("res://streaming_assets/");

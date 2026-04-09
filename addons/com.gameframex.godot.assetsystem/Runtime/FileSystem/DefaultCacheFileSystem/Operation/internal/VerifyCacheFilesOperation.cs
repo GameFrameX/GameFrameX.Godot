@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class CacheFileElement
     {
         public string PackageName { private set; get; }
@@ -19,7 +19,7 @@ namespace YooAsset
         public string DataFileCRC;
         public long DataFileSize;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public CacheFileElement(string packageName, string bundleGUID, string fileRootPath, string dataFilePath, string infoFilePath)
         {
             PackageName = packageName;
@@ -29,7 +29,7 @@ namespace YooAsset
             InfoFilePath = infoFilePath;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void DeleteFiles()
         {
             try
@@ -38,7 +38,7 @@ namespace YooAsset
             }
             catch (Exception e)
             {
-                YooLogger.Warning($"Failed to delete cache bundle folder : {e}");
+                AssetSystemLogger.Warning($"Failed to delete cache bundle folder : {e}");
             }
         }
     }
@@ -46,10 +46,10 @@ namespace YooAsset
     /// <summary>
     /// 缓存文件验证（线程版）
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class VerifyCacheFilesOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -71,7 +71,7 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal VerifyCacheFilesOperation(DefaultCacheFileSystem fileSystem, List<CacheFileElement> elements)
         {
             _fileSystem = fileSystem;
@@ -79,14 +79,14 @@ namespace YooAsset
             _verifyLevel = _fileSystem.FileVerifyLevel;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.InitVerify;
-            _verifyStartTime = UnityEngine.Time.realtimeSinceStartup;
+                _verifyStartTime = AssetSystemTime.RealtimeSinceStartup;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -100,7 +100,7 @@ namespace YooAsset
 
                 // 设置同时验证的最大数
                 ThreadPool.GetMaxThreads(out var workerThreads, out var ioThreads);
-                YooLogger.Log($"Work threads : {workerThreads}, IO threads : {ioThreads}");
+                AssetSystemLogger.Log($"Work threads : {workerThreads}, IO threads : {ioThreads}");
                 _verifyMaxNum = Math.Min(workerThreads, ioThreads);
                 _verifyTotalCount = fileCount;
                 if (_verifyMaxNum < 1)
@@ -121,8 +121,8 @@ namespace YooAsset
                 {
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Succeed;
-                    var costTime = UnityEngine.Time.realtimeSinceStartup - _verifyStartTime;
-                    YooLogger.Log($"Verify cache files elapsed time {costTime:f1} seconds");
+                var costTime = AssetSystemTime.RealtimeSinceStartup - _verifyStartTime;
+                    AssetSystemLogger.Log($"Verify cache files elapsed time {costTime:f1} seconds");
                 }
 
                 for (var i = _waitingList.Count - 1; i >= 0; i--)
@@ -145,14 +145,14 @@ namespace YooAsset
                     }
                     else
                     {
-                        YooLogger.Warning("The thread pool is failed queued.");
+                        AssetSystemLogger.Warning("The thread pool is failed queued.");
                         break;
                     }
                 }
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private float GetProgress()
         {
             if (_verifyTotalCount == 0)
@@ -163,13 +163,13 @@ namespace YooAsset
             return (float)(_succeedCount + _failedCount) / _verifyTotalCount;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private bool BeginVerifyFileWithThread(CacheFileElement element)
         {
             return ThreadPool.QueueUserWorkItem(new WaitCallback(VerifyInThread), element);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void VerifyInThread(object obj)
         {
             var element = (CacheFileElement)obj;
@@ -177,7 +177,7 @@ namespace YooAsset
             _syncContext.Post(VerifyCallback, element);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void VerifyCallback(object obj)
         {
             var element = (CacheFileElement)obj;
@@ -193,7 +193,7 @@ namespace YooAsset
             {
                 _failedCount++;
 
-                YooLogger.Warning($"Failed to verify file {element.Result} and delete files : {element.FileRootPath}");
+                AssetSystemLogger.Warning($"Failed to verify file {element.Result} and delete files : {element.FileRootPath}");
                 element.DeleteFiles();
             }
         }
@@ -201,7 +201,7 @@ namespace YooAsset
         /// <summary>
         /// 验证缓存文件（子线程内操作）
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private EFileVerifyResult VerifyingCacheFile(CacheFileElement element, EFileVerifyLevel verifyLevel)
         {
             try

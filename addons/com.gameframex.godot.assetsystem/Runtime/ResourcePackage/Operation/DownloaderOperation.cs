@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public abstract class DownloaderOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -17,16 +17,16 @@ namespace YooAsset
 
         private const int MAX_LOADER_COUNT = 64;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public delegate void OnDownloadOver(DownloaderFinishData data);
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public delegate void OnDownloadProgress(DownloadUpdateData data);
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public delegate void OnDownloadError(DownloadErrorData data);
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public delegate void OnStartDownloadFile(DownloadFileData data);
 
         private readonly string _packageName;
@@ -96,12 +96,12 @@ namespace YooAsset
         public OnStartDownloadFile OnStartDownloadFileCallback { set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DownloaderOperation(string packageName, List<BundleInfo> downloadList, int downloadingMaxNumber, int failedTryAgain, int timeout)
         {
             _packageName = packageName;
             _bundleInfoList = downloadList;
-            _downloadingMaxNumber = UnityEngine.Mathf.Clamp(downloadingMaxNumber, 1, MAX_LOADER_COUNT);
+            _downloadingMaxNumber = System.Math.Clamp(downloadingMaxNumber, 1, MAX_LOADER_COUNT);
             ;
             _failedTryAgain = failedTryAgain;
             _timeout = timeout;
@@ -113,14 +113,14 @@ namespace YooAsset
             CalculatDownloaderInfo();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
-            YooLogger.Log($"Begine to download {TotalDownloadCount} files and {TotalDownloadBytes} bytes");
+            AssetSystemLogger.Log($"Begine to download {TotalDownloadCount} files and {TotalDownloadBytes} bytes");
             _steps = ESteps.Check;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -266,7 +266,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void CalculatDownloaderInfo()
         {
             if (_bundleInfoList != null)
@@ -289,18 +289,18 @@ namespace YooAsset
         /// 合并其它下载器
         /// </summary>
         /// <param name="downloader">合并的下载器</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Combine(DownloaderOperation downloader)
         {
             if (_packageName != downloader._packageName)
             {
-                YooLogger.Error("The downloaders have different resource packages !");
+                AssetSystemLogger.Error("The downloaders have different resource packages !");
                 return;
             }
 
             if (Status != EOperationStatus.None)
             {
-                YooLogger.Error("The downloader is running, can not combine with other downloader !");
+                AssetSystemLogger.Error("The downloader is running, can not combine with other downloader !");
                 return;
             }
 
@@ -332,7 +332,7 @@ namespace YooAsset
         /// <summary>
         /// 开始下载
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void BeginDownload()
         {
             if (_steps == ESteps.None)
@@ -344,7 +344,7 @@ namespace YooAsset
         /// <summary>
         /// 暂停下载
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void PauseDownload()
         {
             _isPause = true;
@@ -353,7 +353,7 @@ namespace YooAsset
         /// <summary>
         /// 恢复下载
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void ResumeDownload()
         {
             _isPause = false;
@@ -362,7 +362,7 @@ namespace YooAsset
         /// <summary>
         /// 取消下载
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void CancelDownload()
         {
             if (_steps != ESteps.Done)
@@ -381,10 +381,10 @@ namespace YooAsset
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public sealed class ResourceDownloaderOperation : DownloaderOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal ResourceDownloaderOperation(string packageName, List<BundleInfo> downloadList, int downloadingMaxNumber, int failedTryAgain, int timeout)
             : base(packageName, downloadList, downloadingMaxNumber, failedTryAgain, timeout)
         {
@@ -393,7 +393,7 @@ namespace YooAsset
         /// <summary>
         /// 创建空的下载器
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal static ResourceDownloaderOperation CreateEmptyDownloader(string packageName, int downloadingMaxNumber, int failedTryAgain, int timeout)
         {
             var downloadList = new List<BundleInfo>();
@@ -402,10 +402,10 @@ namespace YooAsset
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public sealed class ResourceUnpackerOperation : DownloaderOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal ResourceUnpackerOperation(string packageName, List<BundleInfo> downloadList, int downloadingMaxNumber, int failedTryAgain, int timeout)
             : base(packageName, downloadList, downloadingMaxNumber, failedTryAgain, timeout)
         {
@@ -414,7 +414,7 @@ namespace YooAsset
         /// <summary>
         /// 创建空的解压器
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal static ResourceUnpackerOperation CreateEmptyUnpacker(string packageName, int upackingMaxNumber, int failedTryAgain, int timeout)
         {
             var downloadList = new List<BundleInfo>();
@@ -423,10 +423,10 @@ namespace YooAsset
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public sealed class ResourceImporterOperation : DownloaderOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal ResourceImporterOperation(string packageName, List<BundleInfo> downloadList, int downloadingMaxNumber, int failedTryAgain, int timeout)
             : base(packageName, downloadList, downloadingMaxNumber, failedTryAgain, timeout)
         {
@@ -435,7 +435,7 @@ namespace YooAsset
         /// <summary>
         /// 创建空的导入器
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal static ResourceImporterOperation CreateEmptyImporter(string packageName, int upackingMaxNumber, int failedTryAgain, int timeout)
         {
             var downloadList = new List<BundleInfo>();

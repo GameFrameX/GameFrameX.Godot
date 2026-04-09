@@ -1,8 +1,6 @@
-﻿using UnityEngine;
-
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal abstract class FSLoadBundleOperation : AsyncOperationBase
     {
         /// <summary>
@@ -23,7 +21,7 @@ namespace YooAsset
         /// <summary>
         /// 终止下载任务
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public abstract void AbortDownloadOperation();
     }
 }

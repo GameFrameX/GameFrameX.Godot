@@ -1,9 +1,9 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 下载器结束
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public struct DownloaderFinishData
     {
         /// <summary>
@@ -20,7 +20,7 @@
     /// <summary>
     /// 下载器相关的更新数据
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public struct DownloadUpdateData
     {
         /// <summary>
@@ -31,7 +31,7 @@
         /// <summary>
         /// 下载进度 (0-1f)
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public float Progress;
 
         /// <summary>
@@ -58,7 +58,7 @@
     /// <summary>
     /// 下载器相关的错误数据
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public struct DownloadErrorData
     {
         /// <summary>
@@ -80,7 +80,7 @@
     /// <summary>
     /// 下载器相关的文件数据
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public struct DownloadFileData
     {
         /// <summary>
@@ -102,7 +102,7 @@
     /// <summary>
     /// 导入文件的信息
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public struct ImportFileInfo
     {
         /// <summary>

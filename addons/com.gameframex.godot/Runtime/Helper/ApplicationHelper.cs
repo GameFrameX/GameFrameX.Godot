@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using Godot;
 
 namespace GameFrameX.Runtime
@@ -11,224 +11,104 @@ namespace GameFrameX.Runtime
         /// <summary>
         /// 是否是编辑器
         /// </summary>
-        public static bool IsEditor
-        {
-            get
-            {
-#if UNITY_EDITOR
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
+        public static bool IsEditor => Engine.IsEditorHint();
 
         /// <summary>
         /// 是否是安卓
         /// </summary>
-        public static bool IsAndroid
-        {
-            get
-            {
-#if UNITY_ANDROID
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
+        public static bool IsAndroid => OS.HasFeature("android");
 
         /// <summary>
-        /// 是否是WebGL平台
+        /// 是否是 Web 平台
         /// </summary>
-        public static bool IsWebGL
-        {
-            get
-            {
-#if UNITY_WEBGL
-                return true;
-#else
-                return true;
-#endif
-            }
-        }
+        public static bool IsWebGL => OS.HasFeature("web");
 
         /// <summary>
-        /// 是否是WebGL微信小游戏平台
+        /// 是否是 Web 微信小游戏平台
         /// </summary>
-        public static bool IsWebGLWeChatMiniGame
-        {
-            get
-            {
-#if UNITY_WEBGL && ENABLE_WECHAT_MINI_GAME
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
+        public static bool IsWebGLWeChatMiniGame => IsWebGL && OS.HasFeature("wechat_minigame");
 
         /// <summary>
-        /// 是否是WebGL抖音小游戏平台
+        /// 是否是 Web 抖音小游戏平台
         /// </summary>
-        public static bool IsWebGLDouYinMiniGame
-        {
-            get
-            {
-#if UNITY_WEBGL && ENABLE_DOUYIN_MINI_GAME
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
+        public static bool IsWebGLDouYinMiniGame => IsWebGL && OS.HasFeature("douyin_minigame");
 
         /// <summary>
-        /// 是否是Windows平台
+        /// 是否是 Windows 平台
         /// </summary>
-        public static bool IsWindows
-        {
-            get
-            {
-#if UNITY_STANDALONE_WIN
-                return true;
-#endif
-                return OS.HasFeature("web_windows");
-            }
-        }
+        public static bool IsWindows => OS.HasFeature("windows") || RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         /// <summary>
-        /// 是否是Linux平台
+        /// 是否是 Linux 平台
         /// </summary>
-        public static bool IsLinux
-        {
-            get { return RuntimeInformation.IsOSPlatform(OSPlatform.Linux); }
-        }
+        public static bool IsLinux => OS.HasFeature("linuxbsd") || RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
         /// <summary>
-        /// 是否是Mac平台
+        /// 是否是 Mac 平台
         /// </summary>
-        public static bool IsMacOsx
-        {
-            get
-            {
-#if UNITY_STANDALONE_OSX
-                return true;
-#endif
-                return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-            }
-        }
+        public static bool IsMacOsx => OS.HasFeature("macos") || RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
         /// <summary>
-        /// 获取当前运行平台的名称
+        /// 获取当前运行平台名称
         /// </summary>
-        /// <returns>
-        /// 返回平台名称字符串：
-        /// - "Android": Android平台
-        /// - "MacOs": macOS平台
-        /// - "iOS": iOS平台
-        /// - "WebGL": WebGL平台
-        /// - "Windows": Windows平台
-        /// - 空字符串: 其他未定义的平台
-        /// </returns>
         public static string PlatformName
         {
             get
             {
-#if UNITY_ANDROID
-                return "Android";
-#elif UNITY_STANDALONE_OSX
-                return "MacOs";
-#elif UNITY_IOS || UNITY_IPHONE
-                return "iOS";
-#elif UNITY_WEBGL
-                return "WebGL";
-#elif UNITY_STANDALONE_WIN
-                return "Windows";
-#else
+                if (IsAndroid) return "Android";
+                if (IsIOS) return "iOS";
+                if (IsMacOsx) return "MacOs";
+                if (IsWindows) return "Windows";
+                if (IsWebGL) return "Web";
+                if (IsLinux) return "Linux";
                 return string.Empty;
-#endif
             }
         }
 
         /// <summary>
-        /// 是否是iOS 移动平台
+        /// 是否是 iOS 平台
         /// </summary>
-        public static bool IsIOS
-        {
-            get
-            {
-#if UNITY_IOS
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
+        public static bool IsIOS => OS.HasFeature("ios");
 
         /// <summary>
-        /// 退出
+        /// 退出应用
         /// </summary>
         public static void Quit()
         {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-            return;
-#endif
+            if (Engine.GetMainLoop() is SceneTree sceneTree)
+            {
+                sceneTree.Quit();
+            }
         }
-#if UNITY_IOS
-        [System.Runtime.InteropServices.DllImport("__Internal")]
-        private static extern void open_url(string url);
-#endif
+
         /// <summary>
-        /// 打开URL
+        /// 打开 URL
         /// </summary>
         /// <param name="url">url地址</param>
         public static void OpenURL(string url)
         {
-#if UNITY_EDITOR
-            Application.OpenURL(url);
-            return;
-#endif
-#if UNITY_IOS
-            open_url(url);
-#else
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return;
+            }
+
             OS.ShellOpen(url);
-#endif
         }
 
-#if UNITY_IOS
-        [System.Runtime.InteropServices.DllImport("__Internal")]
-        private static extern void open_setting();
-#endif
         /// <summary>
-        /// 打开设置界面
+        /// 打开设置界面（平台不支持时忽略）
         /// </summary>
         public static void OpenSetting()
         {
-#if UNITY_EDITOR
-            return;
-#endif
-#if UNITY_IOS
-            open_setting();
-#endif
+            // 这里保持空实现；如需平台特化可在后续接入原生桥接。
         }
 
-#if UNITY_IOS
-        [System.Runtime.InteropServices.DllImport("__Internal")]
-        private static extern void open_request_tracking_authorization();
-#endif
         /// <summary>
-        /// 打开请求跟踪授权
+        /// 请求跟踪授权（平台不支持时忽略）
         /// </summary>
         public static void OpenRequestTrackingAuthorization()
         {
-#if UNITY_EDITOR
-            return;
-#endif
-#if UNITY_IOS
-            open_request_tracking_authorization();
-#endif
+            // 这里保持空实现；如需平台特化可在后续接入原生桥接。
         }
     }
 }

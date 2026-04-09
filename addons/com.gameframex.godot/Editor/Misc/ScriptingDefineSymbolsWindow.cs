@@ -275,8 +275,13 @@ namespace GameFrameX.Editor
 
             var enabled = editedItem.IsChecked(0);
             UpsertSymbol(m_CurrentSymbols, symbol, enabled);
-            SaveDefineConstantsInternal(symbol);
             SetStatus($"已更新并保存宏：{symbol} = {(enabled ? "ON" : "OFF")}");
+            CallDeferred(nameof(SaveDefineConstantsAfterTreeEdited), symbol);
+        }
+
+        private void SaveDefineConstantsAfterTreeEdited(string preferredSymbol)
+        {
+            SaveDefineConstantsInternal(preferredSymbol);
         }
 
         private void RefreshSymbolChecklist(IReadOnlyCollection<string> enabledSymbols, string preferredSymbol)

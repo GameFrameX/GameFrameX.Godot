@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using YooAsset;
+using GameFrameX.AssetSystem;
 
 namespace GameFrameX.Editor
 {
@@ -17,45 +17,19 @@ namespace GameFrameX.Editor
 	public partial class AssetSystemBuilderDialog : Window
 	{
 		private const string BuildBackendPck = "PCK";
-		private const string BuildBackendYooAsset = "YooAsset";
+		private const string BuildBackendAssetSystem = "AssetSystem";
 		private const string BuildBackendBoth = "Both";
+		private const string BuildModeForceRebuild = "ForceRebuild";
+		private const string BuildModeIncrementalBuild = "IncrementalBuild";
 		private const string YooBuildPipelineName = "RawFileBuildPipeline";
 		private const string YooDefaultVersionFormat = "yyyyMMddHHmmss";
 		private const string YooDefaultBuildManifestFileName = "build_manifest.txt";
 		private const string YooDefaultBuildVersionFileName = "build_version.txt";
 		private const string DefaultSourcePath = "res://Assets/Probe/teamgame_external.png";
 		private const string DefaultMountPath = "probe_runtime/teamgame_external.png";
-		private const string DefaultOutputPath = "user://assetsystem_runtime_verify/yoo/runtime_verify/verify_content.pck";
 		private const string DefaultBatchConfigSavePath = "user://assetsystem_builder/package_list_config.json";
-		private const string DefaultBatchConfigJson = """
-{
-  "buildBackend": "Both",
-  "packages": [
-    {
-	  "packageName": "runtime_verify",
-	  "outputPck": "user://assetsystem_runtime_verify/yoo/runtime_verify/verify_content.pck",
-	  "outputYoo": "user://assetsystem_builder/yoo/runtime_verify",
-	  "files": [
-		{
-		  "sourcePath": "res://Assets/Probe/teamgame_external.png",
-		  "mountPath": "probe_runtime/teamgame_external.png"
-		}
-	  ]
-	},
-	{
-	  "packageName": "ui_icons",
-	  "outputPck": "user://assetsystem_runtime_verify/yoo/runtime_verify/ui_icons.pck",
-	  "outputYoo": "user://assetsystem_builder/yoo/ui_icons",
-	  "files": [
-		{
-		  "sourcePath": "res://addons/com.gameframex.godot/Resources/gameframex_logo.png",
-		  "mountPath": "ui/logo.png"
-		}
-	  ]
-	}
-  ]
-}
-""";
+		private const string LegacyBuilderPackagesRootVirtual = "user://assetsystem_builder/packages/";
+		private const string LegacyBuilderAssetSystemRootVirtual = "user://assetsystem_builder/yoo/";
 
 		private LineEdit _sourcePathEdit;
 		private LineEdit _mountPathEdit;
@@ -66,9 +40,11 @@ namespace GameFrameX.Editor
 		private RichTextLabel _logText;
 		private Label _resultLabel;
 		private LineEdit _packageSearchEdit;
+		private LineEdit _packageRenameEdit;
 		private ItemList _packageList;
 		private Label _currentPackageLabel;
 		private OptionButton _buildBackendOptions;
+		private OptionButton _buildModeOptions;
 		private LineEdit _packageOutputEdit;
 		private LineEdit _packageYooOutputEdit;
 		private PackageAssetTree _packageAssetTree;
@@ -123,6 +99,7 @@ namespace GameFrameX.Editor
 			}
 
 			_initialized = true;
+			GD.Print("[AssetBuilder] UI schema v20260408 (includes build mode selector).");
 			BuildUi();
 			LoadPackageMappings();
 			RefreshGlobalAssets();
@@ -137,7 +114,7 @@ namespace GameFrameX.Editor
 
 		private void BuildUi()
 		{
-			Title = "GameFrameX Asset Builder (PCK + YooAsset)";
+			Title = "GameFrameX Asset Builder (PCK + AssetSystem)";
 			MinSize = new Vector2I(1100, 760);
 			Size = new Vector2I(1366, 860);
 
@@ -179,6 +156,10 @@ namespace GameFrameX.Editor
 			buildAllButton.Pressed += OnBuildAllPackagesPressed;
 			toolbar.AddChild(buildAllButton);
 
+			var buildIncrementalPatchButton = new Button { Text = "打包增量补丁" };
+			buildIncrementalPatchButton.Pressed += OnBuildIncrementalPatchPressed;
+			toolbar.AddChild(buildIncrementalPatchButton);
+
 			var refreshGlobalButton = new Button { Text = "刷新全局资源" };
 			refreshGlobalButton.Pressed += OnRefreshGlobalAssetsPressed;
 			toolbar.AddChild(refreshGlobalButton);
@@ -193,9 +174,22 @@ namespace GameFrameX.Editor
 			_buildBackendOptions = new OptionButton();
 			_buildBackendOptions.AddItem(BuildBackendBoth);
 			_buildBackendOptions.AddItem(BuildBackendPck);
-			_buildBackendOptions.AddItem(BuildBackendYooAsset);
+			_buildBackendOptions.AddItem(BuildBackendAssetSystem);
 			_buildBackendOptions.ItemSelected += OnBuildBackendSelected;
 			toolbar.AddChild(_buildBackendOptions);
+
+			var buildModeLabel = new Label
+			{
+				Text = "模式:",
+				VerticalAlignment = VerticalAlignment.Center
+			};
+			toolbar.AddChild(buildModeLabel);
+
+			_buildModeOptions = new OptionButton();
+			_buildModeOptions.AddItem(BuildModeForceRebuild);
+			_buildModeOptions.AddItem(BuildModeIncrementalBuild);
+			_buildModeOptions.ItemSelected += OnBuildModeSelected;
+			toolbar.AddChild(_buildModeOptions);
 
 			_resultLabel = new Label
 			{
@@ -231,6 +225,22 @@ namespace GameFrameX.Editor
 			};
 			_packageList.ItemSelected += OnPackageSelected;
 			leftBox.AddChild(_packageList);
+
+			var packageRenameRow = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+			packageRenameRow.AddThemeConstantOverride("separation", 8);
+			leftBox.AddChild(packageRenameRow);
+
+			_packageRenameEdit = new LineEdit
+			{
+				PlaceholderText = "修改包名...",
+				SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+				Editable = false
+			};
+			packageRenameRow.AddChild(_packageRenameEdit);
+
+			var renamePackageButton = new Button { Text = "重命名" };
+			renamePackageButton.Pressed += OnRenamePackagePressed;
+			packageRenameRow.AddChild(renamePackageButton);
 
 			var packageButtons = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
 			packageButtons.AddThemeConstantOverride("separation", 8);
@@ -288,11 +298,12 @@ namespace GameFrameX.Editor
 
 			_packageAssetTree = CreatePackageAssetTree();
 			_packageAssetTree.AssetDropped += OnAssetDroppedToPackage;
+			_packageAssetTree.ItemActivated += OnPackageAssetTreeItemActivated;
 			centerBox.AddChild(_packageAssetTree);
 
 			var centerHint = new Label
 			{
-				Text = "支持从右侧双击或拖拽添加到当前包。",
+				Text = "支持从右侧双击或拖拽添加到当前包；中间双击可删除包内资源。",
 				AutowrapMode = TextServer.AutowrapMode.WordSmart,
 				SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
 			};
@@ -473,6 +484,7 @@ namespace GameFrameX.Editor
 		{
 			_packageMappings.Clear();
 			var buildBackend = BuildBackendBoth;
+			var buildMode = BuildModeForceRebuild;
 			var configPath = ResolveFilePath(DefaultBatchConfigSavePath);
 			if (File.Exists(configPath))
 			{
@@ -488,6 +500,11 @@ namespace GameFrameX.Editor
 						if (!string.IsNullOrWhiteSpace(config.BuildBackend))
 						{
 							buildBackend = config.BuildBackend.Trim();
+						}
+
+						if (!string.IsNullOrWhiteSpace(config.BuildMode))
+						{
+							buildMode = config.BuildMode.Trim();
 						}
 
 						for (var i = 0; i < config.Packages.Count; i++)
@@ -510,6 +527,7 @@ namespace GameFrameX.Editor
 			}
 
 			SetBuildBackendSelection(buildBackend);
+			SetBuildModeSelection(buildMode);
 		}
 
 		private static BatchBuildPackage NormalizePackage(BatchBuildPackage package, int sequence)
@@ -518,8 +536,8 @@ namespace GameFrameX.Editor
 			var normalized = new BatchBuildPackage
 			{
 				PackageName = packageName,
-				OutputPck = string.IsNullOrWhiteSpace(package?.OutputPck) ? BuildDefaultOutputPath(packageName) : package.OutputPck.Trim(),
-				OutputYoo = string.IsNullOrWhiteSpace(package?.OutputYoo) ? BuildDefaultYooOutputPath(packageName) : package.OutputYoo.Trim()
+				OutputPck = NormalizePackageOutputPck(packageName, package?.OutputPck),
+				OutputYoo = NormalizePackageOutputAssetSystem(packageName, package?.OutputYoo)
 			};
 			if (package?.Files == null)
 			{
@@ -555,14 +573,115 @@ namespace GameFrameX.Editor
 			};
 		}
 
+		private static string DefaultOutputPath => GodotAssetPath.GetHotfixPckFileVirtual("runtime_verify");
+
+		private static string DefaultBatchConfigJson => $$"""
+{
+  "buildBackend": "Both",
+  "buildMode": "ForceRebuild",
+  "packages": [
+    {
+	  "packageName": "runtime_verify",
+	  "outputPck": "{{GodotAssetPath.GetHotfixPckFileVirtual("runtime_verify")}}",
+	  "outputYoo": "{{GodotAssetPath.GetHotfixYooPackageRootVirtual("runtime_verify")}}",
+	  "files": [
+        {
+		  "sourcePath": "res://Assets/Probe/teamgame_external.png",
+		  "mountPath": "probe_runtime/teamgame_external.png"
+		}
+	  ]
+	},
+	{
+	  "packageName": "ui_icons",
+	  "outputPck": "{{GodotAssetPath.GetHotfixPckFileVirtual("ui_icons")}}",
+	  "outputYoo": "{{GodotAssetPath.GetHotfixYooPackageRootVirtual("ui_icons")}}",
+	  "files": [
+		{
+		  "sourcePath": "res://addons/com.gameframex.godot/Resources/gameframex_logo.png",
+		  "mountPath": "ui/logo.png"
+		}
+	  ]
+	}
+  ]
+}
+""";
+
 		private static string BuildDefaultOutputPath(string packageName)
 		{
-			return $"user://assetsystem_builder/packages/{MakeSafeFileName(packageName)}.pck";
+			return GodotAssetPath.GetHotfixPckFileVirtual(packageName);
 		}
 
 		private static string BuildDefaultYooOutputPath(string packageName)
 		{
-			return $"user://assetsystem_builder/yoo/{MakeSafeFileName(packageName)}";
+			return GodotAssetPath.GetHotfixYooPackageRootVirtual(packageName);
+		}
+
+		private static string NormalizePackageOutputPck(string packageName, string outputPck)
+		{
+			if (string.IsNullOrWhiteSpace(outputPck))
+			{
+				return BuildDefaultOutputPath(packageName);
+			}
+
+			return MigrateLegacyUserRoot(
+				outputPck,
+				LegacyBuilderPackagesRootVirtual,
+				EnsureTrailingSlash(GodotAssetPath.GetHotfixPackagesRootVirtual()));
+		}
+
+		private static string NormalizePackageOutputAssetSystem(string packageName, string outputAssetSystem)
+		{
+			if (string.IsNullOrWhiteSpace(outputAssetSystem))
+			{
+				return BuildDefaultYooOutputPath(packageName);
+			}
+
+			return MigrateLegacyUserRoot(
+				outputAssetSystem,
+				LegacyBuilderAssetSystemRootVirtual,
+				EnsureTrailingSlash(GodotAssetPath.GetHotfixYooRootVirtual()));
+		}
+
+		private static void NormalizePackageOutputsInPlace(BatchBuildConfig config)
+		{
+			if (config?.Packages == null)
+			{
+				return;
+			}
+
+			for (var i = 0; i < config.Packages.Count; i++)
+			{
+				NormalizePackageOutputsInPlace(config.Packages[i]);
+			}
+		}
+
+		private static void NormalizePackageOutputsInPlace(BatchBuildPackage package)
+		{
+			if (package == null)
+			{
+				return;
+			}
+
+			var packageName = string.IsNullOrWhiteSpace(package.PackageName) ? "default_package" : package.PackageName.Trim();
+			package.PackageName = packageName;
+			package.OutputPck = NormalizePackageOutputPck(packageName, package.OutputPck);
+			package.OutputYoo = NormalizePackageOutputAssetSystem(packageName, package.OutputYoo);
+		}
+
+		private static string MigrateLegacyUserRoot(string value, string legacyRoot, string targetRoot)
+		{
+			var trimmed = value.Trim();
+			if (trimmed.StartsWith(legacyRoot, StringComparison.OrdinalIgnoreCase) == false)
+			{
+				return trimmed;
+			}
+
+			return $"{targetRoot}{trimmed[legacyRoot.Length..]}";
+		}
+
+		private static string EnsureTrailingSlash(string path)
+		{
+			return string.IsNullOrEmpty(path) || path.EndsWith("/", StringComparison.Ordinal) ? path : $"{path}/";
 		}
 
 		private void RefreshGlobalAssets()
@@ -759,6 +878,12 @@ namespace GameFrameX.Editor
 					_packageYooOutputSyncing = false;
 				}
 
+				if (_packageRenameEdit != null)
+				{
+					_packageRenameEdit.Text = string.Empty;
+					_packageRenameEdit.Editable = false;
+				}
+
 				return;
 			}
 
@@ -779,6 +904,12 @@ namespace GameFrameX.Editor
 				_packageYooOutputEdit.Text = package.OutputYoo ?? string.Empty;
 				_packageYooOutputEdit.Editable = true;
 				_packageYooOutputSyncing = false;
+			}
+
+			if (_packageRenameEdit != null)
+			{
+				_packageRenameEdit.Text = package.PackageName ?? string.Empty;
+				_packageRenameEdit.Editable = true;
 			}
 
 			for (var i = 0; i < package.Files.Count; i++)
@@ -812,7 +943,8 @@ namespace GameFrameX.Editor
 			}
 
 			var backend = GetSelectedBuildBackendText();
-			_currentPackageLabel.Text = $"当前包: {package.PackageName}  |  后端: {backend}  |  PCK: {package.OutputPck}  |  Yoo: {package.OutputYoo}";
+			var buildMode = GetSelectedBuildModeText();
+			_currentPackageLabel.Text = $"当前包: {package.PackageName}  |  后端: {backend}  |  模式: {buildMode}  |  PCK: {package.OutputPck}  |  Yoo: {package.OutputYoo}";
 		}
 
 		private void OnCreatePackagePressed()
@@ -841,15 +973,63 @@ namespace GameFrameX.Editor
 			});
 		}
 
+		private void OnRenamePackagePressed()
+		{
+			if (!TryGetCurrentPackage(out var package, out _))
+			{
+				SetBuildResult(false, "请先选择一个包。");
+				return;
+			}
+
+			var newName = _packageRenameEdit?.Text?.Trim() ?? string.Empty;
+			if (string.IsNullOrWhiteSpace(newName))
+			{
+				SetBuildResult(false, "包名不能为空。");
+				return;
+			}
+
+			var oldName = package.PackageName ?? string.Empty;
+			if (string.Equals(oldName, newName, StringComparison.Ordinal))
+			{
+				SetBuildResult(true, "包名未变化。");
+				return;
+			}
+
+			if (_packageMappings.Any(m => !ReferenceEquals(m, package) &&
+										  string.Equals(m.PackageName, newName, StringComparison.OrdinalIgnoreCase)))
+			{
+				SetBuildResult(false, $"包名已存在: {newName}");
+				return;
+			}
+
+			var previousDefaultPck = BuildDefaultOutputPath(oldName);
+			var previousDefaultYoo = BuildDefaultYooOutputPath(oldName);
+			package.PackageName = newName;
+			if (string.Equals(package.OutputPck, previousDefaultPck, StringComparison.OrdinalIgnoreCase))
+			{
+				package.OutputPck = BuildDefaultOutputPath(newName);
+			}
+
+			if (string.Equals(package.OutputYoo, previousDefaultYoo, StringComparison.OrdinalIgnoreCase))
+			{
+				package.OutputYoo = BuildDefaultYooOutputPath(newName);
+			}
+
+			RefreshPackageListView();
+			SetBuildResult(true, $"package renamed: {oldName} -> {newName}");
+		}
+
 		private void OnSaveMappingsPressed()
 		{
 			var config = new BatchBuildConfig
 			{
-				BuildBackend = GetSelectedBuildBackendText()
+				BuildBackend = GetSelectedBuildBackendText(),
+				BuildMode = GetSelectedBuildModeText()
 			};
 			for (var i = 0; i < _packageMappings.Count; i++)
 			{
 				var package = _packageMappings[i];
+				NormalizePackageOutputsInPlace(package);
 				var cloned = new BatchBuildPackage
 				{
 					PackageName = package.PackageName,
@@ -888,7 +1068,8 @@ namespace GameFrameX.Editor
 			}
 
 			var backendMode = GetSelectedBuildBackendMode();
-			if (TryBuildMappedPackage(package, backendMode, out var summary, out var error))
+			var buildMode = GetSelectedBuildModeText();
+			if (TryBuildMappedPackage(package, backendMode, buildMode, out var summary, out var error))
 			{
 				SetBuildResult(true, $"[{package.PackageName}] {summary}");
 				return;
@@ -907,10 +1088,11 @@ namespace GameFrameX.Editor
 
 			var success = 0;
 			var fail = 0;
+			var buildMode = GetSelectedBuildModeText();
 			for (var i = 0; i < _packageMappings.Count; i++)
 			{
 				var package = _packageMappings[i];
-				if (TryBuildMappedPackage(package, GetSelectedBuildBackendMode(), out var summary, out var error))
+				if (TryBuildMappedPackage(package, GetSelectedBuildBackendMode(), buildMode, out var summary, out var error))
 				{
 					success++;
 					AppendLog($"[BuildAll][{package.PackageName}] PASS {summary}");
@@ -925,7 +1107,24 @@ namespace GameFrameX.Editor
 			SetBuildResult(fail == 0, $"build all complete success={success} fail={fail}");
 		}
 
-		private bool TryBuildMappedPackage(BatchBuildPackage package, BuildBackendMode backendMode, out string summary, out string error)
+		private void OnBuildIncrementalPatchPressed()
+		{
+			if (!TryGetCurrentPackage(out var package, out _))
+			{
+				SetBuildResult(false, "请先选择一个包。");
+				return;
+			}
+
+			if (TryBuildMappedPackage(package, BuildBackendMode.AssetSystem, BuildModeIncrementalBuild, out var summary, out var error))
+			{
+				SetBuildResult(true, $"[{package.PackageName}] 增量补丁完成: {summary}");
+				return;
+			}
+
+			SetBuildResult(false, $"[{package.PackageName}] 增量补丁失败: {error}");
+		}
+
+		private bool TryBuildMappedPackage(BatchBuildPackage package, BuildBackendMode backendMode, string buildMode, out string summary, out string error)
 		{
 			summary = string.Empty;
 			error = string.Empty;
@@ -934,6 +1133,7 @@ namespace GameFrameX.Editor
 				error = "package is null.";
 				return false;
 			}
+			NormalizePackageOutputsInPlace(package);
 
 			if (package.Files == null || package.Files.Count == 0)
 			{
@@ -975,14 +1175,14 @@ namespace GameFrameX.Editor
 				resultParts.Add($"PCK bytes={outputLength}");
 			}
 
-			if (backendMode == BuildBackendMode.YooAsset || backendMode == BuildBackendMode.Both)
+			if (backendMode == BuildBackendMode.AssetSystem || backendMode == BuildBackendMode.Both)
 			{
-				if (TryBuildYooPackage(package, buildFiles, out var yooResult, out error) == false)
+				if (TryBuildYooPackage(package, buildFiles, buildMode, out var yooResult, out error) == false)
 				{
 					return false;
 				}
 
-				resultParts.Add($"Yoo files={yooResult.FileCount} version={yooResult.PackageVersion}");
+				resultParts.Add($"Yoo files={yooResult.FileCount} changed={yooResult.ChangedFileCount} skipped={yooResult.SkippedFileCount} version={yooResult.PackageVersion} mode={buildMode}");
 			}
 
 			summary = string.Join(" | ", resultParts);
@@ -997,7 +1197,12 @@ namespace GameFrameX.Editor
 
 		private void OnGlobalAssetTreeItemActivated()
 		{
-			OnAddSelectedGlobalAssetPressed();
+			CallDeferred(nameof(OnAddSelectedGlobalAssetPressed));
+		}
+
+		private void OnPackageAssetTreeItemActivated()
+		{
+			CallDeferred(nameof(OnRemovePackageAssetPressed));
 		}
 
 		private void OnAssetDroppedToPackage(string sourcePath)
@@ -1100,12 +1305,9 @@ namespace GameFrameX.Editor
 				return;
 			}
 
-			RequestConfirm($"确认从包中删除资源？\n{sourcePath}", () =>
-			{
-				var removed = package.Files.RemoveAll(file => string.Equals(file.SourcePath, sourcePath, StringComparison.OrdinalIgnoreCase));
-				RefreshCurrentPackageAssetsView();
-				SetBuildResult(removed > 0, removed > 0 ? $"asset removed: {sourcePath}" : "未删除任何资源。");
-			});
+			var removed = package.Files.RemoveAll(file => string.Equals(file.SourcePath, sourcePath, StringComparison.OrdinalIgnoreCase));
+			RefreshCurrentPackageAssetsView();
+			SetBuildResult(removed > 0, removed > 0 ? $"asset removed: {sourcePath}" : "未删除任何资源。");
 		}
 
 		private void OnPackageSearchChanged(string value)
@@ -1124,6 +1326,18 @@ namespace GameFrameX.Editor
 		}
 
 		private void OnBuildBackendSelected(long index)
+		{
+			if (TryGetCurrentPackage(out var package, out _))
+			{
+				UpdateCurrentPackageSummaryLabel(package);
+			}
+			else
+			{
+				UpdateCurrentPackageSummaryLabel(null);
+			}
+		}
+
+		private void OnBuildModeSelected(long index)
 		{
 			if (TryGetCurrentPackage(out var package, out _))
 			{
@@ -1157,6 +1371,53 @@ namespace GameFrameX.Editor
 			return selectedText.Trim();
 		}
 
+		private string GetSelectedBuildModeText()
+		{
+			if (_buildModeOptions == null || _buildModeOptions.ItemCount <= 0)
+			{
+				return BuildModeForceRebuild;
+			}
+
+			var selectedIndex = _buildModeOptions.Selected;
+			if (selectedIndex < 0 || selectedIndex >= _buildModeOptions.ItemCount)
+			{
+				selectedIndex = 0;
+			}
+
+			var selectedText = _buildModeOptions.GetItemText(selectedIndex);
+			if (string.IsNullOrWhiteSpace(selectedText))
+			{
+				return BuildModeForceRebuild;
+			}
+
+			return selectedText.Trim();
+		}
+
+		private void SetBuildModeSelection(string buildMode)
+		{
+			if (_buildModeOptions == null || _buildModeOptions.ItemCount <= 0)
+			{
+				return;
+			}
+
+			var selectedIndex = 0;
+			for (var i = 0; i < _buildModeOptions.ItemCount; i++)
+			{
+				if (string.Equals(_buildModeOptions.GetItemText(i), buildMode, StringComparison.OrdinalIgnoreCase))
+				{
+					selectedIndex = i;
+					break;
+				}
+			}
+
+			_buildModeOptions.Select(selectedIndex);
+		}
+
+		private static bool IsIncrementalBuildMode(string buildMode)
+		{
+			return string.Equals(buildMode, BuildModeIncrementalBuild, StringComparison.OrdinalIgnoreCase);
+		}
+
 		private BuildBackendMode GetSelectedBuildBackendMode()
 		{
 			var selectedText = GetSelectedBuildBackendText();
@@ -1165,9 +1426,9 @@ namespace GameFrameX.Editor
 				return BuildBackendMode.Pck;
 			}
 
-			if (string.Equals(selectedText, BuildBackendYooAsset, StringComparison.OrdinalIgnoreCase))
+			if (string.Equals(selectedText, BuildBackendAssetSystem, StringComparison.OrdinalIgnoreCase))
 			{
-				return BuildBackendMode.YooAsset;
+				return BuildBackendMode.AssetSystem;
 			}
 
 			return BuildBackendMode.Both;
@@ -1463,7 +1724,6 @@ namespace GameFrameX.Editor
 			{
 				var fileName = Path.GetFileName(normalizedPath);
 				if (fileName.Equals("plugin.cfg", StringComparison.OrdinalIgnoreCase) ||
-					fileName.Equals("package.json", StringComparison.OrdinalIgnoreCase) ||
 					fileName.StartsWith("UPSTREAM_LICENSE", StringComparison.OrdinalIgnoreCase))
 				{
 					return false;
@@ -1699,6 +1959,8 @@ namespace GameFrameX.Editor
 				return false;
 			}
 
+			NormalizePackageOutputsInPlace(config);
+
 			return true;
 		}
 
@@ -1708,6 +1970,7 @@ namespace GameFrameX.Editor
 			error = string.Empty;
 			try
 			{
+				NormalizePackageOutputsInPlace(config);
 				var options = new JsonSerializerOptions { WriteIndented = true };
 				var fullConfigPath = ResolveFilePath(DefaultBatchConfigSavePath);
 				var fullConfigDirectory = Path.GetDirectoryName(fullConfigPath);
@@ -1721,25 +1984,18 @@ namespace GameFrameX.Editor
 				File.WriteAllText(fullConfigPath, JsonSerializer.Serialize(config, options));
 
 				var packageDirectory = Path.Combine(fullConfigDirectory, "packages").Replace('\\', '/');
-				Directory.CreateDirectory(packageDirectory);
-				var oldConfigFiles = Directory.GetFiles(packageDirectory, "*.json");
-				for (var i = 0; i < oldConfigFiles.Length; i++)
+				var removedLegacyCount = 0;
+				if (Directory.Exists(packageDirectory))
 				{
-					File.Delete(oldConfigFiles[i]);
+					var oldConfigFiles = Directory.GetFiles(packageDirectory, "*.json");
+					for (var i = 0; i < oldConfigFiles.Length; i++)
+					{
+						File.Delete(oldConfigFiles[i]);
+						removedLegacyCount++;
+					}
 				}
 
-				var packageWriteCount = 0;
-				for (var i = 0; i < config.Packages.Count; i++)
-				{
-					var package = config.Packages[i];
-					var packageName = string.IsNullOrWhiteSpace(package.PackageName) ? $"package_{i + 1}" : package.PackageName.Trim();
-					var safePackageName = MakeSafeFileName(packageName);
-					var packageConfigPath = Path.Combine(packageDirectory, $"{safePackageName}.json").Replace('\\', '/');
-					File.WriteAllText(packageConfigPath, JsonSerializer.Serialize(package, options));
-					packageWriteCount++;
-				}
-
-				summary = $"root={fullConfigPath}, perPackage={packageWriteCount}";
+				summary = $"root={fullConfigPath}, removedLegacy={removedLegacyCount}";
 				AppendLog($"[Config] saved {summary}");
 				return true;
 			}
@@ -1778,6 +2034,7 @@ namespace GameFrameX.Editor
 			var outputText = _outputPathEdit?.Text ?? DefaultOutputPath;
 			var batchText = _batchConfigEdit?.Text ?? DefaultBatchConfigJson;
 			var buildBackendText = GetSelectedBuildBackendText();
+			var buildModeText = GetSelectedBuildModeText();
 
 			var children = GetChildren();
 			for (var i = 0; i < children.Count; i++)
@@ -1795,6 +2052,7 @@ namespace GameFrameX.Editor
 			_outputPathEdit.Text = outputText;
 			_batchConfigEdit.Text = string.IsNullOrWhiteSpace(batchText) ? DefaultBatchConfigJson : batchText;
 			SetBuildBackendSelection(buildBackendText);
+			SetBuildModeSelection(buildModeText);
 			RefreshPackableAssets();
 			RefreshPackageListView();
 			SetBuildResult(true, "layout refreshed.");
@@ -1904,6 +2162,49 @@ namespace GameFrameX.Editor
 			return normalized.TrimStart('/');
 		}
 
+		private static bool TryFindLatestPackageVersionRoot(string outputRoot, string packageName, string currentPackageVersion, out string packageVersionRoot)
+		{
+			packageVersionRoot = string.Empty;
+			if (string.IsNullOrWhiteSpace(outputRoot) || string.IsNullOrWhiteSpace(packageName))
+			{
+				return false;
+			}
+
+			var packageRoot = NormalizeFileSystemPath(Path.Combine(outputRoot, packageName));
+			if (!Directory.Exists(packageRoot))
+			{
+				return false;
+			}
+
+			var versionDirectories = Directory.GetDirectories(packageRoot);
+			if (versionDirectories.Length == 0)
+			{
+				return false;
+			}
+
+			Array.Sort(versionDirectories, static (left, right) =>
+				string.Compare(Path.GetFileName(right), Path.GetFileName(left), StringComparison.OrdinalIgnoreCase));
+			for (var i = 0; i < versionDirectories.Length; i++)
+			{
+				var directoryPath = NormalizeFileSystemPath(versionDirectories[i]);
+				var versionName = Path.GetFileName(directoryPath);
+				if (string.Equals(versionName, currentPackageVersion, StringComparison.OrdinalIgnoreCase))
+				{
+					continue;
+				}
+
+				if (!File.Exists(Path.Combine(directoryPath, YooDefaultBuildManifestFileName)))
+				{
+					continue;
+				}
+
+				packageVersionRoot = directoryPath;
+				return true;
+			}
+
+			return false;
+		}
+
 		private static string MakeSafeFileName(string value)
 		{
 			if (string.IsNullOrWhiteSpace(value))
@@ -1978,12 +2279,13 @@ namespace GameFrameX.Editor
 			return true;
 		}
 
-		private bool TryBuildYooPackage(BatchBuildPackage package, List<BuildFileItem> buildFiles, out YooBuildResult result, out string error)
+		private bool TryBuildYooPackage(BatchBuildPackage package, List<BuildFileItem> buildFiles, string buildMode, out YooBuildResult result, out string error)
 		{
 			result = default;
 			error = string.Empty;
 			try
 			{
+				var incrementalMode = IsIncrementalBuildMode(buildMode);
 				var packageName = string.IsNullOrWhiteSpace(package.PackageName) ? "default_package" : package.PackageName.Trim();
 				var outputRootInput = string.IsNullOrWhiteSpace(package.OutputYoo) ? BuildDefaultYooOutputPath(packageName) : package.OutputYoo.Trim();
 				var outputRoot = ResolveFilePath(outputRootInput);
@@ -1996,9 +2298,13 @@ namespace GameFrameX.Editor
 				var packageVersion = DateTime.Now.ToString(YooDefaultVersionFormat);
 				var packageRoot = NormalizeFileSystemPath(Path.Combine(outputRoot, packageName, packageVersion));
 				Directory.CreateDirectory(packageRoot);
+				var previousPackageRoot = string.Empty;
+				var hasPreviousPackageRoot = incrementalMode && TryFindLatestPackageVersionRoot(outputRoot, packageName, packageVersion, out previousPackageRoot);
 
 				var bundleEntries = new List<YooBuildBundleEntry>(buildFiles.Count);
 				long totalBytes = 0;
+				var changedFileCount = 0;
+				var skippedFileCount = 0;
 				for (var i = 0; i < buildFiles.Count; i++)
 				{
 					var buildFile = buildFiles[i];
@@ -2015,8 +2321,27 @@ namespace GameFrameX.Editor
 						Directory.CreateDirectory(destinationDir);
 					}
 
-					File.WriteAllBytes(destinationPath, sourceBytes);
-					totalBytes += sourceBytes.LongLength;
+					var shouldWriteOutput = true;
+					if (hasPreviousPackageRoot)
+					{
+						var previousOutputPath = NormalizeFileSystemPath(Path.Combine(previousPackageRoot, outputFileName));
+						if (File.Exists(previousOutputPath))
+						{
+							shouldWriteOutput = false;
+						}
+					}
+
+					if (shouldWriteOutput)
+					{
+						File.WriteAllBytes(destinationPath, sourceBytes);
+						totalBytes += sourceBytes.LongLength;
+						changedFileCount++;
+					}
+					else
+					{
+						skippedFileCount++;
+					}
+
 					bundleEntries.Add(new YooBuildBundleEntry
 					{
 						SourceFilePath = buildFile.SourcePath,
@@ -2032,9 +2357,9 @@ namespace GameFrameX.Editor
 				}
 
 				var runtimeManifest = BuildYooRuntimeManifest(packageName, packageVersion, bundleEntries);
-				var runtimeManifestPath = NormalizeFileSystemPath(Path.Combine(packageRoot, YooAssetSettingsData.GetManifestBinaryFileName(packageName, packageVersion)));
-				var runtimeVersionPath = NormalizeFileSystemPath(Path.Combine(packageRoot, YooAssetSettingsData.GetPackageVersionFileName(packageName)));
-				var runtimeHashPath = NormalizeFileSystemPath(Path.Combine(packageRoot, YooAssetSettingsData.GetPackageHashFileName(packageName, packageVersion)));
+				var runtimeManifestPath = NormalizeFileSystemPath(Path.Combine(packageRoot, AssetSystemSettingsData.GetManifestBinaryFileName(packageName, packageVersion)));
+				var runtimeVersionPath = NormalizeFileSystemPath(Path.Combine(packageRoot, AssetSystemSettingsData.GetPackageVersionFileName(packageName)));
+				var runtimeHashPath = NormalizeFileSystemPath(Path.Combine(packageRoot, AssetSystemSettingsData.GetPackageHashFileName(packageName, packageVersion)));
 				SerializeRuntimeManifestBinary(runtimeManifestPath, runtimeManifest);
 				var runtimeManifestHash = HashUtility.FileMD5(runtimeManifestPath);
 				File.WriteAllText(runtimeVersionPath, packageVersion, Encoding.UTF8);
@@ -2052,9 +2377,11 @@ namespace GameFrameX.Editor
 					OutputRoot = outputRoot,
 					PackageRoot = packageRoot,
 					FileCount = bundleEntries.Count,
+					ChangedFileCount = changedFileCount,
+					SkippedFileCount = skippedFileCount,
 					TotalBytes = totalBytes
 				};
-				AppendLog($"[YooAsset][{packageName}] PASS version={packageVersion} files={bundleEntries.Count} output={packageRoot}");
+				AppendLog($"[AssetSystem][{packageName}] PASS mode={buildMode} version={packageVersion} files={bundleEntries.Count} changed={changedFileCount} skipped={skippedFileCount} output={packageRoot}");
 				return true;
 			}
 			catch (Exception exception)
@@ -2068,7 +2395,7 @@ namespace GameFrameX.Editor
 		{
 			var manifest = new PackageManifest
 			{
-				FileVersion = YooAssetSettings.ManifestFileVersion,
+				FileVersion = AssetSystemSettings.ManifestFileVersion,
 				EnableAddressable = false,
 				LocationToLower = false,
 				IncludeAssetGUID = false,
@@ -2086,7 +2413,6 @@ namespace GameFrameX.Editor
 				manifest.BundleList.Add(new PackageBundle
 				{
 					BundleName = entry.BundleName,
-					UnityCRC = 0,
 					FileHash = entry.FileHash,
 					FileCRC = entry.FileCRC,
 					FileSize = entry.FileSize,
@@ -2191,7 +2517,7 @@ namespace GameFrameX.Editor
 		{
 			using var fileStream = new FileStream(savePath, FileMode.Create, System.IO.FileAccess.Write);
 			using var writer = new BinaryWriter(fileStream, Encoding.UTF8, false);
-			writer.Write(YooAssetSettings.ManifestFileSign);
+			writer.Write(AssetSystemSettings.ManifestFileSign);
 			WriteUtf8(writer, manifest.FileVersion);
 			writer.Write(manifest.EnableAddressable);
 			writer.Write(manifest.LocationToLower);
@@ -2217,7 +2543,7 @@ namespace GameFrameX.Editor
 			{
 				var packageBundle = manifest.BundleList[i];
 				WriteUtf8(writer, packageBundle.BundleName);
-				writer.Write(packageBundle.UnityCRC);
+				writer.Write((uint)0);
 				WriteUtf8(writer, packageBundle.FileHash);
 				WriteUtf8(writer, packageBundle.FileCRC);
 				writer.Write(packageBundle.FileSize);
@@ -2290,7 +2616,7 @@ namespace GameFrameX.Editor
 		private enum BuildBackendMode
 		{
 			Pck = 0,
-			YooAsset = 1,
+			AssetSystem = 1,
 			Both = 2
 		}
 
@@ -2301,6 +2627,8 @@ namespace GameFrameX.Editor
 			public string OutputRoot { get; init; }
 			public string PackageRoot { get; init; }
 			public int FileCount { get; init; }
+			public int ChangedFileCount { get; init; }
+			public int SkippedFileCount { get; init; }
 			public long TotalBytes { get; init; }
 		}
 
@@ -2384,6 +2712,7 @@ namespace GameFrameX.Editor
 		private sealed class BatchBuildConfig
 		{
 			public string BuildBackend { get; set; } = BuildBackendBoth;
+			public string BuildMode { get; set; } = BuildModeForceRebuild;
 			public List<BatchBuildPackage> Packages { get; set; } = new List<BatchBuildPackage>();
 		}
 

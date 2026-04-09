@@ -1,45 +1,38 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using Godot;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class DatabaseSceneProvider : ProviderOperation, ISceneLoadController
     {
-        public readonly LoadSceneParameters LoadSceneParams;
-        private AsyncOperation _asyncOperation;
+        public readonly SceneLoadParameters LoadSceneParams;
         private bool _suspendLoadMode;
         private bool _cancelLoadMode;
         private List<string> _scenePathCandidates;
         private int _scenePathIndex;
+        private Node _pendingSceneNode;
 
-        /// <summary>
-        /// 场景加载模式
-        /// </summary>
-        public LoadSceneMode SceneMode
-        {
-            get { return LoadSceneParams.loadSceneMode; }
-        }
+        public SceneLoadMode SceneMode => LoadSceneParams.SceneMode;
 
-        [UnityEngine.Scripting.Preserve]
-        public DatabaseSceneProvider(ResourceManager manager, string providerGUID, AssetInfo assetInfo, LoadSceneParameters loadSceneParams, bool suspendLoad) : base(manager, providerGUID, assetInfo)
+        [AssetSystemPreserve]
+        public DatabaseSceneProvider(ResourceManager manager, string providerGUID, AssetInfo assetInfo, SceneLoadParameters loadSceneParams, bool suspendLoad)
+            : base(manager, providerGUID, assetInfo)
         {
             LoadSceneParams = loadSceneParams;
             SceneName = Path.GetFileNameWithoutExtension(assetInfo.AssetPath);
             _suspendLoadMode = suspendLoad;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             BeginLoadTimeRecord();
             DebugBeginRecording();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (IsDone)
@@ -59,7 +52,6 @@ namespace YooAsset
                 _steps = ESteps.CheckBundle;
             }
 
-            // 1. 检测资源包
             if (_steps == ESteps.CheckBundle)
             {
                 if (LoadBundleFileOp.IsDone == false)
@@ -84,86 +76,69 @@ namespace YooAsset
                 _steps = ESteps.Loading;
             }
 
-            // 2. 加载资源对象
             if (_steps == ESteps.Loading)
             {
-                if (IsWaitForAsyncComplete)
+                if (TryLoadSceneNode(out var loadedNode, out var loadError) == false)
                 {
-                    SceneObject = TryLoadSceneSync();
-                    if (SceneObject.IsValid() == false)
-                    {
-                        var error = $"Failed to load scene : {MainAssetInfo.AssetPath}";
-                        YooLogger.Error(error);
-                        InvokeCompletion(error, EOperationStatus.Failed);
-                    }
-                    else
-                    {
-                        _steps = ESteps.Checking;
-                    }
+                    AssetSystemLogger.Error(loadError);
+                    InvokeCompletion(loadError, EOperationStatus.Failed);
+                    return;
                 }
-                else
+
+                // Migration note (scheme 2): suspend now pauses node attachment instead of Unity scene activation.
+                if (_suspendLoadMode && IsWaitForAsyncComplete == false)
                 {
-                    if (TryLoadSceneAsyncCurrentPath())
-                    {
-                        _steps = ESteps.Checking;
-                    }
-                    else
-                    {
-                        var error = $"Failed to load scene : {MainAssetInfo.AssetPath}";
-                        YooLogger.Error(error);
-                        InvokeCompletion(error, EOperationStatus.Failed);
-                    }
+                    _pendingSceneNode = loadedNode;
+                    Progress = 0.9f;
+                    _steps = ESteps.Checking;
+                    return;
                 }
+
+                if (TryAttachSceneNode(loadedNode, out var attachError) == false)
+                {
+                    AssetSystemLogger.Error(attachError);
+                    InvokeCompletion(attachError, EOperationStatus.Failed);
+                    return;
+                }
+
+                _steps = ESteps.Checking;
             }
 
-            // 3. 检测加载结果
             if (_steps == ESteps.Checking)
             {
-                if (_asyncOperation != null)
+                if (_pendingSceneNode != null)
                 {
-                    if (IsWaitForAsyncComplete)
+                    if (_suspendLoadMode && IsWaitForAsyncComplete == false)
                     {
-                        // 场景加载无法强制异步转同步
-                        YooLogger.Error("The scene is loading asyn !");
+                        Progress = 0.9f;
+                        return;
                     }
-                    else
+
+                    if (TryAttachSceneNode(_pendingSceneNode, out var attachError) == false)
                     {
-                        // 注意：在业务层中途可以取消挂起
-                        if (_asyncOperation.allowSceneActivation == false)
-                        {
-                            if (_suspendLoadMode == false)
-                            {
-                                _asyncOperation.allowSceneActivation = true;
-                            }
-                        }
-
-                        Progress = _asyncOperation.progress;
-                        if (_asyncOperation.isDone == false)
-                        {
-                            return;
-                        }
-
-                        SceneObject = SceneManager.GetSceneByName(SceneName);
+                        AssetSystemLogger.Error(attachError);
+                        InvokeCompletion(attachError, EOperationStatus.Failed);
+                        return;
                     }
+
+                    _pendingSceneNode = null;
                 }
 
-                if (SceneObject.IsValid())
+                if (SceneNode != null && GodotObject.IsInstanceValid(SceneNode))
                 {
+                    Progress = 1f;
                     InvokeCompletion(string.Empty, EOperationStatus.Succeed);
                 }
                 else
                 {
-                    var error = $"The loaded scene is invalid : {MainAssetInfo.AssetPath}";
-                    YooLogger.Error(error);
+                    var error = $"The loaded scene node is invalid : {MainAssetInfo.AssetPath}";
+                    AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                 }
             }
         }
 
-        /// <summary>
-        /// 解除场景加载挂起操作
-        /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void UnSuspendLoad()
         {
             if (IsDone == false)
@@ -172,7 +147,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void CancelLoad()
         {
             if (IsDone == false)
@@ -182,47 +157,105 @@ namespace YooAsset
             }
         }
 
-        private Scene TryLoadSceneSync()
-        {
-            for (var i = 0; i < _scenePathCandidates.Count; i++)
-            {
-                var scenePath = _scenePathCandidates[i];
-                var sceneObject = SceneManager.LoadScene(scenePath, LoadSceneParams);
-                if (sceneObject.IsValid())
-                {
-                    SceneName = Path.GetFileNameWithoutExtension(scenePath);
-                    return sceneObject;
-                }
-            }
-
-            return new Scene();
-        }
-
-        private bool TryLoadSceneAsyncCurrentPath()
+        private bool TryLoadSceneNode(out Node sceneNode, out string error)
         {
             while (_scenePathIndex < _scenePathCandidates.Count)
             {
-                var scenePath = _scenePathCandidates[_scenePathIndex];
-                _asyncOperation = SceneManager.LoadSceneAsync(scenePath, LoadSceneParams);
-                if (_asyncOperation != null)
+                var scenePath = _scenePathCandidates[_scenePathIndex++];
+                foreach (var candidate in EnumerateSceneCandidates(scenePath))
                 {
-                    _asyncOperation.allowSceneActivation = !_suspendLoadMode;
-                    _asyncOperation.priority = 100;
-                    SceneName = Path.GetFileNameWithoutExtension(scenePath);
+                    if (ResourceLoader.Exists(candidate) == false)
+                    {
+                        continue;
+                    }
+
+                    var packedScene = ResourceLoader.Load<PackedScene>(candidate);
+                    if (packedScene == null)
+                    {
+                        continue;
+                    }
+
+                    sceneNode = packedScene.Instantiate();
+                    SceneName = Path.GetFileNameWithoutExtension(candidate);
+                    error = string.Empty;
                     return true;
                 }
-
-                _scenePathIndex++;
             }
 
+            sceneNode = null;
+            error = $"Failed to load scene : {MainAssetInfo.AssetPath}";
             return false;
+        }
+
+        private bool TryAttachSceneNode(Node sceneNode, out string error)
+        {
+            var tree = Engine.GetMainLoop() as SceneTree;
+            if (tree == null)
+            {
+                error = "SceneTree is not ready.";
+                return false;
+            }
+
+            if (SceneMode == SceneLoadMode.Single)
+            {
+                var currentScene = tree.CurrentScene;
+                if (currentScene != null && currentScene != sceneNode && GodotObject.IsInstanceValid(currentScene))
+                {
+                    currentScene.QueueFree();
+                }
+            }
+
+            if (sceneNode.GetParent() == null)
+            {
+                tree.Root.AddChild(sceneNode);
+            }
+
+            if (SceneMode == SceneLoadMode.Single)
+            {
+                tree.CurrentScene = sceneNode;
+            }
+
+            SceneNode = sceneNode;
+            SceneInfo = new AssetSceneInfo
+            {
+                Name = SceneName,
+                IsLoaded = true,
+                IsValidFlag = true
+            };
+
+            error = string.Empty;
+            return true;
+        }
+
+        private static IEnumerable<string> EnumerateSceneCandidates(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                yield break;
+            }
+
+            yield return path;
+            if (path.EndsWith(".tscn", System.StringComparison.OrdinalIgnoreCase) == false &&
+                path.EndsWith(".scn", System.StringComparison.OrdinalIgnoreCase) == false)
+            {
+                yield return $"{path}.tscn";
+                yield return $"{path}.scn";
+            }
         }
 
         private void TryRecycleLoadedScene()
         {
-            if (SceneObject.IsValid() && SceneObject.isLoaded)
+            if (_pendingSceneNode != null && GodotObject.IsInstanceValid(_pendingSceneNode))
             {
-                SceneManager.UnloadSceneAsync(SceneObject);
+                _pendingSceneNode.QueueFree();
+                _pendingSceneNode = null;
+            }
+
+            if (SceneNode != null && GodotObject.IsInstanceValid(SceneNode))
+            {
+                SceneNode.QueueFree();
+                SceneNode = null;
+                SceneInfo = default;
                 ResourceMgr.UnloadSubScene(SceneName);
             }
         }

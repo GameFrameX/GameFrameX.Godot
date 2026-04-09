@@ -1,9 +1,9 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DWFSLoadAssetBundleOperation : FSLoadBundleOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -17,20 +17,20 @@
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DWFSLoadAssetBundleOperation(DefaultWebFileSystem fileSystem, PackageBundle bundle)
         {
             _fileSystem = fileSystem;
             _bundle = bundle;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.DownloadFile;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -73,7 +73,7 @@
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             if (_steps != ESteps.Done)
@@ -81,11 +81,11 @@
                 _steps = ESteps.Done;
                 Status = EOperationStatus.Failed;
                 Error = "WebGL platform not support sync load method !";
-                UnityEngine.Debug.LogError(Error);
+                    AssetSystemLogger.Error(Error);
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void AbortDownloadOperation()
         {
             if (_steps == ESteps.DownloadFile)

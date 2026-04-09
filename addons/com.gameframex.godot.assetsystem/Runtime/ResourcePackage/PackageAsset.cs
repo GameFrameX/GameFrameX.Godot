@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Linq;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     [Serializable]
     public class PackageAsset
     {
@@ -35,7 +35,7 @@ namespace YooAsset
         /// <summary>
         /// 是否包含Tag
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool HasTag(string[] tags)
         {
             if (tags == null || tags.Length == 0)

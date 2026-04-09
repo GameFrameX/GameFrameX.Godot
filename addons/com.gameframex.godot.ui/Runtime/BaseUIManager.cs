@@ -30,7 +30,6 @@
 // ==========================================================================================
 
 using System.Collections.Generic;
-using GameFrameX.Asset.Runtime;
 using GameFrameX.ObjectPool;
 using GameFrameX.Runtime;
 
@@ -64,11 +63,6 @@ namespace GameFrameX.UI.Runtime
         protected float m_RecycleTime = 0;
 
         protected int m_Serial;
-
-        /// <summary>
-        /// 资源管理器。
-        /// </summary>
-        // protected IAssetManager m_AssetManager;
 
         /// <summary>
         /// 界面辅助器。
@@ -198,17 +192,6 @@ namespace GameFrameX.UI.Runtime
             m_ObjectPoolManager = objectPoolManager;
             m_InstancePool = m_ObjectPoolManager.CreateMultiSpawnObjectPool<UIFormInstanceObject>("UI Instance Pool");
         }
-
-        /*/// <summary>
-        /// 设置资源管理器。
-        /// </summary>
-        /// <param name="assetManager">资源管理器。</param>
-        public virtual void SetResourceManager(IAssetManager assetManager)
-        {
-            GameFrameworkGuard.NotNull(assetManager, nameof(assetManager));
-
-            m_AssetManager = assetManager;
-        }*/
 
         /// <summary>
         /// 设置界面辅助器。

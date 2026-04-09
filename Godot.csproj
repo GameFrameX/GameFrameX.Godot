@@ -19,7 +19,7 @@
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
   </ItemGroup>
   <ItemGroup>
-    <!-- 排除 com.gameframex.godot.assetsystem 里的 Unity Editor 遗留代码；保留 Editor/Godot -->
+    <!-- 排除 com.gameframex.godot.assetsystem 里的旧编辑器遗留代码；保留 Editor/Godot -->
     <Compile Remove="addons/com.gameframex.godot.assetsystem/Editor/AssetBundleBuilder/**/*.cs" />
     <Compile Remove="addons/com.gameframex.godot.assetsystem/Editor/AssetBundleCollector/**/*.cs" />
     <Compile Remove="addons/com.gameframex.godot.assetsystem/Editor/AssetBundleDebugger/**/*.cs" />
@@ -31,13 +31,11 @@
     <Compile Remove="addons/com.gameframex.godot.assetsystem/Editor/HomePage.cs" />
     <Compile Remove="addons/com.gameframex.godot.assetsystem/Editor/SettingLoader.cs" />
     <!-- 排除所有 Tests 目录 -->
-    <Compile Remove="addons/com.gameframex.godot.asset/Tests/**/*.cs" />
     <Compile Remove="tests/**/*.cs" />
-    <Compile Remove="addons/com.gameframex.godot.asset/Runtime/Compatibility/**/*.cs" />
-    <!-- 配置生成产物用于热更/外部逻辑，不参与 Godot 主程序集编译 -->
-    <Compile Remove="Assets/Hotfix/Config/Generate/**/*.cs" />
-    <!-- 排除 asset 包中的 Unity 特定代码 -->
-    <Compile Remove="addons/com.gameframex.godot.asset/Runtime/Asset/**/*.cs" Condition="'$(IncludeAssetSystemRuntime)' != 'true'" />
-    <Compile Remove="addons/com.gameframex.godot.asset/Runtime/GameFrameXAssetCroppingHelper.cs" />
+    <!-- Hotfix 独立编译到 Hotfix.csproj，主程序集不再重复编译 -->
+    <Compile Remove="Assets/Hotfix/**/*.cs" />
   </ItemGroup>
+  <Target Name="BuildHotfixProject" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipHotfixBuild)' != 'true'">
+    <MSBuild Projects="Assets/Hotfix/Hotfix.csproj" Targets="Build" Properties="Configuration=$(Configuration);GodotTargetPlatform=$(GodotTargetPlatform);BuildProjectReferences=false;SkipHotfixBuild=true;CalledFromGodotBuild=true;DefineConstants=$(DefineConstants)" />
+  </Target>
 </Project>

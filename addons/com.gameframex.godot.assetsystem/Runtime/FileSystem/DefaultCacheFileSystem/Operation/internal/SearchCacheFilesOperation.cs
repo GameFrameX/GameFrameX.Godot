@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class SearchCacheFilesOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -28,20 +28,20 @@ namespace YooAsset
         public readonly List<CacheFileElement> Result = new(5000);
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal SearchCacheFilesOperation(DefaultCacheFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.Prepare;
-            _verifyStartTime = UnityEngine.Time.realtimeSinceStartup;
+                _verifyStartTime = AssetSystemTime.RealtimeSinceStartup;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -70,12 +70,12 @@ namespace YooAsset
 
                 _steps = ESteps.Done;
                 Status = EOperationStatus.Succeed;
-                var costTime = UnityEngine.Time.realtimeSinceStartup - _verifyStartTime;
-                YooLogger.Log($"Search cache files elapsed time {costTime:f1} seconds");
+                var costTime = AssetSystemTime.RealtimeSinceStartup - _verifyStartTime;
+                AssetSystemLogger.Log($"Search cache files elapsed time {costTime:f1} seconds");
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private bool SearchFiles()
         {
             if (_filesEnumerator == null)
@@ -130,7 +130,7 @@ namespace YooAsset
             return isFindItem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private string FindDataFileExtension(DirectoryInfo directoryInfo)
         {
             var dataFileExtension = string.Empty;

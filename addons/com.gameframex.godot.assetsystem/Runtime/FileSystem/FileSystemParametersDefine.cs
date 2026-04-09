@@ -1,6 +1,6 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class FileSystemParametersDefine
     {
         public const string FILE_VERIFY_LEVEL = "FILE_VERIFY_LEVEL";

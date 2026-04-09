@@ -1,27 +1,27 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DatabaseRawFileProvider : ProviderOperation
     {
         private List<string> _rawFilePathCandidates;
         private string _resolvedRawFilePath;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DatabaseRawFileProvider(ResourceManager manager, string providerGUID, AssetInfo assetInfo) : base(manager, providerGUID, assetInfo)
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             BeginLoadTimeRecord();
             DebugBeginRecording();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (IsDone)
@@ -35,7 +35,7 @@ namespace YooAsset
                 if (_rawFilePathCandidates.Count == 0)
                 {
                     var error = $"Raw file path is invalid : {MainAssetInfo.AssetPath}";
-                    YooLogger.Error(error);
+                    AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                     return;
                 }
@@ -44,7 +44,7 @@ namespace YooAsset
                 if (string.IsNullOrEmpty(_resolvedRawFilePath))
                 {
                     var error = $"Not found raw file : {MainAssetInfo.AssetPath}";
-                    YooLogger.Error(error);
+                    AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                     return;
                 }
@@ -86,7 +86,7 @@ namespace YooAsset
         /// <summary>
         /// 从候选路径中查找可读取的原始文件路径
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private static string TryFindReadableRawFilePath(List<string> pathCandidates)
         {
             for (var i = 0; i < pathCandidates.Count; i++)
@@ -109,7 +109,7 @@ namespace YooAsset
         /// <summary>
         /// 检测原始文件路径是否存在
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private static bool IsRawFileExists(string rawFilePath)
         {
             return File.Exists(rawFilePath);

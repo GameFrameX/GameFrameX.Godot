@@ -1,25 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class DatabaseAssetProvider : ProviderOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DatabaseAssetProvider(ResourceManager manager, string providerGUID, AssetInfo assetInfo) : base(manager, providerGUID, assetInfo)
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             BeginLoadTimeRecord();
             DebugBeginRecording();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
 #if UNITY_EDITOR
@@ -35,7 +33,7 @@ namespace YooAsset
                 if (string.IsNullOrEmpty(guid))
                 {
                     var error = $"Not found asset : {MainAssetInfo.AssetPath}";
-                    YooLogger.Error(error);
+                    AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                     return;
                 }
@@ -96,7 +94,7 @@ namespace YooAsset
                         error = $"Failed to load asset object : {MainAssetInfo.AssetPath} AssetType : {MainAssetInfo.AssetType}";
                     }
 
-                    YooLogger.Error(error);
+                    AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                 }
                 else

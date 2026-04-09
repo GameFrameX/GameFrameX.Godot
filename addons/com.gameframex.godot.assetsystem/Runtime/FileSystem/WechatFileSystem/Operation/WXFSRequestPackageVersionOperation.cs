@@ -1,9 +1,9 @@
-using YooAsset;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal class WXFSRequestPackageVersionOperation : FSRequestPackageVersionOperation
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private enum ESteps
     {
         None,
@@ -18,7 +18,7 @@ internal class WXFSRequestPackageVersionOperation : FSRequestPackageVersionOpera
     private ESteps _steps = ESteps.None;
 
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal WXFSRequestPackageVersionOperation(WechatFileSystem fileSystem, bool appendTimeTicks, int timeout)
     {
         _fileSystem = fileSystem;
@@ -26,13 +26,13 @@ internal class WXFSRequestPackageVersionOperation : FSRequestPackageVersionOpera
         _timeout = timeout;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         _steps = ESteps.RequestPackageVersion;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
         if (_steps == ESteps.None || _steps == ESteps.Done)

@@ -1,9 +1,9 @@
-using YooAsset;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal class RequestByteGamePackageVersionOperation : AsyncOperationBase
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private enum ESteps
     {
         None,
@@ -13,7 +13,7 @@ internal class RequestByteGamePackageVersionOperation : AsyncOperationBase
 
     private readonly ByteGameFileSystem _fileSystem;
     private readonly int _timeout;
-    private UnityWebTextRequestOperation _webTextRequestOp;
+    private WebTextRequestOperation _webTextRequestOp;
     private int _requestCount = 0;
     private ESteps _steps = ESteps.None;
 
@@ -23,21 +23,21 @@ internal class RequestByteGamePackageVersionOperation : AsyncOperationBase
     public string PackageVersion { private set; get; }
 
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public RequestByteGamePackageVersionOperation(ByteGameFileSystem fileSystem, int timeout)
     {
         _fileSystem = fileSystem;
         _timeout = timeout;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         _requestCount = WebRequestCounter.GetRequestFailedCount(_fileSystem.PackageName, nameof(RequestByteGamePackageVersionOperation));
         _steps = ESteps.RequestPackageVersion;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
         if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -49,9 +49,9 @@ internal class RequestByteGamePackageVersionOperation : AsyncOperationBase
         {
             if (_webTextRequestOp == null)
             {
-                var fileName = YooAssetSettingsData.GetPackageVersionFileName(_fileSystem.PackageName);
+                var fileName = AssetSystemSettingsData.GetPackageVersionFileName(_fileSystem.PackageName);
                 var url = GetRequestURL(fileName);
-                _webTextRequestOp = new UnityWebTextRequestOperation(url, _timeout);
+                _webTextRequestOp = new WebTextRequestOperation(url, _timeout);
                 OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
             }
 
@@ -86,7 +86,7 @@ internal class RequestByteGamePackageVersionOperation : AsyncOperationBase
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private string GetRequestURL(string fileName)
     {
         // 轮流返回请求地址

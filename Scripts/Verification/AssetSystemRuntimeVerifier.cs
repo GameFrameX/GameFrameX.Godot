@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 using Godot;
 
 #if INCLUDE_ASSETSYSTEM_RUNTIME
-using UnityEngine.SceneManagement;
-using UnityEngine;
-using YooAsset;
+using GameFrameX.AssetSystem;
 #endif
 
 namespace Godot.Startup.Verification
@@ -61,11 +59,11 @@ namespace Godot.Startup.Verification
 				ResetDirectory(fixtureCacheRoot);
 				GD.Print($"[AssetSystemRuntimeVerifier] Fixture root: {fixtureRoot}");
 
-				YooAssets.Initialize();
-				YooAssets.SetDownloadSystemHttpTransport(new LocalFileHttpTransport());
+			global::GameFrameX.AssetSystem.AssetSystem.Initialize();
+			global::GameFrameX.AssetSystem.AssetSystem.SetDownloadSystemHttpTransport(new LocalFileHttpTransport());
 
-				var package = YooAssets.TryGetPackage(PackageName) ?? YooAssets.CreatePackage(PackageName);
-				YooAssets.SetDefaultPackage(package);
+			var package = global::GameFrameX.AssetSystem.AssetSystem.TryGetPackage(PackageName) ?? global::GameFrameX.AssetSystem.AssetSystem.CreatePackage(PackageName);
+			global::GameFrameX.AssetSystem.AssetSystem.SetDefaultPackage(package);
 
 				InitializeParameters initializeParameters;
 				if (OS.HasFeature("web"))
@@ -105,7 +103,7 @@ namespace Godot.Startup.Verification
 				VerifyBuiltinResourceLoad();
 				await VerifyAssetBundleLoadAsync(package, AssetLocation);
 
-				var sceneHandle = package.LoadSceneAsync(SceneLocation, LoadSceneMode.Additive, LocalPhysicsMode.None, suspendLoad: false, priority: 100);
+				var sceneHandle = package.LoadSceneAsync(SceneLocation, suspendLoad: false, priority: 100);
 				await WaitHandleAsync(sceneHandle, "LoadScene");
 				GD.Print($"[AssetSystemRuntimeVerifier] loaded scene={sceneHandle.SceneName}");
 
@@ -152,9 +150,9 @@ namespace Godot.Startup.Verification
 			var manifestBytes = BuildManifestBinary(PackageName, PackageVersion, SceneLocation, AssetLocation, bundleName, bundleHash, bundleCrc, bundleSize);
 			var packageHash = ToLowerMd5(manifestBytes);
 
-			var versionFileName = YooAssetSettingsData.GetPackageVersionFileName(PackageName);
-			var hashFileName = YooAssetSettingsData.GetPackageHashFileName(PackageName, PackageVersion);
-			var manifestFileName = YooAssetSettingsData.GetManifestBinaryFileName(PackageName, PackageVersion);
+			var versionFileName = AssetSystemSettingsData.GetPackageVersionFileName(PackageName);
+			var hashFileName = AssetSystemSettingsData.GetPackageHashFileName(PackageName, PackageVersion);
+			var manifestFileName = AssetSystemSettingsData.GetManifestBinaryFileName(PackageName, PackageVersion);
 
 			File.WriteAllText(Path.Combine(packageDirectory, versionFileName), PackageVersion, Encoding.UTF8);
 			File.WriteAllText(Path.Combine(packageDirectory, hashFileName), packageHash, Encoding.UTF8);
@@ -168,8 +166,8 @@ namespace Godot.Startup.Verification
 			using var stream = new MemoryStream();
 			using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
 
-			writer.Write(YooAssetSettings.ManifestFileSign);
-			WriteUtf8(writer, YooAssetSettings.ManifestFileVersion);
+			writer.Write(AssetSystemSettings.ManifestFileSign);
+			WriteUtf8(writer, AssetSystemSettings.ManifestFileVersion);
 			writer.Write(true); // EnableAddressable
 			writer.Write(false); // LocationToLower
 			writer.Write(false); // IncludeAssetGUID
@@ -181,7 +179,7 @@ namespace Godot.Startup.Verification
 			// AssetList
 			writer.Write(2);
 			WriteUtf8(writer, sceneLocation); // Address
-			WriteUtf8(writer, $"Assets/{sceneLocation}.unity"); // AssetPath
+			WriteUtf8(writer, $"Assets/{sceneLocation}.scene"); // AssetPath
 			WriteUtf8(writer, string.Empty); // AssetGUID
 			WriteUtf8Array(writer, Array.Empty<string>()); // Tags
 			writer.Write(0); // BundleID
@@ -195,7 +193,7 @@ namespace Godot.Startup.Verification
 			// BundleList
 			writer.Write(1);
 			WriteUtf8(writer, bundleName);
-			writer.Write((uint)0); // UnityCRC
+			writer.Write((uint)0); // BundleCRC
 			WriteUtf8(writer, bundleHash); // FileHash
 			WriteUtf8(writer, bundleCrc); // FileCRC
 			writer.Write(bundleSize); // FileSize
@@ -215,25 +213,29 @@ namespace Godot.Startup.Verification
 				throw new InvalidOperationException($"Builtin resource is missing: {BuiltinResourcePath} -> {physicalPath}");
 			}
 
-			var resource = Resources.Load<UnityEngine.Object>(BuiltinResourcePath);
+			var resource = ResourceLoader.Load(BuiltinResourcePath);
 			if (resource == null)
 			{
 				throw new InvalidOperationException($"Builtin resource load failed via Resources.Load: {BuiltinResourcePath}");
 			}
 
-			GD.Print($"[AssetSystemRuntimeVerifier] builtin loaded: {resource.name}");
+			var resourceLabel = string.IsNullOrEmpty(resource.ResourceName) ? resource.GetType().Name : resource.ResourceName;
+			GD.Print($"[AssetSystemRuntimeVerifier] builtin loaded: {resourceLabel}");
 		}
 
 		private static async Task VerifyAssetBundleLoadAsync(ResourcePackage package, string assetLocation)
 		{
-			var handle = package.LoadAssetAsync(assetLocation, typeof(UnityEngine.Object), priority: 100);
+			var handle = package.LoadAssetAsync(assetLocation, typeof(object), priority: 100);
 			await WaitHandleAsync(handle, "LoadAsset(AssetBundle)");
 			if (handle.AssetObject == null)
 			{
 				throw new InvalidOperationException("LoadAsset(AssetBundle) returned null AssetObject.");
 			}
 
-			GD.Print($"[AssetSystemRuntimeVerifier] assetbundle loaded: {handle.AssetObject.name}");
+			var assetName = handle.AssetObject.GetType().GetProperty("name")?.GetValue(handle.AssetObject)?.ToString()
+							?? handle.AssetObject.GetType().GetProperty("Name")?.GetValue(handle.AssetObject)?.ToString()
+							?? handle.AssetObject.GetType().Name;
+			GD.Print($"[AssetSystemRuntimeVerifier] assetbundle loaded: {assetName}");
 			handle.Release();
 		}
 

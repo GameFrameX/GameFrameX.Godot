@@ -1,9 +1,9 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class LoadBuildinPackageManifestOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -16,7 +16,7 @@
         private readonly DefaultBuildinFileSystem _fileSystem;
         private readonly string _packageVersion;
         private readonly string _packageHash;
-        private UnityWebDataRequestOperation _webDataRequestOp;
+        private WebDataRequestOperation _webDataRequestOp;
         private DeserializeManifestOperation _deserializer;
         private ESteps _steps = ESteps.None;
 
@@ -26,7 +26,7 @@
         public PackageManifest Manifest { private set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal LoadBuildinPackageManifestOperation(DefaultBuildinFileSystem fileSystem, string packageVersion, string packageHash)
         {
             _fileSystem = fileSystem;
@@ -34,13 +34,13 @@
             _packageHash = packageHash;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.RequestFileData;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -54,7 +54,7 @@
                 {
                     var filePath = _fileSystem.GetBuildinPackageManifestFilePath(_packageVersion);
                     var url = DownloadSystemHelper.ConvertToWWWPath(filePath);
-                    _webDataRequestOp = new UnityWebDataRequestOperation(url);
+                    _webDataRequestOp = new WebDataRequestOperation(url);
                     OperationSystem.StartOperation(_fileSystem.PackageName, _webDataRequestOp);
                 }
 

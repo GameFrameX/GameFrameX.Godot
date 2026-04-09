@@ -1,11 +1,11 @@
-using UnityEngine;
+using Godot;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public sealed class InstantiateOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -14,37 +14,29 @@ namespace YooAsset
         }
 
         private readonly AssetHandle _handle;
-        private readonly bool _setPositionAndRotation;
-        private readonly Vector3 _position;
-        private readonly Quaternion _rotation;
-        private readonly Transform _parent;
-        private readonly bool _worldPositionStays;
+        private readonly Node _parent;
         private ESteps _steps = ESteps.None;
 
         /// <summary>
-        /// 实例化的游戏对象
+        /// 实例化的 Godot 节点
         /// </summary>
-        public GameObject Result = null;
+        public Node Result = null;
 
 
-        [UnityEngine.Scripting.Preserve]
-        internal InstantiateOperation(AssetHandle handle, bool setPositionAndRotation, Vector3 position, Quaternion rotation, Transform parent, bool worldPositionStays)
+        [AssetSystemPreserve]
+        internal InstantiateOperation(AssetHandle handle, Node parent)
         {
             _handle = handle;
-            _setPositionAndRotation = setPositionAndRotation;
-            _position = position;
-            _rotation = rotation;
             _parent = parent;
-            _worldPositionStays = worldPositionStays;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.Clone;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -75,15 +67,15 @@ namespace YooAsset
                     return;
                 }
 
-                // 实例化游戏对象
-                Result = InstantiateInternal(_handle.AssetObject, _setPositionAndRotation, _position, _rotation, _parent, _worldPositionStays);
+                // Migration note (scheme 2): instantiate by Godot runtime backend.
+                Result = InstantiateInternal(_handle.AssetObject, _parent);
 
                 _steps = ESteps.Done;
                 Status = EOperationStatus.Succeed;
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             while (true)
@@ -102,7 +94,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal override void InternalOnAbort()
         {
             if (Result != null)
@@ -115,21 +107,21 @@ namespace YooAsset
         /// <summary>
         /// 取消实例化对象操作
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Cancel()
         {
             SetAbort();
         }
 
-        [UnityEngine.Scripting.Preserve]
-        internal static GameObject InstantiateInternal(UnityEngine.Object assetObject, bool setPositionAndRotation, Vector3 position, Quaternion rotation, Transform parent, bool worldPositionStays)
+        [AssetSystemPreserve]
+        internal static Node InstantiateInternal(object assetObject, Node parent)
         {
             if (assetObject == null)
             {
                 return null;
             }
 
-            return BundleAssetLoaderFactory.Backend.Instantiate(assetObject, setPositionAndRotation, position, rotation, parent, worldPositionStays);
+            return BundleAssetLoaderFactory.Backend.Instantiate(assetObject, parent);
         }
     }
 }

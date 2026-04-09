@@ -154,7 +154,7 @@ namespace FairyGUI
         }
 
         /// <summary>
-        /// As unity does not provide ways to detect this, you should set it by yourself. 
+        /// As runtime cannot reliably detect this on every platform, set it manually when needed.
         /// This will effect:
         /// 1. compoistion cursor pos.
         /// 2. mouse wheel speed.
@@ -198,7 +198,7 @@ namespace FairyGUI
             _focusInChain = new List<GObject>();
             _focusHistory = new List<GComponent>();
 
-            // 在PC上，是否retina屏对输入法位置，鼠标滚轮速度都有影响，但现在没发现Unity有获得的方式。仅判断是否Mac可能不够（外接显示器的情况）。所以最好自行设置。
+            // 在 PC 上，Retina/高 DPI 可能影响输入法位置和滚轮速度，建议按项目需求自行设置。
             devicePixelRatio = (OS.GetName() == "macOS" && DisplayServer.ScreenGetDpi() > 96) ? 2 : 1;
 
             EnableSound();

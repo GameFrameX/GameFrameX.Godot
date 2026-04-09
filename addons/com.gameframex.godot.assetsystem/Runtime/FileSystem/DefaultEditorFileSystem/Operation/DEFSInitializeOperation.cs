@@ -1,23 +1,23 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DEFSInitializeOperation : FSInitializeFileSystemOperation
     {
         private readonly DefaultEditorFileSystem _fileSytem;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DEFSInitializeOperation(DefaultEditorFileSystem fileSystem)
         {
             _fileSytem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             Status = EOperationStatus.Succeed;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
         }

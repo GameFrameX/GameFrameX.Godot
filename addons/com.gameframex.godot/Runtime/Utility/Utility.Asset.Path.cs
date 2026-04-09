@@ -256,9 +256,9 @@
                 /// 获取场景文件路径
                 /// </summary>
                 /// <param name="pathName">路径包含名称</param>
-                /// <param name="extension">扩展名,默认为.unity</param>
+                /// <param name="extension">扩展名,默认为.tscn</param>
                 /// <returns>返回拼接好的路径</returns>
-                public static string GetScenePath(string pathName, string extension = ".unity")
+                public static string GetScenePath(string pathName, string extension = ".tscn")
                 {
                     if (pathName.IndexOf('.') >= 0)
                     {

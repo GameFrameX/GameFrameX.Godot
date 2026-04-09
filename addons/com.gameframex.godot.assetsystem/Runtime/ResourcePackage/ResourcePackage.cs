@@ -3,11 +3,10 @@ using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using Godot;
-using UnityEngine.SceneManagement;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class ResourcePackage
     {
         private bool _isInitialize = false;
@@ -34,7 +33,7 @@ namespace YooAsset
         }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal ResourcePackage(string packageName)
         {
             PackageName = packageName;
@@ -43,7 +42,7 @@ namespace YooAsset
         /// <summary>
         /// 更新资源包裹
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void UpdatePackage()
         {
             if (_playModeImpl != null)
@@ -55,7 +54,7 @@ namespace YooAsset
         /// <summary>
         /// 销毁资源包裹
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void DestroyPackage()
         {
             if (_isInitialize)
@@ -73,7 +72,7 @@ namespace YooAsset
         /// <summary>
         /// 异步初始化
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public InitializationOperation InitializeAsync(InitializeParameters parameters)
         {
             // 注意：联机平台因为网络原因可能会初始化失败！
@@ -136,7 +135,7 @@ namespace YooAsset
             return initializeOperation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void ResetInitializeAfterFailed()
         {
             if (_isInitialize && _initializeStatus == EOperationStatus.Failed)
@@ -147,7 +146,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void CheckInitializeParameters(InitializeParameters parameters)
         {
             if (_isInitialize)
@@ -173,7 +172,7 @@ namespace YooAsset
             CheckPlayModePlatformConstraints(_playMode);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private EPlayMode ResolvePlayMode(InitializeParameters parameters)
         {
             if (parameters is EditorSimulateModeParameters)
@@ -199,7 +198,7 @@ namespace YooAsset
             throw new NotImplementedException();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void CheckPlayModeParameterConstraints(InitializeParameters parameters, EPlayMode playMode)
         {
             if (playMode == EPlayMode.EditorSimulateMode)
@@ -236,7 +235,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void CheckPlayModePlatformConstraints(EPlayMode playMode)
         {
             if (playMode == EPlayMode.EditorSimulateMode)
@@ -261,7 +260,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void InitializeOperation_Completed(AsyncOperationBase op)
         {
             _initializeStatus = op.Status;
@@ -271,7 +270,7 @@ namespace YooAsset
         /// <summary>
         /// 异步销毁
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DestroyOperation DestroyAsync()
         {
             var operation = new DestroyOperation(this);
@@ -284,7 +283,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="appendTimeTicks">在URL末尾添加时间戳</param>
         /// <param name="timeout">超时时间（默认值：60秒）</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public LoadLocalVersionOperation RequestLocalVersionAsync(bool appendTimeTicks = true, int timeout = 60)
         {
             DebugCheckInitialize(false);
@@ -296,7 +295,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="packageVersion">更新的包裹版本</param>
         /// <param name="timeout">超时时间（默认值：60秒）</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public LoadLocalManifestOperation RequestLocalManifestAsync(string packageVersion, int timeout = 60)
         {
             DebugCheckInitialize(false);
@@ -304,7 +303,7 @@ namespace YooAsset
             // 注意：强烈建议在更新之前保持加载器为空！
             if (_resourceManager.HasAnyLoader())
             {
-                YooLogger.Warning($"Found loaded bundle before update manifest ! Recommended to call the  {nameof(UnloadAllAssetsAsync)} method to release loaded bundle !");
+                AssetSystemLogger.Warning($"Found loaded bundle before update manifest ! Recommended to call the  {nameof(UnloadAllAssetsAsync)} method to release loaded bundle !");
             }
 
             return _playModeImpl.LoadLocalManifestAsync(packageVersion, timeout);
@@ -315,7 +314,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="appendTimeTicks">在URL末尾添加时间戳</param>
         /// <param name="timeout">超时时间（默认值：60秒）</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public RequestPackageVersionOperation RequestPackageVersionAsync(bool appendTimeTicks = true, int timeout = 60)
         {
             DebugCheckInitialize(false);
@@ -327,7 +326,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="packageVersion">更新的包裹版本</param>
         /// <param name="timeout">超时时间（默认值：60秒）</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public UpdatePackageManifestOperation UpdatePackageManifestAsync(string packageVersion, int timeout = 60)
         {
             DebugCheckInitialize(false);
@@ -335,7 +334,7 @@ namespace YooAsset
             // 注意：强烈建议在更新之前保持加载器为空！
             if (_resourceManager.HasAnyLoader())
             {
-                YooLogger.Warning($"Found loaded bundle before update manifest ! Recommended to call the  {nameof(UnloadAllAssetsAsync)} method to release loaded bundle !");
+                AssetSystemLogger.Warning($"Found loaded bundle before update manifest ! Recommended to call the  {nameof(UnloadAllAssetsAsync)} method to release loaded bundle !");
             }
 
             return _playModeImpl.UpdatePackageManifestAsync(packageVersion, timeout);
@@ -346,7 +345,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="packageVersion">下载的包裹版本</param>
         /// <param name="timeout">超时时间（默认值：60秒）</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public PreDownloadContentOperation PreDownloadContentAsync(string packageVersion, int timeout = 60)
         {
             DebugCheckInitialize(false);
@@ -356,7 +355,7 @@ namespace YooAsset
         /// <summary>
         /// 清理文件系统所有的资源文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ClearAllBundleFilesOperation ClearAllBundleFilesAsync()
         {
             DebugCheckInitialize();
@@ -366,7 +365,7 @@ namespace YooAsset
         /// <summary>
         /// 清理文件系统未使用的资源文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ClearUnusedBundleFilesOperation ClearUnusedBundleFilesAsync()
         {
             DebugCheckInitialize();
@@ -376,7 +375,7 @@ namespace YooAsset
         /// <summary>
         /// 获取本地包裹的版本信息
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetPackageVersion()
         {
             DebugCheckInitialize();
@@ -388,7 +387,7 @@ namespace YooAsset
         /// <summary>
         /// 强制回收所有资源
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public UnloadAllAssetsOperation UnloadAllAssetsAsync()
         {
             DebugCheckInitialize();
@@ -401,7 +400,7 @@ namespace YooAsset
         /// 回收不再使用的资源
         /// 说明：卸载引用计数为零的资源
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public UnloadUnusedAssetsOperation UnloadUnusedAssetsAsync()
         {
             DebugCheckInitialize();
@@ -414,7 +413,7 @@ namespace YooAsset
         /// 资源回收
         /// 说明：尝试卸载指定的资源
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void TryUnloadUnusedAsset(string location)
         {
             DebugCheckInitialize();
@@ -426,7 +425,7 @@ namespace YooAsset
         /// 资源回收
         /// 说明：尝试卸载指定的资源
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void TryUnloadUnusedAsset(AssetInfo assetInfo)
         {
             DebugCheckInitialize();
@@ -441,7 +440,7 @@ namespace YooAsset
         /// 是否需要从远端更新下载
         /// </summary>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool IsNeedDownloadFromRemote(string location)
         {
             DebugCheckInitialize();
@@ -453,7 +452,7 @@ namespace YooAsset
         /// 是否需要从远端更新下载
         /// </summary>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool IsNeedDownloadFromRemote(AssetInfo assetInfo)
         {
             DebugCheckInitialize();
@@ -464,7 +463,7 @@ namespace YooAsset
         /// 获取资源信息列表
         /// </summary>
         /// <param name="tag">资源标签</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetInfo[] GetAssetInfos(string tag)
         {
             DebugCheckInitialize();
@@ -476,7 +475,7 @@ namespace YooAsset
         /// 获取资源信息列表
         /// </summary>
         /// <param name="tags">资源标签列表</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetInfo[] GetAssetInfos(string[] tags)
         {
             DebugCheckInitialize();
@@ -487,7 +486,7 @@ namespace YooAsset
         /// 获取资源信息
         /// </summary>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetInfo GetAssetInfo(string location)
         {
             DebugCheckInitialize();
@@ -499,7 +498,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="location">资源的定位地址</param>
         /// <param name="type">资源类型</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetInfo GetAssetInfo(string location, Type type)
         {
             DebugCheckInitialize();
@@ -510,7 +509,7 @@ namespace YooAsset
         /// 获取资源信息
         /// </summary>
         /// <param name="assetGUID">资源GUID</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetInfo GetAssetInfoByGUID(string assetGUID)
         {
             DebugCheckInitialize();
@@ -522,7 +521,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="assetGUID">资源GUID</param>
         /// <param name="type">资源类型</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetInfo GetAssetInfoByGUID(string assetGUID, Type type)
         {
             DebugCheckInitialize();
@@ -533,7 +532,7 @@ namespace YooAsset
         /// 检查资源定位地址是否有效
         /// </summary>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool CheckLocationValid(string location)
         {
             DebugCheckInitialize();
@@ -541,12 +540,22 @@ namespace YooAsset
             return string.IsNullOrEmpty(assetPath) == false;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        /// <summary>
+        /// 尝试使用不带路径的资源名查询清单内的资源定位地址。
+        /// </summary>
+        [AssetSystemPreserve]
+        public bool TryGetAssetLocationByName(string assetName, out string location)
+        {
+            DebugCheckInitialize();
+            return _playModeImpl.ActiveManifest.TryMappingAssetNameToAssetPath(assetName, out location);
+        }
+
+        [AssetSystemPreserve]
         private bool IsNeedDownloadFromRemoteInternal(AssetInfo assetInfo)
         {
             if (assetInfo.IsInvalid)
             {
-                YooLogger.Warning(assetInfo.Error);
+                AssetSystemLogger.Warning(assetInfo.Error);
                 return false;
             }
 
@@ -576,7 +585,7 @@ namespace YooAsset
         /// 同步加载原生文件
         /// </summary>
         /// <param name="assetInfo">资源信息</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public RawFileHandle LoadRawFileSync(AssetInfo assetInfo)
         {
             DebugCheckInitialize();
@@ -587,7 +596,7 @@ namespace YooAsset
         /// 同步加载原生文件
         /// </summary>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public RawFileHandle LoadRawFileSync(string location)
         {
             DebugCheckInitialize();
@@ -600,7 +609,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="assetInfo">资源信息</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public RawFileHandle LoadRawFileAsync(AssetInfo assetInfo, uint priority = 0)
         {
             DebugCheckInitialize();
@@ -612,7 +621,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="location">资源的定位地址</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public RawFileHandle LoadRawFileAsync(string location, uint priority = 0)
         {
             DebugCheckInitialize();
@@ -621,7 +630,7 @@ namespace YooAsset
         }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private RawFileHandle LoadRawFileInternal(AssetInfo assetInfo, bool waitForAsyncComplete, uint priority)
         {
             var handle = _resourceManager.LoadRawFileAsync(assetInfo, priority);
@@ -643,8 +652,8 @@ namespace YooAsset
         /// <param name="location">场景的定位地址</param>
         /// <param name="sceneMode">场景加载模式</param>
         /// <param name="physicsMode">场景物理模式</param>
-        [UnityEngine.Scripting.Preserve]
-        public SceneHandle LoadSceneSync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None)
+        [AssetSystemPreserve]
+        public SceneHandle LoadSceneSync(string location, SceneLoadMode sceneMode = SceneLoadMode.Single, ScenePhysicsMode physicsMode = ScenePhysicsMode.None)
         {
             DebugCheckInitialize();
             var assetInfo = ConvertLocationToAssetInfo(location, null);
@@ -657,8 +666,8 @@ namespace YooAsset
         /// <param name="assetInfo">场景的资源信息</param>
         /// <param name="sceneMode">场景加载模式</param>
         /// <param name="physicsMode">场景物理模式</param>
-        [UnityEngine.Scripting.Preserve]
-        public SceneHandle LoadSceneSync(AssetInfo assetInfo, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None)
+        [AssetSystemPreserve]
+        public SceneHandle LoadSceneSync(AssetInfo assetInfo, SceneLoadMode sceneMode = SceneLoadMode.Single, ScenePhysicsMode physicsMode = ScenePhysicsMode.None)
         {
             DebugCheckInitialize();
             return LoadSceneInternal(assetInfo, true, sceneMode, physicsMode, false, 0);
@@ -672,8 +681,8 @@ namespace YooAsset
         /// <param name="physicsMode">场景物理模式</param>
         /// <param name="suspendLoad">场景加载到90%自动挂起</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
-        public SceneHandle LoadSceneAsync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None, bool suspendLoad = false, uint priority = 0)
+        [AssetSystemPreserve]
+        public SceneHandle LoadSceneAsync(string location, SceneLoadMode sceneMode = SceneLoadMode.Single, ScenePhysicsMode physicsMode = ScenePhysicsMode.None, bool suspendLoad = false, uint priority = 0)
         {
             DebugCheckInitialize();
             var assetInfo = ConvertLocationToAssetInfo(location, null);
@@ -688,18 +697,18 @@ namespace YooAsset
         /// <param name="physicsMode">场景物理模式</param>
         /// <param name="suspendLoad">场景加载到90%自动挂起</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
-        public SceneHandle LoadSceneAsync(AssetInfo assetInfo, LoadSceneMode sceneMode = LoadSceneMode.Single, LocalPhysicsMode physicsMode = LocalPhysicsMode.None, bool suspendLoad = false, uint priority = 0)
+        [AssetSystemPreserve]
+        public SceneHandle LoadSceneAsync(AssetInfo assetInfo, SceneLoadMode sceneMode = SceneLoadMode.Single, ScenePhysicsMode physicsMode = ScenePhysicsMode.None, bool suspendLoad = false, uint priority = 0)
         {
             DebugCheckInitialize();
             return LoadSceneInternal(assetInfo, false, sceneMode, physicsMode, suspendLoad, priority);
         }
 
-        [UnityEngine.Scripting.Preserve]
-        private SceneHandle LoadSceneInternal(AssetInfo assetInfo, bool waitForAsyncComplete, LoadSceneMode sceneMode, LocalPhysicsMode physicsMode, bool suspendLoad, uint priority)
+        [AssetSystemPreserve]
+        private SceneHandle LoadSceneInternal(AssetInfo assetInfo, bool waitForAsyncComplete, SceneLoadMode sceneMode, ScenePhysicsMode physicsMode, bool suspendLoad, uint priority)
         {
             DebugCheckAssetLoadType(assetInfo.AssetType);
-            var loadSceneParams = new LoadSceneParameters(sceneMode, physicsMode);
+            var loadSceneParams = new SceneLoadParameters(sceneMode, physicsMode);
             var handle = _resourceManager.LoadSceneAsync(assetInfo, loadSceneParams, suspendLoad, priority);
             if (waitForAsyncComplete)
             {
@@ -717,7 +726,7 @@ namespace YooAsset
         /// 同步加载资源对象
         /// </summary>
         /// <param name="assetInfo">资源信息</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetHandle LoadAssetSync(AssetInfo assetInfo)
         {
             DebugCheckInitialize();
@@ -729,8 +738,8 @@ namespace YooAsset
         /// </summary>
         /// <typeparam name="TObject">资源类型</typeparam>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
-        public AssetHandle LoadAssetSync<TObject>(string location) where TObject : UnityEngine.Object
+        [AssetSystemPreserve]
+        public AssetHandle LoadAssetSync<TObject>(string location)
         {
             DebugCheckInitialize();
             var assetInfo = ConvertLocationToAssetInfo(location, typeof(TObject));
@@ -742,7 +751,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="location">资源的定位地址</param>
         /// <param name="type">资源类型</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetHandle LoadAssetSync(string location, Type type)
         {
             DebugCheckInitialize();
@@ -754,11 +763,11 @@ namespace YooAsset
         /// 同步加载资源对象
         /// </summary>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetHandle LoadAssetSync(string location)
         {
             DebugCheckInitialize();
-            var type = typeof(UnityEngine.Object);
+            var type = typeof(object);
             var assetInfo = ConvertLocationToAssetInfo(location, type);
             return LoadAssetInternal(assetInfo, true, 0);
         }
@@ -769,7 +778,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="assetInfo">资源信息</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetHandle LoadAssetAsync(AssetInfo assetInfo, uint priority = 0)
         {
             DebugCheckInitialize();
@@ -782,8 +791,8 @@ namespace YooAsset
         /// <typeparam name="TObject">资源类型</typeparam>
         /// <param name="location">资源的定位地址</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
-        public AssetHandle LoadAssetAsync<TObject>(string location, uint priority = 0) where TObject : UnityEngine.Object
+        [AssetSystemPreserve]
+        public AssetHandle LoadAssetAsync<TObject>(string location, uint priority = 0)
         {
             DebugCheckInitialize();
             var assetInfo = ConvertLocationToAssetInfo(location, typeof(TObject));
@@ -796,7 +805,7 @@ namespace YooAsset
         /// <param name="location">资源的定位地址</param>
         /// <param name="type">资源类型</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetHandle LoadAssetAsync(string location, Type type, uint priority = 0)
         {
             DebugCheckInitialize();
@@ -809,17 +818,17 @@ namespace YooAsset
         /// </summary>
         /// <param name="location">资源的定位地址</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetHandle LoadAssetAsync(string location, uint priority = 0)
         {
             DebugCheckInitialize();
-            var type = typeof(UnityEngine.Object);
+            var type = typeof(object);
             var assetInfo = ConvertLocationToAssetInfo(location, type);
             return LoadAssetInternal(assetInfo, false, priority);
         }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private AssetHandle LoadAssetInternal(AssetInfo assetInfo, bool waitForAsyncComplete, uint priority)
         {
             DebugCheckAssetLoadType(assetInfo.AssetType);
@@ -840,7 +849,7 @@ namespace YooAsset
         /// 同步加载子资源对象
         /// </summary>
         /// <param name="assetInfo">资源信息</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public SubAssetsHandle LoadSubAssetsSync(AssetInfo assetInfo)
         {
             DebugCheckInitialize();
@@ -852,8 +861,8 @@ namespace YooAsset
         /// </summary>
         /// <typeparam name="TObject">资源类型</typeparam>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
-        public SubAssetsHandle LoadSubAssetsSync<TObject>(string location) where TObject : UnityEngine.Object
+        [AssetSystemPreserve]
+        public SubAssetsHandle LoadSubAssetsSync<TObject>(string location)
         {
             DebugCheckInitialize();
             var assetInfo = ConvertLocationToAssetInfo(location, typeof(TObject));
@@ -865,7 +874,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="location">资源的定位地址</param>
         /// <param name="type">子对象类型</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public SubAssetsHandle LoadSubAssetsSync(string location, Type type)
         {
             DebugCheckInitialize();
@@ -877,11 +886,11 @@ namespace YooAsset
         /// 同步加载子资源对象
         /// </summary>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public SubAssetsHandle LoadSubAssetsSync(string location)
         {
             DebugCheckInitialize();
-            var type = typeof(UnityEngine.Object);
+            var type = typeof(object);
             var assetInfo = ConvertLocationToAssetInfo(location, type);
             return LoadSubAssetsInternal(assetInfo, true, 0);
         }
@@ -892,7 +901,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="assetInfo">资源信息</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public SubAssetsHandle LoadSubAssetsAsync(AssetInfo assetInfo, uint priority = 0)
         {
             DebugCheckInitialize();
@@ -905,8 +914,8 @@ namespace YooAsset
         /// <typeparam name="TObject">资源类型</typeparam>
         /// <param name="location">资源的定位地址</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
-        public SubAssetsHandle LoadSubAssetsAsync<TObject>(string location, uint priority = 0) where TObject : UnityEngine.Object
+        [AssetSystemPreserve]
+        public SubAssetsHandle LoadSubAssetsAsync<TObject>(string location, uint priority = 0)
         {
             DebugCheckInitialize();
             var assetInfo = ConvertLocationToAssetInfo(location, typeof(TObject));
@@ -919,7 +928,7 @@ namespace YooAsset
         /// <param name="location">资源的定位地址</param>
         /// <param name="type">子对象类型</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public SubAssetsHandle LoadSubAssetsAsync(string location, Type type, uint priority = 0)
         {
             DebugCheckInitialize();
@@ -932,17 +941,17 @@ namespace YooAsset
         /// </summary>
         /// <param name="location">资源的定位地址</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public SubAssetsHandle LoadSubAssetsAsync(string location, uint priority = 0)
         {
             DebugCheckInitialize();
-            var type = typeof(UnityEngine.Object);
+            var type = typeof(object);
             var assetInfo = ConvertLocationToAssetInfo(location, type);
             return LoadSubAssetsInternal(assetInfo, false, priority);
         }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private SubAssetsHandle LoadSubAssetsInternal(AssetInfo assetInfo, bool waitForAsyncComplete, uint priority)
         {
             DebugCheckAssetLoadType(assetInfo.AssetType);
@@ -963,7 +972,7 @@ namespace YooAsset
         /// 同步加载资源包内所有资源对象
         /// </summary>
         /// <param name="assetInfo">资源信息</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AllAssetsHandle LoadAllAssetsSync(AssetInfo assetInfo)
         {
             DebugCheckInitialize();
@@ -975,8 +984,8 @@ namespace YooAsset
         /// </summary>
         /// <typeparam name="TObject">资源类型</typeparam>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
-        public AllAssetsHandle LoadAllAssetsSync<TObject>(string location) where TObject : UnityEngine.Object
+        [AssetSystemPreserve]
+        public AllAssetsHandle LoadAllAssetsSync<TObject>(string location)
         {
             DebugCheckInitialize();
             var assetInfo = ConvertLocationToAssetInfo(location, typeof(TObject));
@@ -988,7 +997,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="location">资源的定位地址</param>
         /// <param name="type">子对象类型</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AllAssetsHandle LoadAllAssetsSync(string location, Type type)
         {
             DebugCheckInitialize();
@@ -1000,11 +1009,11 @@ namespace YooAsset
         /// 同步加载资源包内所有资源对象
         /// </summary>
         /// <param name="location">资源的定位地址</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AllAssetsHandle LoadAllAssetsSync(string location)
         {
             DebugCheckInitialize();
-            var type = typeof(UnityEngine.Object);
+            var type = typeof(object);
             var assetInfo = ConvertLocationToAssetInfo(location, type);
             return LoadAllAssetsInternal(assetInfo, true, 0);
         }
@@ -1015,7 +1024,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="assetInfo">资源信息</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AllAssetsHandle LoadAllAssetsAsync(AssetInfo assetInfo, uint priority = 0)
         {
             DebugCheckInitialize();
@@ -1028,8 +1037,8 @@ namespace YooAsset
         /// <typeparam name="TObject">资源类型</typeparam>
         /// <param name="location">资源的定位地址</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
-        public AllAssetsHandle LoadAllAssetsAsync<TObject>(string location, uint priority = 0) where TObject : UnityEngine.Object
+        [AssetSystemPreserve]
+        public AllAssetsHandle LoadAllAssetsAsync<TObject>(string location, uint priority = 0)
         {
             DebugCheckInitialize();
             var assetInfo = ConvertLocationToAssetInfo(location, typeof(TObject));
@@ -1042,7 +1051,7 @@ namespace YooAsset
         /// <param name="location">资源的定位地址</param>
         /// <param name="type">子对象类型</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AllAssetsHandle LoadAllAssetsAsync(string location, Type type, uint priority = 0)
         {
             DebugCheckInitialize();
@@ -1055,17 +1064,17 @@ namespace YooAsset
         /// </summary>
         /// <param name="location">资源的定位地址</param>
         /// <param name="priority">加载的优先级</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AllAssetsHandle LoadAllAssetsAsync(string location, uint priority = 0)
         {
             DebugCheckInitialize();
-            var type = typeof(UnityEngine.Object);
+            var type = typeof(object);
             var assetInfo = ConvertLocationToAssetInfo(location, type);
             return LoadAllAssetsInternal(assetInfo, false, priority);
         }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private AllAssetsHandle LoadAllAssetsInternal(AssetInfo assetInfo, bool waitForAsyncComplete, uint priority)
         {
             DebugCheckAssetLoadType(assetInfo.AssetType);
@@ -1088,7 +1097,7 @@ namespace YooAsset
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
         /// <param name="timeout">超时时间</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceDownloaderOperation CreateResourceDownloader(int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
         {
             DebugCheckInitialize();
@@ -1102,7 +1111,7 @@ namespace YooAsset
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
         /// <param name="timeout">超时时间</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceDownloaderOperation CreateResourceDownloader(string tag, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
         {
             DebugCheckInitialize();
@@ -1116,7 +1125,7 @@ namespace YooAsset
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
         /// <param name="timeout">超时时间</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceDownloaderOperation CreateResourceDownloader(string[] tags, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
         {
             DebugCheckInitialize();
@@ -1130,7 +1139,7 @@ namespace YooAsset
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
         /// <param name="timeout">超时时间</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceDownloaderOperation CreateBundleDownloader(string location, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
         {
             DebugCheckInitialize();
@@ -1146,7 +1155,7 @@ namespace YooAsset
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
         /// <param name="timeout">超时时间</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceDownloaderOperation CreateBundleDownloader(string[] locations, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
         {
             DebugCheckInitialize();
@@ -1167,7 +1176,7 @@ namespace YooAsset
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
         /// <param name="timeout">超时时间</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceDownloaderOperation CreateBundleDownloader(AssetInfo assetInfo, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
         {
             DebugCheckInitialize();
@@ -1182,7 +1191,7 @@ namespace YooAsset
         /// <param name="downloadingMaxNumber">同时下载的最大文件数</param>
         /// <param name="failedTryAgain">下载失败的重试次数</param>
         /// <param name="timeout">超时时间</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceDownloaderOperation CreateBundleDownloader(AssetInfo[] assetInfos, int downloadingMaxNumber, int failedTryAgain, int timeout = 60)
         {
             DebugCheckInitialize();
@@ -1198,7 +1207,7 @@ namespace YooAsset
         /// </summary>
         /// <param name="unpackingMaxNumber">同时解压的最大文件数</param>
         /// <param name="failedTryAgain">解压失败的重试次数</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceUnpackerOperation CreateResourceUnpacker(int unpackingMaxNumber, int failedTryAgain)
         {
             DebugCheckInitialize();
@@ -1211,7 +1220,7 @@ namespace YooAsset
         /// <param name="tag">资源标签</param>
         /// <param name="unpackingMaxNumber">同时解压的最大文件数</param>
         /// <param name="failedTryAgain">解压失败的重试次数</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceUnpackerOperation CreateResourceUnpacker(string tag, int unpackingMaxNumber, int failedTryAgain)
         {
             DebugCheckInitialize();
@@ -1224,7 +1233,7 @@ namespace YooAsset
         /// <param name="tags">资源标签列表</param>
         /// <param name="unpackingMaxNumber">同时解压的最大文件数</param>
         /// <param name="failedTryAgain">解压失败的重试次数</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceUnpackerOperation CreateResourceUnpacker(string[] tags, int unpackingMaxNumber, int failedTryAgain)
         {
             DebugCheckInitialize();
@@ -1242,7 +1251,7 @@ namespace YooAsset
         /// <param name="filePaths">资源路径列表</param>
         /// <param name="importerMaxNumber">同时导入的最大文件数</param>
         /// <param name="failedTryAgain">导入失败的重试次数</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ResourceImporterOperation CreateResourceImporter(string[] filePaths, int importerMaxNumber, int failedTryAgain)
         {
             DebugCheckInitialize();
@@ -1253,13 +1262,13 @@ namespace YooAsset
 
         #region 内部方法
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private AssetInfo ConvertLocationToAssetInfo(string location, Type assetType)
         {
             return _playModeImpl.ActiveManifest.ConvertLocationToAssetInfo(location, assetType);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private AssetInfo ConvertAssetGUIDToAssetInfo(string assetGUID, Type assetType)
         {
             return _playModeImpl.ActiveManifest.ConvertAssetGUIDToAssetInfo(assetGUID, assetType);
@@ -1269,7 +1278,7 @@ namespace YooAsset
 
         #region 调试方法
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         [Conditional("DEBUG")]
         private void DebugCheckInitialize(bool checkActiveManifest = true)
         {
@@ -1291,31 +1300,20 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         [Conditional("DEBUG")]
         private void DebugCheckAssetLoadType(Type type)
         {
-            if (type == null)
-            {
-                return;
-            }
-
-            if (typeof(UnityEngine.Behaviour).IsAssignableFrom(type))
-            {
-                throw new Exception($"Load asset type is invalid : {type.FullName} !");
-            }
-
-            if (typeof(UnityEngine.Object).IsAssignableFrom(type) == false)
-            {
-                throw new Exception($"Load asset type is invalid : {type.FullName} !");
-            }
+            // Godot resources are not rooted in a single common asset base type.
+            // Keep this hook for debug builds, but let the backend decide whether a
+            // concrete asset type is supported.
         }
 
         #endregion
 
         #region 调试信息
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DebugPackageData GetDebugPackageData()
         {
             var data = new DebugPackageData();

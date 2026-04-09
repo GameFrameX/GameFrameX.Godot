@@ -1,17 +1,17 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 清理未使用的文件
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public abstract class ClearUnusedBundleFilesOperation : AsyncOperationBase
     {
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class ClearUnusedBundleFilesImplOperation : ClearUnusedBundleFilesOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -30,7 +30,7 @@
         private FSClearUnusedBundleFilesOperation _clearUnusedBundleFilesOpC;
         private ESteps _steps = ESteps.None;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal ClearUnusedBundleFilesImplOperation(IPlayMode impl, IFileSystem fileSystemA, IFileSystem fileSystemB, IFileSystem fileSystemC)
         {
             _impl = impl;
@@ -39,13 +39,13 @@
             _fileSystemC = fileSystemC;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.ClearFileSystemA;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)

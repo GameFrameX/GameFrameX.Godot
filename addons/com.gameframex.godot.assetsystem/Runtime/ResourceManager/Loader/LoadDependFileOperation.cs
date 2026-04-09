@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class LoadDependBundleFileOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -24,19 +24,19 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal LoadDependBundleFileOperation(List<LoadBundleFileOperation> dpends)
         {
             Depends = dpends;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CheckDepend;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -83,7 +83,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             while (true)
@@ -104,7 +104,7 @@ namespace YooAsset
         /// <summary>
         /// 增加引用计数
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Reference()
         {
             foreach (var loader in Depends)
@@ -116,7 +116,7 @@ namespace YooAsset
         /// <summary>
         /// 减少引用计数
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Release()
         {
             foreach (var loader in Depends)
@@ -128,7 +128,7 @@ namespace YooAsset
         /// <summary>
         /// 获取资源包的调试信息列表
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void GetBundleDebugInfos(List<DebugBundleInfo> output)
         {
             foreach (var loader in Depends)

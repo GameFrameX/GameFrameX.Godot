@@ -1,9 +1,9 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DWFSInitializeOperation : FSInitializeFileSystemOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -16,19 +16,19 @@
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DWFSInitializeOperation(DefaultWebFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.LoadCatalogFile;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -40,13 +40,6 @@
             {
                 if (_loadCatalogFileOp == null)
                 {
-#if UNITY_EDITOR
-                    // 兼容性初始化
-                    // 说明：内置文件系统在编辑器下运行时需要动态生成
-                    var packageRoot = _fileSystem.GetStreamingAssetsPackageRoot();
-                    DefaultBuildinFileSystemBuild.CreateBuildinCatalogFile(_fileSystem.PackageName, packageRoot);
-#endif
-
                     _loadCatalogFileOp = new LoadWebCatalogFileOperation(_fileSystem);
                     OperationSystem.StartOperation(_fileSystem.PackageName, _loadCatalogFileOp);
                 }

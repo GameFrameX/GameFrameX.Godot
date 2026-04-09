@@ -1,12 +1,11 @@
-﻿using System.IO;
-using UnityEngine;
+using System.IO;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DCFSLoadPackageManifestOperation : FSLoadPackageManifestOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -28,7 +27,7 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DCFSLoadPackageManifestOperation(DefaultCacheFileSystem fileSystem, string packageVersion, bool isRemote, int timeout)
         {
             _fileSystem = fileSystem;
@@ -37,13 +36,13 @@ namespace YooAsset
             _timeout = timeout;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = _isRemote ? ESteps.DownloadPackageHash : ESteps.LoadCachePackageHash;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -147,7 +146,7 @@ namespace YooAsset
                     _steps = ESteps.Done;
                     Manifest = _loadCachePackageManifestOp.Manifest;
                     Status = EOperationStatus.Succeed;
-                    Debug.Log($"DCFSLoadPackageManifestOperation 加载本地资源清单成功：{Manifest.PackageName} {Manifest.PackageVersion}");
+                    AssetSystemLogger.Log($"DCFSLoadPackageManifestOperation 加载本地资源清单成功：{Manifest.PackageName} {Manifest.PackageVersion}");
                 }
                 else
                 {
@@ -159,14 +158,14 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void ClearCacheFatalFile()
         {
             // 注意：如果加载沙盒内的清单报错，为了避免流程被卡住，主动把损坏的文件删除。
             var manifestFilePath = _fileSystem.GetCachePackageManifestFilePath(_packageVersion);
             if (File.Exists(manifestFilePath))
             {
-                YooLogger.Warning($"Invalid cache manifest file have been removed : {manifestFilePath}");
+                AssetSystemLogger.Warning($"Invalid cache manifest file have been removed : {manifestFilePath}");
                 File.Delete(manifestFilePath);
             }
 

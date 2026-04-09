@@ -22,8 +22,14 @@ func _init():
     _is_initialized = true
 
 func change_locale(new_locale: String):
-    curr_locale = new_locale
-    var locale_path = "res://addons/ds_inspector/Localization/" + new_locale + ".json"
+    var resolved_locale = new_locale.strip_edges()
+    if resolved_locale.is_empty():
+        resolved_locale = default_locale
+    if not available_locales.has(resolved_locale):
+        resolved_locale = default_locale
+
+    curr_locale = resolved_locale
+    var locale_path = "res://addons/ds_inspector/Localization/" + resolved_locale + ".json"
     
     # 加载语言文件
     if FileAccess.file_exists(locale_path):
@@ -37,10 +43,12 @@ func change_locale(new_locale: String):
             if error == OK:
                 curr_map = json.data
             else:
-                push_error("Failed to parse JSON for locale: " + new_locale)
+                push_error("Failed to parse JSON for locale: " + resolved_locale)
                 curr_map = {}
     else:
-        push_error("Locale file not found: " + locale_path)
+        push_warning("Locale file not found: " + locale_path + ", fallback to default locale.")
+        if resolved_locale != default_locale:
+            return change_locale(default_locale)
         curr_map = {}
     
     # 加载默认语言文件（如果还没加载）

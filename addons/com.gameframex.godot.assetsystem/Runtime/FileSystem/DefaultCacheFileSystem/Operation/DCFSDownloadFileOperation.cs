@@ -1,10 +1,9 @@
 using System.IO;
-using UnityEngine;
-using UnityEngine.Networking;
+using GameFrameX.AssetSystem.Networking;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class DCFSDownloadNormalFileOperation : DefaultDownloadFileOperation
     {
         private readonly DefaultCacheFileSystem _fileSystem;
@@ -13,20 +12,20 @@ namespace YooAsset
         private string _tempFilePath;
         private ESteps _steps = ESteps.None;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DCFSDownloadNormalFileOperation(DefaultCacheFileSystem fileSystem, PackageBundle bundle, DownloadParam param) : base(bundle, param)
         {
             _fileSystem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _tempFilePath = _fileSystem.GetTempFilePath(Bundle);
             _steps = ESteps.CheckExists;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -96,7 +95,7 @@ namespace YooAsset
                         if (_steps == ESteps.Done)
                         {
                             Status = EOperationStatus.Failed;
-                            YooLogger.Error(Error);
+                            AssetSystemLogger.Error(Error);
                         }
                     }
                 }
@@ -122,7 +121,7 @@ namespace YooAsset
                         if (_steps == ESteps.Done)
                         {
                             Status = EOperationStatus.Failed;
-                            YooLogger.Error(Error);
+                            AssetSystemLogger.Error(Error);
                         }
                     }
                 }
@@ -160,7 +159,7 @@ namespace YooAsset
                         _steps = ESteps.Done;
                         Status = EOperationStatus.Failed;
                         Error = $"{_fileSystem.GetType().FullName} failed to write file !";
-                        YooLogger.Error(Error);
+                        AssetSystemLogger.Error(Error);
                     }
                 }
                 else
@@ -183,21 +182,21 @@ namespace YooAsset
                 {
                     Status = EOperationStatus.Failed;
                     _steps = ESteps.Done;
-                    YooLogger.Error(Error);
+                    AssetSystemLogger.Error(Error);
                     return;
                 }
 
-                _tryAgainTimer += Time.unscaledDeltaTime;
+                _tryAgainTimer += AssetSystemTime.UnscaledDeltaTime;
                 if (_tryAgainTimer > 1f)
                 {
                     FailedTryAgain--;
                     _steps = ESteps.CreateRequest;
-                    YooLogger.Warning(Error);
+                    AssetSystemLogger.Warning(Error);
                 }
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal override void InternalOnAbort()
         {
             _steps = ESteps.Done;
@@ -210,7 +209,7 @@ namespace YooAsset
             DisposeWebRequest();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             var isReuqestLocalFile = IsRequestLocalFile();
@@ -247,7 +246,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void CreateWebRequest()
         {
             if (DownloadSystemHelper.HttpTransport != null)
@@ -257,15 +256,15 @@ namespace YooAsset
                 return;
             }
 
-            _webRequest = DownloadSystemHelper.NewUnityWebRequestGet(_requestURL, Param.Timeout);
+            _webRequest = DownloadSystemHelper.CreateWebRequestGet(_requestURL, Param.Timeout);
             var handler = new DownloadHandlerFile(_tempFilePath);
             handler.removeFileOnAbort = true;
             _webRequest.downloadHandler = handler;
             _webRequest.disposeDownloadHandlerOnDispose = true;
-            DownloadSystemHelper.SendRequest(_webRequest);
+            DownloadSystemHelper.SendWebRequest(_webRequest);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private bool WriteHttpDownloadedTempFile(byte[] data)
         {
             if (data == null || data.Length == 0)
@@ -278,7 +277,7 @@ namespace YooAsset
             return true;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void DisposeWebRequest()
         {
             if (_webRequest != null)
@@ -290,7 +289,7 @@ namespace YooAsset
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class DCFSDownloadResumeFileOperation : DefaultDownloadFileOperation
     {
         private readonly DefaultCacheFileSystem _fileSystem;
@@ -301,20 +300,20 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DCFSDownloadResumeFileOperation(DefaultCacheFileSystem fileSystem, PackageBundle bundle, DownloadParam param) : base(bundle, param)
         {
             _fileSystem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _tempFilePath = _fileSystem.GetTempFilePath(Bundle);
             _steps = ESteps.CheckExists;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -394,7 +393,7 @@ namespace YooAsset
                     if (_steps == ESteps.Done)
                     {
                         Status = EOperationStatus.Failed;
-                        YooLogger.Error(Error);
+                        AssetSystemLogger.Error(Error);
                     }
                 }
 
@@ -456,28 +455,28 @@ namespace YooAsset
                 {
                     Status = EOperationStatus.Failed;
                     _steps = ESteps.Done;
-                    YooLogger.Error(Error);
+                    AssetSystemLogger.Error(Error);
                     return;
                 }
 
-                _tryAgainTimer += Time.unscaledDeltaTime;
+                _tryAgainTimer += AssetSystemTime.UnscaledDeltaTime;
                 if (_tryAgainTimer > 1f)
                 {
                     FailedTryAgain--;
                     _steps = ESteps.CreateRequest;
-                    YooLogger.Warning(Error);
+                    AssetSystemLogger.Warning(Error);
                 }
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal override void InternalOnAbort()
         {
             _steps = ESteps.Done;
             DisposeWebRequest();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             var isReuqestLocalFile = IsRequestLocalFile();
@@ -509,10 +508,10 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void CreateWebRequest(long beginLength)
         {
-            _webRequest = DownloadSystemHelper.NewUnityWebRequestGet(_requestURL, Param.Timeout);
+            _webRequest = DownloadSystemHelper.CreateWebRequestGet(_requestURL, Param.Timeout);
 #if UNITY_2019_4_OR_NEWER
             var handler = new DownloadHandlerFile(_tempFilePath, true);
             handler.removeFileOnAbort = false;
@@ -527,10 +526,10 @@ namespace YooAsset
                 _webRequest.SetRequestHeader("Range", $"bytes={beginLength}-");
             }
 
-            DownloadSystemHelper.SendRequest(_webRequest);
+            DownloadSystemHelper.SendWebRequest(_webRequest);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void DisposeWebRequest()
         {
             if (_downloadHandle != null)
@@ -547,7 +546,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void ClearTempFileWhenError()
         {
             if (_fileSystem.ResumeDownloadResponseCodes == null)

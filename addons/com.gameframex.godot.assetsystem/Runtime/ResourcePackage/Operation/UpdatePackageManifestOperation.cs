@@ -1,20 +1,18 @@
 using System.IO;
-using UnityEngine;
-
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 向远端请求并更新清单
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public abstract class UpdatePackageManifestOperation : AsyncOperationBase
     {
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class UpdatePackageManifestImplOperation : UpdatePackageManifestOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -33,7 +31,7 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal UpdatePackageManifestImplOperation(IPlayMode impl, IFileSystem fileSystem, string packageVersion, int timeout)
         {
             _impl = impl;
@@ -43,13 +41,13 @@ namespace YooAsset
             _previousManifest = impl.ActiveManifest;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CheckParams;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -139,7 +137,7 @@ namespace YooAsset
                     }
 
                     _steps = ESteps.Done;
-                    Debug.Log($"LoadPackageManifest Succeed:{_impl.ActiveManifest.PackageName}  {_impl.ActiveManifest.PackageVersion}");
+                    AssetSystemLogger.Log($"LoadPackageManifest Succeed:{_impl.ActiveManifest.PackageName}  {_impl.ActiveManifest.PackageVersion}");
                     Status = EOperationStatus.Succeed;
                 }
                 else
@@ -150,7 +148,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void CompleteFailed(string error)
         {
             _steps = ESteps.Done;
@@ -158,12 +156,12 @@ namespace YooAsset
             Error = error;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void SavePackageVersion()
         {
             if (_impl.ActiveManifest != null)
             {
-                var fileName = YooAssetSettingsData.GetPackageVersionFileName(_fileSystem.PackageName);
+                var fileName = AssetSystemSettingsData.GetPackageVersionFileName(_fileSystem.PackageName);
                 var _manifestFileRoot = PathUtility.Combine(_fileSystem.FileRoot, DefaultCacheFileSystemDefine.ManifestFilesFolderName);
                 var filePath = Path.Combine(_manifestFileRoot, fileName);
 
@@ -178,7 +176,7 @@ namespace YooAsset
                 //fs.Close();
                 //fs.Dispose();
                 FileUtility.WriteAllText(filePath, _packageVersion);
-                Debug.LogWarning("保存沙盒版本文件" + _packageVersion);
+                AssetSystemLogger.Warning("保存沙盒版本文件" + _packageVersion);
             }
         }
     }

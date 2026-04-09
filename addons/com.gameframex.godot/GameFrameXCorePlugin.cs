@@ -15,6 +15,8 @@ namespace GameFrameX.Editor
     [Tool]
     public partial class GameFrameXCorePlugin : EditorPlugin
     {
+        private const string TopMenuButtonNodeName = "GameFrameXTopMenuButton";
+
         /// <summary>
         /// 顶部菜单项：日志宏定义子菜单。
         /// </summary>
@@ -205,7 +207,10 @@ namespace GameFrameX.Editor
                 return;
             }
 
+            CleanupStaleTopMenuButtons();
+
             m_TopMenuButton = new MenuButton();
+            m_TopMenuButton.Name = TopMenuButtonNodeName;
             m_TopMenuButton.Text = "GameFrameX";
 
             m_TopPopupMenu = m_TopMenuButton.GetPopup();
@@ -265,6 +270,7 @@ namespace GameFrameX.Editor
             if (m_LogDefinePopupMenu != null)
             {
                 m_LogDefinePopupMenu.IdPressed -= OnLogDefineMenuIdPressed;
+
                 m_LogDefinePopupMenu.QueueFree();
                 m_LogDefinePopupMenu = null;
             }
@@ -286,6 +292,46 @@ namespace GameFrameX.Editor
 
         }
 
+        private void CleanupStaleTopMenuButtons()
+        {
+            var root = EditorInterface.Singleton?.GetBaseControl();
+            if (root == null)
+            {
+                return;
+            }
+
+            CleanupStaleTopMenuButtonsRecursive(root);
+        }
+
+        private void CleanupStaleTopMenuButtonsRecursive(Node node)
+        {
+            foreach (var childObj in node.GetChildren())
+            {
+                if (childObj is not Node childNode)
+                {
+                    continue;
+                }
+
+                CleanupStaleTopMenuButtonsRecursive(childNode);
+                if (childNode is not MenuButton staleButton)
+                {
+                    continue;
+                }
+
+                if (!string.Equals(staleButton.Name, TopMenuButtonNodeName, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                if (staleButton == m_TopMenuButton)
+                {
+                    continue;
+                }
+
+                staleButton.QueueFree();
+            }
+        }
+
         /// <summary>
         /// 功能：处理 GameFrameX 顶层菜单点击。
         /// </summary>
@@ -294,9 +340,9 @@ namespace GameFrameX.Editor
         {
             if (id == TopMenuAssetBuilderId)
             {
-                if (!ShowUnifiedAssetBuilderDialog() && global::YooAssetEditorPlugin.RequestOpenBuilderFromCompatibilityEntry() == false)
+                if (!ShowUnifiedAssetBuilderDialog() && global::AssetSystemEditorPlugin.RequestOpenBuilderFromCompatibilityEntry() == false)
                 {
-                    GD.PrintErr("无法打开资源打包器：统一窗口与 YooAsset 入口均不可用。");
+                    GD.PrintErr("无法打开资源打包器：统一窗口与 AssetSystem 入口均不可用。");
                 }
 
                 return;
@@ -324,6 +370,12 @@ namespace GameFrameX.Editor
         {
             try
             {
+                if (m_AssetSystemBuilderDialog != null && GodotObject.IsInstanceValid(m_AssetSystemBuilderDialog))
+                {
+                    m_AssetSystemBuilderDialog.QueueFree();
+                    m_AssetSystemBuilderDialog = null;
+                }
+
                 if (m_AssetSystemBuilderDialog == null || !GodotObject.IsInstanceValid(m_AssetSystemBuilderDialog))
                 {
                     m_AssetSystemBuilderDialog = new AssetSystemBuilderDialog();

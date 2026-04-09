@@ -1,10 +1,10 @@
-using UnityEngine.Networking;
-using YooAsset;
+using GameFrameX.AssetSystem.Networking;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal class WXFSLoadBundleOperation : FSLoadBundleOperation
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private enum ESteps
     {
         None,
@@ -18,7 +18,7 @@ internal class WXFSLoadBundleOperation : FSLoadBundleOperation
     private ESteps _steps = ESteps.None;
     private string _packagerVersion;
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal WXFSLoadBundleOperation(WechatFileSystem fileSystem, PackageBundle bundle,string packagerVersion)
     {
         _fileSystem = fileSystem;
@@ -26,13 +26,13 @@ internal class WXFSLoadBundleOperation : FSLoadBundleOperation
         _packagerVersion = packagerVersion;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         _steps = ESteps.LoadBundleFile;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
         if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -46,7 +46,7 @@ internal class WXFSLoadBundleOperation : FSLoadBundleOperation
             {
                 string mainURL = _fileSystem.RemoteServices.GetRemoteMainURL(_bundle.FileName, _packagerVersion);
                 _webRequest = UnityWebRequestAssetBundle.GetAssetBundle(mainURL);
-                DownloadSystemHelper.SendRequest(_webRequest);
+                DownloadSystemHelper.SendWebRequest(_webRequest);
             }
 
             DownloadProgress = _webRequest.downloadProgress;
@@ -60,7 +60,7 @@ internal class WXFSLoadBundleOperation : FSLoadBundleOperation
             if (CheckRequestResult())
             {
                 _steps = ESteps.Done;
-                Result = (_webRequest.downloadHandler as DownloadHandlerAssetBundle)?.assetBundle;
+                Result = (_webRequest.downloadHandler as DownloadHandlerAssetBundle)?.BundleFile;
 
 
                 Status = EOperationStatus.Succeed;
@@ -73,7 +73,7 @@ internal class WXFSLoadBundleOperation : FSLoadBundleOperation
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalWaitForAsyncComplete()
     {
         if (_steps != ESteps.Done)
@@ -81,16 +81,16 @@ internal class WXFSLoadBundleOperation : FSLoadBundleOperation
             _steps = ESteps.Done;
             Status = EOperationStatus.Failed;
             Error = "WebGL platform not support sync load method !";
-            UnityEngine.Debug.LogError(Error);
+                    AssetSystemLogger.Error(Error);
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void AbortDownloadOperation()
     {
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private bool CheckRequestResult()
     {
         if (_webRequest.result != UnityWebRequest.Result.Success)

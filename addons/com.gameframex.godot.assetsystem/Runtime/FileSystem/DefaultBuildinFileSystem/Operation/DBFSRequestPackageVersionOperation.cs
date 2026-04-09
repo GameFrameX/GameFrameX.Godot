@@ -1,11 +1,9 @@
-﻿using UnityEngine;
-
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DBFSRequestPackageVersionOperation : FSRequestPackageVersionOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -18,19 +16,19 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DBFSRequestPackageVersionOperation(DefaultBuildinFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.RequestBuildinPackageVersion;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -56,7 +54,7 @@ namespace YooAsset
                     _steps = ESteps.Done;
                     PackageVersion = _requestBuildinPackageVersionOp.PackageVersion;
                     Status = EOperationStatus.Succeed;
-                    Debug.Log("获取包内版本号成功：" + PackageVersion);
+                    AssetSystemLogger.Log("获取包内版本号成功：" + PackageVersion);
                 }
                 else
                 {

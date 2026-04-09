@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 清单文件
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     [Serializable]
     public class PackageManifest
     {
@@ -94,11 +94,16 @@ namespace YooAsset
         /// </summary>
         [NonSerialized] public Dictionary<string, string> AssetPathMapping2;
 
+        /// <summary>
+        /// 资源名映射集合（提供不带路径的资源名/资源名+扩展名获取 AssetPath）。
+        /// </summary>
+        [NonSerialized] private Dictionary<string, string> _assetNameMapping;
+
 
         /// <summary>
         /// 尝试映射为资源路径
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string TryMappingToAssetPath(string location)
         {
             if (string.IsNullOrEmpty(location))
@@ -122,10 +127,28 @@ namespace YooAsset
         }
 
         /// <summary>
+        /// 尝试用不带路径的资源名映射为资源路径。
+        /// 支持 "icon" 和 "icon.png" 两种输入；比较时统一转小写。
+        /// </summary>
+        [AssetSystemPreserve]
+        public bool TryMappingAssetNameToAssetPath(string assetName, out string assetPath)
+        {
+            assetPath = string.Empty;
+            var normalizedAssetName = NormalizeAssetName(assetName);
+            if (string.IsNullOrEmpty(normalizedAssetName))
+            {
+                return false;
+            }
+
+            BuildAssetNameMappingIfNeeded();
+            return _assetNameMapping.TryGetValue(normalizedAssetName, out assetPath);
+        }
+
+        /// <summary>
         /// 获取主资源包
         /// 注意：传入的资源路径一定合法有效！
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public PackageBundle GetMainPackageBundle(string assetPath)
         {
             if (AssetDic.TryGetValue(assetPath, out var packageAsset))
@@ -151,7 +174,7 @@ namespace YooAsset
         /// 获取资源依赖列表
         /// 注意：传入的资源路径一定合法有效！
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public PackageBundle[] GetAllDependencies(string assetPath)
         {
             var packageBundle = GetMainPackageBundle(assetPath);
@@ -175,7 +198,7 @@ namespace YooAsset
         /// <summary>
         /// 尝试获取包裹的资源
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool TryGetPackageAsset(string assetPath, out PackageAsset result)
         {
             return AssetDic.TryGetValue(assetPath, out result);
@@ -184,7 +207,7 @@ namespace YooAsset
         /// <summary>
         /// 尝试获取包裹的资源包
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool TryGetPackageBundleByBundleName(string bundleName, out PackageBundle result)
         {
             return BundleDic1.TryGetValue(bundleName, out result);
@@ -193,7 +216,7 @@ namespace YooAsset
         /// <summary>
         /// 尝试获取包裹的资源包
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool TryGetPackageBundleByFileName(string fileName, out PackageBundle result)
         {
             return BundleDic2.TryGetValue(fileName, out result);
@@ -202,7 +225,7 @@ namespace YooAsset
         /// <summary>
         /// 尝试获取包裹的资源包
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool TryGetPackageBundleByBundleGUID(string bundleGUID, out PackageBundle result)
         {
             return BundleDic3.TryGetValue(bundleGUID, out result);
@@ -211,16 +234,82 @@ namespace YooAsset
         /// <summary>
         /// 是否包含资源文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool IsIncludeBundleFile(string bundleGUID)
         {
             return BundleDic3.ContainsKey(bundleGUID);
         }
 
+        [AssetSystemPreserve]
+        private void BuildAssetNameMappingIfNeeded()
+        {
+            if (_assetNameMapping != null)
+            {
+                return;
+            }
+
+            _assetNameMapping = new Dictionary<string, string>();
+            for (var i = 0; i < AssetList.Count; i++)
+            {
+                var packageAsset = AssetList[i];
+                RegisterAssetNameMapping(packageAsset.AssetPath);
+                RegisterAssetNameMapping(packageAsset.Address);
+            }
+        }
+
+        [AssetSystemPreserve]
+        private void RegisterAssetNameMapping(string assetPath)
+        {
+            if (string.IsNullOrEmpty(assetPath))
+            {
+                return;
+            }
+
+            var fileName = NormalizeAssetName(GetFileName(assetPath));
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            if (_assetNameMapping.ContainsKey(fileName) == false)
+            {
+                _assetNameMapping.Add(fileName, assetPath);
+            }
+
+            var fileNameWithoutExtension = NormalizeAssetName(Path.GetFileNameWithoutExtension(fileName));
+            if (string.IsNullOrEmpty(fileNameWithoutExtension) == false && _assetNameMapping.ContainsKey(fileNameWithoutExtension) == false)
+            {
+                _assetNameMapping.Add(fileNameWithoutExtension, assetPath);
+            }
+        }
+
+        [AssetSystemPreserve]
+        private static string NormalizeAssetName(string assetName)
+        {
+            if (string.IsNullOrWhiteSpace(assetName))
+            {
+                return string.Empty;
+            }
+
+            return GetFileName(assetName.Replace('\\', '/')).Trim().ToLowerInvariant();
+        }
+
+        [AssetSystemPreserve]
+        private static string GetFileName(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return string.Empty;
+            }
+
+            var index = path.LastIndexOf('/');
+            return index >= 0 ? path.Substring(index + 1) : path;
+        }
+
         /// <summary>
         /// 获取资源信息列表
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetInfo[] GetAssetsInfoByTags(string[] tags)
         {
             var result = new List<AssetInfo>(100);
@@ -240,7 +329,7 @@ namespace YooAsset
         /// 资源定位地址转换为资源信息。
         /// </summary>
         /// <returns>如果转换失败会返回一个无效的资源信息类</returns>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetInfo ConvertLocationToAssetInfo(string location, Type assetType)
         {
             DebugCheckLocation(location);
@@ -268,12 +357,12 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private string ConvertLocationToAssetInfoMapping(string location)
         {
             if (string.IsNullOrEmpty(location))
             {
-                YooLogger.Error("Failed to mapping location to asset path, The location is null or empty.");
+                AssetSystemLogger.Error("Failed to mapping location to asset path, The location is null or empty.");
                 return string.Empty;
             }
 
@@ -288,7 +377,7 @@ namespace YooAsset
             }
             else
             {
-                YooLogger.Warning($"Failed to mapping location to asset path : {location}");
+                AssetSystemLogger.Warning($"Failed to mapping location to asset path : {location}");
                 return string.Empty;
             }
         }
@@ -297,12 +386,12 @@ namespace YooAsset
         /// 资源GUID转换为资源信息。
         /// </summary>
         /// <returns>如果转换失败会返回一个无效的资源信息类</returns>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetInfo ConvertAssetGUIDToAssetInfo(string assetGUID, Type assetType)
         {
             if (IncludeAssetGUID == false)
             {
-                YooLogger.Warning("Package manifest not include asset guid ! Please check asset bundle collector settings.");
+                AssetSystemLogger.Warning("Package manifest not include asset guid ! Please check asset bundle collector settings.");
                 var assetInfo = new AssetInfo(PackageName, "AssetGUID data is empty !");
                 return assetInfo;
             }
@@ -330,12 +419,12 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private string ConvertAssetGUIDToAssetInfoMapping(string assetGUID)
         {
             if (string.IsNullOrEmpty(assetGUID))
             {
-                YooLogger.Error("Failed to mapping assetGUID to asset path, The assetGUID is null or empty.");
+                AssetSystemLogger.Error("Failed to mapping assetGUID to asset path, The assetGUID is null or empty.");
                 return string.Empty;
             }
 
@@ -345,7 +434,7 @@ namespace YooAsset
             }
             else
             {
-                YooLogger.Warning($"Failed to mapping assetGUID to asset path : {assetGUID}");
+                AssetSystemLogger.Warning($"Failed to mapping assetGUID to asset path : {assetGUID}");
                 return string.Empty;
             }
         }
@@ -353,7 +442,7 @@ namespace YooAsset
         /// <summary>
         /// 获取资源包内的主资源列表
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string[] GetBundleIncludeAssets(string assetPath)
         {
             var assetList = new List<string>();
@@ -373,7 +462,7 @@ namespace YooAsset
 
         #region 调试方法
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         [Conditional("DEBUG")]
         private void DebugCheckLocation(string location)
         {
@@ -385,13 +474,13 @@ namespace YooAsset
                 {
                     if (location.Length == index + 1)
                     {
-                        YooLogger.Warning($"Found blank character in location : \"{location}\"");
+                        AssetSystemLogger.Warning($"Found blank character in location : \"{location}\"");
                     }
                 }
 
                 if (location.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
                 {
-                    YooLogger.Warning($"Found illegal character in location : \"{location}\"");
+                    AssetSystemLogger.Warning($"Found illegal character in location : \"{location}\"");
                 }
             }
         }

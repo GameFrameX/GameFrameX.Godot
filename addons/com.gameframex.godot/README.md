@@ -1,9 +1,9 @@
 ﻿<div align="center">
 
-# GameFrameX Unity Package
+# GameFrameX Godot Plugin
 
-[![Version](https://img.shields.io/badge/version-1.3.6-blue.svg)](https://github.com/GameFrameX/com.gameframex.unity)
-[![Unity](https://img.shields.io/badge/Unity-2019.4+-green.svg)](https://unity3d.com/get-unity/download)
+[![Version](https://img.shields.io/badge/version-1.3.6-blue.svg)](https://github.com/GameFrameX/GameFrameX.Godot)
+[![Godot](https://img.shields.io/badge/Godot-4.x-green.svg)](https://godotengine.org/)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE.md)
 [![Documentation](https://img.shields.io/badge/docs-gameframex.doc.alianblank.com-brightgreen.svg)](https://gameframex.doc.alianblank.com)
 
@@ -17,40 +17,38 @@
 
 ## ✨ 项目简介
 
-GameFrameX 是一个专为独立游戏开发者设计的现代化Unity游戏框架，提供完整的前后端一体化解决方案。框架采用模块化架构设计，内置丰富的游戏开发工具和组件，帮助开发者快速构建高质量的游戏项目。
+GameFrameX 是一个面向独立游戏开发者的 Godot 游戏框架与插件集合，提供模块化运行时、资源系统、UI 系统和编辑器工具，支持在 Godot 项目中组织完整的前后端一体化工作流。
 
 ### 🎯 核心特性
 
 - 🏗️ **模块化架构** - 基于组件系统的可扩展框架设计
 - 🔧 **丰富工具集** - 内置多种开发辅助工具和编辑器扩展
 - 📦 **对象池管理** - 高效的内存管理和对象复用机制
-- 🎨 **扩展方法库** - 丰富的Unity引擎扩展方法
+- 🎨 **扩展方法库** - 丰富的 Godot 项目辅助扩展
 - 🛠️ **实用工具类** - 涵盖加密、压缩、网络等常用功能
-- 📱 **多平台支持** - 支持PC、移动端、WebGL等多平台部署
+- 📱 **多平台支持** - 支持 PC、移动端、Web 等平台部署
 - 🔥 **热更新支持** - 内置HybridCLR热更新解决方案
 
 ## 📋 系统要求
 
-- **Unity版本**: 2019.4 或更高版本
-- **平台支持**: Windows, macOS, Linux, iOS, Android, WebGL
+- **Godot版本**: 4.x
+- **平台支持**: Windows, macOS, Linux, iOS, Android, Web
 - **.NET版本**: .NET Standard 2.0+
 
 ## 🚀 快速开始
 
 ### 安装方式
 
-#### 方式一：Unity Package Manager (推荐)
+#### 方式一：Git 克隆到 Godot 项目
 
-1. 打开Unity编辑器
-2. 打开 `Window` → `Package Manager`
-3. 点击左上角的 `+` 按钮
-4. 选择 `Add package from git URL`
-5. 输入: `https://github.com/GameFrameX/com.gameframex.unity.git`
+1. 克隆仓库到本地
+2. 用 Godot 4.x 打开项目根目录
+3. 启用需要的插件并等待 C# 工程生成完成
 
 #### 方式二：手动下载
 
-1. 下载最新的 [Release](https://github.com/GameFrameX/com.gameframex.unity/releases)
-2. 解压到项目的 `Packages` 目录下
+1. 下载最新的 [Release](https://github.com/GameFrameX/GameFrameX.Godot/releases)
+2. 解压到本地目录后，用 Godot 打开项目
 
 ### 基础使用
 
@@ -84,7 +82,7 @@ public class GameManager : MonoBehaviour
 | **ObjectPool** | 对象池系统 | 对象复用、内存优化、性能提升 |
 | **ReferencePool** | 引用池系统 | 引用类型对象管理、GC优化 |
 | **Helper** | 工具助手类 | 文件操作、网络请求、数学计算等 |
-| **Extension** | 扩展方法库 | Unity引擎类型扩展、便捷操作 |
+| **Extension** | 扩展方法库 | Godot 类型扩展、便捷操作 |
 | **Utility** | 实用工具类 | 加密解密、压缩解压、哈希计算 |
 
 ### 编辑器工具
@@ -158,8 +156,8 @@ string sha1 = Utility.Hash.Sha1.ComputeHash("input");
 ## 🤝 社区与支持
 
 - 💬 **QQ讨论群**: 216332935
-- 🐛 **问题反馈**: [GitHub Issues](https://github.com/GameFrameX/com.gameframex.unity/issues)
-- 💡 **功能建议**: [GitHub Discussions](https://github.com/GameFrameX/com.gameframex.unity/discussions)
+- 🐛 **问题反馈**: [GitHub Issues](https://github.com/GameFrameX/GameFrameX.Godot/issues)
+- 💡 **功能建议**: [GitHub Discussions](https://github.com/GameFrameX/GameFrameX.Godot/discussions)
 - 📧 **邮件联系**: alianblank@outlook.com
 
 ## 🔄 更新日志
@@ -189,6 +187,6 @@ string sha1 = Utility.Hash.Sha1.ComputeHash("input");
 
 **如果这个项目对你有帮助，请给我们一个 ⭐ Star！**
 
-[⬆ 回到顶部](#gameframex-unity-package)
+[⬆ 回到顶部](#gameframex-godot-plugin)
 
 </div>

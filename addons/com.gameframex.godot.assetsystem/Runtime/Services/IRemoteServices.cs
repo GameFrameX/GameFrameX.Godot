@@ -1,6 +1,6 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public interface IRemoteServices
     {
         /// <summary>
@@ -8,7 +8,7 @@
         /// </summary>
         /// <param name="fileName">请求的文件名称</param>
         /// <param name="packageVersion">资源包版本</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         string GetRemoteMainURL(string fileName, string packageVersion);
 
         /// <summary>
@@ -16,7 +16,7 @@
         /// </summary>
         /// <param name="fileName">请求的文件名称</param>
         /// <param name="packageVersion">资源包版本</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         string GetRemoteFallbackURL(string fileName, string packageVersion);
     }
 }

@@ -1,6 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("YooAsset.Editor")]
-[assembly: InternalsVisibleTo("YooAsset.EditorExtension")]
-[assembly: InternalsVisibleTo("YooAsset.RuntimeExtension")]
+[assembly: InternalsVisibleTo("GameFrameX.AssetSystem.Editor")]
+[assembly: InternalsVisibleTo("GameFrameX.AssetSystem.EditorExtension")]
+[assembly: InternalsVisibleTo("GameFrameX.AssetSystem.RuntimeExtension")]
 [assembly: InternalsVisibleTo("Assembly-CSharp-Editor")]

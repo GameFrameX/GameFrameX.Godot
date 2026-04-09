@@ -1,6 +1,6 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class DownloadParam
     {
         public readonly int FailedTryAgain;
@@ -21,7 +21,7 @@
         /// </summary>
         public string FallbackURL { set; get; }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DownloadParam(int failedTryAgain, int timeout)
         {
             FailedTryAgain = failedTryAgain;

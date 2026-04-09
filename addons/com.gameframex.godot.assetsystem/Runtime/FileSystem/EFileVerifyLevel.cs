@@ -1,9 +1,9 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 文件校验等级
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public enum EFileVerifyLevel
     {
         /// <summary>
