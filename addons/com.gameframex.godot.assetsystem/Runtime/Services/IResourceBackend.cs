@@ -1,17 +1,18 @@
-using UnityEngine;
+using Godot;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal interface IResourceBackend
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         bool TryCreateBundleAssetLoader(object bundleResult, out IBundleAssetLoader loader, out string error);
 
-        [UnityEngine.Scripting.Preserve]
-        GameObject Instantiate(UnityEngine.Object assetObject, bool setPositionAndRotation, Vector3 position, Quaternion rotation, Transform parent, bool worldPositionStays);
+        // Migration note (scheme 2): instantiate path is now Godot-native.
+        [AssetSystemPreserve]
+        Node Instantiate(object assetObject, Node parent);
 
-        [UnityEngine.Scripting.Preserve]
-        void Destroy(UnityEngine.Object target);
+        [AssetSystemPreserve]
+        void Destroy(object target);
     }
 }

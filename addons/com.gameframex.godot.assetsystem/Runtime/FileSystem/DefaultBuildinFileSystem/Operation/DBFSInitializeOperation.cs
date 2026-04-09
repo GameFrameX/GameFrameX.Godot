@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.IO;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DBFSInitializeOperation : FSInitializeFileSystemOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -20,19 +20,19 @@ namespace YooAsset
         private LoadBuildinCatalogFileOperation _loadCatalogFileOp;
         private ESteps _steps = ESteps.None;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DBFSInitializeOperation(DefaultBuildinFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.InitUnpackFileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -69,13 +69,6 @@ namespace YooAsset
             {
                 if (_loadCatalogFileOp == null)
                 {
-#if UNITY_EDITOR
-                    // 兼容性初始化
-                    // 说明：内置文件系统在编辑器下运行时需要动态生成
-                    var packageRoot = _fileSystem.GetStreamingAssetsPackageRoot();
-                    DefaultBuildinFileSystemBuild.CreateBuildinCatalogFile(_fileSystem.PackageName, packageRoot);
-#endif
-
                     _loadCatalogFileOp = new LoadBuildinCatalogFileOperation(_fileSystem);
                     OperationSystem.StartOperation(_fileSystem.PackageName, _loadCatalogFileOp);
                 }

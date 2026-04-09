@@ -32,7 +32,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GameFrameX.Asset.Runtime;
 using GameFrameX.ObjectPool;
 
 namespace GameFrameX.UI.Runtime
@@ -112,12 +111,6 @@ namespace GameFrameX.UI.Runtime
         /// </summary>
         /// <param name="objectPoolManager">对象池管理器。</param>
         void SetObjectPoolManager(IObjectPoolManager objectPoolManager);
-
-        /*/// <summary>
-        /// 设置资源管理器。
-        /// </summary>
-        /// <param name="assetManager">资源管理器。</param>
-        void SetResourceManager(IAssetManager assetManager);*/
 
         /// <summary>
         /// 设置界面辅助器。

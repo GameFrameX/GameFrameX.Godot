@@ -1,4 +1,4 @@
-local CreateTemplate = [[
+﻿local CreateTemplate = [[
         private static GObject CreateGObject()
         {
             return UIPackage.CreateObject(UIPackageName, UIResName);
@@ -27,7 +27,7 @@ local CreateTemplate = [[
 
 ---@type string UI代码模板
 local FUITemplate = [[
-#if ENABLE_UI_FAIRYGUI
+#if FAIRY_GUI
 using FairyGUI;
 using Cysharp.Threading.Tasks;
 using FairyGUI.Utils;
@@ -103,7 +103,7 @@ __AWAKE__
             base.Dispose();
             self.Remove();
 __DISPOSE__
-            self = null;            
+            self = null;
         }
 
         private {className}(GObject gObject) : base(gObject)
@@ -115,7 +115,7 @@ __DISPOSE__
 #endif]]
 ---@type string UI包资源模板
 local FUIPackageTemplate = [[
-#if ENABLE_UI_FAIRYGUI
+#if FAIRY_GUI
 
 namespace {namespaceName}
 {

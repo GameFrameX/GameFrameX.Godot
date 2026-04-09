@@ -1,6 +1,7 @@
 using System;
 using FairyGUI;
 using Godot;
+using Godot.Hotfix.Config;
 
 namespace Godot.Hotfix.FairyGUI
 {
@@ -14,6 +15,7 @@ namespace Godot.Hotfix.FairyGUI
         public override void OnOpen(object userData)
         {
             base.OnOpen(userData);
+            _ = ConfigRuntimeDispatcher.EnsureLoadedAndLogDemoAsync("FairyGUI.UILogin");
 
             UnbindLoginTrigger();
             FairyGuiRuntimeBridge.DisposeView(ref _view);

@@ -2,6 +2,7 @@ using System;
 using GameFrameX.UI.GDGUI.Runtime;
 using GameFrameX.UI.Runtime;
 using Godot;
+using Godot.Hotfix.Config;
 
 namespace Godot.Hotfix.GodotGUI
 {
@@ -18,6 +19,7 @@ namespace Godot.Hotfix.GodotGUI
 		{
 			base.OnOpen(userData);
 			GD.Print("[UILogin] OnOpen");
+			_ = ConfigRuntimeDispatcher.EnsureLoadedAndLogDemoAsync("GodotGUI.UILogin");
 			BindLoginButton();
 		}
 

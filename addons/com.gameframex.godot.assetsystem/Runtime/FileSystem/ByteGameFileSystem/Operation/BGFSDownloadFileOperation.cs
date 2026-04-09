@@ -1,26 +1,25 @@
-using UnityEngine;
-using UnityEngine.Networking;
-using YooAsset;
+using GameFrameX.AssetSystem.Networking;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal class BGFSDownloadFileOperation : DefaultDownloadFileOperation
 {
     private ByteGameFileSystem _fileSystem;
     private ESteps _steps = ESteps.None;
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal BGFSDownloadFileOperation(ByteGameFileSystem fileSystem, PackageBundle bundle, DownloadParam param) : base(bundle, param)
     {
         _fileSystem = fileSystem;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         _steps = ESteps.CreateRequest;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
         // 创建下载器
@@ -62,7 +61,7 @@ internal class BGFSDownloadFileOperation : DefaultDownloadFileOperation
                 if (_steps == ESteps.Done)
                 {
                     Status = EOperationStatus.Failed;
-                    YooLogger.Error(Error);
+                    AssetSystemLogger.Error(Error);
                 }
             }
 
@@ -77,31 +76,31 @@ internal class BGFSDownloadFileOperation : DefaultDownloadFileOperation
             {
                 Status = EOperationStatus.Failed;
                 _steps = ESteps.Done;
-                YooLogger.Error(Error);
+                AssetSystemLogger.Error(Error);
                 return;
             }
 
-            _tryAgainTimer += Time.unscaledDeltaTime;
+            _tryAgainTimer += AssetSystemTime.UnscaledDeltaTime;
             if (_tryAgainTimer > 1f)
             {
                 FailedTryAgain--;
                 _steps = ESteps.CreateRequest;
-                YooLogger.Warning(Error);
+                AssetSystemLogger.Warning(Error);
             }
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private void CreateWebRequest()
     {
         //TODO : 抖音小游戏没有找到预下载方法
         _webRequest = UnityWebRequestAssetBundle.GetAssetBundle(_requestURL);
         DownloadSystemHelper.SetRequestTimeout(_webRequest, Param.Timeout);
         _webRequest.disposeDownloadHandlerOnDispose = true;
-        DownloadSystemHelper.SendRequest(_webRequest);
+        DownloadSystemHelper.SendWebRequest(_webRequest);
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private void DisposeWebRequest()
     {
         if (_webRequest != null)

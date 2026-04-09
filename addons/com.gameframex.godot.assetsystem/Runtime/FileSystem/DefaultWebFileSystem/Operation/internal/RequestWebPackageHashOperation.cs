@@ -1,9 +1,9 @@
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class RequestWebPackageHashOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -16,7 +16,7 @@ namespace YooAsset
         private readonly int _timeout;
         private readonly bool _appendTimeTicks;
         private int _failedTryAgain = 1;
-        private UnityWebTextRequestOperation _webTextRequestOp;
+        private WebTextRequestOperation _webTextRequestOp;
         private HttpTextRequestOperation _httpTextRequestOp;
         private ESteps _steps = ESteps.None;
 
@@ -26,7 +26,7 @@ namespace YooAsset
         public string PackageHash { private set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public RequestWebPackageHashOperation(DefaultWebFileSystem fileSystem, string packageVersion, int timeout, bool appendTimeTicks)
         {
             _fileSystem = fileSystem;
@@ -35,13 +35,13 @@ namespace YooAsset
             _appendTimeTicks = appendTimeTicks;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.RequestPackageHash;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -62,7 +62,7 @@ namespace YooAsset
                     }
                     else
                     {
-                        _webTextRequestOp = new UnityWebTextRequestOperation(url, _timeout, _appendTimeTicks);
+                        _webTextRequestOp = new WebTextRequestOperation(url, _timeout, _appendTimeTicks);
                         OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
                     }
                 }

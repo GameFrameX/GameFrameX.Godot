@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace YooAsset.Editor
+namespace GameFrameX.AssetSystem.Editor
 {
     [Serializable]
     public class AssetInfo

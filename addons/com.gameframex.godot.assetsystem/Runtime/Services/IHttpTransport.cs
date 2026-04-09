@@ -1,15 +1,15 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public interface IHttpTransport
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         Task<HttpResponse> GetTextAsync(string requestURL, int timeout, bool appendTimeTicks, CancellationToken cancellationToken);
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         Task<HttpResponse> GetDataAsync(string requestURL, int timeout, bool appendTimeTicks, CancellationToken cancellationToken);
     }
 }

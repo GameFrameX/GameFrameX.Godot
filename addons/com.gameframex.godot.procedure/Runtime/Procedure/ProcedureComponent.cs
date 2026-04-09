@@ -33,6 +33,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using GameFrameX.Fsm.Runtime;
 using GameFrameX.Runtime;
 using Godot;
@@ -175,15 +176,52 @@ namespace GameFrameX.Procedure.Runtime
                 result.Add(typeName);
             }
 
-            const string configProcedureTypeName = "Godot.Startup.Procedure.ProcedureConfigState";
-            if (!deduplicate.Contains(configProcedureTypeName))
+            var autoAdded = 0;
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                Type configProcedureType = Utility.Assembly.GetType(configProcedureTypeName);
-                if (configProcedureType != null && typeof(ProcedureBase).IsAssignableFrom(configProcedureType))
+                Type[] types;
+                try
                 {
-                    deduplicate.Add(configProcedureTypeName);
-                    result.Add(configProcedureTypeName);
+                    types = assembly.GetTypes();
                 }
+                catch (ReflectionTypeLoadException exception)
+                {
+                    types = exception.Types;
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (types == null || types.Length == 0)
+                {
+                    continue;
+                }
+
+                foreach (var type in types)
+                {
+                    if (type == null || type.IsAbstract || !typeof(ProcedureBase).IsAssignableFrom(type))
+                    {
+                        continue;
+                    }
+
+                    var fullName = type.FullName;
+                    if (string.IsNullOrWhiteSpace(fullName) || !fullName.StartsWith("Godot.Startup.Procedure.", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    if (deduplicate.Add(fullName))
+                    {
+                        result.Add(fullName);
+                        autoAdded++;
+                    }
+                }
+            }
+
+            if (autoAdded > 0)
+            {
+                Log.Info("ProcedureComponent auto-added startup procedures count={0}", autoAdded);
             }
 
             return result.ToArray();

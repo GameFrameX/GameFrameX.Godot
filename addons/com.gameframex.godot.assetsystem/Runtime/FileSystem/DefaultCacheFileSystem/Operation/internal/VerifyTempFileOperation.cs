@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Threading;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class TempFileElement
     {
         public string TempFilePath { private set; get; }
@@ -15,7 +15,7 @@ namespace YooAsset
         /// </summary>
         public int Result = 0;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public TempFileElement(string filePath, string fileCRC, long fileSize)
         {
             TempFilePath = filePath;
@@ -27,10 +27,10 @@ namespace YooAsset
     /// <summary>
     /// 下载文件验证（线程版）
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class VerifyTempFileOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -48,19 +48,19 @@ namespace YooAsset
         public EFileVerifyResult VerifyResult { protected set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal VerifyTempFileOperation(TempFileElement element)
         {
             _element = element;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.VerifyFile;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -99,7 +99,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             while (true)
@@ -113,13 +113,13 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private bool BeginVerifyFileWithThread(TempFileElement element)
         {
             return ThreadPool.QueueUserWorkItem(new WaitCallback(VerifyInThread), element);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void VerifyInThread(object obj)
         {
             var element = (TempFileElement)obj;

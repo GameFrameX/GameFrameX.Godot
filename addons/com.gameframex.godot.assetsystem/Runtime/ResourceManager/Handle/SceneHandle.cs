@@ -1,20 +1,19 @@
 using System;
-using UnityEngine.SceneManagement;
-
-namespace YooAsset
+using Godot;
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class SceneHandle : HandleBase
     {
         private System.Action<SceneHandle> _callback;
         internal string PackageName { set; get; }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal SceneHandle(ProviderOperation provider) : base(provider)
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal override void InvokeCallback()
         {
             _callback?.Invoke(this);
@@ -55,7 +54,7 @@ namespace YooAsset
         /// <summary>
         /// 等待异步执行完毕
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void WaitForAsyncComplete()
         {
             if (IsValidWithWarning == false)
@@ -83,25 +82,41 @@ namespace YooAsset
         }
 
         /// <summary>
-        /// 场景对象
+        /// 场景对象（兼容字段）
         /// </summary>
-        public Scene SceneObject
+        public AssetSceneInfo SceneInfo
         {
             get
             {
                 if (IsValidWithWarning == false)
                 {
-                    return new Scene();
+                    return default;
                 }
 
-                return Provider.SceneObject;
+                return Provider.SceneInfo;
             }
         }
 
         /// <summary>
-        /// 激活场景（当同时存在多个场景时用于切换激活场景）
+        /// 方案2迁移备注：实际运行的 Godot 场景节点。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        public Node SceneNode
+        {
+            get
+            {
+                if (IsValidWithWarning == false)
+                {
+                    return null;
+                }
+
+                return Provider.SceneNode;
+            }
+        }
+
+        /// <summary>
+        /// 激活场景（方案2：直接切换 Godot SceneTree.CurrentScene）
+        /// </summary>
+        [AssetSystemPreserve]
         public bool ActivateScene()
         {
             if (IsValidWithWarning == false)
@@ -109,13 +124,25 @@ namespace YooAsset
                 return false;
             }
 
-            if (SceneObject.IsValid() && SceneObject.isLoaded)
+            if (SceneNode != null && GodotObject.IsInstanceValid(SceneNode))
             {
-                return SceneManager.SetActiveScene(SceneObject);
+                var tree = SceneNode.GetTree() ?? (Engine.GetMainLoop() as SceneTree);
+                if (tree == null)
+                {
+                    return false;
+                }
+
+                if (SceneNode.GetParent() == null)
+                {
+                    tree.Root.AddChild(SceneNode);
+                }
+
+                tree.CurrentScene = SceneNode;
+                return true;
             }
             else
             {
-                YooLogger.Warning($"Scene is invalid or not loaded : {SceneObject.name}");
+                AssetSystemLogger.Warning($"Scene node is invalid or not loaded : {SceneName}");
                 return false;
             }
         }
@@ -123,7 +150,7 @@ namespace YooAsset
         /// <summary>
         /// 解除场景加载挂起操作
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool UnSuspend()
         {
             if (IsValidWithWarning == false)
@@ -146,7 +173,7 @@ namespace YooAsset
         /// <summary>
         /// 是否为主场景
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool IsMainScene()
         {
             if (IsValidWithWarning == false)
@@ -156,7 +183,7 @@ namespace YooAsset
 
             if (Provider is ISceneLoadController sceneLoadController)
             {
-                return sceneLoadController.SceneMode == LoadSceneMode.Single;
+                return sceneLoadController.SceneMode == SceneLoadMode.Single;
             }
             else
             {
@@ -164,7 +191,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool Cancel()
         {
             if (IsValidWithWarning == false)
@@ -184,7 +211,7 @@ namespace YooAsset
         /// <summary>
         /// 异步卸载子场景
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public UnloadSceneOperation UnloadAsync()
         {
             var packageName = GetAssetInfo().PackageName;
@@ -201,8 +228,8 @@ namespace YooAsset
             // 如果是主场景
             if (IsMainScene())
             {
-                var error = $"Cannot unload main scene. Use {nameof(YooAssets.LoadSceneAsync)} method to change the main scene !";
-                YooLogger.Error(error);
+                var error = $"Cannot unload main scene. Use {nameof(AssetSystem.LoadSceneAsync)} method to change the main scene !";
+                AssetSystemLogger.Error(error);
                 var operation = new UnloadSceneOperation(error);
                 OperationSystem.StartOperation(packageName, operation);
                 return operation;

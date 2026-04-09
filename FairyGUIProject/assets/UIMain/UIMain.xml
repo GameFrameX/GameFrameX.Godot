@@ -10,5 +10,8 @@
     <loader id="n1_ob7a" name="player_icon" xy="51,36" size="164,164" align="center" vAlign="middle" fill="scale"/>
     <text id="n2_ob7a" name="player_name" xy="238,45" size="376,61" fontSize="30" autoSize="none" text=""/>
     <text id="n3_ob7a" name="player_level" xy="236,126" size="376,61" fontSize="30" autoSize="none" text=""/>
+    <loader id="n5_ch27" name="logo" xy="56,539" size="164,164" align="center" vAlign="middle" fill="scale">
+      <relation target="" sidePair="left-left,bottom-bottom"/>
+    </loader>
   </displayList>
 </component>

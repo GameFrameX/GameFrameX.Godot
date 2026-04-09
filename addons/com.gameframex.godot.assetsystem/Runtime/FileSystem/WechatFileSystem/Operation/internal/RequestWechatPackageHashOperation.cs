@@ -1,9 +1,9 @@
-using YooAsset;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal class RequestWechatPackageHashOperation : AsyncOperationBase
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private enum ESteps
     {
         None,
@@ -14,7 +14,7 @@ internal class RequestWechatPackageHashOperation : AsyncOperationBase
     private readonly WechatFileSystem _fileSystem;
     private readonly string _packageVersion;
     private readonly int _timeout;
-    private UnityWebTextRequestOperation _webTextRequestOp;
+    private WebTextRequestOperation _webTextRequestOp;
     private int _requestCount = 0;
     private ESteps _steps = ESteps.None;
 
@@ -24,20 +24,20 @@ internal class RequestWechatPackageHashOperation : AsyncOperationBase
     public string PackageHash { private set; get; }
 
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public RequestWechatPackageHashOperation(WechatFileSystem fileSystem, string packageVersion, int timeout)
     {
         _fileSystem = fileSystem;
         _packageVersion = packageVersion;
         _timeout = timeout;
     }
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         _requestCount = WebRequestCounter.GetRequestFailedCount(_fileSystem.PackageName, nameof(RequestWechatPackageHashOperation));
         _steps = ESteps.RequestPackageHash;
     }
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
         if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -47,9 +47,9 @@ internal class RequestWechatPackageHashOperation : AsyncOperationBase
         {
             if (_webTextRequestOp == null)
             {
-                string fileName = YooAssetSettingsData.GetPackageHashFileName(_fileSystem.PackageName, _packageVersion);
+                string fileName = AssetSystemSettingsData.GetPackageHashFileName(_fileSystem.PackageName, _packageVersion);
                 string url = GetRequestURL(fileName);
-                _webTextRequestOp = new UnityWebTextRequestOperation(url, _timeout);
+                _webTextRequestOp = new WebTextRequestOperation(url, _timeout);
                 OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
             }
 
@@ -82,7 +82,7 @@ internal class RequestWechatPackageHashOperation : AsyncOperationBase
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private string GetRequestURL(string fileName)
     {
         // 轮流返回请求地址

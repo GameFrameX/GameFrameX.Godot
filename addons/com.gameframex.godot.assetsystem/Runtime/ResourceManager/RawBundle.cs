@@ -1,13 +1,13 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class RawBundle
     {
         private readonly IFileSystem _fileSystem;
         private readonly PackageBundle _packageBundle;
         private readonly string _filePath;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal RawBundle(IFileSystem fileSystem, PackageBundle packageBundle, string filePath)
         {
             _fileSystem = fileSystem;
@@ -15,13 +15,13 @@
             _filePath = filePath;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetFilePath()
         {
             return _filePath;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public byte[] ReadFileData()
         {
             if (_fileSystem != null)
@@ -34,7 +34,7 @@
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string ReadFileText()
         {
             if (_fileSystem != null)

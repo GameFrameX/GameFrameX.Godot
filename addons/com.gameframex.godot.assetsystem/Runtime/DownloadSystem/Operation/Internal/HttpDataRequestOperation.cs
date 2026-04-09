@@ -1,12 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class HttpDataRequestOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -24,7 +24,7 @@ namespace YooAsset
 
         public byte[] Result { get; private set; }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal HttpDataRequestOperation(string requestURL, int timeout, bool appendTimeTicks)
         {
             _requestURL = requestURL;
@@ -32,13 +32,13 @@ namespace YooAsset
             _appendTimeTicks = appendTimeTicks;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.Request;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -95,7 +95,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal override void InternalOnAbort()
         {
             _steps = ESteps.Done;

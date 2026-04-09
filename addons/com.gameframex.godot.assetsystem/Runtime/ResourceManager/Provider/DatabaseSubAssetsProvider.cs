@@ -1,25 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class DatabaseSubAssetsProvider : ProviderOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DatabaseSubAssetsProvider(ResourceManager manager, string providerGUID, AssetInfo assetInfo) : base(manager, providerGUID, assetInfo)
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             BeginLoadTimeRecord();
             DebugBeginRecording();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
 #if UNITY_EDITOR
@@ -35,7 +33,7 @@ namespace YooAsset
                 if (string.IsNullOrEmpty(guid))
                 {
                     var error = $"Not found asset : {MainAssetInfo.AssetPath}";
-                    YooLogger.Error(error);
+                    AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                     return;
                 }
@@ -76,7 +74,7 @@ namespace YooAsset
                 else
                 {
                     var findAssets = UnityEditor.AssetDatabase.LoadAllAssetRepresentationsAtPath(MainAssetInfo.AssetPath);
-                    var result = new List<Object>(findAssets.Length);
+                    var result = new List<object>(findAssets.Length);
                     foreach (var findAsset in findAssets)
                     {
                         if (MainAssetInfo.AssetType.IsAssignableFrom(findAsset.GetType()))
@@ -106,7 +104,7 @@ namespace YooAsset
                         error = $"Failed to load sub assets : {MainAssetInfo.AssetPath} AssetType : {MainAssetInfo.AssetType}";
                     }
 
-                    YooLogger.Error(error);
+                    AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                 }
                 else

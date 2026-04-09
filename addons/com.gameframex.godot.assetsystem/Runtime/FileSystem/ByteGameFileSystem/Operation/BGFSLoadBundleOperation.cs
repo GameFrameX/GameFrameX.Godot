@@ -1,11 +1,10 @@
-using UnityEngine;
-using UnityEngine.Networking;
-using YooAsset;
+using GameFrameX.AssetSystem.Networking;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal class BGFSLoadBundleOperation : FSLoadBundleOperation
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private enum ESteps
     {
         None,
@@ -18,20 +17,20 @@ internal class BGFSLoadBundleOperation : FSLoadBundleOperation
     private UnityWebRequest _webRequest;
     private ESteps _steps = ESteps.None;
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal BGFSLoadBundleOperation(ByteGameFileSystem fileSystem, PackageBundle bundle)
     {
         _fileSystem = fileSystem;
         _bundle = bundle;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         _steps = ESteps.LoadBundleFile;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
         if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -45,7 +44,7 @@ internal class BGFSLoadBundleOperation : FSLoadBundleOperation
             {
                 var mainURL = _fileSystem.RemoteServices.GetRemoteMainURL(_bundle.FileName, null);
                 _webRequest = UnityWebRequestAssetBundle.GetAssetBundle(mainURL);
-                DownloadSystemHelper.SendRequest(_webRequest);
+                DownloadSystemHelper.SendWebRequest(_webRequest);
             }
 
             DownloadProgress = _webRequest.downloadProgress;
@@ -59,7 +58,7 @@ internal class BGFSLoadBundleOperation : FSLoadBundleOperation
             if (CheckRequestResult())
             {
                 _steps = ESteps.Done;
-                Result = (_webRequest.downloadHandler as DownloadHandlerAssetBundle).assetBundle;
+                Result = (_webRequest.downloadHandler as DownloadHandlerAssetBundle).BundleFile;
                 Status = EOperationStatus.Succeed;
             }
             else
@@ -70,7 +69,7 @@ internal class BGFSLoadBundleOperation : FSLoadBundleOperation
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalWaitForAsyncComplete()
     {
         if (_steps != ESteps.Done)
@@ -78,16 +77,16 @@ internal class BGFSLoadBundleOperation : FSLoadBundleOperation
             _steps = ESteps.Done;
             Status = EOperationStatus.Failed;
             Error = "WebGL platform not support sync load method !";
-            Debug.LogError(Error);
+            AssetSystemLogger.Error(Error);
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void AbortDownloadOperation()
     {
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private bool CheckRequestResult()
     {
         if (_webRequest.result != UnityWebRequest.Result.Success)

@@ -1,6 +1,6 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal abstract class FSDownloadFileOperation : AsyncOperationBase
     {
         public PackageBundle Bundle { private set; get; }
@@ -26,7 +26,7 @@
         public float DownloadProgress { protected set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public FSDownloadFileOperation(PackageBundle bundle)
         {
             Bundle = bundle;
@@ -36,13 +36,13 @@
             DownloadProgress = 0;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Release()
         {
             RefCount--;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Reference()
         {
             RefCount++;

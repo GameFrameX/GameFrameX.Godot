@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class WebRequestCounter
     {
         /// <summary>
@@ -15,7 +15,7 @@ namespace YooAsset
         /// <summary>
         /// 记录请求失败事件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static void RecordRequestFailed(string packageName, string eventName)
         {
             var key = $"{packageName}_{eventName}";
@@ -30,7 +30,7 @@ namespace YooAsset
         /// <summary>
         /// 获取请求失败的次数
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static int GetRequestFailedCount(string packageName, string eventName)
         {
             var key = $"{packageName}_{eventName}";

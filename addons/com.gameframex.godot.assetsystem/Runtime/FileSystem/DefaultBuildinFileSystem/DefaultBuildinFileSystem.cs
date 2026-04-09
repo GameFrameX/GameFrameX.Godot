@@ -1,41 +1,39 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using UnityEngine;
-
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 内置文件系统
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DefaultBuildinFileSystem : IFileSystem
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private class UnpackRemoteServices : IRemoteServices
         {
             private readonly string _buildinPackageRoot;
             protected readonly Dictionary<string, string> _mapping = new(10000);
 
-            [UnityEngine.Scripting.Preserve]
+            [AssetSystemPreserve]
             public UnpackRemoteServices(string buildinPackRoot)
             {
                 _buildinPackageRoot = buildinPackRoot;
             }
 
-            [UnityEngine.Scripting.Preserve]
+            [AssetSystemPreserve]
             string IRemoteServices.GetRemoteMainURL(string fileName, string packageVersion)
             {
                 return GetFileLoadURL(fileName);
             }
 
-            [UnityEngine.Scripting.Preserve]
+            [AssetSystemPreserve]
             string IRemoteServices.GetRemoteFallbackURL(string fileName, string packageVersion)
             {
                 return GetFileLoadURL(fileName);
             }
 
-            [UnityEngine.Scripting.Preserve]
+            [AssetSystemPreserve]
             private string GetFileLoadURL(string fileName)
             {
                 if (_mapping.TryGetValue(fileName, out var url) == false)
@@ -49,12 +47,12 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public class FileWrapper
         {
             public string FileName { private set; get; }
 
-            [UnityEngine.Scripting.Preserve]
+            [AssetSystemPreserve]
             public FileWrapper(string fileName)
             {
                 FileName = fileName;
@@ -113,12 +111,12 @@ namespace YooAsset
         #endregion
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DefaultBuildinFileSystem()
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSInitializeFileSystemOperation InitializeFileSystemAsync()
         {
             var operation = new DBFSInitializeOperation(this);
@@ -126,7 +124,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSRequestPackageVersionOperation LoadLocalPackageVersionAsync(bool appendTimeTicks, int timeout)
         {
             var operation = new DBFSRequestPackageVersionOperation(this);
@@ -134,7 +132,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSLoadPackageManifestOperation LoadLocalPackageManifestAsync(string packageVersion, int timeout)
         {
             var operation = new DBFSLoadPackageManifestOperation(this, packageVersion);
@@ -142,7 +140,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSLoadPackageManifestOperation RequestRemotePackageManifestAsync(string packageVersion, int timeout)
         {
             var operation = new DBFSLoadPackageManifestOperation(this, packageVersion);
@@ -150,7 +148,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSRequestPackageVersionOperation RequestRemotePackageVersionAsync(bool appendTimeTicks, int timeout)
         {
             var operation = new DBFSRequestPackageVersionOperation(this);
@@ -158,26 +156,26 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSClearAllBundleFilesOperation ClearAllBundleFilesAsync()
         {
             return _unpackFileSystem.ClearAllBundleFilesAsync();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSClearUnusedBundleFilesOperation ClearUnusedBundleFilesAsync(PackageManifest manifest)
         {
             return _unpackFileSystem.ClearUnusedBundleFilesAsync(manifest);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSDownloadFileOperation DownloadFileAsync(PackageBundle bundle, DownloadParam param)
         {
             param.ImportFilePath = GetBuildinFileLoadPath(bundle);
             return _unpackFileSystem.DownloadFileAsync(bundle, param);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSLoadBundleOperation LoadBundleFile(PackageBundle bundle)
         {
             if (NeedUnpack(bundle))
@@ -199,10 +197,10 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual void UnloadBundleFile(PackageBundle bundle, object result)
         {
-            var assetBundle = result as AssetBundle;
+            var assetBundle = result as BundleFile;
             if (assetBundle == null)
             {
                 return;
@@ -232,7 +230,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual void SetParameter(string name, object value)
         {
             if (name == FileSystemParametersDefine.FILE_VERIFY_LEVEL)
@@ -253,11 +251,11 @@ namespace YooAsset
             }
             else
             {
-                YooLogger.Warning($"Invalid parameter : {name}");
+                AssetSystemLogger.Warning($"Invalid parameter : {name}");
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual void OnCreate(string packageName, string rootDirectory)
         {
             PackageName = packageName;
@@ -277,30 +275,30 @@ namespace YooAsset
             _unpackFileSystem.OnCreate(packageName, null);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual void OnUpdate()
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual bool Belong(PackageBundle bundle)
         {
             return _wrappers.ContainsKey(bundle.BundleGUID);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual bool Exists(PackageBundle bundle)
         {
             return _wrappers.ContainsKey(bundle.BundleGUID);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual bool NeedDownload(PackageBundle bundle)
         {
             return false;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual bool NeedUnpack(PackageBundle bundle)
         {
             if (Belong(bundle) == false)
@@ -315,13 +313,13 @@ namespace YooAsset
 #endif
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual bool NeedImport(PackageBundle bundle)
         {
             return false;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual byte[] ReadFileData(PackageBundle bundle)
         {
             if (NeedUnpack(bundle))
@@ -338,7 +336,7 @@ namespace YooAsset
             {
                 if (DecryptionServices == null)
                 {
-                    YooLogger.Error($"The {nameof(IDecryptionServices)} is null !");
+                    AssetSystemLogger.Error($"The {nameof(IDecryptionServices)} is null !");
                     return null;
                 }
 
@@ -358,7 +356,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual string ReadFileText(PackageBundle bundle)
         {
             if (NeedUnpack(bundle))
@@ -375,7 +373,7 @@ namespace YooAsset
             {
                 if (DecryptionServices == null)
                 {
-                    YooLogger.Error($"The {nameof(IDecryptionServices)} is null !");
+                    AssetSystemLogger.Error($"The {nameof(IDecryptionServices)} is null !");
                     return null;
                 }
 
@@ -397,24 +395,24 @@ namespace YooAsset
 
         #region 内部方法
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected string GetDefaultRoot()
         {
-            return PathUtility.Combine(Application.streamingAssetsPath, YooAssetSettingsData.Setting.DefaultYooFolderName);
+            return PathUtility.Combine(GodotAssetPath.GetStreamingAssetsRoot(), AssetSystemSettingsData.Setting.DefaultYooFolderName);
         }
 
         /// <summary>
         /// 解析文件系统根目录
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected string ResolveRootDirectory(string rootDirectory)
         {
             var resolvedRoot = string.IsNullOrEmpty(rootDirectory) ? GetDefaultRoot() : rootDirectory;
-            resolvedRoot = PathUtility.ConvertToAbsolutePath(resolvedRoot, Application.dataPath, Application.persistentDataPath);
+            resolvedRoot = PathUtility.ConvertToAbsolutePath(resolvedRoot, GodotAssetPath.GetProjectRoot(), GodotAssetPath.GetPersistentRoot());
             return PathUtility.RegularPath(resolvedRoot);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetBuildinFileLoadPath(PackageBundle bundle)
         {
             if (_buildinFilePaths.TryGetValue(bundle.BundleGUID, out var filePath) == false)
@@ -426,50 +424,50 @@ namespace YooAsset
             return filePath;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetBuildinCatalogFileLoadPath()
         {
             var fileName = Path.GetFileNameWithoutExtension(DefaultBuildinFileSystemDefine.BuildinCatalogFileName);
-            return PathUtility.Combine(YooAssetSettingsData.Setting.DefaultYooFolderName, PackageName, fileName);
+            return PathUtility.Combine(AssetSystemSettingsData.Setting.DefaultYooFolderName, PackageName, fileName);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetBuildinPackageVersionFilePath()
         {
-            var fileName = YooAssetSettingsData.GetPackageVersionFileName(PackageName);
+            var fileName = AssetSystemSettingsData.GetPackageVersionFileName(PackageName);
             return PathUtility.Combine(FileRoot, fileName);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetBuildinPackageHashFilePath(string packageVersion)
         {
-            var fileName = YooAssetSettingsData.GetPackageHashFileName(PackageName, packageVersion);
+            var fileName = AssetSystemSettingsData.GetPackageHashFileName(PackageName, packageVersion);
             return PathUtility.Combine(FileRoot, fileName);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetBuildinPackageManifestFilePath(string packageVersion)
         {
-            var fileName = YooAssetSettingsData.GetManifestBinaryFileName(PackageName, packageVersion);
+            var fileName = AssetSystemSettingsData.GetManifestBinaryFileName(PackageName, packageVersion);
             return PathUtility.Combine(FileRoot, fileName);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetStreamingAssetsPackageRoot()
         {
-            var rootPath = PathUtility.Combine(Application.streamingAssetsPath, YooAssetSettingsData.Setting.DefaultYooFolderName);
+            var rootPath = PathUtility.Combine(GodotAssetPath.GetStreamingAssetsRoot(), AssetSystemSettingsData.Setting.DefaultYooFolderName);
             return PathUtility.Combine(rootPath, PackageName);
         }
 
         /// <summary>
         /// 记录文件信息
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool RecordFile(string bundleGUID, FileWrapper wrapper)
         {
             if (_wrappers.ContainsKey(bundleGUID))
             {
-                YooLogger.Error($"{nameof(DefaultBuildinFileSystem)} has element : {bundleGUID}");
+                AssetSystemLogger.Error($"{nameof(DefaultBuildinFileSystem)} has element : {bundleGUID}");
                 return false;
             }
 
@@ -480,7 +478,7 @@ namespace YooAsset
         /// <summary>
         /// 初始化解压文件系统
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public FSInitializeFileSystemOperation InitializeUpackFileSystem()
         {
             return _unpackFileSystem.InitializeFileSystemAsync();
@@ -489,8 +487,8 @@ namespace YooAsset
         /// <summary>
         /// 加载加密资源文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
-        public AssetBundle LoadEncryptedAssetBundle(PackageBundle bundle)
+        [AssetSystemPreserve]
+        public BundleFile LoadEncryptedAssetBundle(PackageBundle bundle)
         {
             var filePath = GetBuildinFileLoadPath(bundle);
             var fileInfo = new DecryptFileInfo
@@ -508,8 +506,8 @@ namespace YooAsset
         /// <summary>
         /// 加载加密资源文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
-        public AssetBundleCreateRequest LoadEncryptedAssetBundleAsync(PackageBundle bundle)
+        [AssetSystemPreserve]
+        public BundleFileCreateRequest LoadEncryptedAssetBundleAsync(PackageBundle bundle)
         {
             var filePath = GetBuildinFileLoadPath(bundle);
             var fileInfo = new DecryptFileInfo

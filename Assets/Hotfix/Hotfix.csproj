@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**\*;obj\**\*" />
+    <Compile Include="**\*.cs" Exclude="bin\**\*;obj\**\*;UI\FGUI\**\Components\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="Exists('..\..\.godot\mono\temp\bin\$(Configuration)\Godot.dll')">

@@ -1,25 +1,25 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal abstract class FSClearAllBundleFilesOperation : AsyncOperationBase
     {
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class FSClearAllBundleFilesCompleteOperation : FSClearAllBundleFilesOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal FSClearAllBundleFilesCompleteOperation()
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             Status = EOperationStatus.Succeed;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
         }

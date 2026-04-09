@@ -1,23 +1,22 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 内置资源清单目录
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
-    internal class DefaultBuildinFileCatalog : ScriptableObject
+    [AssetSystemPreserve]
+    internal class DefaultBuildinFileCatalog
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         [Serializable]
         public class FileWrapper
         {
             public string BundleGUID;
             public string FileName;
 
-            [UnityEngine.Scripting.Preserve]
+            [AssetSystemPreserve]
             public FileWrapper(string bundleGUID, string fileName)
             {
                 BundleGUID = bundleGUID;

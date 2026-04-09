@@ -1,19 +1,19 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public sealed class AllAssetsHandle : HandleBase, IDisposable
     {
         private Action<AllAssetsHandle> _callback;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal AllAssetsHandle(ProviderOperation provider) : base(provider)
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal override void InvokeCallback()
         {
             _callback?.Invoke(this);
@@ -54,7 +54,7 @@ namespace YooAsset
         /// <summary>
         /// 等待异步执行完毕
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void WaitForAsyncComplete()
         {
             if (IsValidWithWarning == false)
@@ -68,7 +68,7 @@ namespace YooAsset
         /// <summary>
         /// 释放资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Release()
         {
             ReleaseInternal();
@@ -77,7 +77,7 @@ namespace YooAsset
         /// <summary>
         /// 释放资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Dispose()
         {
             ReleaseInternal();
@@ -87,7 +87,7 @@ namespace YooAsset
         /// <summary>
         /// 子资源对象集合
         /// </summary>
-        public IReadOnlyList<UnityEngine.Object> AllAssetObjects
+        public IReadOnlyList<object> AllAssetObjects
         {
             get
             {

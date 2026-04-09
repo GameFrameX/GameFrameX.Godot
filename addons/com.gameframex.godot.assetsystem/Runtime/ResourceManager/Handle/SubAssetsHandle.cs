@@ -1,19 +1,19 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public sealed class SubAssetsHandle : HandleBase, IDisposable
     {
         private Action<SubAssetsHandle> _callback;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal SubAssetsHandle(ProviderOperation provider) : base(provider)
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal override void InvokeCallback()
         {
             _callback?.Invoke(this);
@@ -54,7 +54,7 @@ namespace YooAsset
         /// <summary>
         /// 等待异步执行完毕
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void WaitForAsyncComplete()
         {
             if (IsValidWithWarning == false)
@@ -68,7 +68,7 @@ namespace YooAsset
         /// <summary>
         /// 释放资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Release()
         {
             ReleaseInternal();
@@ -77,7 +77,7 @@ namespace YooAsset
         /// <summary>
         /// 释放资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Dispose()
         {
             ReleaseInternal();
@@ -87,7 +87,7 @@ namespace YooAsset
         /// <summary>
         /// 子资源对象集合
         /// </summary>
-        public IReadOnlyList<UnityEngine.Object> AllAssetObjects
+        public IReadOnlyList<object> AllAssetObjects
         {
             get
             {
@@ -105,8 +105,8 @@ namespace YooAsset
         /// </summary>
         /// <typeparam name="TObject">子资源对象类型</typeparam>
         /// <param name="assetName">子资源对象名称</param>
-        [UnityEngine.Scripting.Preserve]
-        public TObject GetSubAssetObject<TObject>(string assetName) where TObject : UnityEngine.Object
+        [AssetSystemPreserve]
+        public TObject GetSubAssetObject<TObject>(string assetName) where TObject : class
         {
             if (IsValidWithWarning == false)
             {
@@ -115,13 +115,13 @@ namespace YooAsset
 
             foreach (var assetObject in Provider.AllAssetObjects)
             {
-                if (assetObject.name == assetName)
+                if (GetAssetObjectName(assetObject) == assetName)
                 {
                     return assetObject as TObject;
                 }
             }
 
-            YooLogger.Warning($"Not found sub asset object : {assetName}");
+            AssetSystemLogger.Warning($"Not found sub asset object : {assetName}");
             return null;
         }
 
@@ -129,8 +129,8 @@ namespace YooAsset
         /// 获取所有的子资源对象集合
         /// </summary>
         /// <typeparam name="TObject">子资源对象类型</typeparam>
-        [UnityEngine.Scripting.Preserve]
-        public TObject[] GetSubAssetObjects<TObject>() where TObject : UnityEngine.Object
+        [AssetSystemPreserve]
+        public TObject[] GetSubAssetObjects<TObject>() where TObject : class
         {
             if (IsValidWithWarning == false)
             {
@@ -148,6 +148,24 @@ namespace YooAsset
             }
 
             return ret.ToArray();
+        }
+
+        private static string GetAssetObjectName(object assetObject)
+        {
+            if (assetObject == null)
+            {
+                return string.Empty;
+            }
+
+            var assetType = assetObject.GetType();
+            var nameProperty = assetType.GetProperty("name") ?? assetType.GetProperty("Name");
+            if (nameProperty == null)
+            {
+                return string.Empty;
+            }
+
+            var value = nameProperty.GetValue(assetObject);
+            return value?.ToString() ?? string.Empty;
         }
     }
 }

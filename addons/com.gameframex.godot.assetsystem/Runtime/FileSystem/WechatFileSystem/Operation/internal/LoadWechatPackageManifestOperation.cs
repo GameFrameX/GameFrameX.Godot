@@ -1,9 +1,9 @@
-using YooAsset;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal class LoadWechatPackageManifestOperation : AsyncOperationBase
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private enum ESteps
     {
         None,
@@ -17,7 +17,7 @@ internal class LoadWechatPackageManifestOperation : AsyncOperationBase
     private readonly string _packageVersion;
     private readonly string _packageHash;
     private readonly int _timeout;
-    private UnityWebDataRequestOperation _webDataRequestOp;
+    private WebDataRequestOperation _webDataRequestOp;
     private DeserializeManifestOperation _deserializer;
     private int _requestCount = 0;
     private ESteps _steps = ESteps.None;
@@ -28,7 +28,7 @@ internal class LoadWechatPackageManifestOperation : AsyncOperationBase
     public PackageManifest Manifest { private set; get; }
 
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal LoadWechatPackageManifestOperation(WechatFileSystem fileSystem, string packageVersion, string packageHash, int timeout)
     {
         _fileSystem = fileSystem;
@@ -36,13 +36,13 @@ internal class LoadWechatPackageManifestOperation : AsyncOperationBase
         _packageHash = packageHash;
         _timeout = timeout;
     }
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         _requestCount = WebRequestCounter.GetRequestFailedCount(_fileSystem.PackageName, nameof(LoadWechatPackageManifestOperation));
         _steps = ESteps.RequestFileData;
     }
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
         if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -52,9 +52,9 @@ internal class LoadWechatPackageManifestOperation : AsyncOperationBase
         {
             if (_webDataRequestOp == null)
             {
-                string fileName = YooAssetSettingsData.GetManifestBinaryFileName(_fileSystem.PackageName, _packageVersion);
+                string fileName = AssetSystemSettingsData.GetManifestBinaryFileName(_fileSystem.PackageName, _packageVersion);
                 string url = GetRequestURL(fileName);
-                _webDataRequestOp = new UnityWebDataRequestOperation(url, _timeout);
+                _webDataRequestOp = new WebDataRequestOperation(url, _timeout);
                 OperationSystem.StartOperation(_fileSystem.PackageName, _webDataRequestOp);
             }
 
@@ -117,7 +117,7 @@ internal class LoadWechatPackageManifestOperation : AsyncOperationBase
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private string GetRequestURL(string fileName)
     {
         // 轮流返回请求地址

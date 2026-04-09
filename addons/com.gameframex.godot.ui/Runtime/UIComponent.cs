@@ -328,7 +328,6 @@ namespace GameFrameX.UI.Runtime
                 return;
             }
 
-            // m_UIManager.SetResourceManager(GameFrameworkEntry.GetModule<IAssetManager>());
             m_UIManager.SetObjectPoolManager(objectPoolManager);
             m_UIManager.InstanceAutoReleaseInterval = m_InstanceAutoReleaseInterval;
             m_UIManager.InstanceCapacity = m_InstanceCapacity;

@@ -1,12 +1,10 @@
-﻿using System.IO;
-using UnityEngine;
-
-namespace YooAsset
+using System.IO;
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DCFSLoadAssetBundleOperation : FSLoadBundleOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected enum ESteps
         {
             None,
@@ -20,25 +18,25 @@ namespace YooAsset
         protected readonly DefaultCacheFileSystem _fileSystem;
         protected readonly PackageBundle _bundle;
         protected FSDownloadFileOperation _downloadFileOp;
-        protected AssetBundleCreateRequest _createRequest;
+        protected BundleFileCreateRequest _createRequest;
         protected bool _isWaitForAsyncComplete = false;
         protected ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DCFSLoadAssetBundleOperation(DefaultCacheFileSystem fileSystem, PackageBundle bundle)
         {
             _fileSystem = fileSystem;
             _bundle = bundle;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CheckExist;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -96,7 +94,7 @@ namespace YooAsset
                         _steps = ESteps.Done;
                         Status = EOperationStatus.Failed;
                         Error = $"The {nameof(IDecryptionServices)} is null !";
-                        YooLogger.Error(Error);
+                        AssetSystemLogger.Error(Error);
                         return;
                     }
                 }
@@ -110,7 +108,7 @@ namespace YooAsset
                     else
                     {
                         var filePath = _fileSystem.GetCacheFileLoadPath(_bundle);
-                        Result = AssetBundle.LoadFromFile(filePath);
+                        Result = BundleFile.LoadFromFile(filePath);
                     }
                 }
                 else
@@ -122,7 +120,7 @@ namespace YooAsset
                     else
                     {
                         var filePath = _fileSystem.GetCacheFileLoadPath(_bundle);
-                        _createRequest = AssetBundle.LoadFromFileAsync(filePath);
+                        _createRequest = BundleFile.LoadFromFileAsync(filePath);
                     }
                 }
 
@@ -136,8 +134,8 @@ namespace YooAsset
                     if (_isWaitForAsyncComplete)
                     {
                         // 强制挂起主线程（注意：该操作会很耗时）
-                        YooLogger.Warning("Suspend the main thread to load unity bundle.");
-                        Result = _createRequest.assetBundle;
+                        AssetSystemLogger.Warning("Suspend the main thread to load unity bundle.");
+                        Result = _createRequest.BundleFile;
                     }
                     else
                     {
@@ -146,7 +144,7 @@ namespace YooAsset
                             return;
                         }
 
-                        Result = _createRequest.assetBundle;
+                        Result = _createRequest.BundleFile;
                     }
                 }
 
@@ -167,7 +165,7 @@ namespace YooAsset
                         _steps = ESteps.Done;
                         Status = EOperationStatus.Failed;
                         Error = $"Failed to load encrypted asset bundle file : {_bundle.BundleName}";
-                        YooLogger.Error(Error);
+                        AssetSystemLogger.Error(Error);
                         return;
                     }
 
@@ -177,13 +175,13 @@ namespace YooAsset
                     var fileData = FileUtility.ReadAllBytes(filePath);
                     if (fileData != null && fileData.Length > 0)
                     {
-                        Result = AssetBundle.LoadFromMemory(fileData);
+                        Result = BundleFile.LoadFromMemory(fileData);
                         if (Result == null)
                         {
                             _steps = ESteps.Done;
                             Status = EOperationStatus.Failed;
                             Error = $"Failed to load asset bundle from memory : {_bundle.BundleName}";
-                            YooLogger.Error(Error);
+                            AssetSystemLogger.Error(Error);
                         }
                         else
                         {
@@ -196,7 +194,7 @@ namespace YooAsset
                         _steps = ESteps.Done;
                         Status = EOperationStatus.Failed;
                         Error = $"Failed to read asset bundle file bytes : {_bundle.BundleName}";
-                        YooLogger.Error(Error);
+                        AssetSystemLogger.Error(Error);
                     }
                 }
                 else
@@ -205,12 +203,12 @@ namespace YooAsset
                     _fileSystem.DeleteCacheFile(_bundle.BundleGUID);
                     Status = EOperationStatus.Failed;
                     Error = $"Find corrupted asset bundle file and delete : {_bundle.BundleName}";
-                    YooLogger.Error(Error);
+                    AssetSystemLogger.Error(Error);
                 }
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             _isWaitForAsyncComplete = true;
@@ -226,7 +224,7 @@ namespace YooAsset
                 {
                     if (_downloadFileOp != null && _downloadFileOp.Status == EOperationStatus.Failed)
                     {
-                        YooLogger.Error($"Try load bundle {_bundle.BundleName} from remote !");
+                        AssetSystemLogger.Error($"Try load bundle {_bundle.BundleName} from remote !");
                     }
 
                     _steps = ESteps.Done;
@@ -235,7 +233,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void AbortDownloadOperation()
         {
             if (_steps == ESteps.DownloadFile)
@@ -248,10 +246,10 @@ namespace YooAsset
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DCFSLoadRawBundleOperation : FSLoadBundleOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected enum ESteps
         {
             None,
@@ -267,20 +265,20 @@ namespace YooAsset
         protected ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DCFSLoadRawBundleOperation(DefaultCacheFileSystem fileSystem, PackageBundle bundle)
         {
             _fileSystem = fileSystem;
             _bundle = bundle;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CheckExist;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -343,12 +341,12 @@ namespace YooAsset
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
                     Error = $"Can not found cache raw bundle file : {filePath}";
-                    YooLogger.Error(Error);
+                    AssetSystemLogger.Error(Error);
                 }
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             while (true)
@@ -362,7 +360,7 @@ namespace YooAsset
                 {
                     if (_downloadFileOp != null && _downloadFileOp.Status == EOperationStatus.Failed)
                     {
-                        YooLogger.Error($"Try load bundle {_bundle.BundleName} from remote !");
+                        AssetSystemLogger.Error($"Try load bundle {_bundle.BundleName} from remote !");
                     }
 
                     _steps = ESteps.Done;
@@ -371,7 +369,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void AbortDownloadOperation()
         {
             if (_steps == ESteps.DownloadFile)

@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 默认的构建管线
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public enum EDefaultBuildPipeline
     {
         /// <summary>
@@ -28,7 +28,7 @@ namespace YooAsset
     /// <summary>
     /// 运行模式
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public enum EPlayMode
     {
         /// <summary>
@@ -55,7 +55,7 @@ namespace YooAsset
     /// <summary>
     /// 文件系统参数
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class FileSystemParameters
     {
         internal Dictionary<string, object> CreateParameters = new Dictionary<string, object>();
@@ -73,7 +73,7 @@ namespace YooAsset
         public string RootDirectory { private set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public FileSystemParameters(string fileSystemClass, string rootDirectory)
         {
             FileSystemClass = fileSystemClass;
@@ -83,7 +83,7 @@ namespace YooAsset
         /// <summary>
         /// 添加自定义参数
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void AddParameter(string name, object value)
         {
             CreateParameters.Add(name, value);
@@ -94,7 +94,7 @@ namespace YooAsset
         /// 创建默认的编辑器文件系统参数
         /// <param name="simulateBuildResult">模拟构建结果</param>
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static FileSystemParameters CreateDefaultEditorFileSystemParameters(SimulateBuildResult simulateBuildResult)
         {
             var fileSystemClass = typeof(DefaultEditorFileSystem).FullName;
@@ -108,7 +108,7 @@ namespace YooAsset
         /// <param name="decryptionServices">加密文件解密服务类</param>
         /// <param name="verifyLevel">缓存文件的校验等级</param>
         /// <param name="rootDirectory">内置文件的根路径</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static FileSystemParameters CreateDefaultBuildinFileSystemParameters(IDecryptionServices decryptionServices = null, EFileVerifyLevel verifyLevel = EFileVerifyLevel.Middle, string rootDirectory = null)
         {
             var fileSystemClass = typeof(DefaultBuildinFileSystem).FullName;
@@ -124,7 +124,7 @@ namespace YooAsset
         /// <param name="decryptionServices">加密文件解密服务类</param>
         /// <param name="verifyLevel">缓存文件的校验等级</param>
         /// <param name="rootDirectory">内置文件的根路径</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static FileSystemParameters CreateDefaultBuildinRawFileSystemParameters(IDecryptionServices decryptionServices = null, EFileVerifyLevel verifyLevel = EFileVerifyLevel.Middle, string rootDirectory = null)
         {
             var fileSystemClass = typeof(DefaultBuildinFileSystem).FullName;
@@ -143,7 +143,7 @@ namespace YooAsset
         /// <param name="decryptionServices">加密文件解密服务类</param>
         /// <param name="verifyLevel">缓存文件的校验等级</param>
         /// <param name="rootDirectory">文件系统的根目录</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static FileSystemParameters CreateDefaultCacheFileSystemParameters(IRemoteServices remoteServices, IDecryptionServices decryptionServices = null, EFileVerifyLevel verifyLevel = EFileVerifyLevel.Middle, string rootDirectory = null)
         {
             var fileSystemClass = typeof(DefaultCacheFileSystem).FullName;
@@ -161,7 +161,7 @@ namespace YooAsset
         /// <param name="decryptionServices">加密文件解密服务类</param>
         /// <param name="verifyLevel">缓存文件的校验等级</param>
         /// <param name="rootDirectory">文件系统的根目录</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static FileSystemParameters CreateDefaultCacheRawFileSystemParameters(IRemoteServices remoteServices, IDecryptionServices decryptionServices = null, EFileVerifyLevel verifyLevel = EFileVerifyLevel.Middle, string rootDirectory = null)
         {
             var fileSystemClass = typeof(DefaultCacheFileSystem).FullName;
@@ -178,7 +178,7 @@ namespace YooAsset
         /// 创建默认的Web文件系统参数
         /// </summary>
         /// <param name="disableUnityWebCache">禁用Unity的网络缓存</param>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static FileSystemParameters CreateDefaultWebFileSystemParameters(bool disableUnityWebCache = false)
         {
             var fileSystemClass = typeof(DefaultWebFileSystem).FullName;
@@ -191,7 +191,7 @@ namespace YooAsset
     /// <summary>
     /// 初始化参数
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public abstract class InitializeParameters
     {
     }
@@ -199,7 +199,7 @@ namespace YooAsset
     /// <summary>
     /// 编辑器下模拟运行模式的初始化参数
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class EditorSimulateModeParameters : InitializeParameters
     {
         public FileSystemParameters EditorFileSystemParameters;
@@ -208,7 +208,7 @@ namespace YooAsset
     /// <summary>
     /// 离线运行模式的初始化参数
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class OfflinePlayModeParameters : InitializeParameters
     {
         public FileSystemParameters BuildinFileSystemParameters;
@@ -217,7 +217,7 @@ namespace YooAsset
     /// <summary>
     /// 联机运行模式的初始化参数
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class HostPlayModeParameters : InitializeParameters
     {
         public FileSystemParameters BuildinFileSystemParameters;
@@ -228,7 +228,7 @@ namespace YooAsset
     /// <summary>
     /// WebGL运行模式的初始化参数
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public class WebPlayModeParameters : InitializeParameters
     {
         public FileSystemParameters WebFileSystemParameters;

@@ -1,9 +1,9 @@
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class RequestRemotePackageVersionOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -15,7 +15,7 @@ namespace YooAsset
         private readonly bool _appendTimeTicks;
         private readonly int _timeout;
         private int _failedTryAgain = 1;
-        private UnityWebTextRequestOperation _webTextRequestOp;
+        private WebTextRequestOperation _webTextRequestOp;
         private HttpTextRequestOperation _httpTextRequestOp;
         private int _requestCount = 0;
         private ESteps _steps = ESteps.None;
@@ -26,7 +26,7 @@ namespace YooAsset
         internal string PackageVersion { set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal RequestRemotePackageVersionOperation(DefaultCacheFileSystem fileSystem, bool appendTimeTicks, int timeout)
         {
             _fileSystem = fileSystem;
@@ -34,14 +34,14 @@ namespace YooAsset
             _timeout = timeout;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _requestCount = WebRequestCounter.GetRequestFailedCount(_fileSystem.PackageName, nameof(RequestRemotePackageVersionOperation));
             _steps = ESteps.RequestPackageVersion;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -53,7 +53,7 @@ namespace YooAsset
             {
                 if (_webTextRequestOp == null && _httpTextRequestOp == null)
                 {
-                    var fileName = YooAssetSettingsData.GetPackageVersionFileName(_fileSystem.PackageName);
+                    var fileName = AssetSystemSettingsData.GetPackageVersionFileName(_fileSystem.PackageName);
                     var url = DownloadSystemHelper.ConvertToWWWPath(GetWebRequestURL(fileName));
                     if (DownloadSystemHelper.HttpTransport != null)
                     {
@@ -62,7 +62,7 @@ namespace YooAsset
                     }
                     else
                     {
-                        _webTextRequestOp = new UnityWebTextRequestOperation(url, _timeout, _appendTimeTicks);
+                        _webTextRequestOp = new WebTextRequestOperation(url, _timeout, _appendTimeTicks);
                         OperationSystem.StartOperation(_fileSystem.PackageName, _webTextRequestOp);
                     }
                 }
@@ -119,7 +119,7 @@ namespace YooAsset
             return (value ?? string.Empty).Replace("\uFEFF", string.Empty).Trim();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private string GetWebRequestURL(string fileName)
         {
             string url;

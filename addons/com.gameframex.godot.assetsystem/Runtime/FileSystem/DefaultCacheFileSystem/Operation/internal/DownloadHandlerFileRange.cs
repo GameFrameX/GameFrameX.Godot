@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using System.IO;
-using UnityEngine;
-using UnityEngine.Networking;
+using GameFrameX.AssetSystem.Networking;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 支持Unity2018版本的断点续传下载器
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DownloadHandlerFileRange : DownloadHandlerScript
     {
         private string _fileSavePath;
@@ -20,7 +19,7 @@ namespace YooAsset
         private long _curFileSize = 0;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DownloadHandlerFileRange(string fileSavePath, long fileTotalSize, UnityWebRequest webRequest) : base(new byte[1024 * 1024])
         {
             _fileSavePath = fileSavePath;
@@ -37,7 +36,7 @@ namespace YooAsset
             _curFileSize = _localFileSize;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected override bool ReceiveData(byte[] data, int dataLength)
         {
             if (data == null || dataLength == 0 || _webRequest.responseCode >= 400)
@@ -58,7 +57,7 @@ namespace YooAsset
         /// <summary>
         /// UnityWebRequest.downloadHandler.data
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected override byte[] GetData()
         {
             return null;
@@ -67,7 +66,7 @@ namespace YooAsset
         /// <summary>
         /// UnityWebRequest.downloadHandler.text
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected override string GetText()
         {
             return null;
@@ -76,7 +75,7 @@ namespace YooAsset
         /// <summary>
         /// UnityWebRequest.downloadProgress
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected override float GetProgress()
         {
             return _fileTotalSize == 0 ? 0 : (float)_curFileSize / _fileTotalSize;
@@ -85,7 +84,7 @@ namespace YooAsset
         /// <summary>
         /// 释放下载句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Cleanup()
         {
             if (_fileStream != null)

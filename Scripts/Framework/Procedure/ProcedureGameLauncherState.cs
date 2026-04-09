@@ -5,6 +5,9 @@ using GameFrameX.Runtime;
 using GameFrameX.UI.Runtime;
 using Godot;
 using Godot.Startup.Hotfix;
+#if INCLUDE_ASSETSYSTEM_RUNTIME
+using Godot.Startup.AssetSystem;
+#endif
 
 namespace Godot.Startup.Procedure
 {
@@ -54,6 +57,17 @@ namespace Godot.Startup.Procedure
 					Log.Error("[UIFlow] UIComponent not found.");
 					return;
 				}
+
+#if INCLUDE_ASSETSYSTEM_RUNTIME
+			if (AssetPackageUpdateService.TryPrepareLocalHostPackage("main", out var mainPackage, out var mainPackageError) == false)
+				{
+					Log.Warning("[UIFlow] main package not ready: {0}", mainPackageError);
+				}
+				else
+				{
+					Log.Info("[UIFlow] main package ready: {0}", mainPackage.PackageName);
+				}
+#endif
 
 				var launcherType = HotfixTypeResolver.ResolveOrNull(LauncherTypeFullName);
 				if (launcherType == null)

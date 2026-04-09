@@ -1,9 +1,9 @@
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 初始化操作
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public abstract class InitializationOperation : AsyncOperationBase
     {
     }
@@ -11,10 +11,10 @@ namespace YooAsset
     /// <summary>
     /// 编辑器下模拟模式
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class EditorSimulateModeInitializationOperation : InitializationOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -28,20 +28,20 @@ namespace YooAsset
         private FSInitializeFileSystemOperation _initFileSystemOp;
         private ESteps _steps = ESteps.None;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal EditorSimulateModeInitializationOperation(EditorSimulateModeImpl impl, EditorSimulateModeParameters parameters)
         {
             _impl = impl;
             _parameters = parameters;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CreateFileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.CreateFileSystem)
@@ -97,10 +97,10 @@ namespace YooAsset
     /// <summary>
     /// 离线运行模式
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class OfflinePlayModeInitializationOperation : InitializationOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -114,20 +114,20 @@ namespace YooAsset
         private FSInitializeFileSystemOperation _initFileSystemOp;
         private ESteps _steps = ESteps.None;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal OfflinePlayModeInitializationOperation(OfflinePlayModeImpl impl, OfflinePlayModeParameters parameters)
         {
             _impl = impl;
             _parameters = parameters;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CreateFileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -188,10 +188,10 @@ namespace YooAsset
     /// <summary>
     /// 联机运行模式
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class HostPlayModeInitializationOperation : InitializationOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -209,20 +209,20 @@ namespace YooAsset
         private FSInitializeFileSystemOperation _initCacheFileSystemOp;
         private ESteps _steps = ESteps.None;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal HostPlayModeInitializationOperation(HostPlayModeImpl impl, HostPlayModeParameters parameters)
         {
             _impl = impl;
             _parameters = parameters;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CreateFileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -371,10 +371,10 @@ namespace YooAsset
     /// <summary>
     /// WebGL运行模式
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class WebPlayModeInitializationOperation : InitializationOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -388,20 +388,20 @@ namespace YooAsset
         private FSInitializeFileSystemOperation _initWebFileSystemOp;
         private ESteps _steps = ESteps.None;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal WebPlayModeInitializationOperation(WebPlayModeImpl impl, WebPlayModeParameters parameters)
         {
             _impl = impl;
             _parameters = parameters;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CreateFileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)

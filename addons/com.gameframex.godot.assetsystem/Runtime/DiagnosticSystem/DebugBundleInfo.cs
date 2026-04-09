@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     [Serializable]
     public class DebugBundleInfo : IComparer<DebugBundleInfo>, IComparable<DebugBundleInfo>
     {
@@ -28,13 +28,13 @@ namespace YooAsset
         /// </summary>
         public EOperationStatus Status;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public int CompareTo(DebugBundleInfo other)
         {
             return Compare(this, other);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public int Compare(DebugBundleInfo a, DebugBundleInfo b)
         {
             return string.CompareOrdinal(a.BundleName, b.BundleName);

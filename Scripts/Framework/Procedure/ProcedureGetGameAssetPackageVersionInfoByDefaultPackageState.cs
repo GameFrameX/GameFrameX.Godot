@@ -46,6 +46,6 @@ public sealed class ProcedureGetGameAssetPackageVersionInfoByDefaultPackageState
     {
         base.OnEnter(procedureOwner);
         Log.Info("进入流程：ProcedureGetGameAssetPackageVersionInfoByDefaultPackageState");
-        ChangeState<ProcedurePatchInit>(procedureOwner);
+        ChangeState<ProcedureSelectUpdateMode>(procedureOwner);
     }
 }

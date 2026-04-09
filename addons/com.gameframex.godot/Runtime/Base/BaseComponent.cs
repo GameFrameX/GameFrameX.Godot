@@ -207,12 +207,12 @@ namespace GameFrameX.Runtime
 
             if (what == NotificationWMCloseRequest)
             {
-                // Equivalent to OnApplicationQuit in Unity
+                // Equivalent runtime teardown callback
                 // StopAllCoroutines();
             }
             else if (what == NotificationPredelete || what == NotificationExitTree)
             {
-                // Equivalent to OnDestroy in Unity
+                // Equivalent dispose callback
                 GameFrameworkEntry.Shutdown();
             }
         }
@@ -395,11 +395,6 @@ namespace GameFrameX.Runtime
                 objectPoolComponent.ReleaseAllUnused();
             }
 
-            /*AssetComponent resourceComponent = GameEntry.GetComponent<AssetComponent>();
-            if (resourceComponent != null)
-            {
-                // resourceComponent.ForceUnloadUnusedAssets(true);
-            }*/
         }
     }
 }

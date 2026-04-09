@@ -1,12 +1,12 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class DCFSClearUnusedBundleFilesOperation : FSClearUnusedBundleFilesOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -22,20 +22,20 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DCFSClearUnusedBundleFilesOperation(DefaultCacheFileSystem fileSystem, PackageManifest manifest)
         {
             _fileSystem = fileSystem;
             _manifest = manifest;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.GetUnusedCacheFiles;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -48,7 +48,7 @@ namespace YooAsset
                 _unusedBundleGUIDs = GetUnusedBundleGUIDs();
                 _unusedFileTotalCount = _unusedBundleGUIDs.Count;
                 _steps = ESteps.ClearUnusedCacheFiles;
-                YooLogger.Log($"Found unused cache files count : {_unusedFileTotalCount}");
+                AssetSystemLogger.Log($"Found unused cache files count : {_unusedFileTotalCount}");
             }
 
             if (_steps == ESteps.ClearUnusedCacheFiles)
@@ -81,7 +81,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private List<string> GetUnusedBundleGUIDs()
         {
             var allBundleGUIDs = _fileSystem.GetAllCachedBundleGUIDs();

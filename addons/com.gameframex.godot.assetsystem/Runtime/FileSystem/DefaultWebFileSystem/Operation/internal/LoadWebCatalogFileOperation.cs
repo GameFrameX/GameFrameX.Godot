@@ -1,15 +1,14 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class LoadWebCatalogFileOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -25,19 +24,19 @@ namespace YooAsset
         /// </summary>
         public string PackageVersion { private set; get; }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal LoadWebCatalogFileOperation(DefaultWebFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.LoadCatalog;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -48,7 +47,7 @@ namespace YooAsset
             if (_steps == ESteps.LoadCatalog)
             {
                 var catalogFilePath = _fileSystem.GetCatalogFileLoadPath();
-                var catalog = Resources.Load<DefaultBuildinFileCatalog>(catalogFilePath);
+                var catalog = AssetSystemResources.Load<DefaultBuildinFileCatalog>(catalogFilePath);
                 if (catalog == null)
                 {
                     _steps = ESteps.Done;
@@ -72,7 +71,7 @@ namespace YooAsset
                     _fileSystem.RecordFile(wrapper.BundleGUID, fileWrapper);
                 }
 
-                YooLogger.Log($"Package '{_fileSystem.PackageName}' catalog files count : {catalog.Wrappers.Count}");
+                AssetSystemLogger.Log($"Package '{_fileSystem.PackageName}' catalog files count : {catalog.Wrappers.Count}");
                 _steps = ESteps.Done;
                 Status = EOperationStatus.Succeed;
             }

@@ -1,25 +1,25 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class PlayModeHelper
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static IFileSystem CreateFileSystem(string packageName, FileSystemParameters parameters)
         {
             var classType = Type.GetType(parameters.FileSystemClass);
             if (classType == null)
             {
-                YooLogger.Error($"Can not found file system class type {parameters.FileSystemClass}");
+                AssetSystemLogger.Error($"Can not found file system class type {parameters.FileSystemClass}");
                 return null;
             }
 
             var instance = (IFileSystem)Activator.CreateInstance(classType, true);
             if (instance == null)
             {
-                YooLogger.Error($"Failed to create file system instance {parameters.FileSystemClass}");
+                AssetSystemLogger.Error($"Failed to create file system instance {parameters.FileSystemClass}");
                 return null;
             }
 
@@ -32,7 +32,7 @@ namespace YooAsset
             return instance;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static List<BundleInfo> GetDownloadListByAll(PackageManifest manifest, IFileSystem fileSystemA = null, IFileSystem fileSystemB = null, IFileSystem fileSystemC = null)
         {
             var result = new List<BundleInfo>(1000);
@@ -62,7 +62,7 @@ namespace YooAsset
                 }
                 else
                 {
-                    YooLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
+                    AssetSystemLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
                 }
 
                 if (fileSystem == null)
@@ -77,7 +77,7 @@ namespace YooAsset
             return result;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static List<BundleInfo> GetDownloadListByTags(PackageManifest manifest, string[] tags, IFileSystem fileSystemA = null, IFileSystem fileSystemB = null, IFileSystem fileSystemC = null)
         {
             var result = new List<BundleInfo>(1000);
@@ -107,7 +107,7 @@ namespace YooAsset
                 }
                 else
                 {
-                    YooLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
+                    AssetSystemLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
                 }
 
                 if (fileSystem == null)
@@ -135,7 +135,7 @@ namespace YooAsset
             return result;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static List<BundleInfo> GetDownloadListByPaths(PackageManifest manifest, AssetInfo[] assetInfos, IFileSystem fileSystemA = null, IFileSystem fileSystemB = null, IFileSystem fileSystemC = null)
         {
             // 获取资源对象的资源包和所有依赖资源包
@@ -144,7 +144,7 @@ namespace YooAsset
             {
                 if (assetInfo.IsInvalid)
                 {
-                    YooLogger.Warning(assetInfo.Error);
+                    AssetSystemLogger.Warning(assetInfo.Error);
                     continue;
                 }
 
@@ -193,7 +193,7 @@ namespace YooAsset
                 }
                 else
                 {
-                    YooLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
+                    AssetSystemLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
                 }
 
                 if (fileSystem == null)
@@ -208,7 +208,7 @@ namespace YooAsset
             return result;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static List<BundleInfo> GetUnpackListByAll(PackageManifest manifest, IFileSystem fileSystemA = null, IFileSystem fileSystemB = null, IFileSystem fileSystemC = null)
         {
             var result = new List<BundleInfo>(1000);
@@ -238,7 +238,7 @@ namespace YooAsset
                 }
                 else
                 {
-                    YooLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
+                    AssetSystemLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
                 }
 
                 if (fileSystem == null)
@@ -253,7 +253,7 @@ namespace YooAsset
             return result;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static List<BundleInfo> GetUnpackListByTags(PackageManifest manifest, string[] tags, IFileSystem fileSystemA = null, IFileSystem fileSystemB = null, IFileSystem fileSystemC = null)
         {
             var result = new List<BundleInfo>(1000);
@@ -283,7 +283,7 @@ namespace YooAsset
                 }
                 else
                 {
-                    YooLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
+                    AssetSystemLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
                 }
 
                 if (fileSystem == null)
@@ -302,7 +302,7 @@ namespace YooAsset
             return result;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static List<BundleInfo> GetImporterListByFilePaths(PackageManifest manifest, string[] filePaths, IFileSystem fileSystemA = null, IFileSystem fileSystemB = null, IFileSystem fileSystemC = null)
         {
             var result = new List<BundleInfo>();
@@ -335,7 +335,7 @@ namespace YooAsset
                     }
                     else
                     {
-                        YooLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
+                        AssetSystemLogger.Error($"Can not found belong file system : {packageBundle.BundleName}");
                     }
 
                     if (fileSystem == null)
@@ -348,7 +348,7 @@ namespace YooAsset
                 }
                 else
                 {
-                    YooLogger.Warning($"Not found package bundle, importer file path : {filePath}");
+                    AssetSystemLogger.Warning($"Not found package bundle, importer file path : {filePath}");
                 }
             }
 

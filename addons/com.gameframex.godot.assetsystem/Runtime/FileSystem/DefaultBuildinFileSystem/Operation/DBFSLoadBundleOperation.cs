@@ -1,15 +1,13 @@
-﻿using System.IO;
-using UnityEngine;
-
-namespace YooAsset
+using System.IO;
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 加载AssetBundle文件
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DBFSLoadAssetBundleOperation : FSLoadBundleOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -20,19 +18,19 @@ namespace YooAsset
 
         private readonly DefaultBuildinFileSystem _fileSystem;
         private readonly PackageBundle _bundle;
-        private AssetBundleCreateRequest _createRequest;
+        private BundleFileCreateRequest _createRequest;
         private bool _isWaitForAsyncComplete = false;
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DBFSLoadAssetBundleOperation(DefaultBuildinFileSystem fileSystem, PackageBundle bundle)
         {
             _fileSystem = fileSystem;
             _bundle = bundle;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             DownloadProgress = 1f;
@@ -40,7 +38,7 @@ namespace YooAsset
             _steps = ESteps.LoadAssetBundle;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -57,7 +55,7 @@ namespace YooAsset
                         _steps = ESteps.Done;
                         Status = EOperationStatus.Failed;
                         Error = $"The {nameof(IDecryptionServices)} is null !";
-                        YooLogger.Error(Error);
+                        AssetSystemLogger.Error(Error);
                         return;
                     }
                 }
@@ -71,7 +69,7 @@ namespace YooAsset
                     else
                     {
                         var filePath = _fileSystem.GetBuildinFileLoadPath(_bundle);
-                        Result = AssetBundle.LoadFromFile(filePath);
+                        Result = BundleFile.LoadFromFile(filePath);
                     }
                 }
                 else
@@ -83,7 +81,7 @@ namespace YooAsset
                     else
                     {
                         var filePath = _fileSystem.GetBuildinFileLoadPath(_bundle);
-                        _createRequest = AssetBundle.LoadFromFileAsync(filePath);
+                        _createRequest = BundleFile.LoadFromFileAsync(filePath);
                     }
                 }
 
@@ -97,8 +95,8 @@ namespace YooAsset
                     if (_isWaitForAsyncComplete)
                     {
                         // 强制挂起主线程（注意：该操作会很耗时）
-                        YooLogger.Warning("Suspend the main thread to load unity bundle.");
-                        Result = _createRequest.assetBundle;
+                        AssetSystemLogger.Warning("Suspend the main thread to load unity bundle.");
+                        Result = _createRequest.BundleFile;
                     }
                     else
                     {
@@ -107,7 +105,7 @@ namespace YooAsset
                             return;
                         }
 
-                        Result = _createRequest.assetBundle;
+                        Result = _createRequest.BundleFile;
                     }
                 }
 
@@ -123,19 +121,19 @@ namespace YooAsset
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
                     Error = $"Failed to load encrypted buildin asset bundle file : {_bundle.BundleName}";
-                    YooLogger.Error(Error);
+                    AssetSystemLogger.Error(Error);
                 }
                 else
                 {
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
                     Error = $"Failed to load buildin asset bundle file : {_bundle.BundleName}";
-                    YooLogger.Error(Error);
+                    AssetSystemLogger.Error(Error);
                 }
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             _isWaitForAsyncComplete = true;
@@ -150,7 +148,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void AbortDownloadOperation()
         {
         }
@@ -159,10 +157,10 @@ namespace YooAsset
     /// <summary>
     /// 加载原生文件
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DBFSLoadRawBundleOperation : FSLoadBundleOperation
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -175,14 +173,14 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DBFSLoadRawBundleOperation(DefaultBuildinFileSystem fileSystem, PackageBundle bundle)
         {
             _fileSystem = fileSystem;
             _bundle = bundle;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             DownloadProgress = 1f;
@@ -190,7 +188,7 @@ namespace YooAsset
             _steps = ESteps.LoadBuildinRawBundle;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -212,12 +210,12 @@ namespace YooAsset
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
                     Error = $"Can not found buildin raw bundle file : {filePath}";
-                    YooLogger.Error(Error);
+                    AssetSystemLogger.Error(Error);
                 }
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             while (true)
@@ -230,7 +228,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void AbortDownloadOperation()
         {
         }

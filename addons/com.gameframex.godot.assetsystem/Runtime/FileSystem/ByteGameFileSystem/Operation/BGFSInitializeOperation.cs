@@ -1,23 +1,23 @@
-using YooAsset;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal partial class BGFSInitializeOperation : FSInitializeFileSystemOperation
 {
     private readonly ByteGameFileSystem _fileSystem;
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public BGFSInitializeOperation(ByteGameFileSystem fileSystem)
     {
         _fileSystem = fileSystem;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         Status = EOperationStatus.Succeed;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
     }

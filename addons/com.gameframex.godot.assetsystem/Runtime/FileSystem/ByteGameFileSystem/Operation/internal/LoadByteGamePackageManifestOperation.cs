@@ -1,9 +1,9 @@
-using YooAsset;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal class LoadByteGamePackageManifestOperation : AsyncOperationBase
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private enum ESteps
     {
         None,
@@ -17,7 +17,7 @@ internal class LoadByteGamePackageManifestOperation : AsyncOperationBase
     private readonly string _packageVersion;
     private readonly string _packageHash;
     private readonly int _timeout;
-    private UnityWebDataRequestOperation _webDataRequestOp;
+    private WebDataRequestOperation _webDataRequestOp;
     private DeserializeManifestOperation _deserializer;
     private int _requestCount = 0;
     private ESteps _steps = ESteps.None;
@@ -28,7 +28,7 @@ internal class LoadByteGamePackageManifestOperation : AsyncOperationBase
     public PackageManifest Manifest { private set; get; }
 
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal LoadByteGamePackageManifestOperation(ByteGameFileSystem fileSystem, string packageVersion, string packageHash, int timeout)
     {
         _fileSystem = fileSystem;
@@ -37,14 +37,14 @@ internal class LoadByteGamePackageManifestOperation : AsyncOperationBase
         _timeout = timeout;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         _requestCount = WebRequestCounter.GetRequestFailedCount(_fileSystem.PackageName, nameof(LoadByteGamePackageManifestOperation));
         _steps = ESteps.RequestFileData;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
         if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -56,9 +56,9 @@ internal class LoadByteGamePackageManifestOperation : AsyncOperationBase
         {
             if (_webDataRequestOp == null)
             {
-                var fileName = YooAssetSettingsData.GetManifestBinaryFileName(_fileSystem.PackageName, _packageVersion);
+                var fileName = AssetSystemSettingsData.GetManifestBinaryFileName(_fileSystem.PackageName, _packageVersion);
                 var url = GetRequestURL(fileName);
-                _webDataRequestOp = new UnityWebDataRequestOperation(url, _timeout);
+                _webDataRequestOp = new WebDataRequestOperation(url, _timeout);
                 OperationSystem.StartOperation(_fileSystem.PackageName, _webDataRequestOp);
             }
 
@@ -125,7 +125,7 @@ internal class LoadByteGamePackageManifestOperation : AsyncOperationBase
         }
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private string GetRequestURL(string fileName)
     {
         // 轮流返回请求地址

@@ -1,17 +1,17 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 解压文件系统
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DefaultUnpackFileSystem : DefaultCacheFileSystem
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DefaultUnpackFileSystem()
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void OnCreate(string packageName, string rootDirectory)
         {
             base.OnCreate(packageName, rootDirectory);

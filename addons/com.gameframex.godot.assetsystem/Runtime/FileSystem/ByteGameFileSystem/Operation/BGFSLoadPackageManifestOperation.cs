@@ -1,9 +1,9 @@
-using YooAsset;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal class BGFSLoadPackageManifestOperation : FSLoadPackageManifestOperation
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     private enum ESteps
     {
         None,
@@ -20,7 +20,7 @@ internal class BGFSLoadPackageManifestOperation : FSLoadPackageManifestOperation
     private ESteps _steps = ESteps.None;
 
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public BGFSLoadPackageManifestOperation(ByteGameFileSystem fileSystem, string packageVersion, int timeout)
     {
         _fileSystem = fileSystem;
@@ -28,13 +28,13 @@ internal class BGFSLoadPackageManifestOperation : FSLoadPackageManifestOperation
         _timeout = timeout;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         _steps = ESteps.RequestRemotePackageHash;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
         if (_steps == ESteps.None || _steps == ESteps.Done)

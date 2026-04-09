@@ -1,9 +1,9 @@
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class LoadWebPackageManifestOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -19,7 +19,7 @@ namespace YooAsset
         private readonly int _timeout;
         private readonly bool _appendTimeTicks;
         private int _failedTryAgain = 1;
-        private UnityWebDataRequestOperation _webDataRequestOp;
+        private WebDataRequestOperation _webDataRequestOp;
         private HttpDataRequestOperation _httpDataRequestOp;
         private DeserializeManifestOperation _deserializer;
         private ESteps _steps = ESteps.None;
@@ -30,7 +30,7 @@ namespace YooAsset
         public PackageManifest Manifest { private set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal LoadWebPackageManifestOperation(DefaultWebFileSystem fileSystem, string packageVersion, string packageHash, int timeout, bool appendTimeTicks)
         {
             _fileSystem = fileSystem;
@@ -40,13 +40,13 @@ namespace YooAsset
             _appendTimeTicks = appendTimeTicks;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.RequestFileData;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -67,7 +67,7 @@ namespace YooAsset
                     }
                     else
                     {
-                        _webDataRequestOp = new UnityWebDataRequestOperation(url, _timeout, _appendTimeTicks);
+                        _webDataRequestOp = new WebDataRequestOperation(url, _timeout, _appendTimeTicks);
                         OperationSystem.StartOperation(_fileSystem.PackageName, _webDataRequestOp);
                     }
                 }

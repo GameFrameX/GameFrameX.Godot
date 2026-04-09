@@ -1,28 +1,28 @@
-﻿using System;
+using System;
 using System.Collections;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public abstract class HandleBase : IEnumerator
     {
         private readonly AssetInfo _assetInfo;
         internal ProviderOperation Provider { private set; get; }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal HandleBase(ProviderOperation provider)
         {
             Provider = provider;
             _assetInfo = provider.MainAssetInfo;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal abstract void InvokeCallback();
 
         /// <summary>
         /// 获取资源信息
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public AssetInfo GetAssetInfo()
         {
             return _assetInfo;
@@ -31,7 +31,7 @@ namespace YooAsset
         /// <summary>
         /// 获取下载报告
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DownloadStatus GetDownloadStatus()
         {
             if (IsValidWithWarning == false)
@@ -155,11 +155,11 @@ namespace YooAsset
                 {
                     if (Provider == null)
                     {
-                        YooLogger.Warning($"Operation handle is released : {_assetInfo.AssetPath}");
+                        AssetSystemLogger.Warning($"Operation handle is released : {_assetInfo.AssetPath}");
                     }
                     else if (Provider.IsDestroyed)
                     {
-                        YooLogger.Warning($"Provider is destroyed : {_assetInfo.AssetPath}");
+                        AssetSystemLogger.Warning($"Provider is destroyed : {_assetInfo.AssetPath}");
                     }
 
                     return false;
@@ -170,7 +170,7 @@ namespace YooAsset
         /// <summary>
         /// 释放句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void ReleaseInternal()
         {
             if (IsValidWithWarning == false)
@@ -193,13 +193,13 @@ namespace YooAsset
         }
 
         // 协程相关
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         bool IEnumerator.MoveNext()
         {
             return !IsDone;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         void IEnumerator.Reset()
         {
         }

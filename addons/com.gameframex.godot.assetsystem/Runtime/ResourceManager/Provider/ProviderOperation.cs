@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System;
+using Godot;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal abstract class ProviderOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected enum ESteps
         {
             None = 0,
@@ -36,17 +37,22 @@ namespace YooAsset
         /// <summary>
         /// 获取的资源对象
         /// </summary>
-        public UnityEngine.Object AssetObject { protected set; get; }
+        public object AssetObject { protected set; get; }
 
         /// <summary>
         /// 获取的资源对象集合
         /// </summary>
-        public UnityEngine.Object[] AllAssetObjects { protected set; get; }
+        public object[] AllAssetObjects { protected set; get; }
 
         /// <summary>
         /// 获取的场景对象
         /// </summary>
-        public UnityEngine.SceneManagement.Scene SceneObject { protected set; get; }
+        public AssetSceneInfo SceneInfo { internal set; get; }
+
+        /// <summary>
+        /// 方案2迁移备注：Godot 场景节点实例（运行时主字段）
+        /// </summary>
+        public Node SceneNode { internal set; get; }
 
         /// <summary>
         /// 获取的原生对象
@@ -76,7 +82,7 @@ namespace YooAsset
         private readonly List<HandleBase> _handles = new();
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public ProviderOperation(ResourceManager manager, string providerGUID, AssetInfo assetInfo)
         {
             ResourceMgr = manager;
@@ -94,7 +100,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalWaitForAsyncComplete()
         {
             IsWaitForAsyncComplete = true;
@@ -122,7 +128,7 @@ namespace YooAsset
         /// <summary>
         /// 销毁资源提供者
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void DestroyProvider()
         {
             IsDestroyed = true;
@@ -151,7 +157,7 @@ namespace YooAsset
         /// <summary>
         /// 是否可以销毁
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool CanDestroyProvider()
         {
             // 注意：在进行资源加载过程时不可以销毁
@@ -166,7 +172,7 @@ namespace YooAsset
         /// <summary>
         /// 创建资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public T CreateHandle<T>() where T : HandleBase
         {
             // 引用计数增加
@@ -205,7 +211,7 @@ namespace YooAsset
         /// <summary>
         /// 释放资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void ReleaseHandle(HandleBase handle)
         {
             if (RefCount <= 0)
@@ -225,7 +231,7 @@ namespace YooAsset
         /// <summary>
         /// 释放所有资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void ReleaseAllHandles()
         {
             for (var i = _handles.Count - 1; i >= 0; i--)
@@ -238,7 +244,7 @@ namespace YooAsset
         /// <summary>
         /// 处理致命问题
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected void ProcessFatalEvent()
         {
             if (LoadBundleFileOp.IsDestroyed)
@@ -246,15 +252,15 @@ namespace YooAsset
                 throw new Exception("Should never get here !");
             }
 
-            var error = $"The bundle {LoadBundleFileOp.BundleFileInfo.Bundle.BundleName} has been destroyed by unity bugs !";
-            YooLogger.Error(error);
+            var error = $"The bundle {LoadBundleFileOp.BundleFileInfo.Bundle.BundleName} has been invalidated unexpectedly.";
+            AssetSystemLogger.Error(error);
             InvokeCompletion(Error, EOperationStatus.Failed);
         }
 
         /// <summary>
         /// 结束流程
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected void InvokeCompletion(string error, EOperationStatus status)
         {
             DebugEndRecording();
@@ -279,7 +285,7 @@ namespace YooAsset
         /// <summary>
         /// 获取下载报告
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DownloadStatus GetDownloadStatus()
         {
             var status = new DownloadStatus();
@@ -324,38 +330,38 @@ namespace YooAsset
 
         /// <summary>
         /// 加载开始时间（单位：秒）
-        /// 使用UnityEngine.Time.realtimeSinceStartup记录，初始值为-1表示未开始
+        /// 使用 AssetSystemTime.RealtimeSinceStartup 记录，初始值为-1表示未开始
         /// </summary>
         private float _loadingStartTime = -1f;
 
         /// <summary>
         /// 加载结束时间（单位：秒）
-        /// 使用UnityEngine.Time.realtimeSinceStartup记录，初始值为-1表示未结束
+        /// 使用 AssetSystemTime.RealtimeSinceStartup 记录，初始值为-1表示未结束
         /// </summary>
         private float _loadingEndTime = -1f;
 
         // 加载耗时统计
         private Stopwatch _watch = null;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         [Conditional("DEBUG")]
         public void InitSpawnDebugInfo()
         {
-            SpawnScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            ;
-            SpawnTime = SpawnTimeToString(UnityEngine.Time.realtimeSinceStartup);
+            var tree = Engine.GetMainLoop() as SceneTree;
+            SpawnScene = tree?.CurrentScene?.Name ?? "UnknownScene";
+            SpawnTime = SpawnTimeToString(AssetSystemTime.RealtimeSinceStartup);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private string SpawnTimeToString(float spawnTime)
         {
-            float h = UnityEngine.Mathf.FloorToInt(spawnTime / 3600f);
-            float m = UnityEngine.Mathf.FloorToInt(spawnTime / 60f - h * 60f);
-            float s = UnityEngine.Mathf.FloorToInt(spawnTime - m * 60f - h * 3600f);
+            float h = (float)System.Math.Floor(spawnTime / 3600f);
+            float m = (float)System.Math.Floor(spawnTime / 60f - h * 60f);
+            float s = (float)System.Math.Floor(spawnTime - m * 60f - h * 3600f);
             return h.ToString("00") + ":" + m.ToString("00") + ":" + s.ToString("00");
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         [Conditional("DEBUG")]
         protected void DebugBeginRecording()
         {
@@ -365,7 +371,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         [Conditional("DEBUG")]
         private void DebugEndRecording()
         {
@@ -377,14 +383,14 @@ namespace YooAsset
         }
         /// <summary>
         /// 开始记录加载时间（单位：秒）
-        /// 仅当尚未记录时，以 UnityEngine.Time.realtimeSinceStartup 赋值 _loadingStartTime
+        /// 仅当尚未记录时，以 AssetSystemTime.RealtimeSinceStartup 赋值 _loadingStartTime
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected void BeginLoadTimeRecord()
         {
             if (_loadingStartTime < 0f)
             {
-                _loadingStartTime = UnityEngine.Time.realtimeSinceStartup;
+            _loadingStartTime = AssetSystemTime.RealtimeSinceStartup;
             }
         }
 
@@ -394,12 +400,12 @@ namespace YooAsset
         /// 2. 若 _loadingStartTime 仍未记录（异常场景），则将其设为与 _loadingEndTime 相同，避免负值  
         /// 3. 计算耗时（毫秒），负值则取 0，最终写入 Duration 字段  
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void EndLoadTimeRecord()
         {
             if (_loadingEndTime < 0f)
             {
-                _loadingEndTime = UnityEngine.Time.realtimeSinceStartup;
+            _loadingEndTime = AssetSystemTime.RealtimeSinceStartup;
             }
 
             if (_loadingStartTime < 0f)
@@ -419,7 +425,7 @@ namespace YooAsset
         /// <summary>
         /// 获取资源包的调试信息列表
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void GetBundleDebugInfos(List<DebugBundleInfo> output)
         {
             var bundleInfo = new DebugBundleInfo();
@@ -438,23 +444,23 @@ namespace YooAsset
     {
         bool IsDone { get; }
         float Progress { get; }
-        UnityEngine.Object AssetObject { get; }
-        UnityEngine.Object[] AllAssetObjects { get; }
+        object AssetObject { get; }
+        object[] AllAssetObjects { get; }
     }
 
     internal interface IBundleAssetLoader
     {
-        UnityEngine.Object LoadAsset(string assetPath, Type assetType);
+        object LoadAsset(string assetPath, Type assetType);
         IBundleAssetLoadRequest LoadAssetAsync(string assetPath, Type assetType);
-        UnityEngine.Object[] LoadSubAssets(string assetPath, Type assetType);
+        object[] LoadSubAssets(string assetPath, Type assetType);
         IBundleAssetLoadRequest LoadSubAssetsAsync(string assetPath, Type assetType);
-        UnityEngine.Object[] LoadAllAssets(Type assetType);
+        object[] LoadAllAssets(Type assetType);
         IBundleAssetLoadRequest LoadAllAssetsAsync(Type assetType);
     }
 
     internal interface ISceneLoadController
     {
-        UnityEngine.SceneManagement.LoadSceneMode SceneMode { get; }
+        SceneLoadMode SceneMode { get; }
         void UnSuspendLoad();
         void CancelLoad();
     }
@@ -477,14 +483,14 @@ namespace YooAsset
 
     internal sealed class UnityAssetBundleLoader : IBundleAssetLoader
     {
-        private readonly UnityEngine.AssetBundle _assetBundle;
+        private readonly BundleFile _assetBundle;
 
-        public UnityAssetBundleLoader(UnityEngine.AssetBundle assetBundle)
+        public UnityAssetBundleLoader(BundleFile assetBundle)
         {
             _assetBundle = assetBundle;
         }
 
-        public UnityEngine.Object LoadAsset(string assetPath, Type assetType)
+        public object LoadAsset(string assetPath, Type assetType)
         {
             return assetType == null ? _assetBundle.LoadAsset(assetPath) : _assetBundle.LoadAsset(assetPath, assetType);
         }
@@ -495,7 +501,7 @@ namespace YooAsset
             return new UnityAssetBundleLoadRequest(request);
         }
 
-        public UnityEngine.Object[] LoadSubAssets(string assetPath, Type assetType)
+        public object[] LoadSubAssets(string assetPath, Type assetType)
         {
             return assetType == null ? _assetBundle.LoadAssetWithSubAssets(assetPath) : _assetBundle.LoadAssetWithSubAssets(assetPath, assetType);
         }
@@ -506,7 +512,7 @@ namespace YooAsset
             return new UnityAssetBundleLoadRequest(request);
         }
 
-        public UnityEngine.Object[] LoadAllAssets(Type assetType)
+        public object[] LoadAllAssets(Type assetType)
         {
             return assetType == null ? _assetBundle.LoadAllAssets() : _assetBundle.LoadAllAssets(assetType);
         }
@@ -520,17 +526,17 @@ namespace YooAsset
 
     internal sealed class UnityAssetBundleLoadRequest : IBundleAssetLoadRequest
     {
-        private readonly UnityEngine.AssetBundleRequest _request;
+        private readonly BundleAssetRequest _request;
 
-        public UnityAssetBundleLoadRequest(UnityEngine.AssetBundleRequest request)
+        public UnityAssetBundleLoadRequest(BundleAssetRequest request)
         {
             _request = request;
         }
 
         public bool IsDone => _request.isDone;
         public float Progress => _request.progress;
-        public UnityEngine.Object AssetObject => _request.asset;
-        public UnityEngine.Object[] AllAssetObjects => _request.allAssets;
+        public object AssetObject => _request.asset;
+        public object[] AllAssetObjects => _request.allAssets;
     }
 
     internal static class BundleAssetLoadUtility
@@ -543,7 +549,7 @@ namespace YooAsset
             return candidates;
         }
 
-        public static bool IsTypeMatch(UnityEngine.Object assetObject, Type assetType)
+        public static bool IsTypeMatch(object assetObject, Type assetType)
         {
             if (assetObject == null)
             {
@@ -558,7 +564,7 @@ namespace YooAsset
             return assetType.IsAssignableFrom(assetObject.GetType());
         }
 
-        public static UnityEngine.Object[] FilterByType(UnityEngine.Object[] allAssets, Type assetType)
+        public static object[] FilterByType(object[] allAssets, Type assetType)
         {
             if (allAssets == null || allAssets.Length == 0)
             {
@@ -570,7 +576,7 @@ namespace YooAsset
                 return allAssets;
             }
 
-            var results = new List<UnityEngine.Object>(allAssets.Length);
+            var results = new List<object>(allAssets.Length);
             foreach (var assetObject in allAssets)
             {
                 if (assetObject == null)
@@ -587,14 +593,14 @@ namespace YooAsset
             return results.ToArray();
         }
 
-        public static bool HasAnyAsset(UnityEngine.Object[] allAssets)
+        public static bool HasAnyAsset(object[] allAssets)
         {
             return allAssets != null && allAssets.Length > 0;
         }
 
         private static bool IsWildcardType(Type assetType)
         {
-            return assetType == null || assetType == typeof(UnityEngine.Object);
+            return assetType == null || assetType == typeof(object);
         }
 
         private static void AddCandidate(List<string> candidates, string path)

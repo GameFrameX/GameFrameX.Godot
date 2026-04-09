@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class OperationSystem
     {
         private static readonly List<AsyncOperationBase> _operations = new(1000);
@@ -33,7 +33,7 @@ namespace YooAsset
         /// <summary>
         /// 初始化异步操作系统
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static void Initialize()
         {
             _watch = Stopwatch.StartNew();
@@ -42,7 +42,7 @@ namespace YooAsset
         /// <summary>
         /// 更新异步操作系统
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static void Update()
         {
             _frameTime = _watch.ElapsedMilliseconds;
@@ -121,7 +121,7 @@ namespace YooAsset
         /// <summary>
         /// 销毁异步操作系统
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static void DestroyAll()
         {
             _operations.Clear();
@@ -136,7 +136,7 @@ namespace YooAsset
         /// <summary>
         /// 销毁包裹的所有任务
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static void ClearPackageOperation(string packageName)
         {
             // 终止临时队列里的任务
@@ -161,7 +161,7 @@ namespace YooAsset
         /// <summary>
         /// 开始处理异步操作类
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static void StartOperation(string packageName, AsyncOperationBase operation)
         {
             _newList.Add(operation);
@@ -172,7 +172,7 @@ namespace YooAsset
         /// <summary>
         /// 标记优先级队列需要重排
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal static void SetPriorityDirty()
         {
             _priorityDirty = true;

@@ -4,9 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public abstract class AsyncOperationBase : IEnumerator, IComparable<AsyncOperationBase>
     {
         private Action<AsyncOperationBase> _callback;
@@ -98,42 +98,42 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public abstract void InternalOnStart();
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public abstract void InternalOnUpdate();
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal virtual void InternalOnAbort()
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual void InternalWaitForAsyncComplete()
         {
             throw new NotImplementedException(GetType().Name);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetPackageName()
         {
             return _packageName;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void SetPackageName(string packageName)
         {
             _packageName = packageName;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void SetStart()
         {
             Status = EOperationStatus.Processing;
             InternalOnStart();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void SetFinish()
         {
             IsFinish = true;
@@ -150,14 +150,14 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal void SetAbort()
         {
             if (IsDone == false)
             {
                 Status = EOperationStatus.Failed;
                 Error = "user abort";
-                YooLogger.Warning($"Async operaiton {GetType().Name} has been abort !");
+                AssetSystemLogger.Warning($"Async operaiton {GetType().Name} has been abort !");
                 InternalOnAbort();
             }
         }
@@ -165,7 +165,7 @@ namespace YooAsset
         /// <summary>
         /// 执行While循环
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected bool ExecuteWhileDone()
         {
             if (IsDone == false)
@@ -179,7 +179,7 @@ namespace YooAsset
                 {
                     Status = EOperationStatus.Failed;
                     Error = $"Operation {GetType().Name} failed to wait for async complete !";
-                    YooLogger.Error(Error);
+                    AssetSystemLogger.Error(Error);
                 }
             }
 
@@ -189,7 +189,7 @@ namespace YooAsset
         /// <summary>
         /// 清空完成回调
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected void ClearCompletedCallback()
         {
             _callback = null;
@@ -198,7 +198,7 @@ namespace YooAsset
         /// <summary>
         /// 等待异步执行完毕
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void WaitForAsyncComplete()
         {
             if (IsDone)
@@ -211,7 +211,7 @@ namespace YooAsset
 
         #region 排序接口实现
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public int CompareTo(AsyncOperationBase other)
         {
             return other.Priority.CompareTo(Priority);
@@ -221,13 +221,13 @@ namespace YooAsset
 
         #region 异步编程相关
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         bool IEnumerator.MoveNext()
         {
             return !IsDone;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         void IEnumerator.Reset()
         {
         }

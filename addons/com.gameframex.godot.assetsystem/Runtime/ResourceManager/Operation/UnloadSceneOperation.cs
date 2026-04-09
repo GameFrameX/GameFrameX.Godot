@@ -1,15 +1,14 @@
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using Godot;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 场景卸载异步操作类
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public sealed class UnloadSceneOperation : AsyncOperationBase
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum ESteps
         {
             None,
@@ -22,15 +21,14 @@ namespace YooAsset
         private ESteps _steps = ESteps.None;
         private readonly string _error;
         private readonly ProviderOperation _provider;
-        private AsyncOperation _asyncOp = null;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal UnloadSceneOperation(string error)
         {
             _error = error;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal UnloadSceneOperation(ProviderOperation provider)
         {
             _error = null;
@@ -46,13 +44,13 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CheckError;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -80,19 +78,11 @@ namespace YooAsset
                     return;
                 }
 
-                if (_provider.SceneObject.IsValid() == false)
+                if (_provider.SceneNode == null || GodotObject.IsInstanceValid(_provider.SceneNode) == false)
                 {
                     _steps = ESteps.Done;
                     Status = EOperationStatus.Failed;
-                    Error = "Scene is invalid !";
-                    return;
-                }
-
-                if (_provider.SceneObject.isLoaded == false)
-                {
-                    _steps = ESteps.Done;
-                    Status = EOperationStatus.Failed;
-                    Error = "Scene is not loaded !";
+                    Error = "Scene node is invalid !";
                     return;
                 }
 
@@ -101,25 +91,21 @@ namespace YooAsset
 
             if (_steps == ESteps.UnLoadScene)
             {
-                if (_asyncOp == null)
+                var sceneNode = _provider.SceneNode;
+                if (sceneNode == null || GodotObject.IsInstanceValid(sceneNode) == false)
                 {
-                    _asyncOp = SceneManager.UnloadSceneAsync(_provider.SceneObject);
-                    if (_asyncOp == null)
-                    {
-                        _steps = ESteps.Done;
-                        Status = EOperationStatus.Failed;
-                        Error = "Scene unload request failed !";
-                        return;
-                    }
-
-                    _provider.ResourceMgr.UnloadSubScene(_provider.SceneName);
-                }
-
-                Progress = _asyncOp.progress;
-                if (_asyncOp.isDone == false)
-                {
+                    _steps = ESteps.Done;
+                    Status = EOperationStatus.Failed;
+                    Error = "Scene node is invalid !";
                     return;
                 }
+
+                // Migration note (scheme 2): unload scene by Godot node lifecycle.
+                sceneNode.QueueFree();
+                _provider.SceneNode = null;
+                _provider.SceneInfo = default;
+                _provider.ResourceMgr.UnloadSubScene(_provider.SceneName);
+                Progress = 1f;
 
                 _provider.ResourceMgr.TryUnloadUnusedAsset(_provider.MainAssetInfo);
                 _steps = ESteps.Done;

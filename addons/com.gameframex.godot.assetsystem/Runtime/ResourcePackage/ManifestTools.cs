@@ -1,38 +1,37 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal static class ManifestTools
     {
 #if UNITY_EDITOR
         /// <summary>
         /// 序列化（JSON文件）
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static void SerializeToJson(string savePath, PackageManifest manifest)
         {
-            var json = JsonUtility.ToJson(manifest, true);
+            var json = AssetSystemJson.ToJson(manifest, true);
             FileUtility.WriteAllText(savePath, json);
         }
 
         /// <summary>
         /// 序列化（二进制文件）
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static void SerializeToBinary(string savePath, PackageManifest manifest)
         {
             using (var fs = new FileStream(savePath, FileMode.Create))
             {
                 // 创建缓存器
-                var buffer = new BufferWriter(YooAssetSettings.ManifestFileMaxSize);
+                var buffer = new BufferWriter(AssetSystemSettings.ManifestFileMaxSize);
 
                 // 写入文件标记
-                buffer.WriteUInt32(YooAssetSettings.ManifestFileSign);
+                buffer.WriteUInt32(AssetSystemSettings.ManifestFileSign);
 
                 // 写入文件版本
                 buffer.WriteUTF8(manifest.FileVersion);
@@ -82,16 +81,16 @@ namespace YooAsset
         /// <summary>
         /// 反序列化（JSON文件）
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static PackageManifest DeserializeFromJson(string jsonContent)
         {
-            return JsonUtility.FromJson<PackageManifest>(jsonContent);
+            return AssetSystemJson.FromJson<PackageManifest>(jsonContent);
         }
 
         /// <summary>
         /// 反序列化（二进制文件）
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static PackageManifest DeserializeFromBinary(byte[] binaryData)
         {
             // 创建缓存器
@@ -99,16 +98,16 @@ namespace YooAsset
 
             // 读取文件标记
             var fileSign = buffer.ReadUInt32();
-            if (fileSign != YooAssetSettings.ManifestFileSign)
+            if (fileSign != AssetSystemSettings.ManifestFileSign)
             {
                 throw new Exception("Invalid manifest file !");
             }
 
             // 读取文件版本
             var fileVersion = buffer.ReadUTF8();
-            if (fileVersion != YooAssetSettings.ManifestFileVersion)
+            if (fileVersion != AssetSystemSettings.ManifestFileVersion)
             {
-                throw new Exception($"The manifest file version are not compatible : {fileVersion} != {YooAssetSettings.ManifestFileVersion}");
+                throw new Exception($"The manifest file version are not compatible : {fileVersion} != {AssetSystemSettings.ManifestFileVersion}");
             }
 
             var manifest = new PackageManifest();
@@ -194,7 +193,7 @@ namespace YooAsset
         /// <summary>
         /// 注意：该类拷贝自编辑器
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private enum EFileNameStyle
         {
             /// <summary>
@@ -216,7 +215,7 @@ namespace YooAsset
         /// <summary>
         /// 获取资源文件的后缀名
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static string GetRemoteBundleFileExtension(string bundleName)
         {
             var fileExtension = Path.GetExtension(bundleName);
@@ -226,7 +225,7 @@ namespace YooAsset
         /// <summary>
         /// 获取远端的资源文件名
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public static string GetRemoteBundleFileName(int nameStyle, string bundleName, string fileExtension, string fileHash)
         {
             if (nameStyle == (int)EFileNameStyle.HashName)

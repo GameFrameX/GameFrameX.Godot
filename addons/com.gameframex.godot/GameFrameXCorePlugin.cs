@@ -118,8 +118,6 @@ namespace GameFrameX.Editor
         private RuntimeLogBridge m_RuntimeLogBridge;
         private AssetSystemBuilderDialog m_AssetSystemBuilderDialog;
         private ScriptingDefineSymbolsWindow m_ScriptingDefineSymbolsWindow;
-        private Callable m_TopMenuIdPressedCallable;
-        private Callable m_LogDefineMenuIdPressedCallable;
 
         /// <summary>
         /// 当插件进入场景树时调用，注册 Inspector 插件。
@@ -180,8 +178,6 @@ namespace GameFrameX.Editor
             m_LogDefinePopupMenu = null;
             m_CurrentLocale = null;
             m_RuntimeLogBridge = null;
-            m_TopMenuIdPressedCallable = default;
-            m_LogDefineMenuIdPressedCallable = default;
         }
 
         /// <summary>
@@ -221,11 +217,7 @@ namespace GameFrameX.Editor
             m_TopPopupMenu.AddItem(L("资源打包器", "Asset Builder"), TopMenuAssetBuilderId);
             m_TopPopupMenu.AddItem(L("生成客户端配置", "Generate Client Config"), TopMenuGenerateClientConfigId);
             m_TopPopupMenu.AddSeparator();
-            m_TopMenuIdPressedCallable = Callable.From<long>(OnTopMenuIdPressed);
-            if (!m_TopPopupMenu.IsConnected(PopupMenu.SignalName.IdPressed, m_TopMenuIdPressedCallable))
-            {
-                m_TopPopupMenu.Connect(PopupMenu.SignalName.IdPressed, m_TopMenuIdPressedCallable);
-            }
+            m_TopPopupMenu.IdPressed += OnTopMenuIdPressed;
             BuildLogDefineSubmenu();
             if (m_LogDefinePopupMenu != null)
             {
@@ -266,11 +258,7 @@ namespace GameFrameX.Editor
             m_LogDefinePopupMenu.AddItem(L("开启警告及以上日志", "Enable Warning+ Logs"), LogDefineEnableWarningAndAboveLogsId);
             m_LogDefinePopupMenu.AddItem(L("开启错误及以上日志", "Enable Error+ Logs"), LogDefineEnableErrorAndAboveLogsId);
             m_LogDefinePopupMenu.AddItem(L("开启严重错误及以上日志", "Enable Fatal+ Logs"), LogDefineEnableFatalAndAboveLogsId);
-            m_LogDefineMenuIdPressedCallable = Callable.From<long>(OnLogDefineMenuIdPressed);
-            if (!m_LogDefinePopupMenu.IsConnected(PopupMenu.SignalName.IdPressed, m_LogDefineMenuIdPressedCallable))
-            {
-                m_LogDefinePopupMenu.Connect(PopupMenu.SignalName.IdPressed, m_LogDefineMenuIdPressedCallable);
-            }
+            m_LogDefinePopupMenu.IdPressed += OnLogDefineMenuIdPressed;
             m_TopPopupMenu.AddChild(m_LogDefinePopupMenu);
         }
 
@@ -281,10 +269,7 @@ namespace GameFrameX.Editor
         {
             if (m_LogDefinePopupMenu != null)
             {
-                if (!m_LogDefineMenuIdPressedCallable.IsNull() && m_LogDefinePopupMenu.IsConnected(PopupMenu.SignalName.IdPressed, m_LogDefineMenuIdPressedCallable))
-                {
-                    m_LogDefinePopupMenu.Disconnect(PopupMenu.SignalName.IdPressed, m_LogDefineMenuIdPressedCallable);
-                }
+                m_LogDefinePopupMenu.IdPressed -= OnLogDefineMenuIdPressed;
 
                 m_LogDefinePopupMenu.QueueFree();
                 m_LogDefinePopupMenu = null;
@@ -297,10 +282,7 @@ namespace GameFrameX.Editor
                 PopupMenu popupMenu = m_TopMenuButton.GetPopup();
                 if (popupMenu != null)
                 {
-                    if (!m_TopMenuIdPressedCallable.IsNull() && popupMenu.IsConnected(PopupMenu.SignalName.IdPressed, m_TopMenuIdPressedCallable))
-                    {
-                        popupMenu.Disconnect(PopupMenu.SignalName.IdPressed, m_TopMenuIdPressedCallable);
-                    }
+                    popupMenu.IdPressed -= OnTopMenuIdPressed;
                 }
 
                 RemoveControlFromContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
@@ -358,9 +340,9 @@ namespace GameFrameX.Editor
         {
             if (id == TopMenuAssetBuilderId)
             {
-                if (!ShowUnifiedAssetBuilderDialog() && global::YooAssetEditorPlugin.RequestOpenBuilderFromCompatibilityEntry() == false)
+                if (!ShowUnifiedAssetBuilderDialog() && global::AssetSystemEditorPlugin.RequestOpenBuilderFromCompatibilityEntry() == false)
                 {
-                    GD.PrintErr("无法打开资源打包器：统一窗口与 YooAsset 入口均不可用。");
+                    GD.PrintErr("无法打开资源打包器：统一窗口与 AssetSystem 入口均不可用。");
                 }
 
                 return;
@@ -388,6 +370,12 @@ namespace GameFrameX.Editor
         {
             try
             {
+                if (m_AssetSystemBuilderDialog != null && GodotObject.IsInstanceValid(m_AssetSystemBuilderDialog))
+                {
+                    m_AssetSystemBuilderDialog.QueueFree();
+                    m_AssetSystemBuilderDialog = null;
+                }
+
                 if (m_AssetSystemBuilderDialog == null || !GodotObject.IsInstanceValid(m_AssetSystemBuilderDialog))
                 {
                     m_AssetSystemBuilderDialog = new AssetSystemBuilderDialog();

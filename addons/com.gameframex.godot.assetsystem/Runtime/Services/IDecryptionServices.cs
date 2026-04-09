@@ -1,9 +1,7 @@
-﻿using System.IO;
-using UnityEngine;
-
-namespace YooAsset
+using System.IO;
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public struct DecryptFileInfo
     {
         /// <summary>
@@ -22,33 +20,33 @@ namespace YooAsset
         public uint FileLoadCRC;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public interface IDecryptionServices
     {
         /// <summary>
         /// 同步方式获取解密的资源包对象
         /// 注意：加载流对象在资源包对象释放的时候会自动释放
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
-        AssetBundle LoadAssetBundle(DecryptFileInfo fileInfo, out Stream managedStream);
+        [AssetSystemPreserve]
+        BundleFile LoadAssetBundle(DecryptFileInfo fileInfo, out Stream managedStream);
 
         /// <summary>
         /// 异步方式获取解密的资源包对象
         /// 注意：加载流对象在资源包对象释放的时候会自动释放
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
-        AssetBundleCreateRequest LoadAssetBundleAsync(DecryptFileInfo fileInfo, out Stream managedStream);
+        [AssetSystemPreserve]
+        BundleFileCreateRequest LoadAssetBundleAsync(DecryptFileInfo fileInfo, out Stream managedStream);
 
         /// <summary>
         /// 获取解密的字节数据
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         byte[] ReadFileData(DecryptFileInfo fileInfo);
 
         /// <summary>
         /// 获取解密的文本数据
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         string ReadFileText(DecryptFileInfo fileInfo);
     }
 }

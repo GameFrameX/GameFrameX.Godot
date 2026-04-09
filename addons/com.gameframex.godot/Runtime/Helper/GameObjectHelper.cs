@@ -156,7 +156,7 @@ namespace GameFrameX.Runtime
         /// <param name="children">是否设置子物体</param>
         public static void SetLayer(Node node, int layer, bool children = true)
         {
-            // Godot doesn't have the same concept of layers as Unity
+                // Godot and this runtime use different layer/tag model
             // For physics, use Collision layers/masks
             // For rendering, use Canvas layers
             // This is a placeholder for compatibility

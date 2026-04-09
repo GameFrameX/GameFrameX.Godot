@@ -1,21 +1,21 @@
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public sealed class HttpResponse
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool Success { get; set; }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public long StatusCode { get; set; }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string Error { get; set; }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string Text { get; set; }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public byte[] Data { get; set; }
     }
 }

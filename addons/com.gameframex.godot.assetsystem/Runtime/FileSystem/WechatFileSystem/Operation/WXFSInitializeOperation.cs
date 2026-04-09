@@ -1,21 +1,21 @@
-using YooAsset;
+using GameFrameX.AssetSystem;
 
-[UnityEngine.Scripting.Preserve]
+[AssetSystemPreserve]
 internal partial class WXFSInitializeOperation : FSInitializeFileSystemOperation
 {
     private readonly WechatFileSystem _fileSystem;
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public WXFSInitializeOperation(WechatFileSystem fileSystem)
     {
         _fileSystem = fileSystem;
     }
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnStart()
     {
         Status = EOperationStatus.Succeed;
     }
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public override void InternalOnUpdate()
     {
     }

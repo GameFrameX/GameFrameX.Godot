@@ -2,18 +2,16 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
     /// <summary>
     /// 缓存文件系统
     /// 说明：正在进行的下载器会在ResourcePackage销毁的时候执行Abort操作！
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DefaultCacheFileSystem : IFileSystem
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public class FileWrapper
         {
             public string InfoFilePath { private set; get; }
@@ -21,7 +19,7 @@ namespace YooAsset
             public string DataFileCRC { private set; get; }
             public long DataFileSize { private set; get; }
 
-            [UnityEngine.Scripting.Preserve]
+            [AssetSystemPreserve]
             public FileWrapper(string infoFilePath, string dataFilePath, string dataFileCRC, long dataFileSize)
             {
                 InfoFilePath = infoFilePath;
@@ -104,12 +102,12 @@ namespace YooAsset
         #endregion
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public DefaultCacheFileSystem()
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSInitializeFileSystemOperation InitializeFileSystemAsync()
         {
             var operation = new DCFSInitializeOperation(this);
@@ -117,7 +115,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSRequestPackageVersionOperation LoadLocalPackageVersionAsync(bool appendTimeTicks, int timeout)
         {
             var operation = new DCFSLoadLocalPackageVersionOperation(this, appendTimeTicks, timeout);
@@ -125,7 +123,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSLoadPackageManifestOperation LoadLocalPackageManifestAsync(string packageVersion, int timeout)
         {
             var operation = new DCFSLoadPackageManifestOperation(this, packageVersion, false, timeout);
@@ -133,7 +131,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSRequestPackageVersionOperation RequestRemotePackageVersionAsync(bool appendTimeTicks, int timeout)
         {
             var operation = new DCFSRequestPackageVersionOperation(this, appendTimeTicks, timeout);
@@ -141,7 +139,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSLoadPackageManifestOperation RequestRemotePackageManifestAsync(string packageVersion, int timeout)
         {
             var operation = new DCFSLoadPackageManifestOperation(this, packageVersion, true, timeout);
@@ -149,7 +147,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSClearAllBundleFilesOperation ClearAllBundleFilesAsync()
         {
             var operation = new DCFSClearAllBundleFilesOperation(this);
@@ -157,7 +155,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSClearUnusedBundleFilesOperation ClearUnusedBundleFilesAsync(PackageManifest manifest)
         {
             var operation = new DCFSClearUnusedBundleFilesOperation(this, manifest);
@@ -165,7 +163,7 @@ namespace YooAsset
             return operation;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSDownloadFileOperation DownloadFileAsync(PackageBundle bundle, DownloadParam param)
         {
             // 查询旧的下载器
@@ -208,7 +206,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual FSLoadBundleOperation LoadBundleFile(PackageBundle bundle)
         {
             if (RawFileBuildPipeline)
@@ -225,10 +223,10 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual void UnloadBundleFile(PackageBundle bundle, object result)
         {
-            var assetBundle = result as AssetBundle;
+            var assetBundle = result as BundleFile;
             if (assetBundle == null)
             {
                 return;
@@ -251,7 +249,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual void SetParameter(string name, object value)
         {
             if (name == FileSystemParametersDefine.REMOTE_SERVICES)
@@ -284,11 +282,11 @@ namespace YooAsset
             }
             else
             {
-                YooLogger.Warning($"Invalid parameter : {name}");
+                AssetSystemLogger.Warning($"Invalid parameter : {name}");
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual void OnCreate(string packageName, string rootDirectory)
         {
             PackageName = packageName;
@@ -305,7 +303,7 @@ namespace YooAsset
             FileUtility.CreateDirectory(_manifestFileRoot);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual void OnUpdate()
         {
             _removeList.Clear();
@@ -334,20 +332,20 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual bool Belong(PackageBundle bundle)
         {
             // 注意：缓存文件系统保底加载！
             return true;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual bool Exists(PackageBundle bundle)
         {
             return _wrappers.ContainsKey(bundle.BundleGUID);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual bool NeedDownload(PackageBundle bundle)
         {
             if (Belong(bundle) == false)
@@ -358,13 +356,13 @@ namespace YooAsset
             return Exists(bundle) == false;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual bool NeedUnpack(PackageBundle bundle)
         {
             return false;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual bool NeedImport(PackageBundle bundle)
         {
             if (Belong(bundle) == false)
@@ -375,7 +373,7 @@ namespace YooAsset
             return Exists(bundle) == false;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual byte[] ReadFileData(PackageBundle bundle)
         {
             if (Exists(bundle) == false)
@@ -387,7 +385,7 @@ namespace YooAsset
             {
                 if (DecryptionServices == null)
                 {
-                    YooLogger.Error($"The {nameof(IDecryptionServices)} is null !");
+                    AssetSystemLogger.Error($"The {nameof(IDecryptionServices)} is null !");
                     return null;
                 }
 
@@ -407,7 +405,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public virtual string ReadFileText(PackageBundle bundle)
         {
             if (Exists(bundle) == false)
@@ -419,7 +417,7 @@ namespace YooAsset
             {
                 if (DecryptionServices == null)
                 {
-                    YooLogger.Error($"The {nameof(IDecryptionServices)} is null !");
+                    AssetSystemLogger.Error($"The {nameof(IDecryptionServices)} is null !");
                     return null;
                 }
 
@@ -443,7 +441,7 @@ namespace YooAsset
 
         private readonly BufferWriter _sharedBuffer = new(1024);
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void WriteInfoFile(string filePath, string dataFileCRC, long dataFileSize)
         {
             using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read))
@@ -456,7 +454,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void ReadInfoFile(string filePath, out string dataFileCRC, out long dataFileSize)
         {
             var binaryData = FileUtility.ReadAllBytes(filePath);
@@ -465,33 +463,29 @@ namespace YooAsset
             dataFileSize = buffer.ReadInt64();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected string GetDefaultRoot()
         {
-#if UNITY_EDITOR
-            // 注意：为了方便调试查看，编辑器下把存储目录放到项目里。
-            var projectPath = Path.GetDirectoryName(Application.dataPath);
-            projectPath = PathUtility.RegularPath(projectPath);
-            return PathUtility.Combine(projectPath, YooAssetSettingsData.Setting.DefaultYooFolderName);
-#elif UNITY_STANDALONE
-            return PathUtility.Combine(UnityEngine.Application.dataPath, YooAssetSettingsData.Setting.DefaultYooFolderName);
-#else
-            return PathUtility.Combine(UnityEngine.Application.persistentDataPath, YooAssetSettingsData.Setting.DefaultYooFolderName);
-#endif
+            if (global::Godot.Engine.IsEditorHint())
+            {
+                return PathUtility.Combine(GodotAssetPath.GetProjectRoot(), AssetSystemSettingsData.Setting.DefaultYooFolderName);
+            }
+
+            return PathUtility.Combine(GodotAssetPath.GetPersistentRoot(), AssetSystemSettingsData.Setting.DefaultYooFolderName);
         }
 
         /// <summary>
         /// 解析文件系统根目录
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected string ResolveRootDirectory(string rootDirectory)
         {
             var resolvedRoot = string.IsNullOrEmpty(rootDirectory) ? GetDefaultRoot() : rootDirectory;
-            resolvedRoot = PathUtility.ConvertToAbsolutePath(resolvedRoot, Application.dataPath, Application.persistentDataPath);
+            resolvedRoot = PathUtility.ConvertToAbsolutePath(resolvedRoot, GodotAssetPath.GetProjectRoot(), GodotAssetPath.GetPersistentRoot());
             return PathUtility.RegularPath(resolvedRoot);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected string GetDataFilePath(PackageBundle bundle)
         {
             if (_dataFilePaths.TryGetValue(bundle.BundleGUID, out var filePath) == false)
@@ -509,7 +503,7 @@ namespace YooAsset
             return filePath;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         protected string GetInfoFilePath(PackageBundle bundle)
         {
             if (_infoFilePaths.TryGetValue(bundle.BundleGUID, out var filePath) == false)
@@ -522,7 +516,7 @@ namespace YooAsset
             return filePath;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetTempFilePath(PackageBundle bundle)
         {
             if (_tempFilePaths.TryGetValue(bundle.BundleGUID, out var filePath) == false)
@@ -534,33 +528,38 @@ namespace YooAsset
             return filePath;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetCacheFileLoadPath(PackageBundle bundle)
         {
+            if (_wrappers.TryGetValue(bundle.BundleGUID, out var wrapper))
+            {
+                return wrapper.DataFilePath;
+            }
+
             return GetDataFilePath(bundle);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetCacheFilesRoot()
         {
             return _saveFileRoot;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetCachePackageHashFilePath(string packageVersion)
         {
-            var fileName = YooAssetSettingsData.GetPackageHashFileName(PackageName, packageVersion);
+            var fileName = AssetSystemSettingsData.GetPackageHashFileName(PackageName, packageVersion);
             return PathUtility.Combine(_manifestFileRoot, fileName);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetCachePackageManifestFilePath(string packageVersion)
         {
-            var fileName = YooAssetSettingsData.GetManifestBinaryFileName(PackageName, packageVersion);
+            var fileName = AssetSystemSettingsData.GetManifestBinaryFileName(PackageName, packageVersion);
             return PathUtility.Combine(_manifestFileRoot, fileName);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public string GetSandboxAppFootPrintFilePath()
         {
             return PathUtility.Combine(_manifestFileRoot, DefaultCacheFileSystemDefine.AppFootPrintFileName);
@@ -569,7 +568,7 @@ namespace YooAsset
         /// <summary>
         /// 是否已经记录了文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool IsRecordFile(string bundleGUID)
         {
             return _wrappers.ContainsKey(bundleGUID);
@@ -578,12 +577,12 @@ namespace YooAsset
         /// <summary>
         /// 记录文件信息
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool RecordFile(string bundleGUID, FileWrapper wrapper)
         {
             if (_wrappers.ContainsKey(bundleGUID))
             {
-                YooLogger.Error($"{nameof(DefaultCacheFileSystem)} has element : {bundleGUID}");
+                AssetSystemLogger.Error($"{nameof(DefaultCacheFileSystem)} has element : {bundleGUID}");
                 return false;
             }
 
@@ -594,7 +593,7 @@ namespace YooAsset
         /// <summary>
         /// 验证缓存文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public EFileVerifyResult VerifyCacheFile(PackageBundle bundle)
         {
             if (_wrappers.TryGetValue(bundle.BundleGUID, out var wrapper) == false)
@@ -609,7 +608,7 @@ namespace YooAsset
         /// <summary>
         /// 写入缓存文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool WriteCacheFile(PackageBundle bundle, string copyPath)
         {
             if (_wrappers.ContainsKey(bundle.BundleGUID))
@@ -643,7 +642,7 @@ namespace YooAsset
             }
             catch (Exception e)
             {
-                YooLogger.Error($"Failed to write cache file ! {e.Message}");
+                AssetSystemLogger.Error($"Failed to write cache file ! {e.Message}");
                 return false;
             }
 
@@ -654,7 +653,7 @@ namespace YooAsset
         /// <summary>
         /// 删除缓存文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool DeleteCacheFile(string bundleGUID)
         {
             if (_wrappers.TryGetValue(bundleGUID, out var wrapper))
@@ -673,7 +672,7 @@ namespace YooAsset
                 }
                 catch (Exception e)
                 {
-                    YooLogger.Error($"Failed to delete cache file ! {e.Message}");
+                    AssetSystemLogger.Error($"Failed to delete cache file ! {e.Message}");
                     return false;
                 }
             }
@@ -686,7 +685,7 @@ namespace YooAsset
         /// <summary>
         /// 删除所有清单文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void DeleteAllManifestFiles()
         {
             if (Directory.Exists(_manifestFileRoot))
@@ -698,7 +697,7 @@ namespace YooAsset
         /// <summary>
         /// 获取所有缓存文件GUID
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public List<string> GetAllCachedBundleGUIDs()
         {
             return _wrappers.Keys.ToList();
@@ -707,8 +706,8 @@ namespace YooAsset
         /// <summary>
         /// 加载加密资源文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
-        public AssetBundle LoadEncryptedAssetBundle(PackageBundle bundle)
+        [AssetSystemPreserve]
+        public BundleFile LoadEncryptedAssetBundle(PackageBundle bundle)
         {
             var filePath = GetCacheFileLoadPath(bundle);
             var fileInfo = new DecryptFileInfo
@@ -726,8 +725,8 @@ namespace YooAsset
         /// <summary>
         /// 加载加密资源文件
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
-        public AssetBundleCreateRequest LoadEncryptedAssetBundleAsync(PackageBundle bundle)
+        [AssetSystemPreserve]
+        public BundleFileCreateRequest LoadEncryptedAssetBundleAsync(PackageBundle bundle)
         {
             var filePath = GetCacheFileLoadPath(bundle);
             var fileInfo = new DecryptFileInfo

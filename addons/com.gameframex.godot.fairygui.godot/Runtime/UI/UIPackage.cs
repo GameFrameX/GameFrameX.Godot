@@ -586,19 +586,8 @@ namespace FairyGUI
                 if (name != existingPkg.name)
                     GD.PushWarning("FairyGUI: Package conflicts, '" + name + "' and '" + existingPkg.name + "'");
 
-#if UNITY_EDITOR
-                //maybe multiple pkgs in different folder, pefer the one in resources
-                if (Application.isEditor)
-                {
-                    if (existingPkg._loadFunc == _loadFromAssetsPath) //old one is outside resources path
-                        existingPkg.Dispose(); //replace the existing
-                    else if (existingPkg._loadFunc == _loadFromResourcesPath && _loadFunc == _loadFromResourcesPath
-                        && _assetPath.Length < existingPkg._assetPath.Length) //both in resources path, pefer short path
-                        existingPkg.Dispose(); //replace the existing
-                    else //keep the existing
-                        return false;
-                }
-#endif
+                // Keep existing package instance when duplicated package id is found.
+                return false;
             }
 
             buffer.Skip(20);

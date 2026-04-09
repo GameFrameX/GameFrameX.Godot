@@ -1,14 +1,14 @@
-using UnityEngine;
+using Godot;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class GodotResourceBackend : IResourceBackend
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public bool TryCreateBundleAssetLoader(object bundleResult, out IBundleAssetLoader loader, out string error)
         {
-            if (bundleResult is AssetBundle assetBundle)
+            if (bundleResult is BundleFile assetBundle)
             {
                 loader = new UnityAssetBundleLoader(assetBundle);
                 error = string.Empty;
@@ -20,39 +20,46 @@ namespace YooAsset
             return false;
         }
 
-        [UnityEngine.Scripting.Preserve]
-        public GameObject Instantiate(UnityEngine.Object assetObject, bool setPositionAndRotation, Vector3 position, Quaternion rotation, Transform parent, bool worldPositionStays)
+        // Migration note (scheme 2): instantiate directly from Godot scene resources.
+        [AssetSystemPreserve]
+        public Node Instantiate(object assetObject, Node parent)
         {
-            var gameObject = assetObject as GameObject;
-            if (gameObject == null)
+            Node instance = null;
+            var runtimeObject = assetObject;
+
+            if (runtimeObject is PackedScene packedScene)
+            {
+                instance = packedScene.Instantiate();
+            }
+            else if (runtimeObject is Node node)
+            {
+                instance = node.Duplicate() as Node;
+            }
+            else
             {
                 return null;
             }
 
-            if (setPositionAndRotation)
+            if (instance != null && parent != null)
             {
-                if (parent != null)
-                {
-                    return UnityEngine.Object.Instantiate(gameObject, position, rotation, parent);
-                }
-
-                return UnityEngine.Object.Instantiate(gameObject, position, rotation);
+                parent.AddChild(instance);
             }
 
-            if (parent != null)
-            {
-                return UnityEngine.Object.Instantiate(gameObject, parent, worldPositionStays);
-            }
-
-            return UnityEngine.Object.Instantiate(gameObject);
+            return instance;
         }
 
-        [UnityEngine.Scripting.Preserve]
-        public void Destroy(UnityEngine.Object target)
+        [AssetSystemPreserve]
+        public void Destroy(object target)
         {
-            if (target != null)
+            if (target is Node node && GodotObject.IsInstanceValid(node))
             {
-                UnityEngine.Object.Destroy(target);
+                node.QueueFree();
+                return;
+            }
+
+            if (target is System.IDisposable disposable)
+            {
+                disposable.Dispose();
             }
         }
     }

@@ -1,6 +1,6 @@
-﻿namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public struct EncryptResult
     {
         /// <summary>
@@ -14,7 +14,7 @@
         public byte[] EncryptedData;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public struct EncryptFileInfo
     {
         /// <summary>
@@ -28,10 +28,10 @@
         public string FileLoadPath;
     }
 
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public interface IEncryptionServices
     {
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         EncryptResult Encrypt(EncryptFileInfo fileInfo);
     }
 }

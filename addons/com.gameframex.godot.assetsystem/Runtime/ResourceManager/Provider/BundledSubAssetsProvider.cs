@@ -1,10 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal sealed class BundledSubAssetsProvider : ProviderOperation
     {
         private IBundleAssetLoader _bundleLoader;
@@ -12,19 +10,19 @@ namespace YooAsset
         private List<string> _assetPathCandidates;
         private int _assetPathIndex;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public BundledSubAssetsProvider(ResourceManager manager, string providerGUID, AssetInfo assetInfo) : base(manager, providerGUID, assetInfo)
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             BeginLoadTimeRecord();
             DebugBeginRecording();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (IsDone)
@@ -109,7 +107,7 @@ namespace YooAsset
                     if (IsWaitForAsyncComplete)
                     {
                         // 强制挂起主线程（注意：该操作会很耗时）
-                        YooLogger.Warning("Suspend the main thread to load unity asset.");
+            AssetSystemLogger.Warning("Suspend the main thread to load asset synchronously.");
                         AllAssetObjects = _cacheRequest.AllAssetObjects;
                     }
                     else
@@ -140,14 +138,14 @@ namespace YooAsset
                     string error;
                     if (MainAssetInfo.AssetType == null)
                     {
-                        error = $"Failed to load sub assets : {MainAssetInfo.AssetPath} AssetType : null AssetBundle : {LoadBundleFileOp.BundleFileInfo.Bundle.BundleName}";
+            error = $"Failed to load sub assets : {MainAssetInfo.AssetPath} AssetType : null Bundle : {LoadBundleFileOp.BundleFileInfo.Bundle.BundleName}";
                     }
                     else
                     {
-                        error = $"Failed to load sub assets : {MainAssetInfo.AssetPath} AssetType : {MainAssetInfo.AssetType} AssetBundle : {LoadBundleFileOp.BundleFileInfo.Bundle.BundleName}";
+            error = $"Failed to load sub assets : {MainAssetInfo.AssetPath} AssetType : {MainAssetInfo.AssetType} Bundle : {LoadBundleFileOp.BundleFileInfo.Bundle.BundleName}";
                     }
 
-                    YooLogger.Error(error);
+                    AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                 }
                 else
@@ -157,7 +155,7 @@ namespace YooAsset
             }
         }
 
-        private UnityEngine.Object[] TryLoadSubAssetsSync()
+        private object[] TryLoadSubAssetsSync()
         {
             for (var i = 0; i < _assetPathCandidates.Count; i++)
             {

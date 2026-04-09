@@ -1,20 +1,19 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using UnityEngine;
-
-namespace YooAsset
+using Godot;
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     public sealed class AssetHandle : HandleBase, IDisposable
     {
         private Action<AssetHandle> _callback;
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal AssetHandle(ProviderOperation provider) : base(provider)
         {
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal override void InvokeCallback()
         {
             _callback?.Invoke(this);
@@ -55,7 +54,7 @@ namespace YooAsset
         /// <summary>
         /// 等待异步执行完毕
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void WaitForAsyncComplete()
         {
             if (IsValidWithWarning == false)
@@ -69,7 +68,7 @@ namespace YooAsset
         /// <summary>
         /// 释放资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Release()
         {
             ReleaseInternal();
@@ -78,7 +77,7 @@ namespace YooAsset
         /// <summary>
         /// 释放资源句柄
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public void Dispose()
         {
             ReleaseInternal();
@@ -88,7 +87,7 @@ namespace YooAsset
         /// <summary>
         /// 资源对象
         /// </summary>
-        public UnityEngine.Object AssetObject
+        public object AssetObject
         {
             get
             {
@@ -105,8 +104,8 @@ namespace YooAsset
         /// 获取资源对象
         /// </summary>
         /// <typeparam name="TAsset">资源类型</typeparam>
-        [UnityEngine.Scripting.Preserve]
-        public TAsset GetAssetObject<TAsset>() where TAsset : UnityEngine.Object
+        [AssetSystemPreserve]
+        public TAsset GetAssetObject<TAsset>() where TAsset : class
         {
             if (IsValidWithWarning == false)
             {
@@ -117,73 +116,37 @@ namespace YooAsset
         }
 
         /// <summary>
-        /// 同步初始化游戏对象
+        /// 同步实例化 Godot 节点（方案2：直接走 Godot API）。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
-        public GameObject InstantiateSync()
+        [AssetSystemPreserve]
+        public Node InstantiateSync()
         {
-            return InstantiateSyncInternal(false, Vector3.zero, Quaternion.identity, null, false);
+            return InstantiateSyncInternal(null);
         }
 
-        [UnityEngine.Scripting.Preserve]
-        public GameObject InstantiateSync(Transform parent)
+        [AssetSystemPreserve]
+        public Node InstantiateSync(Node parent)
         {
-            return InstantiateSyncInternal(false, Vector3.zero, Quaternion.identity, parent, false);
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public GameObject InstantiateSync(Transform parent, bool worldPositionStays)
-        {
-            return InstantiateSyncInternal(false, Vector3.zero, Quaternion.identity, parent, worldPositionStays);
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public GameObject InstantiateSync(Vector3 position, Quaternion rotation)
-        {
-            return InstantiateSyncInternal(true, position, rotation, null, false);
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public GameObject InstantiateSync(Vector3 position, Quaternion rotation, Transform parent)
-        {
-            return InstantiateSyncInternal(true, position, rotation, parent, false);
+            return InstantiateSyncInternal(parent);
         }
 
         /// <summary>
-        /// 异步初始化游戏对象
+        /// 异步实例化 Godot 节点（方案2：直接走 Godot API）。
         /// </summary>
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public InstantiateOperation InstantiateAsync()
         {
-            return InstantiateAsyncInternal(false, Vector3.zero, Quaternion.identity, null, false);
+            return InstantiateAsyncInternal(null);
         }
 
-        [UnityEngine.Scripting.Preserve]
-        public InstantiateOperation InstantiateAsync(Transform parent)
+        [AssetSystemPreserve]
+        public InstantiateOperation InstantiateAsync(Node parent)
         {
-            return InstantiateAsyncInternal(false, Vector3.zero, Quaternion.identity, parent, false);
+            return InstantiateAsyncInternal(parent);
         }
 
-        [UnityEngine.Scripting.Preserve]
-        public InstantiateOperation InstantiateAsync(Transform parent, bool worldPositionStays)
-        {
-            return InstantiateAsyncInternal(false, Vector3.zero, Quaternion.identity, parent, worldPositionStays);
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public InstantiateOperation InstantiateAsync(Vector3 position, Quaternion rotation)
-        {
-            return InstantiateAsyncInternal(true, position, rotation, null, false);
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public InstantiateOperation InstantiateAsync(Vector3 position, Quaternion rotation, Transform parent)
-        {
-            return InstantiateAsyncInternal(true, position, rotation, parent, false);
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        private GameObject InstantiateSyncInternal(bool setPositionAndRotation, Vector3 position, Quaternion rotation, Transform parent, bool worldPositionStays)
+        [AssetSystemPreserve]
+        private Node InstantiateSyncInternal(Node parent)
         {
             if (IsValidWithWarning == false)
             {
@@ -195,14 +158,14 @@ namespace YooAsset
                 return null;
             }
 
-            return InstantiateOperation.InstantiateInternal(Provider.AssetObject, setPositionAndRotation, position, rotation, parent, worldPositionStays);
+            return InstantiateOperation.InstantiateInternal(Provider.AssetObject, parent);
         }
 
-        [UnityEngine.Scripting.Preserve]
-        private InstantiateOperation InstantiateAsyncInternal(bool setPositionAndRotation, Vector3 position, Quaternion rotation, Transform parent, bool worldPositionStays)
+        [AssetSystemPreserve]
+        private InstantiateOperation InstantiateAsyncInternal(Node parent)
         {
             var packageName = GetAssetInfo().PackageName;
-            var operation = new InstantiateOperation(this, setPositionAndRotation, position, rotation, parent, worldPositionStays);
+            var operation = new InstantiateOperation(this, parent);
             OperationSystem.StartOperation(packageName, operation);
             return operation;
         }

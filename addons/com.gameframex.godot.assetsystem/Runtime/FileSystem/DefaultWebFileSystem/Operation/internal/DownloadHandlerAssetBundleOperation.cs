@@ -1,31 +1,30 @@
-using UnityEngine;
-using UnityEngine.Networking;
+using GameFrameX.AssetSystem.Networking;
 
-namespace YooAsset
+namespace GameFrameX.AssetSystem
 {
-    [UnityEngine.Scripting.Preserve]
+    [AssetSystemPreserve]
     internal class DownloadHandlerAssetBundleOperation : DefaultDownloadFileOperation
     {
         private readonly DefaultWebFileSystem _fileSystem;
         private DownloadHandlerAssetBundle _downloadhandler;
         private ESteps _steps = ESteps.None;
 
-        public AssetBundle Result { private set; get; }
+        public BundleFile Result { private set; get; }
 
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal DownloadHandlerAssetBundleOperation(DefaultWebFileSystem fileSystem, PackageBundle bundle, DownloadParam param) : base(bundle, param)
         {
             _fileSystem = fileSystem;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnStart()
         {
             _steps = ESteps.CreateRequest;
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
             if (_steps == ESteps.None || _steps == ESteps.Done)
@@ -64,7 +63,7 @@ namespace YooAsset
                 if (CheckRequestResult())
                 {
                     _steps = ESteps.Done;
-                    Result = _downloadhandler.assetBundle;
+                    Result = _downloadhandler.BundleFile;
                     Status = EOperationStatus.Succeed;
                 }
                 else
@@ -73,7 +72,7 @@ namespace YooAsset
                     if (_steps == ESteps.Done)
                     {
                         Status = EOperationStatus.Failed;
-                        YooLogger.Error(Error);
+                        AssetSystemLogger.Error(Error);
                     }
                 }
 
@@ -88,38 +87,38 @@ namespace YooAsset
                 {
                     Status = EOperationStatus.Failed;
                     _steps = ESteps.Done;
-                    YooLogger.Error(Error);
+                    AssetSystemLogger.Error(Error);
                     return;
                 }
 
-                _tryAgainTimer += Time.unscaledDeltaTime;
+                _tryAgainTimer += AssetSystemTime.UnscaledDeltaTime;
                 if (_tryAgainTimer > 1f)
                 {
                     FailedTryAgain--;
                     _steps = ESteps.CreateRequest;
-                    YooLogger.Warning(Error);
+                    AssetSystemLogger.Warning(Error);
                 }
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         internal override void InternalOnAbort()
         {
             _steps = ESteps.Done;
             DisposeWebRequest();
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void CreateWebRequest()
         {
             _downloadhandler = CreateDownloadHandler();
-            _webRequest = DownloadSystemHelper.NewUnityWebRequestGet(_requestURL, Param.Timeout);
+            _webRequest = DownloadSystemHelper.CreateWebRequestGet(_requestURL, Param.Timeout);
             _webRequest.downloadHandler = _downloadhandler;
             _webRequest.disposeDownloadHandlerOnDispose = true;
-            DownloadSystemHelper.SendRequest(_webRequest);
+            DownloadSystemHelper.SendWebRequest(_webRequest);
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private void DisposeWebRequest()
         {
             if (_webRequest != null)
@@ -130,7 +129,7 @@ namespace YooAsset
             }
         }
 
-        [UnityEngine.Scripting.Preserve]
+        [AssetSystemPreserve]
         private DownloadHandlerAssetBundle CreateDownloadHandler()
         {
             if (_fileSystem.DisableUnityWebCache)
@@ -146,7 +145,7 @@ namespace YooAsset
                 // 注意：优先从浏览器缓存里获取文件
                 // The file hash defining the version of the asset bundle.
                 var unityCRC = Bundle.UnityCRC;
-                var fileHash = Hash128.Parse(Bundle.FileHash);
+                var fileHash = BundleHash.Parse(Bundle.FileHash);
                 var downloadhandler = new DownloadHandlerAssetBundle(_requestURL, fileHash, unityCRC);
 #if UNITY_2020_3_OR_NEWER
                 downloadhandler.autoLoadAssetBundle = false;
