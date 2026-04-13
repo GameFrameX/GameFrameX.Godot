@@ -128,6 +128,18 @@ namespace GameFrameX.Editor
         public override void _EnterTree()
         {
             m_CurrentLocale = TranslationServer.GetLocale();
+            ScriptingDefineSymbols.DefineSymbolsChanged -= OnDefineSymbolsChanged;
+            ScriptingDefineSymbols.DefineSymbolsChanged += OnDefineSymbolsChanged;
+            try
+            {
+                bool changed = ScriptingDefineSymbols.AlignHotfixDefineConstantsWithGodot();
+                string symbols = string.Join(";", ScriptingDefineSymbols.GetScriptingDefineSymbols());
+                GD.Print($"[ScriptingDefineSymbols] plugin enter align checked. changed={changed} symbols={symbols}");
+            }
+            catch (Exception exception)
+            {
+                GD.PushWarning($"[ScriptingDefineSymbols] align Hotfix.csproj failed on plugin enter: {exception.Message}");
+            }
 
             // 注册核心的 BaseComponent Inspector / Register the core BaseComponent Inspector
             m_BaseComponentInspector = new BaseComponentInspector();
@@ -155,6 +167,7 @@ namespace GameFrameX.Editor
         /// </remarks>
         public override void _ExitTree()
         {
+            ScriptingDefineSymbols.DefineSymbolsChanged -= OnDefineSymbolsChanged;
             SetProcess(false);
             UnregisterTopToolbarMenu();
             if (m_AssetSystemBuilderDialog != null)
@@ -178,6 +191,33 @@ namespace GameFrameX.Editor
             m_LogDefinePopupMenu = null;
             m_CurrentLocale = null;
             m_RuntimeLogBridge = null;
+        }
+
+        private void OnDefineSymbolsChanged()
+        {
+            GD.Print("[ScriptingDefineSymbols] define constants changed, cleaning editor windows for hot-reload.");
+            CloseTransientEditorWindowsForDefineSwitch();
+        }
+
+        private void CloseTransientEditorWindowsForDefineSwitch()
+        {
+            SafeCloseWindow(ref m_AssetSystemBuilderDialog);
+        }
+
+        private static void SafeCloseWindow<TWindow>(ref TWindow window) where TWindow : Window
+        {
+            if (window == null)
+            {
+                return;
+            }
+
+            if (GodotObject.IsInstanceValid(window))
+            {
+                window.Hide();
+                window.QueueFree();
+            }
+
+            window = null;
         }
 
         /// <summary>
@@ -388,9 +428,13 @@ namespace GameFrameX.Editor
                     parent.AddChild(m_AssetSystemBuilderDialog);
                 }
 
-                m_AssetSystemBuilderDialog.MinSize = new Vector2I(1100, 760);
-                m_AssetSystemBuilderDialog.Size = new Vector2I(1366, 860);
-                m_AssetSystemBuilderDialog.PopupCentered(new Vector2I(1366, 860));
+                var popupSize = m_AssetSystemBuilderDialog.Size;
+                if (popupSize.X <= 0 || popupSize.Y <= 0)
+                {
+                    popupSize = new Vector2I(1700, 860);
+                }
+
+                m_AssetSystemBuilderDialog.PopupCentered(popupSize);
                 m_AssetSystemBuilderDialog.Show();
                 return true;
             }
@@ -459,22 +503,33 @@ namespace GameFrameX.Editor
         {
             try
             {
+                var parent = EditorInterface.Singleton?.GetBaseControl();
+                if (parent == null)
+                {
+                    return false;
+                }
+
                 if (m_ScriptingDefineSymbolsWindow == null || !GodotObject.IsInstanceValid(m_ScriptingDefineSymbolsWindow))
                 {
                     m_ScriptingDefineSymbolsWindow = new ScriptingDefineSymbolsWindow();
-                    var parent = EditorInterface.Singleton?.GetBaseControl();
-                    if (parent == null)
-                    {
-                        return false;
-                    }
+                }
 
+                if (m_ScriptingDefineSymbolsWindow.GetParent() is Node currentParent)
+                {
+                    if (currentParent != parent)
+                    {
+                        m_ScriptingDefineSymbolsWindow.Reparent(parent);
+                    }
+                }
+                else
+                {
                     parent.AddChild(m_ScriptingDefineSymbolsWindow);
                 }
 
+                m_ScriptingDefineSymbolsWindow.PrepareForDisplay();
                 m_ScriptingDefineSymbolsWindow.MinSize = new Vector2I(980, 700);
                 m_ScriptingDefineSymbolsWindow.Size = new Vector2I(1120, 700);
                 m_ScriptingDefineSymbolsWindow.PopupCentered(new Vector2I(1120, 700));
-                m_ScriptingDefineSymbolsWindow.Show();
                 return true;
             }
             catch (Exception exception)

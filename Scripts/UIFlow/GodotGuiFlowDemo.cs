@@ -12,13 +12,16 @@ namespace Godot.Startup.UIFlow
         private const string LauncherTypeFullName = "Godot.Hotfix.GodotGUI.UILauncher";
         private const string LoginTypeFullName = "Godot.Hotfix.GodotGUI.UILogin";
         private const string MainTypeFullName = "Godot.Hotfix.GodotGUI.UIMain";
+        private const string LauncherAssetRootPath = "res://Assets/Resources/UI/GGUI/UILauncher";
+        private const string LoginAssetRootPath = "res://Assets/Bundles/UI/GGUI/UILogin";
+        private const string MainAssetRootPath = "res://Assets/Bundles/UI/GGUI/UIMain";
 
         protected override string FlowLogTag => "GodotGuiFlowDemo";
-        protected override string UiAssetRootPath => "res://Assets/Bundles/Prefabs/UI/GodotUI";
+        protected override string UiAssetRootPath => "res://Assets/Bundles/UI/GGUI";
 
         protected override Task<IUIForm> OpenLauncherFormAsync(UIComponent uiComponent, string rootPath)
         {
-            return OpenFormAsync(uiComponent, rootPath, LauncherTypeFullName);
+            return OpenFormAsync(uiComponent, LauncherAssetRootPath, LauncherTypeFullName);
         }
 
         protected override void SetLauncherProgress(IUIForm launcherForm, float progressPercent)
@@ -28,7 +31,7 @@ namespace Godot.Startup.UIFlow
 
         protected override Task<IUIForm> OpenLoginFormAsync(UIComponent uiComponent, string rootPath)
         {
-            return OpenFormAsync(uiComponent, rootPath, LoginTypeFullName);
+            return OpenFormAsync(uiComponent, LoginAssetRootPath, LoginTypeFullName);
         }
 
         protected override void BindLoginClicked(IUIForm loginForm, Action onClicked)
@@ -43,7 +46,7 @@ namespace Godot.Startup.UIFlow
 
         protected override Task<IUIForm> OpenMainFormAsync(UIComponent uiComponent, string rootPath)
         {
-            return OpenFormAsync(uiComponent, rootPath, MainTypeFullName);
+            return OpenFormAsync(uiComponent, MainAssetRootPath, MainTypeFullName);
         }
 
         protected override void SetMainPlayerInfo(IUIForm mainForm, string playerName, string playerLevel)

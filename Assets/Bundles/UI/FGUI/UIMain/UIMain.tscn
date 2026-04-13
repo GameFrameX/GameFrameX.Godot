@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://diktj2katc53n"]
+
+[ext_resource type="Script" path="res://Assets/Hotfix/UI/FGUI/UIMain/UIMain.cs" id="1_comed"]
+
+[node name="UIMain" type="Control" unique_id=749955819]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_comed")

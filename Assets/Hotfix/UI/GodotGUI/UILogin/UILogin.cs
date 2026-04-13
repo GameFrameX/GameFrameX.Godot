@@ -7,7 +7,6 @@ using Godot.Hotfix.Config;
 namespace Godot.Hotfix.GodotGUI
 {
 	[OptionUIGroup(UIGroupNameConstants.Normal)]
-	[OptionUIConfig(path: "res://Assets/Bundles/Prefabs/UI/GodotUI")]
 	public partial class UILogin : GDGUI
 	{
 		public event Action LoginClicked;

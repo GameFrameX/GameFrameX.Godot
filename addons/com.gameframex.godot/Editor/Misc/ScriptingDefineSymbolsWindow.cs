@@ -14,13 +14,13 @@ namespace GameFrameX.Editor
     {
         private const string FairyGuiSymbol = "FAIRY_GUI";
         private const string EnableLogSymbol = "ENABLE_LOG";
-        private const string IncludeAssetSystemRuntimeSymbol = "INCLUDE_ASSETSYSTEM_RUNTIME";
+        private const string NotEditorSymbol = "NOT_EDITOR";
 
         private static readonly string[] CommonSymbols =
         {
             FairyGuiSymbol,
             EnableLogSymbol,
-            IncludeAssetSystemRuntimeSymbol
+            NotEditorSymbol
         };
 
         private readonly List<string> m_CurrentSymbols = new List<string>();
@@ -40,12 +40,24 @@ namespace GameFrameX.Editor
             m_Initialized = true;
             BuildUi();
             RefreshFromProject();
-            CloseRequested += OnCloseRequested;
         }
 
-        public override void _ExitTree()
+        public override void _Notification(int what)
         {
-            CloseRequested -= OnCloseRequested;
+            if (what == NotificationWMCloseRequest)
+            {
+                OnCloseRequested();
+            }
+        }
+
+        public void PrepareForDisplay()
+        {
+            if (!m_Initialized)
+            {
+                return;
+            }
+
+            RefreshFromProject();
         }
 
         private void BuildUi()
@@ -87,7 +99,6 @@ namespace GameFrameX.Editor
                 SizeFlagsVertical = Control.SizeFlags.ExpandFill,
                 CustomMinimumSize = new Vector2(0f, 360f)
             };
-            symbolPanel.AddThemeStyleboxOverride("panel", CreateListPanelStyle());
             root.AddChild(symbolPanel);
 
             var symbolMargin = new MarginContainer
@@ -112,7 +123,6 @@ namespace GameFrameX.Editor
             };
             m_SymbolTree.SetColumnExpand(0, true);
             m_SymbolTree.SetColumnClipContent(0, false);
-            m_SymbolTree.AddThemeStyleboxOverride("panel", CreateListInnerStyle());
             m_SymbolTree.ItemEdited += OnSymbolTreeItemEdited;
             symbolMargin.AddChild(m_SymbolTree);
 
@@ -358,30 +368,6 @@ namespace GameFrameX.Editor
             }
 
             return symbol;
-        }
-
-        private static StyleBoxFlat CreateListPanelStyle()
-        {
-            var style = new StyleBoxFlat
-            {
-                BgColor = new Color(0.12f, 0.12f, 0.13f, 1f),
-                BorderColor = new Color(0.22f, 0.22f, 0.24f, 1f)
-            };
-            style.SetBorderWidthAll(1);
-            style.SetCornerRadiusAll(6);
-            return style;
-        }
-
-        private static StyleBoxFlat CreateListInnerStyle()
-        {
-            var style = new StyleBoxFlat
-            {
-                BgColor = new Color(0.09f, 0.09f, 0.10f, 1f),
-                BorderColor = new Color(0.18f, 0.18f, 0.20f, 1f)
-            };
-            style.SetBorderWidthAll(1);
-            style.SetCornerRadiusAll(4);
-            return style;
         }
 
         private static void UpsertSymbol(List<string> symbols, string symbol, bool enabled)

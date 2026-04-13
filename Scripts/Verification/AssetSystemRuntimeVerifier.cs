@@ -6,10 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Godot;
-
-#if INCLUDE_ASSETSYSTEM_RUNTIME
 using GameFrameX.AssetSystem;
-#endif
 
 namespace Godot.Startup.Verification
 {
@@ -23,7 +20,7 @@ namespace Godot.Startup.Verification
 		[Export] public string SceneLocation { get; set; } = "verify_scene";
 		[Export] public string AssetLocation { get; set; } = "verify_asset";
 		[Export] public string BuiltinResourcePath { get; set; } = "res://addons/com.gameframex.godot/Resources/gameframex_logo.png";
-		[Export] public string FixtureVirtualRoot { get; set; } = "user://assetsystem_runtime_verify/yoo";
+		[Export] public string FixtureVirtualRoot { get; set; } = "user://asset_runtime_verify/asset";
 		[Export] public bool AutoRunOnReady { get; set; } = true;
 		[Export] public bool AutoQuitOnFinish { get; set; } = true;
 
@@ -35,18 +32,9 @@ namespace Godot.Startup.Verification
 				return;
 			}
 
-#if INCLUDE_ASSETSYSTEM_RUNTIME
 			await RunVerificationAsync();
-#else
-			GD.PrintErr("[AssetSystemRuntimeVerifier] assetsystem runtime is not compiled. Build/run with IncludeAssetSystemRuntime=true.");
-			if (AutoQuitOnFinish)
-			{
-				GetTree().Quit(1);
-			}
-#endif
 		}
 
-#if INCLUDE_ASSETSYSTEM_RUNTIME
 		private async Task RunVerificationAsync()
 		{
 			var stopwatch = Stopwatch.StartNew();
@@ -213,7 +201,7 @@ namespace Godot.Startup.Verification
 				throw new InvalidOperationException($"Builtin resource is missing: {BuiltinResourcePath} -> {physicalPath}");
 			}
 
-			var resource = ResourceLoader.Load(BuiltinResourcePath);
+			var resource = AssetSystemResources.Load<Resource>(BuiltinResourcePath);
 			if (resource == null)
 			{
 				throw new InvalidOperationException($"Builtin resource load failed via Resources.Load: {BuiltinResourcePath}");
@@ -466,6 +454,5 @@ namespace Godot.Startup.Verification
 				return Path.Combine(baseDirectory, fileName).Replace('\\', '/');
 			}
 		}
-#endif
 	}
 }

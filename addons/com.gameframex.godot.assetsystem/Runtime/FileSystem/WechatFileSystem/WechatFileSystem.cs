@@ -212,7 +212,7 @@ internal class WechatFileSystem : IFileSystem
         // 注意：CDN服务未启用的情况下，使用微信WEB服务器
         if (RemoteServices == null)
         {
-            string webRoot = PathUtility.Combine(GodotAssetPath.GetStreamingAssetsRoot(), AssetSystemSettingsData.Setting.DefaultYooFolderName, packageName);
+            string webRoot = PathUtility.Combine(GodotAssetPath.GetStreamingAssetsRoot(), AssetSystemSettingsData.Setting.DefaultAssetSystemFolderName, packageName);
             RemoteServices = new WebRemoteServices(webRoot);
         }
         
@@ -359,3 +359,4 @@ internal class WechatFileSystem : IFileSystem
 
     #endregion
 }
+

@@ -211,9 +211,9 @@ namespace GameFrameX.AssetSystem
         }
 
         /// <summary>
-        /// 同步加载原生文件并转换为 Godot 资源。
+        /// 同步加载原生文件并转换为 Godot 资源（Package/Location 模式）。
         /// </summary>
-        /// <param name="location">资源定位地址</param>
+        /// <param name="location">AssetSystem 清单内的 location（不是 res:// 路径）。</param>
         /// <param name="typeHint">资源类型提示，可为空</param>
         [AssetSystemPreserve]
         public static Resource LoadGodotResourceFromRawFileSync(string location, string typeHint = "")
@@ -271,8 +271,8 @@ namespace GameFrameX.AssetSystem
         }
 
         /// <summary>
-        /// 尝试用不带路径的资源名从资源包读取 Godot 资源。
-        /// 优先查询指定资源包的清单；清单未命中时，会挂载并扫描永久目录下的其它 PCK。
+        /// 用资源名从资源包读取 Godot 资源（PackageName + AssetName 模式）。
+        /// 优先查询指定资源包清单；清单未命中时，会挂载并扫描永久目录下其它 PCK。
         /// </summary>
         /// <param name="assetName">资源名。可传 "logo" 或 "logo.png"，不要传路径。</param>
         /// <param name="packageName">资源包名，默认 main。</param>
@@ -384,6 +384,11 @@ namespace GameFrameX.AssetSystem
         [AssetSystemPreserve]
         private static Resource TryLoadMountedGodotResource(string resourcePath, Type assetType)
         {
+            if (string.IsNullOrWhiteSpace(resourcePath) || ResourceLoader.Exists(resourcePath) == false)
+            {
+                return null;
+            }
+
             var resource = ResourceLoader.Load(resourcePath, GetGodotTypeHint(assetType));
             if (resource == null)
             {
@@ -575,7 +580,7 @@ namespace GameFrameX.AssetSystem
         [AssetSystemPreserve]
         private static void MountSiblingGodotResourcePacks(string exceptPackageName)
         {
-            var packageFolder = ProjectSettings.GlobalizePath("user://hotfix/packages");
+            var packageFolder = ProjectSettings.GlobalizePath(GodotAssetPath.GetHotfixPackagesRootVirtual());
             if (Directory.Exists(packageFolder) == false)
             {
                 return;
@@ -815,9 +820,9 @@ namespace GameFrameX.AssetSystem
         }
 
         /// <summary>
-        /// 异步加载资源对象
+        /// 异步加载资源对象（Package/Location 模式）。
         /// </summary>
-        /// <param name="location">资源的定位地址</param>
+        /// <param name="location">AssetSystem 清单内的 location（不是 res:// 路径）。</param>
         /// <param name="type">资源类型</param>
         [AssetSystemPreserve]
         public static AssetHandle LoadAssetAsync(string location, Type type, uint priority = 0)
@@ -827,9 +832,9 @@ namespace GameFrameX.AssetSystem
         }
 
         /// <summary>
-        /// 异步加载资源对象
+        /// 异步加载资源对象（Package/Location 模式）。
         /// </summary>
-        /// <param name="location">资源的定位地址</param>
+        /// <param name="location">AssetSystem 清单内的 location（不是 res:// 路径）。</param>
         [AssetSystemPreserve]
         public static AssetHandle LoadAssetAsync(string location, uint priority = 0)
         {

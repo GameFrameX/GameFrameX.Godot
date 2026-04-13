@@ -7,18 +7,40 @@ namespace GameFrameX.AssetSystem
     [AssetSystemPreserve]
     public static class AssetSystemResources
     {
+        /// <summary>
+        /// 路径资源加载入口（Path 模式）。
+        /// 适用：res://、user://、绝对路径、相对路径。
+        /// 不适用：AssetSystem 清单内的 location（请改用 AssetSystem.LoadAsset*/LoadRawFile* 或 TryGetPackageAsset）。
+        /// </summary>
+        /// <param name="path">资源路径（非包内 location）。</param>
         [AssetSystemPreserve]
         public static T Load<T>(string path) where T : class
         {
             if (typeof(global::Godot.Resource).IsAssignableFrom(typeof(T)))
             {
-                return global::Godot.ResourceLoader.Load(path) as T;
+                var resourcePath = ResolveResourceLoaderPath(path);
+                if (string.IsNullOrWhiteSpace(resourcePath))
+                {
+                    return null;
+                }
+
+                if (!global::Godot.ResourceLoader.Exists(resourcePath))
+                {
+                    return null;
+                }
+
+                return global::Godot.ResourceLoader.Load(resourcePath) as T;
             }
 
             var resolvedPath = ResolveResourcePath(path);
             if (string.IsNullOrEmpty(resolvedPath))
             {
                 return null;
+            }
+
+            if (typeof(T) == typeof(byte[]))
+            {
+                return (T)(object)File.ReadAllBytes(resolvedPath);
             }
 
             if (typeof(T) == typeof(string))
@@ -80,6 +102,33 @@ namespace GameFrameX.AssetSystem
             }
 
             return string.Empty;
+        }
+
+        private static string ResolveResourceLoaderPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return string.Empty;
+            }
+
+            var normalized = path.Replace('\\', '/');
+            if (normalized.StartsWith("res://", StringComparison.OrdinalIgnoreCase) ||
+                normalized.StartsWith("user://", StringComparison.OrdinalIgnoreCase))
+            {
+                return normalized;
+            }
+
+            if (Path.IsPathRooted(normalized))
+            {
+                var localized = global::Godot.ProjectSettings.LocalizePath(normalized);
+                if (localized.StartsWith("res://", StringComparison.OrdinalIgnoreCase) ||
+                    localized.StartsWith("user://", StringComparison.OrdinalIgnoreCase))
+                {
+                    return localized;
+                }
+            }
+
+            return $"res://{normalized.TrimStart('/')}";
         }
 
         private static void AddPathCandidate(ICollection<string> candidates, string path)

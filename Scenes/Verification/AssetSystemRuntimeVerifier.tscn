@@ -7,6 +7,7 @@ script = ExtResource("1")
 PackageName = "runtime_verify"
 PackageVersion = "v1"
 SceneLocation = "verify_scene"
-FixtureVirtualRoot = "user://assetsystem_runtime_verify/yoo"
+FixtureVirtualRoot = "user://asset_runtime_verify/asset"
 AutoRunOnReady = true
 AutoQuitOnFinish = true
+

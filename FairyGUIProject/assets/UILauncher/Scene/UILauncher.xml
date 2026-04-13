@@ -18,5 +18,8 @@
       <gearDisplay controller="IsUpgrade" pages="1"/>
       <relation target="" sidePair="center-center,middle-middle"/>
     </component>
+    <text id="n15_e4w0" name="txtVersion" xy="1125,596" pivot="0.5,0.5" size="226,49" font="ui://f59y7iy8ghno32" fontSize="36" color="#cccccc" align="right" autoSize="shrink" strokeColor="#2f1708" strokeSize="2" autoClearText="true" text="0.0.1">
+      <relation target="" sidePair="width-width,center-center,bottom-bottom"/>
+    </text>
   </displayList>
 </component>

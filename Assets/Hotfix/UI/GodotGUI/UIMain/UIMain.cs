@@ -7,7 +7,6 @@ using GameFrameX.Runtime;
 namespace Godot.Hotfix.GodotGUI
 {
 	[OptionUIGroup(UIGroupNameConstants.Normal)]
-	[OptionUIConfig(path: "res://Assets/Bundles/Prefabs/UI/GodotUI")]
 	public partial class UIMain : GDGUI
 	{
 		private const string MainPackageName = "main";
@@ -60,8 +59,22 @@ namespace Godot.Hotfix.GodotGUI
 
 		private TextureRect ResolveCenterLogoTextureRect()
 		{
+			// root attach
+			var textureRect = GetNodeOrNull<TextureRect>("CenterLogo");
+			if (textureRect != null)
+			{
+				return textureRect;
+			}
+
 			// normal attach
-			var textureRect = GetNodeOrNull<TextureRect>("Center/CenterLogo");
+			textureRect = GetNodeOrNull<TextureRect>("Center/CenterLogo");
+			if (textureRect != null)
+			{
+				return textureRect;
+			}
+
+			// fallback attach: scene root is re-parented to ViewRoot
+			textureRect = GetNodeOrNull<TextureRect>("ViewRoot/CenterLogo");
 			if (textureRect != null)
 			{
 				return textureRect;
@@ -95,7 +108,7 @@ namespace Godot.Hotfix.GodotGUI
 			var loadedFromMainPackage = texture != null;
 			if (texture == null)
 			{
-				texture = ResourceLoader.Load<Texture2D>(BuiltinLogoPath);
+				texture = AssetSystemResources.Load<Texture2D>(BuiltinLogoPath);
 			}
 
 			if (texture != null)

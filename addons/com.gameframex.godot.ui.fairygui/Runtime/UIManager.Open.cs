@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using GameFrameX.AssetSystem;
 using GameFrameX.Runtime;
 using GameFrameX.UI.Runtime;
 using Godot;
@@ -251,14 +253,7 @@ namespace GameFrameX.UI.FairyGUI.Runtime
                 return null;
             }
 
-            var candidates = new[]
-            {
-                assetPath,
-                assetPath + ".tscn",
-                assetPath + ".scn"
-            };
-
-            foreach (var path in candidates)
+            foreach (var path in EnumeratePackedScenePathCandidates(assetPath))
             {
                 var normalizedPath = NormalizeToResourcePath(path);
                 if (normalizedPath == null || !ResourceLoader.Exists(normalizedPath))
@@ -266,11 +261,45 @@ namespace GameFrameX.UI.FairyGUI.Runtime
                     continue;
                 }
 
-                var scene = ResourceLoader.Load<PackedScene>(normalizedPath);
-                return scene;
+                var scene = AssetSystemResources.Load<PackedScene>(normalizedPath);
+                if (scene != null)
+                {
+                    return scene;
+                }
+            }
+
+            // Fallback: match by resource name from mounted PCK/package manifest.
+            // This keeps runtime package loading resilient when path mapping changes.
+            var sceneName = Path.GetFileName(assetPath.Replace('\\', '/'));
+            if (string.IsNullOrWhiteSpace(sceneName))
+            {
+                return null;
+            }
+
+            var sceneFromPackage = global::GameFrameX.AssetSystem.AssetSystem.TryGetPackageAsset<PackedScene>(sceneName);
+            if (sceneFromPackage != null)
+            {
+                return sceneFromPackage;
             }
 
             return null;
+        }
+
+        private static IEnumerable<string> EnumeratePackedScenePathCandidates(string assetPath)
+        {
+            if (string.IsNullOrWhiteSpace(assetPath))
+            {
+                yield break;
+            }
+
+            if (Path.HasExtension(assetPath))
+            {
+                yield return assetPath;
+                yield break;
+            }
+
+            yield return assetPath + ".tscn";
+            yield return assetPath + ".scn";
         }
 
         /// <summary>

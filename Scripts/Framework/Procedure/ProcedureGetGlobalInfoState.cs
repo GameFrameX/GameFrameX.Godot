@@ -46,6 +46,7 @@ public sealed class ProcedureGetGlobalInfoState : ProcedureBase
     {
         base.OnEnter(procedureOwner);
         Log.Info("进入流程：ProcedureGetGlobalInfoState");
+        LauncherFlowProgressReporter.Report(10f, nameof(ProcedureGetGlobalInfoState));
         ChangeState<ProcedureGetAppVersionInfoState>(procedureOwner);
     }
 }

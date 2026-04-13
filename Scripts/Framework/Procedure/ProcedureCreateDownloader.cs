@@ -46,6 +46,7 @@ public sealed class ProcedureCreateDownloader : ProcedureBase
     {
         base.OnEnter(procedureOwner);
         Log.Info("进入流程：ProcedureCreateDownloader");
+        LauncherFlowProgressReporter.Report(60f, nameof(ProcedureCreateDownloader));
         ChangeState<ProcedureDownloadWebFiles>(procedureOwner);
     }
 }

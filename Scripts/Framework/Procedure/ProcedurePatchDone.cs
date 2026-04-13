@@ -46,6 +46,7 @@ public sealed class ProcedurePatchDone : ProcedureBase
     {
         base.OnEnter(procedureOwner);
         Log.Info("进入流程：ProcedurePatchDone");
+        LauncherFlowProgressReporter.Report(94f, nameof(ProcedurePatchDone));
         ChangeState<ProcedureConfigState>(procedureOwner);
     }
 }

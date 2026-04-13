@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using GameFrameX.AssetSystem;
 using GameFrameX.Runtime;
 using Godot;
 
@@ -8,8 +9,7 @@ namespace Godot.Hotfix.AssetSystem
 {
 	internal static class GodotPckResourceLoader
 	{
-		private const string DefaultPackagesRoot = "user://assetsystem_builder/packages";
-		private const string DefaultBuilderRoot = "user://assetsystem_builder";
+		private const string DefaultBuilderRoot = "user://hotfix";
 		private static readonly Dictionary<string, string> MountedPackagePathMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
 		internal static bool EnsurePackageMounted(string packageName, out string mountedPhysicalPath)
@@ -67,7 +67,7 @@ namespace Godot.Hotfix.AssetSystem
 						continue;
 					}
 
-					if (!ResourceLoader.Exists(resourcePath))
+					if (AssetSystemResources.Load<Resource>(resourcePath) == null)
 					{
 						continue;
 					}
@@ -88,22 +88,33 @@ namespace Godot.Hotfix.AssetSystem
 				return null;
 			}
 
-			return ResourceLoader.Load<TResource>(resolvedResourcePath);
+			return AssetSystemResources.Load<TResource>(resolvedResourcePath);
 		}
 
 		private static List<string> BuildPckCandidates(string packageName)
 		{
-			var result = new List<string>(16);
+			var result = new List<string>(8);
+			var dedupe = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 			var safePackageName = MakeSafeFileName(packageName);
-			result.Add($"{DefaultPackagesRoot}/{safePackageName}.pck");
+			var packagesRoot = GodotAssetPath.GetHotfixPackagesRootVirtual();
+			AddCandidate(result, dedupe, $"{packagesRoot}/{safePackageName}.pck");
 			if (!string.Equals(safePackageName, packageName, StringComparison.Ordinal))
 			{
-				result.Add($"{DefaultPackagesRoot}/{packageName}.pck");
+				AddCandidate(result, dedupe, $"{packagesRoot}/{packageName}.pck");
 			}
 
-			var builderRootPath = ResolvePhysicalPath(DefaultBuilderRoot);
-			if (!string.IsNullOrWhiteSpace(builderRootPath) && Directory.Exists(builderRootPath))
+			var searchRoots = new[]
 			{
+				DefaultBuilderRoot
+			};
+			for (var rootIndex = 0; rootIndex < searchRoots.Length; rootIndex++)
+			{
+				var builderRootPath = ResolvePhysicalPath(searchRoots[rootIndex]);
+				if (string.IsNullOrWhiteSpace(builderRootPath) || Directory.Exists(builderRootPath) == false)
+				{
+					continue;
+				}
+
 				var allPckFiles = Directory.GetFiles(builderRootPath, "*.pck", SearchOption.AllDirectories);
 				Array.Sort(allPckFiles, static (left, right) =>
 					File.GetLastWriteTimeUtc(right).CompareTo(File.GetLastWriteTimeUtc(left)));
@@ -116,11 +127,27 @@ namespace Godot.Hotfix.AssetSystem
 						continue;
 					}
 
-					result.Add(allPckFiles[i].Replace('\\', '/'));
+					AddCandidate(result, dedupe, allPckFiles[i]);
 				}
 			}
 
 			return result;
+		}
+
+		private static void AddCandidate(List<string> result, HashSet<string> dedupe, string path)
+		{
+			if (string.IsNullOrWhiteSpace(path))
+			{
+				return;
+			}
+
+			var normalized = path.Replace('\\', '/').Trim();
+			if (!dedupe.Add(normalized))
+			{
+				return;
+			}
+
+			result.Add(normalized);
 		}
 
 		private static IEnumerable<string> ExpandResourcePathCandidates(string rawCandidate)

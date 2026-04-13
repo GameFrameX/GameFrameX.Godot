@@ -398,7 +398,7 @@ namespace GameFrameX.AssetSystem
         [AssetSystemPreserve]
         protected string GetDefaultRoot()
         {
-            return PathUtility.Combine(GodotAssetPath.GetStreamingAssetsRoot(), AssetSystemSettingsData.Setting.DefaultYooFolderName);
+            return PathUtility.Combine(GodotAssetPath.GetStreamingAssetsRoot(), AssetSystemSettingsData.Setting.DefaultAssetSystemFolderName);
         }
 
         /// <summary>
@@ -428,7 +428,7 @@ namespace GameFrameX.AssetSystem
         public string GetBuildinCatalogFileLoadPath()
         {
             var fileName = Path.GetFileNameWithoutExtension(DefaultBuildinFileSystemDefine.BuildinCatalogFileName);
-            return PathUtility.Combine(AssetSystemSettingsData.Setting.DefaultYooFolderName, PackageName, fileName);
+            return PathUtility.Combine(AssetSystemSettingsData.Setting.DefaultAssetSystemFolderName, PackageName, fileName);
         }
 
         [AssetSystemPreserve]
@@ -455,7 +455,7 @@ namespace GameFrameX.AssetSystem
         [AssetSystemPreserve]
         public string GetStreamingAssetsPackageRoot()
         {
-            var rootPath = PathUtility.Combine(GodotAssetPath.GetStreamingAssetsRoot(), AssetSystemSettingsData.Setting.DefaultYooFolderName);
+            var rootPath = PathUtility.Combine(GodotAssetPath.GetStreamingAssetsRoot(), AssetSystemSettingsData.Setting.DefaultAssetSystemFolderName);
             return PathUtility.Combine(rootPath, PackageName);
         }
 
@@ -525,3 +525,4 @@ namespace GameFrameX.AssetSystem
         #endregion
     }
 }
+

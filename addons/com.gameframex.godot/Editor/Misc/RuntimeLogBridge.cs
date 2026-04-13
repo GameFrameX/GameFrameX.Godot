@@ -70,7 +70,7 @@ namespace GameFrameX.Editor
                     continue;
                 }
 
-                GD.Print($"[RuntimeLogBridge] {line}");
+                RelayLine(line);
             }
         }
 
@@ -96,6 +96,24 @@ namespace GameFrameX.Editor
             }
 
             return false;
+        }
+
+        private static void RelayLine(string line)
+        {
+            var message = $"[RuntimeLogBridge] {line}";
+            if (line.StartsWith("ERROR:", StringComparison.Ordinal))
+            {
+                GD.PushError(message);
+                return;
+            }
+
+            if (line.StartsWith("WARNING:", StringComparison.Ordinal))
+            {
+                GD.PushWarning(message);
+                return;
+            }
+
+            GD.Print(message);
         }
     }
 }

@@ -207,7 +207,7 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private const string BuilderPackageVersionFormat = "yyyyMMddHHmmss";
     private const string BuilderDefaultBuildMode = "ForceRebuild";
     private const string BuilderDefaultFileNameStyle = "BundleName";
-        private const string BuilderSettingsPath = "user://assetsystem_builder_profiles.cfg";
+        private const string BuilderSettingsPath = "user://hotfix/asset_builder_profiles.cfg";
     private const string BuilderSettingsSectionPrefix = "BuilderProfiles/";
     private const string BuilderSettingsKeyBuildMode = "BuildMode";
     private const string BuilderSettingsKeyFileNameStyle = "FileNameStyle";

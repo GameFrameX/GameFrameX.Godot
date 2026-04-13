@@ -240,9 +240,12 @@ namespace GameFrameX.AssetSystem
                 yield break;
             }
 
-            yield return path;
-            if (path.EndsWith(".tscn", System.StringComparison.OrdinalIgnoreCase) == false &&
-                path.EndsWith(".scn", System.StringComparison.OrdinalIgnoreCase) == false)
+            if (path.EndsWith(".tscn", System.StringComparison.OrdinalIgnoreCase) ||
+                path.EndsWith(".scn", System.StringComparison.OrdinalIgnoreCase))
+            {
+                yield return path;
+            }
+            else
             {
                 yield return $"{path}.tscn";
                 yield return $"{path}.scn";
