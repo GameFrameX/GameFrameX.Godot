@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://srgh3h7adblx"]
+
+[ext_resource type="Script" uid="uid://lyh6mbt2kth1" path="res://Assets/Resources/UI/FGUI/UILauncher/UILauncher/UILauncher.cs" id="1_ub6aq"]
+
+[node name="UILauncher" type="Control" unique_id=119829452]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ub6aq")

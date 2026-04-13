@@ -10,6 +10,7 @@ namespace GameFrameX.AssetSystem
     {
         private const string BuiltinVirtualRoot = "res://streaming_assets";
         private const string HotfixVirtualRoot = "user://hotfix";
+        private const string DefaultHotfixAssemblyFileName = "Hotfix.dll";
 
         [AssetSystemPreserve]
         public static string GetProjectRoot()
@@ -50,15 +51,15 @@ namespace GameFrameX.AssetSystem
         }
 
         [AssetSystemPreserve]
-        public static string GetBuiltinYooRootVirtual()
+        public static string GetBuiltinAssetSystemRootVirtual()
         {
-            return CombineVirtualPath(BuiltinVirtualRoot, AssetSystemSettingsData.Setting.DefaultYooFolderName);
+            return CombineVirtualPath(BuiltinVirtualRoot, AssetSystemSettingsData.Setting.DefaultAssetSystemFolderName);
         }
 
         [AssetSystemPreserve]
-        public static string GetBuiltinYooPackageRootVirtual(string packageName)
+        public static string GetBuiltinAssetSystemPackageRootVirtual(string packageName)
         {
-            return CombineVirtualPath(GetBuiltinYooRootVirtual(), NormalizePackageSegment(packageName));
+            return CombineVirtualPath(GetBuiltinAssetSystemRootVirtual(), NormalizePackageSegment(packageName));
         }
 
         [AssetSystemPreserve]
@@ -70,13 +71,22 @@ namespace GameFrameX.AssetSystem
         [AssetSystemPreserve]
         public static string GetHotfixPackagesRootVirtual()
         {
-            return CombineVirtualPath(HotfixVirtualRoot, "packages");
+            return HotfixVirtualRoot;
         }
 
         [AssetSystemPreserve]
-        public static string GetHotfixYooRootVirtual()
+        public static string GetHotfixAssemblyFileVirtual(string assemblyFileName = DefaultHotfixAssemblyFileName)
         {
-            return CombineVirtualPath(HotfixVirtualRoot, AssetSystemSettingsData.Setting.DefaultYooFolderName);
+            var normalized = string.IsNullOrWhiteSpace(assemblyFileName)
+                ? DefaultHotfixAssemblyFileName
+                : assemblyFileName.Trim();
+            return CombineVirtualPath(HotfixVirtualRoot, normalized);
+        }
+
+        [AssetSystemPreserve]
+        public static string GetHotfixAssetSystemRootVirtual()
+        {
+            return HotfixVirtualRoot;
         }
 
         [AssetSystemPreserve]
@@ -92,9 +102,9 @@ namespace GameFrameX.AssetSystem
         }
 
         [AssetSystemPreserve]
-        public static string GetHotfixYooPackageRootVirtual(string packageName)
+        public static string GetHotfixAssetSystemPackageRootVirtual(string packageName)
         {
-            return CombineVirtualPath(GetHotfixYooRootVirtual(), NormalizePackageSegment(packageName));
+            return CombineVirtualPath(GetHotfixAssetSystemRootVirtual(), NormalizePackageSegment(packageName));
         }
 
         [AssetSystemPreserve]
@@ -175,3 +185,4 @@ namespace GameFrameX.AssetSystem
         }
     }
 }
+

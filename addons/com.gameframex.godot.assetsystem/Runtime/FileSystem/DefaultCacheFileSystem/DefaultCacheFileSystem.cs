@@ -468,10 +468,10 @@ namespace GameFrameX.AssetSystem
         {
             if (global::Godot.Engine.IsEditorHint())
             {
-                return PathUtility.Combine(GodotAssetPath.GetProjectRoot(), AssetSystemSettingsData.Setting.DefaultYooFolderName);
+                return PathUtility.Combine(GodotAssetPath.GetProjectRoot(), AssetSystemSettingsData.Setting.DefaultAssetSystemFolderName);
             }
 
-            return PathUtility.Combine(GodotAssetPath.GetPersistentRoot(), AssetSystemSettingsData.Setting.DefaultYooFolderName);
+            return PathUtility.Combine(GodotAssetPath.GetPersistentRoot(), AssetSystemSettingsData.Setting.DefaultAssetSystemFolderName);
         }
 
         /// <summary>
@@ -744,3 +744,4 @@ namespace GameFrameX.AssetSystem
         #endregion
     }
 }
+

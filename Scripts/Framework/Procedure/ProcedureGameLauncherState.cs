@@ -1,99 +1,23 @@
-using System.Threading.Tasks;
 using GameFrameX.Fsm.Runtime;
 using GameFrameX.Procedure.Runtime;
 using GameFrameX.Runtime;
-using GameFrameX.UI.Runtime;
-using Godot;
-using Godot.Startup.Hotfix;
-#if INCLUDE_ASSETSYSTEM_RUNTIME
-using Godot.Startup.AssetSystem;
-#endif
 
-namespace Godot.Startup.Procedure
+namespace Godot.Startup.Procedure;
+
+/// <summary>
+/// 游戏启动阶段流程。
+/// </summary>
+public sealed class ProcedureGameLauncherState : ProcedureBase
 {
 	/// <summary>
-	/// 启动热更新后游戏流程（框架驱动：UIComponent/UIManager）。
+	/// 进入流程时执行。
 	/// </summary>
-	public sealed class ProcedureGameLauncherState : ProcedureBase
+	/// <param name="procedureOwner">流程持有者。</param>
+	protected internal override void OnEnter(IFsm<IProcedureManager> procedureOwner)
 	{
-		private static bool s_IsFlowRunning;
-#if FAIRY_GUI
-		private const string LauncherTypeFullName = "Godot.Hotfix.FairyGUI.UILauncher";
-#else
-		private const string LauncherTypeFullName = "Godot.Hotfix.GodotGUI.UILauncher";
-#endif
-
-		/// <summary>
-		/// 进入流程时执行。
-		/// </summary>
-		/// <param name="procedureOwner">流程持有者。</param>
-		protected internal override void OnEnter(IFsm<IProcedureManager> procedureOwner)
-		{
-			base.OnEnter(procedureOwner);
-			Log.Info("进入流程：ProcedureGameLauncherState");
-			_ = StartUiFlowAsync();
-		}
-
-		private static async Task StartUiFlowAsync()
-		{
-			if (s_IsFlowRunning)
-			{
-				Log.Warning("[UIFlow] 已有流程在运行，忽略重复启动。");
-				return;
-			}
-
-			s_IsFlowRunning = true;
-			try
-			{
-#if FAIRY_GUI
-				Log.Info("[UIFlow] 编译模式：FAIRY_GUI（走框架 UIManager + FairyGUI UIForm）");
-#else
-				Log.Info("[UIFlow] 编译模式：GDGUI（走框架 UIManager + Godot GUI UIForm）");
-#endif
-
-				var UIComp = GameEntry.GetComponent<UIComponent>();
-				if (UIComp == null)
-				{
-					Log.Error("[UIFlow] UIComponent not found.");
-					return;
-				}
-
-#if INCLUDE_ASSETSYSTEM_RUNTIME
-			if (AssetPackageUpdateService.TryPrepareLocalHostPackage("main", out var mainPackage, out var mainPackageError) == false)
-				{
-					Log.Warning("[UIFlow] main package not ready: {0}", mainPackageError);
-				}
-				else
-				{
-					Log.Info("[UIFlow] main package ready: {0}", mainPackage.PackageName);
-				}
-#endif
-
-				var launcherType = HotfixTypeResolver.ResolveOrNull(LauncherTypeFullName);
-				if (launcherType == null)
-				{
-					Log.Error("[UIFlow] 未找到 Hotfix UI 类型：{0}。请先确认 Hotfix.dll 已构建并可加载。", LauncherTypeFullName);
-					return;
-				}
-
-				var launcher = await UIComp.OpenRequiredAsync(launcherType);
-				if (launcher == null)
-				{
-					Log.Error("[UIFlow] 打开 UILauncher 失败。");
-					return;
-				}
-
-				Log.Info("[UIFlow] UILauncher 已显示，后续切换由 UILauncher 内部逻辑处理。");
-			}
-			catch (System.Exception exception)
-			{
-				Log.Error("[UIFlow] 流程异常：{0}", exception);
-			}
-			finally
-			{
-				s_IsFlowRunning = false;
-			}
-		}
-
+		base.OnEnter(procedureOwner);
+		Log.Info("进入流程：ProcedureGameLauncherState");
+		LauncherFlowProgressReporter.Report(100f, nameof(ProcedureGameLauncherState));
+		ProcedureLauncherState.EnsureLauncherUiFlowStarted(nameof(ProcedureGameLauncherState));
 	}
 }

@@ -46,6 +46,7 @@ public sealed class ProcedurePatchInit : ProcedureBase
     {
         base.OnEnter(procedureOwner);
         Log.Info("进入流程：ProcedurePatchInit");
+        LauncherFlowProgressReporter.Report(42f, nameof(ProcedurePatchInit));
         ChangeState<ProcedureUpdateStaticVersion>(procedureOwner);
     }
 }

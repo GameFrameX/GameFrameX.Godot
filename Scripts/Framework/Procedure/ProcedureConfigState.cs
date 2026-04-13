@@ -46,6 +46,7 @@ public sealed class ProcedureConfigState : ProcedureBase
     {
         base.OnEnter(procedureOwner);
         Log.Info("进入流程：ProcedureConfigState");
+        LauncherFlowProgressReporter.Report(97f, nameof(ProcedureConfigState));
         ChangeState<ProcedureGameLauncherState>(procedureOwner);
     }
 }

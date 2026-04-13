@@ -45,6 +45,7 @@ public sealed class ProcedureSelectUpdateMode : ProcedureBase
     protected internal override void OnEnter(IFsm<IProcedureManager> procedureOwner)
     {
         base.OnEnter(procedureOwner);
+        LauncherFlowProgressReporter.Report(36f, nameof(ProcedureSelectUpdateMode));
 
         var mode = StartupUpdateModeContext.Refresh();
         Log.Info("进入流程：ProcedureSelectUpdateMode");

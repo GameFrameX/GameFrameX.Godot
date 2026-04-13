@@ -12,13 +12,16 @@ namespace Godot.Startup.UIFlow
         private const string LauncherTypeFullName = "Godot.Hotfix.FairyGUI.UILauncher";
         private const string LoginTypeFullName = "Godot.Hotfix.FairyGUI.UILogin";
         private const string MainTypeFullName = "Godot.Hotfix.FairyGUI.UIMain";
+        private const string LauncherAssetRootPath = "res://Assets/Resources/UI/FGUI/UILauncher";
+        private const string LoginAssetRootPath = "res://Assets/Bundles/UI/FGUI/UILogin";
+        private const string MainAssetRootPath = "res://Assets/Bundles/UI/FGUI/UIMain";
 
         protected override string FlowLogTag => "FairyGuiFlowDemo";
-        protected override string UiAssetRootPath => "res://Assets/Bundles/Prefabs/UI/FGUI";
+        protected override string UiAssetRootPath => "res://Assets/Bundles/UI/FGUI";
 
         protected override Task<IUIForm> OpenLauncherFormAsync(UIComponent uiComponent, string rootPath)
         {
-            return OpenFormAsync(uiComponent, rootPath, LauncherTypeFullName);
+            return OpenFormAsync(uiComponent, LauncherAssetRootPath, LauncherTypeFullName);
         }
 
         protected override void SetLauncherProgress(IUIForm launcherForm, float progressPercent)
@@ -28,7 +31,7 @@ namespace Godot.Startup.UIFlow
 
         protected override Task<IUIForm> OpenLoginFormAsync(UIComponent uiComponent, string rootPath)
         {
-            return OpenFormAsync(uiComponent, rootPath, LoginTypeFullName);
+            return OpenFormAsync(uiComponent, LoginAssetRootPath, LoginTypeFullName);
         }
 
         protected override void BindLoginClicked(IUIForm loginForm, Action onClicked)
@@ -43,7 +46,7 @@ namespace Godot.Startup.UIFlow
 
         protected override Task<IUIForm> OpenMainFormAsync(UIComponent uiComponent, string rootPath)
         {
-            return OpenFormAsync(uiComponent, rootPath, MainTypeFullName);
+            return OpenFormAsync(uiComponent, MainAssetRootPath, MainTypeFullName);
         }
 
         protected override void SetMainPlayerInfo(IUIForm mainForm, string playerName, string playerLevel)

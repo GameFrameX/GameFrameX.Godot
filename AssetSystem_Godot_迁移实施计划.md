@@ -14,7 +14,7 @@
 - 已完成（准备）：`L1.2-RT`（Godot 场景级验证脚本与场景已落地，待本机 Godot 可执行环境实跑）
 - 当前验证结果：
   - `dotnet build Godot.sln -v minimal`：通过
-  - `dotnet build Godot.sln -v minimal -p:IncludeAssetSystemRuntime=true`：通过
+  - `dotnet build Godot.sln -v minimal`（历史上也验证过带 runtime 相关编译配置）：通过
   - `dotnet test addons/com.gameframex.godot.asset/Tests/Unit/GameFrameX.Asset.UnitTests.csproj -v minimal`：通过（30）
 - 下一执行项（按顺序）：
   - `L1.2-RT`：Godot 场景级真实链路验证（真实资源下载/加载）

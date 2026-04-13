@@ -38,11 +38,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-
-#if INCLUDE_ASSETSYSTEM_RUNTIME
 using System.Threading;
 using System.Threading.Tasks;
-#endif
 
 namespace Godot.Startup.Procedure;
 
@@ -51,7 +48,6 @@ namespace Godot.Startup.Procedure;
 /// </summary>
 public sealed class ProcedureDownloadWebFiles : ProcedureBase
 {
-#if INCLUDE_ASSETSYSTEM_RUNTIME
 	private enum LoadProbeStage
 	{
 		None,
@@ -72,9 +68,8 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 	private const string ProbePckLocation = "verify_content.pck";
 	private const string ProbePckResourcePath = "res://probe_runtime/teamgame_external.png";
 	private const string ProbePckResourcePathInPack = "probe_runtime/teamgame_external.png";
-	private const string ProbeFixtureVirtualRoot = "user://assetsystem_runtime_verify/yoo";
+	private const string ProbeFixtureVirtualRoot = "user://asset_runtime_verify/asset";
 	private const ulong LoadProbeStageTimeoutMs = 30000;
-#endif
 	private const string BuiltinResourcePath = "res://addons/com.gameframex.godot/Resources/gameframex_logo.png";
 	private const string ExternalProbeResourcePath = "res://Assets/Probe/teamgame_external.png";
 	private const string BuiltinSceneProbePath = "res://Scenes/Verification/AssetSystemRuntimeVerifier.tscn";
@@ -82,12 +77,9 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 	private const string RemotePreviewNodeName = "RuntimeLoadRemotePreviewSprite";
 	private const string PckPreviewNodeName = "RuntimeLoadPckPreviewSprite";
 	private const string RemoteProbeDownloadLink = "https://s1.aigei.com/prevfiles/1a0cd76a0fb64eaea9f1f0859f7faa8f.jpeg?e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:4ffDvyEeh1Xkdvdb_S6lbTLiHck=";
-	private const string LoadProbeCodeRevision = "2026-04-04-r12";
-	private const ulong RemoteImageWaitLogIntervalMs = 2000;
 	private const ulong RemoteImageStageTimeoutMs = 10000;
 	private static readonly System.Net.Http.HttpClient RemoteImageHttpClient = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(15) };
 
-#if INCLUDE_ASSETSYSTEM_RUNTIME
 	private bool _stateChanged;
 	private LoadProbeStage _stage;
 	private string _packageVersion = string.Empty;
@@ -101,9 +93,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 	private string _probeFixturePackageRoot;
 	private Task<byte[]> _remoteImageBytesTask;
 	private ulong _remoteImageRequestStartTicksMs;
-	private ulong _remoteImageLastWaitLogTicksMs;
 	private ulong _stageEnterTicksMs;
-#endif
 
 	/// <summary>
 	/// 进入流程时执行。
@@ -112,11 +102,9 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 	protected internal override void OnEnter(IFsm<IProcedureManager> procedureOwner)
 	{
 		base.OnEnter(procedureOwner);
-		Log.Info("进入流程：ProcedureDownloadWebFiles");
-		Log.Info("[Code] rev={0}", LoadProbeCodeRevision);
-		Log.Info("[UpdateMode] active mode={0}", StartupUpdateModeContext.CurrentMode);
+		Log.Info("[PatchPackage] enter mode={0} package={1}", StartupUpdateModeContext.CurrentMode, ProbePackageName);
+		LauncherFlowProgressReporter.Report(64f, nameof(ProcedureDownloadWebFiles));
 
-#if INCLUDE_ASSETSYSTEM_RUNTIME
 		_stateChanged = false;
 		_packageVersion = string.Empty;
 		_package = null;
@@ -128,25 +116,12 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		_probeFixturePackageRoot = string.Empty;
 		_remoteImageBytesTask = null;
 		_remoteImageRequestStartTicksMs = 0;
-		_remoteImageLastWaitLogTicksMs = 0;
 		MoveToStage(LoadProbeStage.Initializing, "pipeline enter");
-#else
-		Log.Info("[Resources] SKIP runtime-disabled (build with IncludeAssetSystemRuntime=true for full probe)");
-		Log.Info("[AB] SKIP runtime-disabled");
-		Log.Info("[Remote] SKIP runtime-disabled");
-		Log.Info("[Preview] SKIP builtin preview disabled.");
-		if (StartupUpdateModeContext.CurrentMode == StartupUpdateMode.OnlineForceUpdate)
-		{
-			Log.Warning("[UpdateMode] Force update requested but INCLUDE_ASSETSYSTEM_RUNTIME is disabled. Continue startup as fallback.");
-		}
-		GoPatchDone(procedureOwner, "runtime-disabled");
-#endif
 	}
 
 	protected internal override void OnUpdate(IFsm<IProcedureManager> procedureOwner, float elapseSeconds, float realElapseSeconds)
 	{
 		base.OnUpdate(procedureOwner, elapseSeconds, realElapseSeconds);
-#if INCLUDE_ASSETSYSTEM_RUNTIME
 		UpdateRuntimeLoadPipeline();
 		if (_stateChanged || (_stage != LoadProbeStage.Completed && _stage != LoadProbeStage.Failed))
 		{
@@ -156,28 +131,28 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		_stateChanged = true;
 		if (_stage == LoadProbeStage.Completed)
 		{
-			GoPatchDone(procedureOwner, "probe-completed");
+			Log.Info("[PatchPackage] ready package={0} version={1}",
+				ProbePackageName, string.IsNullOrWhiteSpace(_packageVersion) ? "unknown" : _packageVersion);
+			GoPatchDone(procedureOwner, "patch-package-ready");
 			return;
 		}
 
 		if (StartupUpdateModeContext.CurrentMode == StartupUpdateMode.OnlineForceUpdate)
 		{
-			Log.Error("[UpdateMode] Force update failed. startup halted in ProcedureDownloadWebFiles.");
+			Log.Error("[PatchPackage] force-update mode: patch package load failed, startup halted.");
 			return;
 		}
 
-		Log.Warning("[UpdateMode] Optional update failed. continue startup.");
+		Log.Warning("[PatchPackage] optional-update mode: patch package load failed, continue startup.");
 		GoPatchDone(procedureOwner, "optional-update-failed");
-#endif
 	}
 
 	private void GoPatchDone(IFsm<IProcedureManager> procedureOwner, string reason)
 	{
-		Log.Info("[Flow] {0} -> {1} ({2})", nameof(ProcedureDownloadWebFiles), nameof(ProcedurePatchDone), reason);
+		Log.Info("[PatchPackage] flow {0}->{1} reason={2}", nameof(ProcedureDownloadWebFiles), nameof(ProcedurePatchDone), reason);
 		ChangeState<ProcedurePatchDone>(procedureOwner);
 	}
 
-#if INCLUDE_ASSETSYSTEM_RUNTIME
 	private void UpdateRuntimeLoadPipeline()
 	{
 		try
@@ -187,7 +162,7 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 				var elapsed = Time.GetTicksMsec() - _stageEnterTicksMs;
 				if (elapsed > LoadProbeStageTimeoutMs)
 				{
-					FailPipeline($"[Stage] TIMEOUT stage={_stage} elapsedMs={elapsed}");
+					FailPipeline($"timeout stage={_stage} elapsedMs={elapsed}");
 					return;
 				}
 			}
@@ -204,13 +179,13 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			_package = AssetPackageUpdateService.PreparePackage(ProbePackageName, new LocalFileHttpTransport());
 					if (OS.HasFeature("web"))
 					{
-						Log.Info("[Remote] initialize mode=WebPlayMode root={0}", fixtureRoot);
+						Log.Info("[PatchPackage] initialize begin mode=WebPlayMode root={0}", fixtureRoot);
 				_initializeOperation = AssetPackageUpdateService.BeginInitializeWeb(_package, fixtureRoot);
 					}
 					else
 					{
 						var remoteServices = new LocalDirectoryRemoteServices(fixturePackageRoot);
-						Log.Info("[Remote] initialize mode=HostPlayMode root={0} cache={1}", fixturePackageRoot, fixtureCacheRoot);
+						Log.Info("[PatchPackage] initialize begin mode=HostPlayMode root={0} cache={1}", fixturePackageRoot, fixtureCacheRoot);
 				_initializeOperation = AssetPackageUpdateService.BeginInitializeHost(_package, remoteServices, fixtureCacheRoot);
 					}
 					return;
@@ -218,15 +193,17 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 
 				if (_initializeOperation.IsDone == false)
 				{
+					LauncherFlowProgressReporter.ReportRangeProgress(64f, 68f, _initializeOperation.Progress, "PatchPackage.Initializing");
 					return;
 				}
 
 				if (_initializeOperation.Status != EOperationStatus.Succeed)
 				{
-					FailPipeline($"[Remote] FAIL initialize: {_initializeOperation.Error}");
+					FailPipeline($"initialize failed error={_initializeOperation.Error}");
 					return;
 				}
 
+				Log.Info("[PatchPackage] initialize success package={0}", _package.PackageName);
 				MoveToStage(LoadProbeStage.RequestingVersion, "initialize succeeded");
 				return;
 			}
@@ -235,22 +212,25 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			{
 				if (_versionOperation == null)
 				{
+					Log.Info("[PatchPackage] request version begin package={0}", _package.PackageName);
 			_versionOperation = AssetPackageUpdateService.BeginRequestPackageVersion(_package, appendTimeTicks: false, timeout: 10);
 					return;
 				}
 
 				if (_versionOperation.IsDone == false)
 				{
+					LauncherFlowProgressReporter.ReportRangeProgress(68f, 72f, _versionOperation.Progress, "PatchPackage.RequestingVersion");
 					return;
 				}
 
 				if (_versionOperation.Status != EOperationStatus.Succeed)
 				{
-					FailPipeline($"[Remote] FAIL version: {_versionOperation.Error}");
+					FailPipeline($"request version failed error={_versionOperation.Error}");
 					return;
 				}
 
 				_packageVersion = _versionOperation.PackageVersion;
+				Log.Info("[PatchPackage] request version success version={0}", _packageVersion);
 				MoveToStage(LoadProbeStage.UpdatingManifest, "version succeeded");
 				return;
 			}
@@ -259,21 +239,24 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			{
 				if (_manifestOperation == null)
 				{
+					Log.Info("[PatchPackage] update manifest begin package={0} version={1}", _package.PackageName, _packageVersion);
 			_manifestOperation = AssetPackageUpdateService.BeginUpdatePackageManifest(_package, _packageVersion, timeout: 10);
 					return;
 				}
 
 				if (_manifestOperation.IsDone == false)
 				{
+					LauncherFlowProgressReporter.ReportRangeProgress(72f, 76f, _manifestOperation.Progress, "PatchPackage.UpdatingManifest");
 					return;
 				}
 
 				if (_manifestOperation.Status != EOperationStatus.Succeed)
 				{
-					FailPipeline($"[Remote] FAIL manifest: {_manifestOperation.Error}");
+					FailPipeline($"update manifest failed error={_manifestOperation.Error}");
 					return;
 				}
 
+				Log.Info("[PatchPackage] update manifest success package={0} version={1}", _package.PackageName, _packageVersion);
 				MoveToStage(LoadProbeStage.Downloading, "manifest succeeded");
 				return;
 			}
@@ -282,31 +265,28 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			{
 				if (_downloaderOperation == null)
 				{
+					Log.Info("[PatchPackage] download begin package={0}", _package.PackageName);
 			_downloaderOperation = AssetPackageUpdateService.BeginCreateDownloader(_package, downloadingMaxNumber: 1, failedTryAgain: 0, timeout: 10);
-					_downloaderOperation.OnStartDownloadFileCallback = data =>
-					{
-						Log.Info("[Remote] downloading file={0} size={1}", data.FileName, data.FileSize);
-					};
 					_downloaderOperation.OnDownloadErrorCallback = data =>
 					{
-						Log.Warning("[Remote] download error file={0} info={1}", data.FileName, data.ErrorInfo);
-						Log.Info("[Remote] download error file={0} info={1}", data.FileName, data.ErrorInfo);
+						Log.Warning("[PatchPackage] download file failed file={0} info={1}", data.FileName, data.ErrorInfo);
 					};
 					return;
 				}
 
 				if (_downloaderOperation.IsDone == false)
 				{
+					ReportDownloadStageProgress();
 					return;
 				}
 
 				if (_downloaderOperation.Status != EOperationStatus.Succeed)
 				{
-					FailPipeline($"[Remote] FAIL download: {_downloaderOperation.Error}");
+					FailPipeline($"download failed error={_downloaderOperation.Error}");
 					return;
 				}
 
-				Log.Info("[Remote] READY package={0} totalCount={1} totalBytes={2}",
+				Log.Info("[PatchPackage] download success package={0} totalCount={1} totalBytes={2}",
 					_package.PackageName, _downloaderOperation.TotalDownloadCount, _downloaderOperation.TotalDownloadBytes);
 				MoveToStage(LoadProbeStage.LoadingAsset, "download succeeded");
 				return;
@@ -316,25 +296,27 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			{
 				if (_assetHandle == null)
 				{
+					Log.Info("[PatchPackage] load probe asset begin location={0}", ProbeAssetLocation);
 					_assetHandle = _package.LoadAssetAsync(ProbeAssetLocation, typeof(object), priority: 100);
 					return;
 				}
 
 				if (_assetHandle.IsDone == false)
 				{
+					LauncherFlowProgressReporter.ReportRangeProgress(90f, 93f, _assetHandle.Progress, "PatchPackage.LoadingAsset");
 					return;
 				}
 
 				if (_assetHandle.Status != EOperationStatus.Succeed || _assetHandle.AssetObject == null)
 				{
-					FailPipeline($"[AB] FAIL handle: {_assetHandle.LastError}");
+					FailPipeline($"load probe asset failed error={_assetHandle.LastError}");
 					return;
 				}
 
 				var assetName = _assetHandle.AssetObject.GetType().GetProperty("name")?.GetValue(_assetHandle.AssetObject)?.ToString()
 								?? _assetHandle.AssetObject.GetType().GetProperty("Name")?.GetValue(_assetHandle.AssetObject)?.ToString()
 								?? _assetHandle.AssetObject.GetType().Name;
-				Log.Info("[AB] PASS asset={0}", assetName);
+				Log.Info("[PatchPackage] load probe asset success asset={0}", assetName);
 				_assetHandle.Release();
 				_assetHandle = null;
 				MoveToStage(LoadProbeStage.ShowingPreview, "asset loaded");
@@ -343,10 +325,9 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 
 			if (_stage == LoadProbeStage.ShowingPreview)
 			{
-				Log.Info("[Preview] SKIP pck/raw/builtin preview disabled.");
 				// MoveToStage(LoadProbeStage.ShowingRemoteImage, "preview shown");
 				// 按调试需求临时关闭远程图片加载入口，预览完成后直接结束探针流程。
-				MoveToStage(LoadProbeStage.Completed, "preview shown (remote image entry disabled)");
+				MoveToStage(LoadProbeStage.Completed, "patch package loaded");
 				return;
 			}
 
@@ -355,10 +336,8 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 				if (_remoteImageBytesTask == null)
 				{
 					var requestUrl = ResolveRemoteImageRequestUrl(RemoteProbeDownloadLink);
-					Log.Info("[RemoteImage] request={0}", requestUrl);
 					_remoteImageBytesTask = DownloadRemoteImageBytesAsync(requestUrl);
 					_remoteImageRequestStartTicksMs = Time.GetTicksMsec();
-					_remoteImageLastWaitLogTicksMs = _remoteImageRequestStartTicksMs;
 					return;
 				}
 
@@ -368,16 +347,9 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 					var waitMs = nowTicks - _remoteImageRequestStartTicksMs;
 					if (waitMs >= RemoteImageStageTimeoutMs)
 					{
-						Log.Warning("[RemoteImage] FAIL timeout={0}ms", waitMs);
-						Log.Info("[RemoteImage] FAIL timeout={0}ms", waitMs);
+						Log.Warning("[PatchPackage] remote image timeout={0}ms", waitMs);
 						MoveToStage(LoadProbeStage.Completed, "remote image timeout");
 						return;
-					}
-
-					if (nowTicks - _remoteImageLastWaitLogTicksMs >= RemoteImageWaitLogIntervalMs)
-					{
-						_remoteImageLastWaitLogTicksMs = nowTicks;
-						Log.Info("[RemoteImage] waiting elapsedMs={0}", waitMs);
 					}
 
 					return;
@@ -386,21 +358,18 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 				if (_remoteImageBytesTask.IsFaulted || _remoteImageBytesTask.IsCanceled)
 				{
 					var error = _remoteImageBytesTask.Exception?.GetBaseException().Message ?? "request failed.";
-					Log.Warning("[RemoteImage] FAIL error={0}", error);
-					Log.Info("[RemoteImage] FAIL error={0}", error);
+					Log.Warning("[PatchPackage] remote image failed error={0}", error);
 					MoveToStage(LoadProbeStage.Completed, "remote image failed");
 					return;
 				}
 
-				Log.Info("[RemoteImage] response bytes={0}", _remoteImageBytesTask.Result.Length);
 				if (TryShowRemoteImagePreview(_remoteImageBytesTask.Result))
 				{
 					MoveToStage(LoadProbeStage.Completed, "remote image shown");
 				}
 				else
 				{
-					Log.Warning("[RemoteImage] FAIL decode/display.");
-					Log.Info("[RemoteImage] FAIL decode/display.");
+					Log.Warning("[PatchPackage] remote image decode/display failed.");
 					MoveToStage(LoadProbeStage.Completed, "remote image decode failed");
 				}
 
@@ -409,15 +378,13 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		}
 		catch (Exception exception)
 		{
-			FailPipeline($"[Remote] FAIL exception={exception.Message}");
+			FailPipeline($"exception={exception.Message}");
 		}
 	}
 
 	private void FailPipeline(string message)
 	{
-		Log.Warning(message);
-		Log.Info(message);
-		Log.Info("[Preview] SKIP builtin preview disabled in fail path.");
+		Log.Warning("[PatchPackage] failed reason={0}", message);
 		MoveToStage(LoadProbeStage.Failed, "pipeline failed");
 	}
 
@@ -425,7 +392,61 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 	{
 		_stage = nextStage;
 		_stageEnterTicksMs = Time.GetTicksMsec();
-		Log.Info("[Stage] {0} ({1})", nextStage, reason);
+		Log.Info("[PatchPackage] stage={0} reason={1}", nextStage, reason);
+		ReportFlowStageProgress(nextStage);
+	}
+
+	private void ReportDownloadStageProgress()
+	{
+		if (_downloaderOperation == null)
+		{
+			return;
+		}
+
+		var ratio = _downloaderOperation.TotalDownloadBytes > 0
+			? (float)_downloaderOperation.CurrentDownloadBytes / _downloaderOperation.TotalDownloadBytes
+			: _downloaderOperation.Progress;
+		var clampedRatio = Math.Clamp(ratio, 0f, 1f);
+		var stageText = $"PatchPackage.Downloading {_downloaderOperation.CurrentDownloadCount}/{_downloaderOperation.TotalDownloadCount}";
+		LauncherFlowProgressReporter.ReportRangeProgress(76f, 90f, clampedRatio, stageText);
+	}
+
+	private static void ReportFlowStageProgress(LoadProbeStage stage)
+	{
+		switch (stage)
+		{
+			case LoadProbeStage.None:
+				return;
+			case LoadProbeStage.Initializing:
+				LauncherFlowProgressReporter.Report(64f, "PatchPackage.Initializing");
+				return;
+			case LoadProbeStage.RequestingVersion:
+				LauncherFlowProgressReporter.Report(68f, "PatchPackage.RequestingVersion");
+				return;
+			case LoadProbeStage.UpdatingManifest:
+				LauncherFlowProgressReporter.Report(72f, "PatchPackage.UpdatingManifest");
+				return;
+			case LoadProbeStage.Downloading:
+				LauncherFlowProgressReporter.Report(76f, "PatchPackage.Downloading");
+				return;
+			case LoadProbeStage.LoadingAsset:
+				LauncherFlowProgressReporter.Report(90f, "PatchPackage.LoadingAsset");
+				return;
+			case LoadProbeStage.ShowingPreview:
+				LauncherFlowProgressReporter.Report(93f, "PatchPackage.ShowingPreview");
+				return;
+			case LoadProbeStage.ShowingRemoteImage:
+				LauncherFlowProgressReporter.Report(93f, "PatchPackage.ShowingRemoteImage");
+				return;
+			case LoadProbeStage.Completed:
+				LauncherFlowProgressReporter.Report(94f, "PatchPackage.Completed");
+				return;
+			case LoadProbeStage.Failed:
+				LauncherFlowProgressReporter.Report(94f, "PatchPackage.Failed");
+				return;
+			default:
+				return;
+		}
 	}
 
 	private static void ProbeGodotRawResourceLoading()
@@ -433,40 +454,22 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		try
 		{
 			var rawTexture = global::GameFrameX.AssetSystem.AssetSystem.LoadGodotResourceFromRawFileSync<Texture2D>(ProbeAssetLocation);
-			if (rawTexture != null)
+			if (rawTexture == null)
 			{
-				Log.Info("[GodotRaw] PASS location={0} type=Texture2D", ProbeAssetLocation);
-			}
-			else
-			{
-				var fallbackTexture = ResourceLoader.Load<Texture2D>(BuiltinResourcePath);
-				if (fallbackTexture != null)
-				{
-					Log.Info("[GodotRaw] PASS fallback path={0} type=Texture2D", BuiltinResourcePath);
-				}
-				else
-				{
-					Log.Warning("[GodotRaw] FAIL location={0} type=Texture2D", ProbeAssetLocation);
-					Log.Info("[GodotRaw] FAIL location={0} type=Texture2D", ProbeAssetLocation);
-				}
+				var fallbackTexture = AssetSystemResources.Load<Texture2D>(BuiltinResourcePath);
+				_ = fallbackTexture;
 			}
 
 			var rawScene = global::GameFrameX.AssetSystem.AssetSystem.LoadGodotResourceFromRawFileSync<PackedScene>(ProbeAssetLocation);
-			if (rawScene != null)
-			{
-				Log.Info("[GodotRaw] PASS location={0} type=PackedScene", ProbeAssetLocation);
-			}
-			else
+			if (rawScene == null)
 			{
 				// var fallbackScene = ResourceLoader.Load<PackedScene>(BuiltinSceneProbePath);
 				// AssetSystemRuntimeVerifier 场景探针入口已按需求禁用，不再触发其脚本加载链路。
-				Log.Info("[GodotRaw] SKIP fallback scene probe path={0}", BuiltinSceneProbePath);
 			}
 		}
 		catch (Exception exception)
 		{
-			Log.Warning("[GodotRaw] FAIL exception={0}", exception.Message);
-			Log.Info("[GodotRaw] FAIL exception={0}", exception.Message);
+			_ = exception;
 		}
 	}
 
@@ -476,38 +479,28 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		{
 			if (_package == null || _package.CheckLocationValid(ProbePckLocation) == false)
 			{
-				Log.Info("[GodotPck] SKIP missing location={0}", ProbePckLocation);
 				return;
 			}
 
 			var mounted = global::GameFrameX.AssetSystem.AssetSystem.MountGodotResourcePackFromRawFileSync(ProbePckLocation, replaceFiles: false);
 			if (mounted == false)
 			{
-				Log.Warning("[GodotPck] raw mount failed location={0}, try direct-path fallback", ProbePckLocation);
-				Log.Info("[GodotPck] raw mount failed location={0}, try direct-path fallback", ProbePckLocation);
 				if (string.IsNullOrWhiteSpace(_probeFixturePackageRoot) == false)
 				{
 					var pckPath = Path.Combine(_probeFixturePackageRoot, ProbePckLocation).Replace('\\', '/');
 			mounted = global::GameFrameX.AssetSystem.AssetSystem.MountGodotResourcePackByPath(pckPath, replaceFiles: false);
-					if (mounted)
-					{
-						Log.Info("[GodotPck] mounted via direct path={0}", pckPath);
-					}
 				}
 
 				if (mounted == false)
 				{
-					Log.Warning("[GodotPck] FAIL mount location={0}", ProbePckLocation);
-					Log.Info("[GodotPck] FAIL mount location={0}", ProbePckLocation);
 					return;
 				}
 			}
 
-			var loaded = ResourceLoader.Load<Resource>(ProbePckResourcePath) ?? ResourceLoader.Load<Resource>(ProbePckResourcePathInPack);
+			var loaded = AssetSystemResources.Load<Resource>(ProbePckResourcePath) ?? AssetSystemResources.Load<Resource>(ProbePckResourcePathInPack);
 			if (loaded is Texture2D loadedTexture)
 			{
 				ShowTexturePreview(loadedTexture, PckPreviewNodeName, new Vector2(650f, 120f));
-				Log.Info("[GodotPck] PASS path={0} type={1}", ProbePckResourcePath, loaded.GetType().Name);
 				return;
 			}
 
@@ -519,27 +512,20 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 				existsInPack = true;
 			}
 
-			Log.Info("[GodotPck] resourceLoader miss, fileExists={0} path={1}", existsInPack, filePath);
 			if (existsInPack == false)
 			{
-				Log.Warning("[GodotPck] FAIL load path={0}", ProbePckResourcePath);
-				Log.Info("[GodotPck] FAIL load path={0}", ProbePckResourcePath);
 				return;
 			}
 
 			using var fileAccess = FileAccess.Open(filePath, FileAccess.ModeFlags.Read);
 			if (fileAccess == null)
 			{
-				Log.Warning("[GodotPck] FAIL file open path={0}", filePath);
-				Log.Info("[GodotPck] FAIL file open path={0}", filePath);
 				return;
 			}
 
 			var bytes = fileAccess.GetBuffer((long)fileAccess.GetLength());
 			if (bytes == null || bytes.Length == 0)
 			{
-				Log.Warning("[GodotPck] FAIL file empty path={0}", filePath);
-				Log.Info("[GodotPck] FAIL file empty path={0}", filePath);
 				return;
 			}
 
@@ -552,25 +538,18 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 
 			if (loadResult != Error.Ok)
 			{
-				Log.Warning("[GodotPck] FAIL decode path={0} error={1}", filePath, loadResult);
-				Log.Info("[GodotPck] FAIL decode path={0} error={1}", filePath, loadResult);
 				return;
 			}
 
 			var previewTexture = ImageTexture.CreateFromImage(image);
 			if (previewTexture == null || ShowTexturePreview(previewTexture, PckPreviewNodeName, new Vector2(650f, 120f)) == false)
 			{
-				Log.Warning("[GodotPck] FAIL display path={0}", filePath);
-				Log.Info("[GodotPck] FAIL display path={0}", filePath);
 				return;
 			}
-
-			Log.Info("[GodotPck] PASS path={0} type=ImageTexture bytes={1}", filePath, bytes.Length);
 		}
 		catch (Exception exception)
 		{
-			Log.Warning("[GodotPck] FAIL exception={0}", exception.Message);
-			Log.Info("[GodotPck] FAIL exception={0}", exception.Message);
+			_ = exception;
 		}
 	}
 
@@ -612,11 +591,6 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			assetLocations.Add(ProbePckLocation);
 			assetPaths.Add($"Assets/{ProbePckLocation}");
 			assetBundleIds.Add(1);
-			Log.Info("[GodotPck] fixture prepared path={0} bytes={1}", pckFilePath.Replace('\\', '/'), pckBytes.LongLength);
-		}
-		else
-		{
-			Log.Info("[GodotPck] fixture skipped (packer unavailable or source missing)");
 		}
 
 		var manifestBytes = BuildManifestBinary(
@@ -651,8 +625,6 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		{
 			return false;
 		}
-
-		Log.Info("[GodotPck] fixture source={0}", sourceFilePath);
 
 		var packer = new PckPacker();
 		var startResult = packer.PckStart(pckFilePath);
@@ -906,11 +878,6 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 		}
 
 		var displayed = ShowTexturePreview(texture, RemotePreviewNodeName, new Vector2(420f, 120f));
-		if (displayed)
-		{
-			Log.Info("[RemoteImage] PASS bytes={0}", bytes.Length);
-		}
-
 		return displayed;
 	}
 
@@ -1029,24 +996,15 @@ public sealed class ProcedureDownloadWebFiles : ProcedureBase
 			return Path.Combine(baseDirectory, fileName).Replace('\\', '/');
 		}
 	}
-#endif
-
 	private static void ShowBuiltinResourcePreview()
 	{
-		var texture = ResourceLoader.Load<Texture2D>(BuiltinResourcePath);
+		var texture = AssetSystemResources.Load<Texture2D>(BuiltinResourcePath);
 		if (texture == null)
 		{
-			Log.Warning("[Resources] FAIL path={0}", BuiltinResourcePath);
 			return;
 		}
 
-		if (ShowTexturePreview(texture, PreviewNodeName, new Vector2(180f, 120f)))
-		{
-			Log.Info("[Resources] PASS displayed preview path={0}", BuiltinResourcePath);
-			return;
-		}
-
-		Log.Warning("[Resources] FAIL no scene root.");
+		ShowTexturePreview(texture, PreviewNodeName, new Vector2(180f, 120f));
 	}
 
 	private static Node GetSceneRootNode()

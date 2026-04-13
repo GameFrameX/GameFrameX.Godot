@@ -241,7 +241,7 @@ internal class ByteGameFileSystem : IFileSystem
         // 注意：CDN服务未启用的情况下，使用抖音WEB服务器
         if (RemoteServices == null)
         {
-            var webRoot = PathUtility.Combine(GodotAssetPath.GetStreamingAssetsRoot(), AssetSystemSettingsData.Setting.DefaultYooFolderName, packageName);
+            var webRoot = PathUtility.Combine(GodotAssetPath.GetStreamingAssetsRoot(), AssetSystemSettingsData.Setting.DefaultAssetSystemFolderName, packageName);
             RemoteServices = new WebRemoteServices(webRoot);
         }
 
@@ -374,3 +374,4 @@ internal class ByteGameFileSystem : IFileSystem
 
     #endregion
 }
+

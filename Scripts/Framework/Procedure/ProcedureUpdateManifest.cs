@@ -46,6 +46,7 @@ public sealed class ProcedureUpdateManifest : ProcedureBase
     {
         base.OnEnter(procedureOwner);
         Log.Info("进入流程：ProcedureUpdateManifest");
+        LauncherFlowProgressReporter.Report(54f, nameof(ProcedureUpdateManifest));
         ChangeState<ProcedureCreateDownloader>(procedureOwner);
     }
 }

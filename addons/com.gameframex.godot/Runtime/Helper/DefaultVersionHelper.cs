@@ -29,6 +29,7 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
+using System;
 using Godot;
 
 namespace GameFrameX.Runtime
@@ -38,12 +39,34 @@ namespace GameFrameX.Runtime
     /// </summary>
     public class DefaultVersionHelper : Version.IVersionHelper
     {
+        private const string ProjectSettingAppVersionKey = "gameframex/startup/app_version";
+        private const string ProjectSettingFallbackVersionKey = "application/config/version";
+        private const string EnvironmentVariableAppVersionKey = "GFX_APP_VERSION";
+        private const string DefaultAppVersion = "1.0.0";
+
         /// <summary>
         /// 获取游戏版本号。
         /// </summary>
         public string GameVersion
         {
-            get { return OS.GetVersion(); }
+            get
+            {
+                var raw = global::System.Environment.GetEnvironmentVariable(EnvironmentVariableAppVersionKey);
+                if (string.IsNullOrWhiteSpace(raw) && ProjectSettings.HasSetting(ProjectSettingAppVersionKey))
+                {
+                    var settingValue = ProjectSettings.GetSetting(ProjectSettingAppVersionKey);
+                    raw = settingValue.IsNull() ? string.Empty : settingValue.AsString();
+                }
+
+                if (string.IsNullOrWhiteSpace(raw) && ProjectSettings.HasSetting(ProjectSettingFallbackVersionKey))
+                {
+                    var settingValue = ProjectSettings.GetSetting(ProjectSettingFallbackVersionKey);
+                    raw = settingValue.IsNull() ? string.Empty : settingValue.AsString();
+                }
+
+                var version = raw?.Trim();
+                return string.IsNullOrWhiteSpace(version) ? DefaultAppVersion : version;
+            }
         }
     }
 }

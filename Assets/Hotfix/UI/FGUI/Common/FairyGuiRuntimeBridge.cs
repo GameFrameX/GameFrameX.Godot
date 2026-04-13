@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using FairyGUI;
+using GameFrameX.AssetSystem;
 using Godot;
-using FileAccess = Godot.FileAccess;
 
 namespace Godot.Hotfix.FairyGUI
 {
@@ -24,14 +24,46 @@ namespace Godot.Hotfix.FairyGUI
 
         internal static void EnsureInitialized()
         {
-            if (s_Initialized)
+            if (!s_Initialized)
             {
-                return;
+                _ = Stage.inst;
+                s_Initialized = true;
             }
 
-            _ = Stage.inst;
+            // Re-run package probing on every call so packages mounted later (for example via pck)
+            // can still be added into FairyGUI runtime.
             LoadRequiredPackages(DefaultBundleRootPath);
-            s_Initialized = true;
+        }
+
+        internal static bool TryEnsurePackageReady(string packageName, out string error)
+        {
+            error = string.Empty;
+            if (string.IsNullOrWhiteSpace(packageName))
+            {
+                error = "package name is empty";
+                return false;
+            }
+
+            EnsureInitialized();
+            if (UIPackage.GetByName(packageName) != null)
+            {
+                return true;
+            }
+
+            if (!TryResolvePackagePath(DefaultBundleRootPath, packageName, out var packagePath))
+            {
+                error = $"package file missing: {packageName}";
+                return false;
+            }
+
+            var package = UIPackage.AddPackage(packagePath, LoadResourceWithFallback);
+            if (package != null)
+            {
+                return true;
+            }
+
+            error = $"add package failed: {packageName}, path={packagePath}";
+            return false;
         }
 
         internal static GComponent CreateFullScreenView(string packageName, string componentName, string uiGroupName = null)
@@ -80,19 +112,44 @@ namespace Godot.Hotfix.FairyGUI
                     continue;
                 }
 
-                var packagePath = $"{bundleRootPath}/{packageName}/{packageName}_fui.bytes";
-                if (!FileAccess.FileExists(packagePath))
+                if (!TryResolvePackagePath(bundleRootPath, packageName, out var packagePath))
                 {
-                    GD.PushWarning($"[FGUIBridge] package file missing: {packagePath}");
+                    GD.PushWarning($"[FGUIBridge] package file missing. package={packageName}");
                     continue;
                 }
 
                 var package = UIPackage.AddPackage(packagePath, LoadResourceWithFallback);
                 if (package == null)
                 {
-                    GD.PushWarning($"[FGUIBridge] add package failed: {packagePath}");
+                    GD.PushWarning($"[FGUIBridge] add package failed or package file missing: {packagePath}");
                 }
             }
+        }
+
+        private static bool TryResolvePackagePath(string bundleRootPath, string packageName, out string resolvedPath)
+        {
+            resolvedPath = string.Empty;
+            if (string.IsNullOrWhiteSpace(bundleRootPath) || string.IsNullOrWhiteSpace(packageName))
+            {
+                return false;
+            }
+
+            var candidates = new[]
+            {
+                $"{bundleRootPath}/{packageName}/{packageName}_fui.bytes",
+                $"{bundleRootPath}/{packageName}_fui.bytes"
+            };
+
+            for (var i = 0; i < candidates.Length; i++)
+            {
+                if (FileAccess.FileExists(candidates[i]))
+                {
+                    resolvedPath = candidates[i];
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static GComponent GetOrCreateGroupLayer(string uiGroupName)
@@ -119,13 +176,7 @@ namespace Godot.Hotfix.FairyGUI
 
             if (type == typeof(byte[]))
             {
-                if (!FileAccess.FileExists(path))
-                {
-                    return null;
-                }
-
-                using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
-                return file.GetBuffer((long)file.GetLength());
+                return AssetSystemResources.Load<byte[]>(path);
             }
 
             var resource = TryLoad(path);
@@ -162,7 +213,7 @@ namespace Godot.Hotfix.FairyGUI
                 return null;
             }
 
-            return ResourceLoader.Load(path);
+            return AssetSystemResources.Load<Resource>(path);
         }
     }
 }

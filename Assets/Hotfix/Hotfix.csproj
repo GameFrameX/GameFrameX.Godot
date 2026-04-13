@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Godot.NET.Sdk/4.6.1">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -10,29 +10,39 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <NoWarn>$(NoWarn);CS8981</NoWarn>
-    <DefineConstants>ENABLE_LOG;INCLUDE_ASSETSYSTEM_RUNTIME</DefineConstants>
+    <DefineConstants>ENABLE_LOG;NOT_EDITOR</DefineConstants>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <OutputPath>..\..\BuildArtifacts\Assemblies\$(Configuration)\</OutputPath>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="bin\**\*;obj\**\*;UI\FGUI\**\Components\**\*.cs" />
+    <Compile Include="..\Resources\UI\FGUI\UILauncher\UILauncher\**\*.cs" Exclude="..\Resources\UI\FGUI\UILauncher\UILauncher\Components\**\*.cs;..\Resources\UI\FGUI\UILauncher\UILauncher\UILauncher.cs;..\Resources\UI\FGUI\UILauncher\UILauncher\UILauncher.FGUI.Logic.cs" />
+    <Compile Include="..\Resources\UI\GGUI\UILauncher\UILauncher\**\*.cs" Exclude="..\Resources\UI\GGUI\UILauncher\UILauncher\UILauncher.cs" />
   </ItemGroup>
-
   <ItemGroup Condition="Exists('..\..\.godot\mono\temp\bin\$(Configuration)\Godot.dll')">
     <Reference Include="Godot">
       <HintPath>..\..\.godot\mono\temp\bin\$(Configuration)\Godot.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
-
   <Target Name="EnsureGodotAssemblyExists" BeforeTargets="CoreCompile" Condition="!Exists('..\..\.godot\mono\temp\bin\$(Configuration)\Godot.dll')">
     <Error Text="Godot.dll not found at '..\..\.godot\mono\temp\bin\$(Configuration)\Godot.dll'. Build Godot.csproj first." />
   </Target>
-
   <Target Name="BlockStandaloneBuild" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true' and '$(CalledFromGodotBuild)' != 'true' and '$(AllowStandaloneHotfixBuild)' != 'true' and '$(SolutionPath)' == ''">
     <Error Text="Hotfix.csproj must be built via Godot.csproj (or Godot Editor). If you really need standalone build, set /p:AllowStandaloneHotfixBuild=true." />
+  </Target>
+  <Target Name="CopyHotfixAssemblyToUserHotfix" AfterTargets="Build">
+    <PropertyGroup>
+      <GodotUserHotfixDir Condition="'$(APPDATA)' != ''">$(APPDATA)\Godot\app_userdata\Godot\hotfix\</GodotUserHotfixDir>
+      <GodotUserHotfixDir Condition="'$(APPDATA)' == '' and '$(HOME)' != ''">$(HOME)/.local/share/godot/app_userdata/Godot/hotfix/</GodotUserHotfixDir>
+      <GodotUserHotfixDir Condition="'$(GodotUserHotfixDir)' == ''">..\..\BuildArtifacts\Assemblies\UserHotfix\</GodotUserHotfixDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(GodotUserHotfixDir)" />
+    <Copy SourceFiles="$(OutputPath)Hotfix.dll" DestinationFiles="$(GodotUserHotfixDir)Hotfix.dll" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)Hotfix.dll')" />
+    <Copy SourceFiles="$(OutputPath)Hotfix.pdb" DestinationFiles="$(GodotUserHotfixDir)Hotfix.pdb" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)Hotfix.pdb')" />
+    <Copy SourceFiles="$(OutputPath)Hotfix.deps.json" DestinationFiles="$(GodotUserHotfixDir)Hotfix.deps.json" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)Hotfix.deps.json')" />
+    <Copy SourceFiles="$(OutputPath)Hotfix.runtimeconfig.json" DestinationFiles="$(GodotUserHotfixDir)Hotfix.runtimeconfig.json" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)Hotfix.runtimeconfig.json')" />
   </Target>
 </Project>

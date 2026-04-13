@@ -30,14 +30,19 @@
 using GameFrameX.Fsm.Runtime;
 using GameFrameX.Procedure.Runtime;
 using GameFrameX.Runtime;
+using Godot;
 
 namespace Godot.Startup.Procedure;
 
 /// <summary>
 /// 启动入口流程。
 /// </summary>
-public sealed class ProcedureLauncherState : ProcedureBase
+public sealed partial class ProcedureLauncherState : ProcedureBase
 {
+    private const ulong LauncherUiReadyWaitTimeoutMs = 5000;
+    private bool _stateChanged;
+    private ulong _enterTicksMs;
+
     /// <summary>
     /// 进入流程时执行。
     /// </summary>
@@ -46,6 +51,36 @@ public sealed class ProcedureLauncherState : ProcedureBase
     {
         base.OnEnter(procedureOwner);
         Log.Info("进入流程：ProcedureLauncherState");
+        LauncherFlowProgressReporter.Begin(nameof(ProcedureLauncherState));
+        LauncherFlowProgressReporter.Report(3f, nameof(ProcedureLauncherState));
+        _stateChanged = false;
+        _enterTicksMs = Time.GetTicksMsec();
+        EnsureLauncherUiFlowStarted(nameof(ProcedureLauncherState));
+    }
+
+    protected internal override void OnUpdate(IFsm<IProcedureManager> procedureOwner, float elapseSeconds, float realElapseSeconds)
+    {
+        base.OnUpdate(procedureOwner, elapseSeconds, realElapseSeconds);
+        if (_stateChanged)
+        {
+            return;
+        }
+
+        if (IsLauncherUiReady())
+        {
+            _stateChanged = true;
+            ChangeState<ProcedureGetGlobalInfoState>(procedureOwner);
+            return;
+        }
+
+        var elapsed = Time.GetTicksMsec() - _enterTicksMs;
+        if (elapsed < LauncherUiReadyWaitTimeoutMs)
+        {
+            return;
+        }
+
+        _stateChanged = true;
+        Log.Warning("[LauncherUI] wait ui ready timeout={0}ms, continue startup.", elapsed);
         ChangeState<ProcedureGetGlobalInfoState>(procedureOwner);
     }
 }

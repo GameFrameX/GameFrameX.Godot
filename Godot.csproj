@@ -9,11 +9,7 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <NoWarn>$(NoWarn);CS8981</NoWarn>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <DefineConstants>ENABLE_LOG;INCLUDE_ASSETSYSTEM_RUNTIME</DefineConstants>
-    <IncludeAssetSystemRuntime>true</IncludeAssetSystemRuntime>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(IncludeAssetSystemRuntime)' == 'true'">
-    <DefineConstants>$(DefineConstants);INCLUDE_ASSETSYSTEM_RUNTIME</DefineConstants>
+    <DefineConstants>ENABLE_LOG;NOT_EDITOR</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
@@ -34,6 +30,16 @@
     <Compile Remove="tests/**/*.cs" />
     <!-- Hotfix 独立编译到 Hotfix.csproj，主程序集不再重复编译 -->
     <Compile Remove="Assets/Hotfix/**/*.cs" />
+    <!-- 已迁移到 Resources 的 Hotfix UI 脚本默认由 Hotfix.csproj 统一编译 -->
+    <Compile Remove="Assets/Resources/UI/FGUI/UILauncher/UILauncher/**/*.cs" />
+    <Compile Remove="Assets/Resources/UI/GGUI/UILauncher/UILauncher/**/*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- 启动阶段需要直接实例化 UILauncher（场景根脚本解析 IUIForm），因此由主程序集编译 -->
+    <Compile Include="Assets/Hotfix/UI/FGUI/Common/FairyGuiRuntimeBridge.cs" />
+    <Compile Include="Assets/Resources/UI/FGUI/UILauncher/UILauncher/UILauncher.cs" />
+    <Compile Include="Assets/Resources/UI/FGUI/UILauncher/UILauncher/UILauncher.FGUI.Logic.cs" />
+    <Compile Include="Assets/Resources/UI/GGUI/UILauncher/UILauncher/UILauncher.cs" />
   </ItemGroup>
   <Target Name="BuildHotfixProject" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipHotfixBuild)' != 'true'">
     <MSBuild Projects="Assets/Hotfix/Hotfix.csproj" Targets="Build" Properties="Configuration=$(Configuration);GodotTargetPlatform=$(GodotTargetPlatform);BuildProjectReferences=false;SkipHotfixBuild=true;CalledFromGodotBuild=true;DefineConstants=$(DefineConstants)" />

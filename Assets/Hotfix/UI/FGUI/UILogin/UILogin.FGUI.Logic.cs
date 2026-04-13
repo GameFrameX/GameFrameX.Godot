@@ -15,6 +15,7 @@ namespace Godot.Hotfix.FairyGUI
         public override void OnOpen(object userData)
         {
             base.OnOpen(userData);
+            GD.Print("[UILogin-FGUI] OnOpen");
             _ = ConfigRuntimeDispatcher.EnsureLoadedAndLogDemoAsync("FairyGUI.UILogin");
 
             UnbindLoginTrigger();
@@ -23,6 +24,7 @@ namespace Godot.Hotfix.FairyGUI
             _view = FairyGuiRuntimeBridge.CreateFullScreenView("UILogin", "UILogin", UIGroup?.Name);
             if (_view == null)
             {
+                GD.PushError("[UILogin-FGUI] create fullscreen view failed.");
                 return;
             }
 
@@ -34,6 +36,7 @@ namespace Godot.Hotfix.FairyGUI
             }
 
             _loginTrigger.onClick.Add(OnLoginClicked);
+            GD.Print("[UILogin-FGUI] login trigger bound.");
         }
 
         public override void OnClose(bool isShutdown, object userData)
@@ -45,6 +48,7 @@ namespace Godot.Hotfix.FairyGUI
 
         private void OnLoginClicked()
         {
+            GD.Print("[UILogin-FGUI] login trigger clicked.");
             LoginClicked?.Invoke();
         }
 

@@ -413,15 +413,7 @@ internal static class HotfixTypeResolver
     {
         return
         [
-            ProjectSettings.GlobalizePath("res://BuildArtifacts/Assemblies/Debug/Hotfix.dll"),
-            ProjectSettings.GlobalizePath("res://BuildArtifacts/Assemblies/Release/Hotfix.dll"),
-            ProjectSettings.GlobalizePath("res://BuildArtifacts/Assemblies/ExportDebug/Hotfix.dll"),
-            ProjectSettings.GlobalizePath("res://BuildArtifacts/Assemblies/ExportRelease/Hotfix.dll"),
-            Path.Combine(AppContext.BaseDirectory, "Hotfix.dll"),
-            ProjectSettings.GlobalizePath("res://.godot/mono/temp/bin/Debug/Hotfix.dll"),
-            ProjectSettings.GlobalizePath("res://.godot/mono/temp/bin/Release/Hotfix.dll"),
-            ProjectSettings.GlobalizePath("res://.godot/mono/temp/bin/ExportDebug/Hotfix.dll"),
-            ProjectSettings.GlobalizePath("res://.godot/mono/temp/bin/ExportRelease/Hotfix.dll")
+            ProjectSettings.GlobalizePath(global::GameFrameX.AssetSystem.GodotAssetPath.GetHotfixAssemblyFileVirtual())
         ];
     }
 

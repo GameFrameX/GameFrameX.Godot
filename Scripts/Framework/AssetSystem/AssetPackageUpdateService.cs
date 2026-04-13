@@ -8,7 +8,6 @@ using GameFrameX.Runtime;
 
 namespace Godot.Startup.AssetSystem
 {
-#if INCLUDE_ASSETSYSTEM_RUNTIME
 	/// <summary>
 	/// 资源更新入口（版本、清单、下载）。
 	/// 说明：这里只处理更新链路，不承担业务资源实例化与PCK挂载。
@@ -18,7 +17,7 @@ namespace Godot.Startup.AssetSystem
 		/// <summary>
 		/// 尝试准备本地Host模式资源包（默认对齐正式热更永久目录）。
 		/// 默认目录：
-		///  - 包根：user://hotfix/yoo/{packageName}
+		///  - 包根：user://hotfix/{packageName}
 		///  - 缓存：user://hotfix/cache/{packageName}
 		/// </summary>
 		public static bool TryPrepareLocalHostPackage(
@@ -40,7 +39,7 @@ namespace Godot.Startup.AssetSystem
 			try
 			{
 				global::GameFrameX.AssetSystem.AssetSystem.Initialize();
-				packageRootVirtual ??= GodotAssetPath.GetHotfixYooRootVirtual();
+				packageRootVirtual ??= GodotAssetPath.GetHotfixAssetSystemRootVirtual();
 				cacheRootVirtual ??= GodotAssetPath.GetHotfixCacheRootVirtual();
 
 				var packageVirtualPath = GodotAssetPath.CombineVirtualPath(packageRootVirtual, GodotAssetPath.NormalizePackageSegment(packageName));
@@ -292,5 +291,6 @@ namespace Godot.Startup.AssetSystem
 			}
 		}
 	}
-#endif
 }
+
+

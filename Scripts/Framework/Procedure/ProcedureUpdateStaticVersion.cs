@@ -30,6 +30,7 @@
 using GameFrameX.Fsm.Runtime;
 using GameFrameX.Procedure.Runtime;
 using GameFrameX.Runtime;
+using GameFrameX.Web.Runtime;
 
 namespace Godot.Startup.Procedure;
 /// <summary>
@@ -37,6 +38,11 @@ namespace Godot.Startup.Procedure;
 /// </summary>
 public sealed class ProcedureUpdateStaticVersion : ProcedureBase
 {
+    private const string WebBaseFormKeyAppVersionPascalCase = "AppVersion";
+    private const string WebBaseFormKeyAppVersionCamelCase = "appVersion";
+    private const string WebBaseQueryKeyAppVersion = "appVersion";
+    private const string FallbackAppVersion = "1.0.0";
+
     /// <summary>
     /// 进入流程时执行。
     /// </summary>
@@ -45,6 +51,27 @@ public sealed class ProcedureUpdateStaticVersion : ProcedureBase
     {
         base.OnEnter(procedureOwner);
         Log.Info("进入流程：ProcedureUpdateStaticVersion");
+        LauncherFlowProgressReporter.Report(48f, nameof(ProcedureUpdateStaticVersion));
+        var appVersion = ResolveLocalAppVersion();
+        var webComponent = GameEntry.GetComponent<WebComponent>();
+        if (webComponent != null)
+        {
+            webComponent.AddBaseForm(WebBaseFormKeyAppVersionPascalCase, appVersion);
+            webComponent.AddBaseForm(WebBaseFormKeyAppVersionCamelCase, appVersion);
+            webComponent.AddBaseQueryString(WebBaseQueryKeyAppVersion, appVersion);
+            Log.Info("[StaticVersion] appVersion={0}", appVersion);
+        }
+        else
+        {
+            Log.Warning("[StaticVersion] WebComponent not found, skip base version injection.");
+        }
+
         ChangeState<ProcedureUpdateManifest>(procedureOwner);
+    }
+
+    private static string ResolveLocalAppVersion()
+    {
+        var appVersion = Version.GameVersion?.Trim();
+        return string.IsNullOrWhiteSpace(appVersion) ? FallbackAppVersion : appVersion;
     }
 }

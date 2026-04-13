@@ -11,7 +11,7 @@ namespace GameFrameX.AssetSystem
         /// <summary>
         /// 默认的AssetSystem文件夹名称
         /// </summary>
-        public string DefaultYooFolderName = "yoo";
+        public string DefaultAssetSystemFolderName = "asset";
 
 
         /// <summary>
@@ -41,3 +41,5 @@ namespace GameFrameX.AssetSystem
         public const string ReportFileName = "BuildReport";
     }
 }
+
+
