@@ -10,7 +10,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <NoWarn>$(NoWarn);CS8981</NoWarn>
-    <DefineConstants>ENABLE_LOG;NOT_EDITOR</DefineConstants>
+    <DefineConstants>FAIRY_GUI;ENABLE_GAME_FRAME_X_WEB_SOCKET;ENABLE_LOG;ENABLE_GAME_FRAME_X_JSON</DefineConstants>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>

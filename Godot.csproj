@@ -9,7 +9,7 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <NoWarn>$(NoWarn);CS8981</NoWarn>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <DefineConstants>ENABLE_LOG;NOT_EDITOR</DefineConstants>
+    <DefineConstants>FAIRY_GUI;ENABLE_GAME_FRAME_X_WEB_SOCKET;ENABLE_LOG;ENABLE_GAME_FRAME_X_JSON</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
