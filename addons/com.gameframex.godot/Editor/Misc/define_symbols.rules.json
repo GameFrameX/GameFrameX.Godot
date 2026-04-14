@@ -1,0 +1,38 @@
+{
+  "symbols": [
+    {
+      "symbol": "ENABLE_LOG",
+      "label": "Enable Log"
+    },
+    {
+      "symbol": "FAIRY_GUI",
+      "label": "FairyGUI"
+    },
+    {
+      "symbol": "NOT_EDITOR",
+      "label": "Force Runtime Load"
+    },
+    {
+      "symbol": "ENABLE_GAME_FRAME_X_WEB_SOCKET",
+      "label": "WebSocket"
+    },
+    {
+      "symbol": "ENABLE_GAME_FRAME_X_PROTOBUF",
+      "label": "Protobuf",
+      "group": "DATA_FORMAT",
+      "mode": "single",
+      "conflicts": [
+        "ENABLE_GAME_FRAME_X_JSON"
+      ]
+    },
+    {
+      "symbol": "ENABLE_GAME_FRAME_X_JSON",
+      "label": "Json",
+      "group": "DATA_FORMAT",
+      "mode": "single",
+      "conflicts": [
+        "ENABLE_GAME_FRAME_X_PROTOBUF"
+      ]
+    }
+  ]
+}
