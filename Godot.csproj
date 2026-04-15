@@ -9,7 +9,7 @@
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <NoWarn>$(NoWarn);CS8981</NoWarn>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <DefineConstants>FAIRY_GUI;ENABLE_GAME_FRAME_X_WEB_SOCKET;ENABLE_LOG;ENABLE_GAME_FRAME_X_JSON</DefineConstants>
+    <DefineConstants>ENABLE_GAME_FRAME_X_WEB_SOCKET;ENABLE_LOG;ENABLE_GAME_FRAME_X_PROTOBUF</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
@@ -40,6 +40,10 @@
     <Compile Include="Assets/Resources/UI/FGUI/UILauncher/UILauncher/UILauncher.cs" />
     <Compile Include="Assets/Resources/UI/FGUI/UILauncher/UILauncher/UILauncher.FGUI.Logic.cs" />
     <Compile Include="Assets/Resources/UI/GGUI/UILauncher/UILauncher/UILauncher.cs" />
+    <!-- 登录界面在进入 Hotfix 前也可能被打开，避免 tscn 根脚本实例化失败 -->
+    <Compile Include="Assets/Hotfix/UI/FGUI/UILogin/UILogin.cs" />
+    <Compile Include="Assets/Hotfix/UI/FGUI/UILogin/UILogin.FGUI.Logic.cs" />
+    <Compile Include="Assets/Hotfix/UI/GodotGUI/UILogin/UILogin.cs" />
   </ItemGroup>
   <Target Name="BuildHotfixProject" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipHotfixBuild)' != 'true'">
     <MSBuild Projects="Assets/Hotfix/Hotfix.csproj" Targets="Build" Properties="Configuration=$(Configuration);GodotTargetPlatform=$(GodotTargetPlatform);BuildProjectReferences=false;SkipHotfixBuild=true;CalledFromGodotBuild=true;DefineConstants=$(DefineConstants)" />
