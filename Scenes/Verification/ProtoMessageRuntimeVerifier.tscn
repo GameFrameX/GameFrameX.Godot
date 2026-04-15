@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Verification/ProtoMessageRuntimeVerifier.cs" id="1"]
+
+[node name="ProtoMessageRuntimeVerifier" type="Node"]
+script = ExtResource("1")
+AutoRunOnReady = true
+AutoQuitOnFinish = true
+UseLocalLoopbackServer = true
+EndpointUrl = "http://127.0.0.1:29180/proto/"
+TimeoutSeconds = 8
+RequestText = "hello-proto"
+RequestNumber = 2026
+

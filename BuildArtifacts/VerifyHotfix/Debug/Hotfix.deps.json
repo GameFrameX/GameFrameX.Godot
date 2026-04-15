@@ -1,0 +1,60 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Hotfix/1.0.0": {
+        "dependencies": {
+          "GodotSharp": "4.6.1",
+          "GodotSharpEditor": "4.6.1"
+        },
+        "runtime": {
+          "Hotfix.dll": {}
+        }
+      },
+      "GodotSharp/4.6.1": {
+        "runtime": {
+          "lib/net8.0/GodotSharp.dll": {
+            "assemblyVersion": "4.6.1.0",
+            "fileVersion": "4.6.1.0"
+          }
+        }
+      },
+      "GodotSharpEditor/4.6.1": {
+        "dependencies": {
+          "GodotSharp": "4.6.1"
+        },
+        "runtime": {
+          "lib/net8.0/GodotSharpEditor.dll": {
+            "assemblyVersion": "4.6.1.0",
+            "fileVersion": "4.6.1.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Hotfix/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "GodotSharp/4.6.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-FQc5iM5ftSAIegboeP7CsOeNtG0GLgjkqNshUHISZhnc8secWLwZqmCPFHGYshVPIqqJFCfQQ5ttjdmNKLKKEw==",
+      "path": "godotsharp/4.6.1",
+      "hashPath": "godotsharp.4.6.1.nupkg.sha512"
+    },
+    "GodotSharpEditor/4.6.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-WtUHTHUegXO3OwHXa2pW2a6UIBV3TcVui2lbQ6eQt4RuKSZwuzNGdBy3GYIDJ3pkqJZEjqvM9zA32ARxhUygTQ==",
+      "path": "godotsharpeditor/4.6.1",
+      "hashPath": "godotsharpeditor.4.6.1.nupkg.sha512"
+    }
+  }
+}

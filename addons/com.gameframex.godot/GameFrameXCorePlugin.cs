@@ -197,11 +197,13 @@ namespace GameFrameX.Editor
         {
             GD.Print("[ScriptingDefineSymbols] define constants changed, cleaning editor windows for hot-reload.");
             CloseTransientEditorWindowsForDefineSwitch();
+            CallDeferred(nameof(RebuildTopToolbarMenu));
         }
 
         private void CloseTransientEditorWindowsForDefineSwitch()
         {
             SafeCloseWindow(ref m_AssetSystemBuilderDialog);
+            SafeCloseWindow(ref m_ScriptingDefineSymbolsWindow);
         }
 
         private static void SafeCloseWindow<TWindow>(ref TWindow window) where TWindow : Window
@@ -257,7 +259,8 @@ namespace GameFrameX.Editor
             m_TopPopupMenu.AddItem(L("资源打包器", "Asset Builder"), TopMenuAssetBuilderId);
             m_TopPopupMenu.AddItem(L("生成客户端配置", "Generate Client Config"), TopMenuGenerateClientConfigId);
             m_TopPopupMenu.AddSeparator();
-            ReconnectPopupMenuIdPressed(m_TopPopupMenu, nameof(OnTopMenuIdPressed));
+            m_TopPopupMenu.IdPressed -= OnTopMenuIdPressed;
+            m_TopPopupMenu.IdPressed += OnTopMenuIdPressed;
             BuildLogDefineSubmenu();
             if (m_LogDefinePopupMenu != null)
             {
@@ -298,7 +301,8 @@ namespace GameFrameX.Editor
             m_LogDefinePopupMenu.AddItem(L("开启警告及以上日志", "Enable Warning+ Logs"), LogDefineEnableWarningAndAboveLogsId);
             m_LogDefinePopupMenu.AddItem(L("开启错误及以上日志", "Enable Error+ Logs"), LogDefineEnableErrorAndAboveLogsId);
             m_LogDefinePopupMenu.AddItem(L("开启严重错误及以上日志", "Enable Fatal+ Logs"), LogDefineEnableFatalAndAboveLogsId);
-            ReconnectPopupMenuIdPressed(m_LogDefinePopupMenu, nameof(OnLogDefineMenuIdPressed));
+            m_LogDefinePopupMenu.IdPressed -= OnLogDefineMenuIdPressed;
+            m_LogDefinePopupMenu.IdPressed += OnLogDefineMenuIdPressed;
             m_TopPopupMenu.AddChild(m_LogDefinePopupMenu);
         }
 
@@ -309,7 +313,7 @@ namespace GameFrameX.Editor
         {
             if (m_LogDefinePopupMenu != null)
             {
-                DisconnectPopupMenuIdPressed(m_LogDefinePopupMenu, nameof(OnLogDefineMenuIdPressed));
+                m_LogDefinePopupMenu.IdPressed -= OnLogDefineMenuIdPressed;
 
                 m_LogDefinePopupMenu.QueueFree();
                 m_LogDefinePopupMenu = null;
@@ -322,7 +326,7 @@ namespace GameFrameX.Editor
                 PopupMenu popupMenu = m_TopMenuButton.GetPopup();
                 if (popupMenu != null)
                 {
-                    DisconnectPopupMenuIdPressed(popupMenu, nameof(OnTopMenuIdPressed));
+                    popupMenu.IdPressed -= OnTopMenuIdPressed;
                 }
 
                 RemoveControlFromContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
@@ -371,40 +375,10 @@ namespace GameFrameX.Editor
                 var stalePopup = staleButton.GetPopup();
                 if (stalePopup != null)
                 {
-                    DisconnectPopupMenuIdPressed(stalePopup, nameof(OnTopMenuIdPressed));
+                    stalePopup.IdPressed -= OnTopMenuIdPressed;
                 }
 
                 staleButton.QueueFree();
-            }
-        }
-
-        private void ReconnectPopupMenuIdPressed(PopupMenu popupMenu, string methodName)
-        {
-            if (popupMenu == null || string.IsNullOrWhiteSpace(methodName))
-            {
-                return;
-            }
-
-            var callable = new Callable(this, methodName);
-            if (popupMenu.IsConnected(PopupMenu.SignalName.IdPressed, callable))
-            {
-                popupMenu.Disconnect(PopupMenu.SignalName.IdPressed, callable);
-            }
-
-            popupMenu.Connect(PopupMenu.SignalName.IdPressed, callable);
-        }
-
-        private void DisconnectPopupMenuIdPressed(PopupMenu popupMenu, string methodName)
-        {
-            if (popupMenu == null || string.IsNullOrWhiteSpace(methodName))
-            {
-                return;
-            }
-
-            var callable = new Callable(this, methodName);
-            if (popupMenu.IsConnected(PopupMenu.SignalName.IdPressed, callable))
-            {
-                popupMenu.Disconnect(PopupMenu.SignalName.IdPressed, callable);
             }
         }
 
@@ -446,12 +420,6 @@ namespace GameFrameX.Editor
         {
             try
             {
-                if (m_AssetSystemBuilderDialog != null && GodotObject.IsInstanceValid(m_AssetSystemBuilderDialog))
-                {
-                    m_AssetSystemBuilderDialog.QueueFree();
-                    m_AssetSystemBuilderDialog = null;
-                }
-
                 if (m_AssetSystemBuilderDialog == null || !GodotObject.IsInstanceValid(m_AssetSystemBuilderDialog))
                 {
                     m_AssetSystemBuilderDialog = new AssetSystemBuilderDialog();
@@ -543,12 +511,6 @@ namespace GameFrameX.Editor
                 if (parent == null)
                 {
                     return false;
-                }
-
-                if (m_ScriptingDefineSymbolsWindow != null && GodotObject.IsInstanceValid(m_ScriptingDefineSymbolsWindow))
-                {
-                    m_ScriptingDefineSymbolsWindow.QueueFree();
-                    m_ScriptingDefineSymbolsWindow = null;
                 }
 
                 if (m_ScriptingDefineSymbolsWindow == null || !GodotObject.IsInstanceValid(m_ScriptingDefineSymbolsWindow))

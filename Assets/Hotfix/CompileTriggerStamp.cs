@@ -6,6 +6,6 @@ namespace Godot.Hotfix
     /// </summary>
     internal static class CompileTriggerStamp
     {
-        internal const string Value = "2026-04-14 03:06:11.927";
+        internal const string Value = "2026-04-15 14:18:00.820";
     }
 }

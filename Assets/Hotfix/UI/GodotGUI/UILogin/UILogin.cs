@@ -6,7 +6,10 @@ using GameFrameX.UI.GDGUI.Runtime;
 using GameFrameX.UI.Runtime;
 using GameFrameX.Web.Runtime;
 using Godot;
+using Godot.Startup.Network;
+#if HOTFIX_RUNTIME
 using Godot.Hotfix.Config;
+#endif
 
 namespace Godot.Hotfix.GodotGUI
 {
@@ -26,7 +29,13 @@ namespace Godot.Hotfix.GodotGUI
 		{
 			base.OnOpen(userData);
 			GD.Print("[UILogin] OnOpen");
+			GD.Print("[ProtoSmoke] trigger from GGUI.UILogin.OnOpen");
+#pragma warning disable CS4014
+			LoginProtoMessageSmoke.SendOnLoginOpenAsync("GGUI.UILogin.OnOpen");
+#pragma warning restore CS4014
+#if HOTFIX_RUNTIME
 			_ = ConfigRuntimeDispatcher.EnsureLoadedAndLogDemoAsync("GodotGUI.UILogin");
+#endif
 			BindLoginButton();
 		}
 
@@ -34,6 +43,12 @@ namespace Godot.Hotfix.GodotGUI
 		{
 			UnbindLoginButton();
 			base.OnClose(isShutdown, userData);
+		}
+
+		public override void _ExitTree()
+		{
+			UnbindLoginButton();
+			base._ExitTree();
 		}
 
 		private void BindLoginButton()

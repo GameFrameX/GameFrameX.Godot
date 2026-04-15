@@ -10,14 +10,14 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <NoWarn>$(NoWarn);CS8981</NoWarn>
-    <DefineConstants>FAIRY_GUI;ENABLE_GAME_FRAME_X_WEB_SOCKET;ENABLE_LOG;ENABLE_GAME_FRAME_X_JSON</DefineConstants>
+    <DefineConstants>ENABLE_GAME_FRAME_X_WEB_SOCKET;ENABLE_LOG;ENABLE_GAME_FRAME_X_PROTOBUF</DefineConstants>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <OutputPath>..\..\BuildArtifacts\Assemblies\$(Configuration)\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="bin\**\*;obj\**\*;UI\FGUI\**\Components\**\*.cs" />
+    <Compile Include="**\*.cs" Exclude="bin\**\*;obj\**\*;UI\FGUI\**\Components\**\*.cs;UI\FGUI\UILogin\**\*.cs;UI\GodotGUI\UILogin\**\*.cs" />
     <Compile Include="..\Resources\UI\FGUI\UILauncher\UILauncher\**\*.cs" Exclude="..\Resources\UI\FGUI\UILauncher\UILauncher\Components\**\*.cs;..\Resources\UI\FGUI\UILauncher\UILauncher\UILauncher.cs;..\Resources\UI\FGUI\UILauncher\UILauncher\UILauncher.FGUI.Logic.cs" />
     <Compile Include="..\Resources\UI\GGUI\UILauncher\UILauncher\**\*.cs" Exclude="..\Resources\UI\GGUI\UILauncher\UILauncher\UILauncher.cs" />
   </ItemGroup>
