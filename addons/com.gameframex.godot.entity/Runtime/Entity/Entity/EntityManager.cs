@@ -341,7 +341,9 @@ namespace GameFrameX.Entity.Runtime
             {
                 int serialId = ++m_Serial;
                 m_EntitiesBeingLoaded.Add(entityId, serialId);
-                object entityAsset = await Task.Run(() => ResourceLoader.Load(entityAssetName));
+                // ponytail: 主线程同步加载（ResourceLoader 非线程安全，禁止 Task.Run 包装）；
+                // 接入 AssetSystem 异步句柄与进度/依赖回调待 asset 组件层（Phase 1.5）落地
+                object entityAsset = ResourceLoader.Load(entityAssetName);
                 var newUserData = ShowEntityInfo.Create(serialId, entityId, entityGroup, userData);
                 if (entityAsset != null)
                 {
