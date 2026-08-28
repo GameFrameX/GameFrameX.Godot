@@ -264,8 +264,8 @@ namespace GameFrameX.Network.Runtime
                     throw;
                 }
 
-                PSentPacketCount = 0;
-                PReceivedPacketCount = 0;
+                m_SentPacketCount = 0;
+                m_ReceivedPacketCount = 0;
 
                 lock (PSendPacketPool)
                 {
@@ -291,7 +291,7 @@ namespace GameFrameX.Network.Runtime
                         PHeartBeatState.Reset(PResetHeartBeatElapseSecondsWhenReceivePacket);
                     }
 
-                    PReceivedPacketCount++;
+                    System.Threading.Interlocked.Increment(ref m_ReceivedPacketCount);
 
                     if (buffer.Length < PacketReceiveHeaderHandler.PacketHeaderLength)
                     {
@@ -333,10 +333,10 @@ namespace GameFrameX.Network.Runtime
                             }
                         }
 
-                        // 将收到的消息加入到链表最后
-                        m_ExecutionMessageLinkedList.AddLast(messageObject);
+                        // 将收到的消息加入到队列
+                        m_ExecutionMessageQueue.Enqueue(messageObject);
 
-                        PReceivedPacketCount++;
+                        System.Threading.Interlocked.Increment(ref m_ReceivedPacketCount);
                     }
                     else
                     {

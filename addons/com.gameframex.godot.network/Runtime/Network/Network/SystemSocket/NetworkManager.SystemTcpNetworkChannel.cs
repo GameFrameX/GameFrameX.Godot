@@ -236,10 +236,10 @@ namespace GameFrameX.Network.Runtime
                 }
 
                 DebugReceiveLog(messageObject);
-                // 将收到的消息加入到链表最后
-                m_ExecutionMessageLinkedList.AddLast(messageObject);
+                // 将收到的消息加入到队列
+                m_ExecutionMessageQueue.Enqueue(messageObject);
 
-                PReceivedPacketCount++;
+                System.Threading.Interlocked.Increment(ref m_ReceivedPacketCount);
                 PReceiveState.PrepareForPacketHeader();
                 return processSuccess;
             }
@@ -330,7 +330,7 @@ namespace GameFrameX.Network.Runtime
                     return;
                 }
 
-                PSentPacketCount++;
+                System.Threading.Interlocked.Increment(ref m_SentPacketCount);
                 PSendState.Reset();
             }
 
@@ -380,8 +380,8 @@ namespace GameFrameX.Network.Runtime
                     return;
                 }
 
-                PSentPacketCount = 0;
-                PReceivedPacketCount = 0;
+                m_SentPacketCount = 0;
+                m_ReceivedPacketCount = 0;
 
                 lock (PSendPacketPool)
                 {

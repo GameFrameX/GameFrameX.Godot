@@ -79,6 +79,21 @@ namespace GameFrameX.Network.Runtime
                 _disposed = true;
             }
 
+            /// <summary>
+            /// 重置 RPC 状态，用于重连场景。
+            /// </summary>
+            public void Reset()
+            {
+                foreach (var kvp in _waitingReplyHandlingObjects)
+                {
+                    kvp.Value.Dispose();
+                }
+
+                _waitingReplyHandlingObjects.Clear();
+                _removeReplyHandlingObjectIds.Clear();
+                _disposed = false;
+            }
+
 
             /// <summary>
             /// 处理RPC回复消息。
@@ -130,7 +145,11 @@ namespace GameFrameX.Network.Runtime
                 }
 
                 var defaultMessageActorObject = RpcMessageData.Create(messageObject as IRequestMessage, _rpcTimeout, isIgnoreErrorCode);
-                _waitingReplyHandlingObjects.TryAdd(messageObject.UniqueId, defaultMessageActorObject);
+                if (!_waitingReplyHandlingObjects.TryAdd(messageObject.UniqueId, defaultMessageActorObject))
+                {
+                    return defaultMessageActorObject.Task;
+                }
+
                 try
                 {
                     _rpcStartHandler?.Invoke(this, messageObject);

@@ -108,12 +108,12 @@ namespace GameFrameX.Network.Runtime
             /// <summary>
             /// 发送数据包的数量
             /// </summary>
-            protected int PSentPacketCount;
+            protected int m_SentPacketCount;
 
             /// <summary>
             /// 接收数据包数量
             /// </summary>
-            protected int PReceivedPacketCount;
+            protected int m_ReceivedPacketCount;
 
             /// <summary>
             /// 是否在应用程序获得焦点时发送心跳包
@@ -123,10 +123,10 @@ namespace GameFrameX.Network.Runtime
             /// <summary>
             /// 是否正在连接中
             /// </summary>
-            protected bool PIsConnecting = false;
+            protected volatile bool PIsConnecting = false;
 
             private bool m_Disposed;
-            private bool m_PActive;
+            private volatile bool m_PActive;
 
             /// <summary>
             /// 网络是否激活
@@ -152,7 +152,7 @@ namespace GameFrameX.Network.Runtime
             private IPacketReceiveBodyHandler m_PacketReceiveBodyHandler;
             private IPacketHeartBeatHandler m_PacketHeartBeatHandler;
 
-            protected readonly GameFrameworkLinkedList<MessageObject> m_ExecutionMessageLinkedList = new GameFrameworkLinkedList<MessageObject>();
+            protected readonly ConcurrentQueue<MessageObject> m_ExecutionMessageQueue = new ConcurrentQueue<MessageObject>();
 
             public Action<NetworkChannelBase, object> NetworkChannelConnected;
             public Action<NetworkChannelBase, string, ushort> NetworkChannelClosed;
@@ -181,8 +181,8 @@ namespace GameFrameX.Network.Runtime
                 PReceiveState = new ReceiveState();
                 PHeartBeatState = new HeartBeatState();
                 PRpcState = new RpcState(rpcTimeout);
-                PSentPacketCount = 0;
-                PReceivedPacketCount = 0;
+                m_SentPacketCount = 0;
+                m_ReceivedPacketCount = 0;
                 PActive = false;
                 PFocusHeartbeat = true;
                 PIsConnecting = false;
@@ -253,7 +253,7 @@ namespace GameFrameX.Network.Runtime
             /// </summary>
             public int SentPacketCount
             {
-                get { return PSentPacketCount; }
+                get { return System.Threading.Interlocked.CompareExchange(ref m_SentPacketCount, 0, 0); }
             }
 
             /// <summary>
@@ -261,7 +261,7 @@ namespace GameFrameX.Network.Runtime
             /// </summary>
             public int ReceivedPacketCount
             {
-                get { return PReceivedPacketCount; }
+                get { return System.Threading.Interlocked.CompareExchange(ref m_ReceivedPacketCount, 0, 0); }
             }
 
             /// <summary>
@@ -293,7 +293,15 @@ namespace GameFrameX.Network.Runtime
             public float HeartBeatInterval
             {
                 get { return PHeartBeatInterval; }
-                set { PHeartBeatInterval = value; }
+                set
+                {
+                    if (value < 0f)
+                    {
+                        throw new GameFrameworkException("HeartBeatInterval must be non-negative.");
+                    }
+
+                    PHeartBeatInterval = value;
+                }
             }
 
             /// <summary>
@@ -391,9 +399,8 @@ namespace GameFrameX.Network.Runtime
             /// </summary>
             private void ProcessReceivedMessage()
             {
-                while (m_ExecutionMessageLinkedList.First != null)
+                while (m_ExecutionMessageQueue.TryDequeue(out var messageObject))
                 {
-                    var messageObject = m_ExecutionMessageLinkedList.First.Value;
                     try
                     {
                         // 执行RPC匹配
@@ -422,10 +429,6 @@ namespace GameFrameX.Network.Runtime
                     {
                         Log.Fatal(e);
                     }
-                    finally
-                    {
-                        m_ExecutionMessageLinkedList.RemoveFirst();
-                    }
                 }
             }
 
@@ -439,6 +442,7 @@ namespace GameFrameX.Network.Runtime
                 {
                     bool sendHeartBeat = false;
                     int missHeartBeatCount = 0;
+                    bool shouldClose = false;
                     lock (PHeartBeatState)
                     {
                         if (PSocket == null || !PActive)
@@ -472,8 +476,13 @@ namespace GameFrameX.Network.Runtime
                         if (PHeartBeatState.MissHeartBeatCount > MissHeartBeatCountByClose)
                         {
                             // 心跳丢失达到上线。触发断开
-                            Close(NetworkCloseReason.MissHeartBeat, (ushort)NetworkErrorCode.MissHeartBeatError);
+                            shouldClose = true;
                         }
+                    }
+
+                    if (shouldClose)
+                    {
+                        Close(NetworkCloseReason.MissHeartBeat, (ushort)NetworkErrorCode.MissHeartBeatError);
                     }
                 }
             }
@@ -737,8 +746,8 @@ namespace GameFrameX.Network.Runtime
                         NetworkChannelClosed?.Invoke(this, reason, code);
                     }
 
-                    PSentPacketCount = 0;
-                    PReceivedPacketCount = 0;
+                    m_SentPacketCount = 0;
+                    m_ReceivedPacketCount = 0;
 
                     lock (PSendPacketPool)
                     {
@@ -750,8 +759,11 @@ namespace GameFrameX.Network.Runtime
                         PHeartBeatState.Reset(true);
                     }
 
-                    PRpcState.Dispose();
-                    m_ExecutionMessageLinkedList.Clear();
+                    PRpcState.Reset();
+                    while (m_ExecutionMessageQueue.Count > 0)
+                    {
+                        m_ExecutionMessageQueue.TryDequeue(out _);
+                    }
                 }
             }
 

@@ -43,11 +43,17 @@ namespace GameFrameX.Network.Runtime
     public sealed partial class NetworkManager : GameFrameworkModule, INetworkManager
     {
         private readonly Dictionary<string, NetworkChannelBase> m_NetworkChannels;
+        private readonly List<NetworkChannelBase> m_NetworkChannelSnapshot = new List<NetworkChannelBase>(4);
 
         private EventHandler<NetworkConnectedEventArgs> m_NetworkConnectedEventHandler;
         private EventHandler<NetworkClosedEventArgs> m_NetworkClosedEventHandler;
         private EventHandler<NetworkMissHeartBeatEventArgs> m_NetworkMissHeartBeatEventHandler;
         private EventHandler<NetworkErrorEventArgs> m_NetworkErrorEventHandler;
+
+        private readonly object m_NetworkConnectedLock = new object();
+        private readonly object m_NetworkClosedLock = new object();
+        private readonly object m_NetworkMissHeartBeatLock = new object();
+        private readonly object m_NetworkErrorLock = new object();
 
         /// <summary>
         /// 初始化网络管理器的新实例。
@@ -113,9 +119,11 @@ namespace GameFrameX.Network.Runtime
         /// <param name="realElapseSeconds">真实流逝时间，以秒为单位。</param>
         public override void Update(float elapseSeconds, float realElapseSeconds)
         {
-            foreach (var networkChannel in m_NetworkChannels)
+            m_NetworkChannelSnapshot.Clear();
+            m_NetworkChannelSnapshot.AddRange(m_NetworkChannels.Values);
+            for (int i = 0; i < m_NetworkChannelSnapshot.Count; i++)
             {
-                networkChannel.Value.Update(elapseSeconds, realElapseSeconds);
+                m_NetworkChannelSnapshot[i].Update(elapseSeconds, realElapseSeconds);
             }
         }
 
@@ -262,11 +270,11 @@ namespace GameFrameX.Network.Runtime
         {
             if (m_NetworkConnectedEventHandler != null)
             {
-                lock (m_NetworkConnectedEventHandler)
+                lock (m_NetworkConnectedLock)
                 {
                     NetworkConnectedEventArgs networkConnectedEventArgs = NetworkConnectedEventArgs.Create(networkChannel, userData);
                     m_NetworkConnectedEventHandler(this, networkConnectedEventArgs);
-                    // ReferencePool.Release(networkConnectedEventArgs);
+                    ReferencePool.Release(networkConnectedEventArgs);
                 }
             }
         }
@@ -275,11 +283,11 @@ namespace GameFrameX.Network.Runtime
         {
             if (m_NetworkClosedEventHandler != null)
             {
-                lock (m_NetworkClosedEventHandler)
+                lock (m_NetworkClosedLock)
                 {
                     NetworkClosedEventArgs networkClosedEventArgs = NetworkClosedEventArgs.Create(networkChannel, reason, errorCode);
                     m_NetworkClosedEventHandler(this, networkClosedEventArgs);
-                    // ReferencePool.Release(networkClosedEventArgs);
+                    ReferencePool.Release(networkClosedEventArgs);
                 }
             }
         }
@@ -288,11 +296,11 @@ namespace GameFrameX.Network.Runtime
         {
             if (m_NetworkMissHeartBeatEventHandler != null)
             {
-                lock (m_NetworkMissHeartBeatEventHandler)
+                lock (m_NetworkMissHeartBeatLock)
                 {
                     NetworkMissHeartBeatEventArgs networkMissHeartBeatEventArgs = NetworkMissHeartBeatEventArgs.Create(networkChannel, missHeartBeatCount);
                     m_NetworkMissHeartBeatEventHandler(this, networkMissHeartBeatEventArgs);
-                    // ReferencePool.Release(networkMissHeartBeatEventArgs);
+                    ReferencePool.Release(networkMissHeartBeatEventArgs);
                 }
             }
         }
@@ -301,11 +309,11 @@ namespace GameFrameX.Network.Runtime
         {
             if (m_NetworkErrorEventHandler != null)
             {
-                lock (m_NetworkErrorEventHandler)
+                lock (m_NetworkErrorLock)
                 {
                     NetworkErrorEventArgs networkErrorEventArgs = NetworkErrorEventArgs.Create(networkChannel, errorCode, socketErrorCode, errorMessage);
                     m_NetworkErrorEventHandler(this, networkErrorEventArgs);
-                    // ReferencePool.Release(networkErrorEventArgs);
+                    ReferencePool.Release(networkErrorEventArgs);
                 }
             }
         }
