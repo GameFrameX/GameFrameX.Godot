@@ -139,13 +139,18 @@ namespace GameFrameX.AssetSystem.Networking
         public float downloadProgress { get; set; } = 1f;
         public ulong downloadedBytes { get; set; }
         public bool isDone { get; set; } = true;
-        public bool isNetworkError => false;
-        public bool isHttpError => false;
+        public bool isNetworkError => result == Result.ConnectionError;
+        public bool isHttpError => result == Result.ProtocolError;
         public int timeout { get; set; }
         public Result result { get; set; } = Result.Success;
 
         public UnityWebRequestAsyncOperation SendWebRequest()
         {
+            // ponytail: Godot 桩无网络实现，误配置（HttpTransport 为 null 走 Web* 桩链）时显式失败而非假成功；
+            // 升级路径：配置 GodotHttpTransport 后主下载链不经过此桩。
+            result = Result.ConnectionError;
+            error = "HTTP transport not configured (GodotHttpTransport is null)";
+            isDone = true;
             return new UnityWebRequestAsyncOperation { webRequest = this };
         }
 

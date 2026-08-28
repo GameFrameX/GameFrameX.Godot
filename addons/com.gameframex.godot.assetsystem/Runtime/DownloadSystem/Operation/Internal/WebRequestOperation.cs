@@ -85,7 +85,6 @@ namespace GameFrameX.AssetSystem
         [AssetSystemPreserve]
         protected bool CheckRequestResult()
         {
-#if UNITY_2020_3_OR_NEWER
             if (_webRequest.result != UnityWebRequest.Result.Success)
             {
                 Error = DownloadSystemHelper.FormatRequestError(_webRequest, _requestURL, _isAbort);
@@ -95,17 +94,6 @@ namespace GameFrameX.AssetSystem
             {
                 return true;
             }
-#else
-            if (_webRequest.isNetworkError || _webRequest.isHttpError)
-            {
-                Error = DownloadSystemHelper.FormatRequestError(_webRequest, _requestURL, _isAbort);
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-#endif
         }
     }
 }
