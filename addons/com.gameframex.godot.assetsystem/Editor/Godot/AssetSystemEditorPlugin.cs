@@ -378,6 +378,35 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private const float ReporterSummaryMinHeight = 150f;
     private const float ReporterLogMinHeight = 120f;
     private const float DebuggerLogMinHeight = 220f;
+    // Reporter Runtime 二进制清单表格（Phase 2.5）
+    private const string ButtonLoadRuntimeManifestTables = "Load Runtime Manifest Tables";
+    private const string ReporterManifestSectionAssets = "=== AssetInfos ({0}) ===";
+    private const string ReporterManifestSectionBundles = "=== BundleInfos ({0}) ===";
+    private const string ReporterManifestAssetLineFormat = "{0} | {1} | {2}";
+    private const string ReporterManifestBundleLineFormat = "{0} | {1} bytes | {2} assets";
+    private const string ReporterManifestTruncatedFormat = "...（共 {0} 条，仅展示前 {1} 条）";
+    private const string ReporterManifestAddressEmpty = "-";
+    private const string ReporterManifestLogLoadedPrefix = "Runtime 清单表格加载完成：";
+    private const string ReporterManifestLogFailedPrefix = "Runtime 清单表格加载失败：";
+    private const string ReporterManifestStatusFailed = "Runtime 清单表格加载失败。";
+    private const string ReporterManifestStatusCompleted = "Runtime 清单表格加载完成。";
+    private const float ReporterManifestMinHeight = 220f;
+    // ponytail: 万级资产全量绘制会卡编辑器 UI，表格仅展示前 ReporterManifestMaxRows 条；全量数据走既有 Export 导出
+    private const int ReporterManifestMaxRows = 200;
+    // Debugger 轮询视图（Phase 2.5）
+    private const string DebuggerAutoRefreshLabelText = "Auto Refresh (1.5s)";
+    private const double DebuggerPollIntervalSeconds = 1.5;
+    private const string DebuggerLogPollStarted = "开始轮询 Runtime 调试报告...";
+    private const string DebuggerLogPollStopped = "停止轮询 Runtime 调试报告。";
+    private const string DebuggerLogPollFailedPrefix = "轮询失败: ";
+    private const string DebuggerPollHeaderFormat = "Runtime Debug Report | Frame={0}";
+    private const string DebuggerPollPackageLineFormat = "{0} | Providers={1} ({2}) | Bundles={3} ({4}) | TotalRefCount={5}";
+    private const string DebuggerPollStatusNone = "None";
+    private const string DebuggerPollStatusSummaryEmpty = "None=0";
+    private const string DebuggerPollStatusSummarySeparator = ", ";
+    private const float DebuggerPollMinHeight = 150f;
+    // TODO: IndependAssets / 重复资源检测依赖依赖分析，按 Phase 2.5 决策明确推迟，不在本期实现
+
     private const DockSlot PluginDockSlot = DockSlot.LeftUl;
     private static readonly HashSet<string> RawFilePipelineExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
@@ -459,6 +488,11 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private LineEdit _debuggerCommandParamInput;
     private RichTextLabel _debuggerLogView;
     private DebugReport _lastRuntimeDebugReport;
+    private RichTextLabel _reporterManifestView;
+    private CheckButton _debuggerAutoRefreshToggle;
+    private Timer _debuggerPollTimer;
+    private RichTextLabel _debuggerPollView;
+
     private bool _isLifecycleMounted;
     private bool _toolMenusRegistered;
     private bool _builderProfileSyncing;
@@ -698,6 +732,11 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         _debuggerStatusLabel = null;
         _debuggerPathLabel = null;
         _debuggerLogView = null;
+        _reporterManifestView = null;
+        _debuggerAutoRefreshToggle = null;
+        _debuggerPollTimer = null;
+        _debuggerPollView = null;
+
         _collectorRulesSyncing = false;
     }
 
@@ -1416,6 +1455,12 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         openManifestButton.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
         openManifestButton.Pressed += OpenLastBuildManifestFile;
         quickActions.AddChild(openManifestButton);
+        var loadTablesButton = new Button();
+        loadTablesButton.Text = ButtonLoadRuntimeManifestTables;
+        loadTablesButton.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        loadTablesButton.Pressed += LoadRuntimeManifestTables;
+        quickActions.AddChild(loadTablesButton);
+
 
         _reporterSummaryView = new RichTextLabel();
         _reporterSummaryView.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
@@ -1428,6 +1473,12 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         _reporterLogView.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
         _reporterLogView.CustomMinimumSize = new Vector2(UiMinWidthAuto, ReporterLogMinHeight);
         page.AddChild(_reporterLogView);
+        _reporterManifestView = new RichTextLabel();
+        _reporterManifestView.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        _reporterManifestView.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+        _reporterManifestView.CustomMinimumSize = new Vector2(UiMinWidthAuto, ReporterManifestMinHeight);
+        page.AddChild(_reporterManifestView);
+
 
         AppendReporterLog(ReporterReadyLog);
         return page;
@@ -1514,6 +1565,24 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         _debuggerLogView.CustomMinimumSize = new Vector2(UiMinWidthAuto, DebuggerLogMinHeight);
         page.AddChild(_debuggerLogView);
 
+        var autoRefreshFields = new HBoxContainer();
+        autoRefreshFields.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        page.AddChild(autoRefreshFields);
+        _debuggerAutoRefreshToggle = new CheckButton();
+        _debuggerAutoRefreshToggle.Text = DebuggerAutoRefreshLabelText;
+        _debuggerAutoRefreshToggle.Toggled += OnDebuggerAutoRefreshToggled;
+        autoRefreshFields.AddChild(_debuggerAutoRefreshToggle);
+        _debuggerPollTimer = new Timer();
+        _debuggerPollTimer.WaitTime = DebuggerPollIntervalSeconds;
+        _debuggerPollTimer.OneShot = false;
+        _debuggerPollTimer.Autostart = false;
+        _debuggerPollTimer.Timeout += OnDebuggerPollTick;
+        page.AddChild(_debuggerPollTimer);
+        _debuggerPollView = new RichTextLabel();
+        _debuggerPollView.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        _debuggerPollView.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+        _debuggerPollView.CustomMinimumSize = new Vector2(UiMinWidthAuto, DebuggerPollMinHeight);
+        page.AddChild(_debuggerPollView);
         AppendDebuggerLog(DebuggerReadyLog);
         RefreshDebuggerSnapshot();
         return page;
@@ -3087,8 +3156,106 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         }
 
         SetStatus(ReporterLoadBuildReportCompleted);
+        LoadRuntimeManifestTablesFrom(runtimeManifestFilePath);
+
         AppendReporterLog($"{ReporterOpenManifestLogPrefix}{NormalizePathForDisplay(manifestPath)}");
         AppendReporterLog(ReporterLoadBuildReportCompleted);
+    }
+
+    /// <summary>
+    /// 重新定位最新构建产物并读取 Runtime 二进制清单，展示资产/资源包两张表
+    /// </summary>
+    private void LoadRuntimeManifestTables()
+    {
+        if (!TryResolveLatestBuildPackageRoot(out var packageRoot))
+        {
+            SetStatus(ReporterLoadBuildReportUnavailable);
+            AppendReporterLog(ReporterLoadBuildReportUnavailable);
+            return;
+        }
+        var manifestFields = ReadKeyValueFile(Path.Combine(packageRoot, BuilderManifestFileName));
+        var versionFields = ReadKeyValueFile(Path.Combine(packageRoot, BuilderVersionFileName));
+        var packageName = GetBuildField(versionFields, manifestFields, ManifestFieldPackageName);
+        var packageVersion = GetBuildField(versionFields, manifestFields, ManifestFieldBuildVersion);
+        if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(packageVersion))
+        {
+            AppendReporterLog($"{ReporterManifestLogFailedPrefix}{ReporterLoadBuildReportMissingVersion}");
+            SetStatus(ReporterManifestStatusFailed);
+            return;
+        }
+        var manifestPath = Path.Combine(packageRoot, AssetSystemSettingsData.GetManifestBinaryFileName(packageName, packageVersion));
+        LoadRuntimeManifestTablesFrom(manifestPath);
+    }
+
+    /// <summary>
+    /// 解析 Runtime 二进制清单并填充 Reporter 表格视图；清单缺失或格式非法时优雅降级
+    /// </summary>
+    private void LoadRuntimeManifestTablesFrom(string manifestPath)
+    {
+        if (_reporterManifestView == null)
+        {
+            return;
+        }
+        _reporterManifestView.Clear();
+        if (!AssetSystemManifestReader.TryReadManifestFile(manifestPath, out var manifest, out var errorMessage))
+        {
+            _reporterManifestView.AppendText($"{ReporterManifestLogFailedPrefix}{errorMessage}");
+            AppendReporterLog($"{ReporterManifestLogFailedPrefix}{NormalizePathForDisplay(manifestPath)} {errorMessage}");
+            SetStatus(ReporterManifestStatusFailed);
+            return;
+        }
+        var bundleAssetCounts = new Dictionary<int, int>();
+        for (var index = 0; index < manifest.AssetList.Count; index++)
+        {
+            var bundleId = manifest.AssetList[index].BundleID;
+            if (bundleAssetCounts.ContainsKey(bundleId))
+            {
+                bundleAssetCounts[bundleId]++;
+            }
+            else
+            {
+                bundleAssetCounts[bundleId] = 1;
+            }
+        }
+        _reporterManifestView.AppendText(string.Format(ReporterManifestSectionAssets, manifest.AssetList.Count));
+        _reporterManifestView.AppendText(PluginLogLineTerminator);
+        var assetDisplayCount = Math.Min(manifest.AssetList.Count, ReporterManifestMaxRows);
+        for (var index = 0; index < assetDisplayCount; index++)
+        {
+            var packageAsset = manifest.AssetList[index];
+            var bundleFileName = packageAsset.BundleID >= 0 && packageAsset.BundleID < manifest.BundleList.Count
+                ? manifest.BundleList[packageAsset.BundleID].FileName
+                : string.Empty;
+            var address = string.IsNullOrEmpty(packageAsset.Address) ? ReporterManifestAddressEmpty : packageAsset.Address;
+            _reporterManifestView.AppendText(string.Format(ReporterManifestAssetLineFormat, packageAsset.AssetPath, address, bundleFileName));
+            _reporterManifestView.AppendText(PluginLogLineTerminator);
+        }
+        if (manifest.AssetList.Count > assetDisplayCount)
+        {
+            _reporterManifestView.AppendText(string.Format(ReporterManifestTruncatedFormat, manifest.AssetList.Count, assetDisplayCount));
+            _reporterManifestView.AppendText(PluginLogLineTerminator);
+        }
+        _reporterManifestView.AppendText(string.Format(ReporterManifestSectionBundles, manifest.BundleList.Count));
+        _reporterManifestView.AppendText(PluginLogLineTerminator);
+        var bundleDisplayCount = Math.Min(manifest.BundleList.Count, ReporterManifestMaxRows);
+        for (var index = 0; index < bundleDisplayCount; index++)
+        {
+            var packageBundle = manifest.BundleList[index];
+            int bundleAssetCount;
+            if (!bundleAssetCounts.TryGetValue(index, out bundleAssetCount))
+            {
+                bundleAssetCount = 0;
+            }
+            _reporterManifestView.AppendText(string.Format(ReporterManifestBundleLineFormat, packageBundle.FileName, packageBundle.FileSize, bundleAssetCount));
+            _reporterManifestView.AppendText(PluginLogLineTerminator);
+        }
+        if (manifest.BundleList.Count > bundleDisplayCount)
+        {
+            _reporterManifestView.AppendText(string.Format(ReporterManifestTruncatedFormat, manifest.BundleList.Count, bundleDisplayCount));
+            _reporterManifestView.AppendText(PluginLogLineTerminator);
+        }
+        AppendReporterLog($"{ReporterManifestLogLoadedPrefix}{manifest.AssetList.Count} assets / {manifest.BundleList.Count} bundles");
+        SetStatus(ReporterManifestStatusCompleted);
     }
 
     private void ExportReporterPlaceholder()
@@ -3714,6 +3881,141 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// 轮询开关切换：开启时启动定时器并立即采样一次，关闭时停止轮询
+    /// </summary>
+    private void OnDebuggerAutoRefreshToggled(bool enabled)
+    {
+        if (_debuggerPollTimer == null)
+        {
+            return;
+        }
+        if (enabled)
+        {
+            _debuggerPollTimer.Start();
+            AppendDebuggerLog(DebuggerLogPollStarted);
+            OnDebuggerPollTick();
+        }
+        else
+        {
+            _debuggerPollTimer.Stop();
+            AppendDebuggerLog(DebuggerLogPollStopped);
+        }
+    }
+
+    private void OnDebuggerPollTick()
+    {
+        var commandParam = _debuggerCommandParamInput?.Text?.Trim() ?? string.Empty;
+        if (!AssetSystem.TryExecuteDebugCommand(DebuggerRuntimeCommandDefault, commandParam, out var report, out var message))
+        {
+            // ponytail: 运行时未初始化时失败不自动停止轮询，保持每 1.5s 记一条日志，等运行时就绪后自动恢复
+            AppendDebuggerLog($"{DebuggerLogPollFailedPrefix}{message}");
+            return;
+        }
+        _lastRuntimeDebugReport = report;
+        RefreshDebuggerPollView(report);
+    }
+
+    /// <summary>
+    /// 按包汇总 Provider 状态分布、去重 Bundle 状态分布与引用计数，覆盖式刷新轮询视图
+    /// </summary>
+    private void RefreshDebuggerPollView(DebugReport report)
+    {
+        if (_debuggerPollView == null || report == null)
+        {
+            return;
+        }
+        _debuggerPollView.Clear();
+        _debuggerPollView.AppendText(string.Format(DebuggerPollHeaderFormat, report.FrameCount));
+        _debuggerPollView.AppendText(PluginLogLineTerminator);
+        for (var packageIndex = 0; packageIndex < report.PackageDatas.Count; packageIndex++)
+        {
+            var packageData = report.PackageDatas[packageIndex];
+            if (packageData == null)
+            {
+                continue;
+            }
+            var providerStatusCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var bundleStatusCounts = new Dictionary<EOperationStatus, int>();
+            var countedBundles = new HashSet<string>(StringComparer.Ordinal);
+            var totalRefCount = 0;
+            var providerCount = packageData.ProviderInfos == null ? 0 : packageData.ProviderInfos.Count;
+            if (packageData.ProviderInfos != null)
+            {
+                for (var providerIndex = 0; providerIndex < packageData.ProviderInfos.Count; providerIndex++)
+                {
+                    var providerInfo = packageData.ProviderInfos[providerIndex];
+                    if (providerInfo == null)
+                    {
+                        continue;
+                    }
+                    totalRefCount += providerInfo.RefCount;
+                    var providerStatus = string.IsNullOrEmpty(providerInfo.Status) ? DebuggerPollStatusNone : providerInfo.Status;
+                    if (providerStatusCounts.ContainsKey(providerStatus))
+                    {
+                        providerStatusCounts[providerStatus]++;
+                    }
+                    else
+                    {
+                        providerStatusCounts[providerStatus] = 1;
+                    }
+                    if (providerInfo.DependBundleInfos == null)
+                    {
+                        continue;
+                    }
+                    for (var bundleIndex = 0; bundleIndex < providerInfo.DependBundleInfos.Count; bundleIndex++)
+                    {
+                        var bundleInfo = providerInfo.DependBundleInfos[bundleIndex];
+                        if (bundleInfo == null || !countedBundles.Add(bundleInfo.BundleName))
+                        {
+                            continue;
+                        }
+                        if (bundleStatusCounts.ContainsKey(bundleInfo.Status))
+                        {
+                            bundleStatusCounts[bundleInfo.Status]++;
+                        }
+                        else
+                        {
+                            bundleStatusCounts[bundleInfo.Status] = 1;
+                        }
+                    }
+                }
+            }
+            var providerStatusSummary = BuildDebuggerProviderStatusSummary(providerStatusCounts);
+            var bundleStatusSummary = BuildDebuggerBundleStatusSummary(bundleStatusCounts);
+            _debuggerPollView.AppendText(string.Format(DebuggerPollPackageLineFormat, packageData.PackageName, providerCount, providerStatusSummary, countedBundles.Count, bundleStatusSummary, totalRefCount));
+            _debuggerPollView.AppendText(PluginLogLineTerminator);
+        }
+    }
+
+    private static string BuildDebuggerProviderStatusSummary(Dictionary<string, int> statusCounts)
+    {
+        var parts = new List<string>();
+        foreach (var pair in statusCounts)
+        {
+            parts.Add($"{pair.Key}={pair.Value}");
+        }
+        if (parts.Count == 0)
+        {
+            return DebuggerPollStatusSummaryEmpty;
+        }
+        return string.Join(DebuggerPollStatusSummarySeparator, parts);
+    }
+
+    private static string BuildDebuggerBundleStatusSummary(Dictionary<EOperationStatus, int> statusCounts)
+    {
+        var parts = new List<string>();
+        foreach (var pair in statusCounts)
+        {
+            parts.Add($"{pair.Key}={pair.Value}");
+        }
+        if (parts.Count == 0)
+        {
+            return DebuggerPollStatusSummaryEmpty;
+        }
+        return string.Join(DebuggerPollStatusSummarySeparator, parts);
     }
 
     private void AppendRuntimeDebugReport(DebugReport report)
