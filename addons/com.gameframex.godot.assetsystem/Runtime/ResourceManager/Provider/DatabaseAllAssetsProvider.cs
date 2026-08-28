@@ -1,5 +1,7 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using Godot;
+
 namespace GameFrameX.AssetSystem
 {
     [AssetSystemPreserve]
@@ -20,7 +22,6 @@ namespace GameFrameX.AssetSystem
         [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
-#if UNITY_EDITOR
             if (IsDone)
             {
                 return;
@@ -29,8 +30,7 @@ namespace GameFrameX.AssetSystem
             if (_steps == ESteps.None)
             {
                 // 检测资源文件是否存在
-                var guid = UnityEditor.AssetDatabase.AssetPathToGUID(MainAssetInfo.AssetPath);
-                if (string.IsNullOrEmpty(guid))
+                if (ResourceLoader.Exists(MainAssetInfo.AssetPath) == false)
                 {
                     var error = $"Not found asset : {MainAssetInfo.AssetPath}";
                     AssetSystemLogger.Error(error);
@@ -64,38 +64,22 @@ namespace GameFrameX.AssetSystem
                 _steps = ESteps.Loading;
             }
 
-            // 2. 加载资源对象
+            // 2. 加载资源对象集合
+            // 迁移备注：编辑器模拟模式下按模拟清单记录的 IncludeAssetsInEditor 逐个从工程内加载（等价于 Unity 侧 AssetDatabase.LoadAssetAtPath）。
             if (_steps == ESteps.Loading)
             {
-                if (MainAssetInfo.AssetType == null)
+                var typeHint = GetGodotTypeHint(MainAssetInfo.AssetType);
+                var result = new List<object>();
+                foreach (var assetPath in LoadBundleFileOp.BundleFileInfo.IncludeAssetsInEditor)
                 {
-                    var result = new List<object>();
-                    foreach (var assetPath in LoadBundleFileOp.BundleFileInfo.IncludeAssetsInEditor)
+                    var assetObject = ResourceLoader.Load(assetPath, typeHint);
+                    if (BundleAssetLoadUtility.IsTypeMatch(assetObject, MainAssetInfo.AssetType))
                     {
-                        var mainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath(assetPath);
-                        if (mainAsset != null)
-                        {
-                            result.Add(mainAsset);
-                        }
+                        result.Add(assetObject);
                     }
-
-                    AllAssetObjects = result.ToArray();
-                }
-                else
-                {
-                    var result = new List<object>();
-                    foreach (var assetPath in LoadBundleFileOp.BundleFileInfo.IncludeAssetsInEditor)
-                    {
-                        var mainAsset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetPath, MainAssetInfo.AssetType);
-                        if (mainAsset != null)
-                        {
-                            result.Add(mainAsset);
-                        }
-                    }
-
-                    AllAssetObjects = result.ToArray();
                 }
 
+                AllAssetObjects = result.ToArray();
                 _steps = ESteps.Checking;
             }
 
@@ -113,7 +97,6 @@ namespace GameFrameX.AssetSystem
                     {
                         error = $"Failed to load all assets : {MainAssetInfo.AssetPath} AssetType : {MainAssetInfo.AssetType}";
                     }
-
                     AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                 }
@@ -122,7 +105,21 @@ namespace GameFrameX.AssetSystem
                     InvokeCompletion(string.Empty, EOperationStatus.Succeed);
                 }
             }
-#endif
+        }
+
+        /// <summary>
+        /// 获取 Godot 资源类型提示
+        /// 语义与 AssetSystem.GodotExtensions.GetGodotTypeHint 一致（那里为 private 无法跨类复用）。
+        /// </summary>
+        [AssetSystemPreserve]
+        private static string GetGodotTypeHint(Type assetType)
+        {
+            if (assetType == null || typeof(Resource).IsAssignableFrom(assetType) == false)
+            {
+                return string.Empty;
+            }
+
+            return assetType.Name;
         }
     }
 }

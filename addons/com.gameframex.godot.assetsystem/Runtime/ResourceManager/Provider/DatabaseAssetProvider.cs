@@ -1,5 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+using Godot;
+
 namespace GameFrameX.AssetSystem
 {
     [AssetSystemPreserve]
@@ -20,7 +21,6 @@ namespace GameFrameX.AssetSystem
         [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
-#if UNITY_EDITOR
             if (IsDone)
             {
                 return;
@@ -29,8 +29,7 @@ namespace GameFrameX.AssetSystem
             if (_steps == ESteps.None)
             {
                 // 检测资源文件是否存在
-                var guid = UnityEditor.AssetDatabase.AssetPathToGUID(MainAssetInfo.AssetPath);
-                if (string.IsNullOrEmpty(guid))
+                if (ResourceLoader.Exists(MainAssetInfo.AssetPath) == false)
                 {
                     var error = $"Not found asset : {MainAssetInfo.AssetPath}";
                     AssetSystemLogger.Error(error);
@@ -65,24 +64,18 @@ namespace GameFrameX.AssetSystem
             }
 
             // 2. 加载资源对象
+            // 迁移备注：编辑器模拟模式下资源就在工程内，直接通过 res:// 路径加载，等价于 Unity 侧的 AssetDatabase.LoadAssetAtPath。
             if (_steps == ESteps.Loading)
             {
-                if (MainAssetInfo.AssetType == null)
-                {
-                    AssetObject = UnityEditor.AssetDatabase.LoadMainAssetAtPath(MainAssetInfo.AssetPath);
-                }
-                else
-                {
-                    AssetObject = UnityEditor.AssetDatabase.LoadAssetAtPath(MainAssetInfo.AssetPath, MainAssetInfo.AssetType);
-                }
-
+                AssetObject = ResourceLoader.Load(MainAssetInfo.AssetPath, GetGodotTypeHint(MainAssetInfo.AssetType));
                 _steps = ESteps.Checking;
             }
 
             // 3. 检测加载结果
             if (_steps == ESteps.Checking)
             {
-                if (AssetObject == null)
+                // 注意：加载结果为空或者类型不匹配都视为失败，不允许假成功
+                if (BundleAssetLoadUtility.IsTypeMatch(AssetObject, MainAssetInfo.AssetType) == false)
                 {
                     string error;
                     if (MainAssetInfo.AssetType == null)
@@ -93,7 +86,6 @@ namespace GameFrameX.AssetSystem
                     {
                         error = $"Failed to load asset object : {MainAssetInfo.AssetPath} AssetType : {MainAssetInfo.AssetType}";
                     }
-
                     AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                 }
@@ -102,7 +94,21 @@ namespace GameFrameX.AssetSystem
                     InvokeCompletion(string.Empty, EOperationStatus.Succeed);
                 }
             }
-#endif
+        }
+
+        /// <summary>
+        /// 获取 Godot 资源类型提示
+        /// 语义与 AssetSystem.GodotExtensions.GetGodotTypeHint 一致（那里为 private 无法跨类复用）。
+        /// </summary>
+        [AssetSystemPreserve]
+        private static string GetGodotTypeHint(Type assetType)
+        {
+            if (assetType == null || typeof(Resource).IsAssignableFrom(assetType) == false)
+            {
+                return string.Empty;
+            }
+
+            return assetType.Name;
         }
     }
 }

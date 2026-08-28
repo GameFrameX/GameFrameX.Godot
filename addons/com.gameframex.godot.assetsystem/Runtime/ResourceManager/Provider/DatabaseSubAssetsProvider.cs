@@ -1,5 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+using Godot;
+
 namespace GameFrameX.AssetSystem
 {
     [AssetSystemPreserve]
@@ -20,7 +21,6 @@ namespace GameFrameX.AssetSystem
         [AssetSystemPreserve]
         public override void InternalOnUpdate()
         {
-#if UNITY_EDITOR
             if (IsDone)
             {
                 return;
@@ -29,8 +29,7 @@ namespace GameFrameX.AssetSystem
             if (_steps == ESteps.None)
             {
                 // 检测资源文件是否存在
-                var guid = UnityEditor.AssetDatabase.AssetPathToGUID(MainAssetInfo.AssetPath);
-                if (string.IsNullOrEmpty(guid))
+                if (ResourceLoader.Exists(MainAssetInfo.AssetPath) == false)
                 {
                     var error = $"Not found asset : {MainAssetInfo.AssetPath}";
                     AssetSystemLogger.Error(error);
@@ -64,26 +63,16 @@ namespace GameFrameX.AssetSystem
                 _steps = ESteps.Loading;
             }
 
-            // 2. 加载资源对象
+            // 2. 加载资源对象集合
+            // ponytail: Godot 没有 Unity 的“子资产（SubAsset）”概念，这里将语义映射为“加载同路径主资源 + 类型过滤”，
+            // 即请求 Texture2D 子资产时返回的集合里要么是主资源本身（类型匹配），要么为空集合（类型不匹配，按 YooAsset 语义不算失败）。
+            // 升级路径：若未来需要 .tres 内嵌 SubResource 级别的枚举，改为加载主资源后遍历其子资源并按类型过滤。
             if (_steps == ESteps.Loading)
             {
-                if (MainAssetInfo.AssetType == null)
+                var mainAsset = ResourceLoader.Load(MainAssetInfo.AssetPath, GetGodotTypeHint(MainAssetInfo.AssetType));
+                if (mainAsset != null)
                 {
-                    AllAssetObjects = UnityEditor.AssetDatabase.LoadAllAssetRepresentationsAtPath(MainAssetInfo.AssetPath);
-                }
-                else
-                {
-                    var findAssets = UnityEditor.AssetDatabase.LoadAllAssetRepresentationsAtPath(MainAssetInfo.AssetPath);
-                    var result = new List<object>(findAssets.Length);
-                    foreach (var findAsset in findAssets)
-                    {
-                        if (MainAssetInfo.AssetType.IsAssignableFrom(findAsset.GetType()))
-                        {
-                            result.Add(findAsset);
-                        }
-                    }
-
-                    AllAssetObjects = result.ToArray();
+                    AllAssetObjects = BundleAssetLoadUtility.FilterByType(new object[] { mainAsset }, MainAssetInfo.AssetType);
                 }
 
                 _steps = ESteps.Checking;
@@ -103,7 +92,6 @@ namespace GameFrameX.AssetSystem
                     {
                         error = $"Failed to load sub assets : {MainAssetInfo.AssetPath} AssetType : {MainAssetInfo.AssetType}";
                     }
-
                     AssetSystemLogger.Error(error);
                     InvokeCompletion(error, EOperationStatus.Failed);
                 }
@@ -112,7 +100,21 @@ namespace GameFrameX.AssetSystem
                     InvokeCompletion(string.Empty, EOperationStatus.Succeed);
                 }
             }
-#endif
+        }
+
+        /// <summary>
+        /// 获取 Godot 资源类型提示
+        /// 语义与 AssetSystem.GodotExtensions.GetGodotTypeHint 一致（那里为 private 无法跨类复用）。
+        /// </summary>
+        [AssetSystemPreserve]
+        private static string GetGodotTypeHint(Type assetType)
+        {
+            if (assetType == null || typeof(Resource).IsAssignableFrom(assetType) == false)
+            {
+                return string.Empty;
+            }
+
+            return assetType.Name;
         }
     }
 }
