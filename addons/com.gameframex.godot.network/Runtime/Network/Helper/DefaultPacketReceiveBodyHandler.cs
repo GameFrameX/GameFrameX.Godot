@@ -6,11 +6,26 @@ namespace GameFrameX.Network.Runtime
     
     public sealed class DefaultPacketReceiveBodyHandler : IPacketReceiveBodyHandler, IPacketHandler
     {
+        /// <summary>
+        /// 通道级别的消息序列化器，为空时回退使用全局序列化器。
+        /// </summary>
+        /// <remarks>
+        /// Channel-level message serializer; falls back to the global serializer when null.
+        /// </remarks>
+        internal IMessageSerializer ChannelSerializer { get; set; }
+
         public bool Handler<T>(byte[] source, int messageId, out T messageObject) where T : MessageObject
         {
             var messageType = ProtoMessageIdHandler.GetRespTypeById(messageId);
-            messageObject = (T)SerializerHelper.Deserialize(source, messageType);
-            return true;
+            if (messageType == null)
+            {
+                messageObject = default(T);
+                return false;
+            }
+
+            var serializer = ChannelSerializer ?? MessageSerializerRegistry.Global;
+            messageObject = serializer != null ? (T)serializer.Deserialize(source, messageType) : (T)SerializerHelper.Deserialize(source, messageType);
+            return messageObject != null;
         }
     }
 }

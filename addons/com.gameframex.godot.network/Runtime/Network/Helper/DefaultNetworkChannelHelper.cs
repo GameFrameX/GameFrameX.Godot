@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Reflection;
 using GameFrameX.Event.Runtime;
 using GameFrameX.Runtime;
 
@@ -13,10 +14,30 @@ namespace GameFrameX.Network.Runtime
     public class DefaultNetworkChannelHelper : INetworkChannelHelper, IReference
     {
         private INetworkChannel m_NetworkChannel;
+        private IMessageSerializer m_ChannelSerializer;
 
         public DefaultNetworkChannelHelper()
         {
             m_NetworkChannel = null;
+            m_ChannelSerializer = null;
+        }
+
+        /// <summary>
+        /// 设置通道级别的消息序列化器，必须在 <see cref="Initialize"/> 之前调用。
+        /// </summary>
+        /// <remarks>
+        /// Sets the channel-level message serializer; must be called before <see cref="Initialize"/>.
+        /// </remarks>
+        /// <param name="serializer">消息序列化器实例 / The message serializer instance</param>
+        /// <exception cref="InvalidOperationException">当 <see cref="Initialize"/> 已调用后调用时抛出 / Thrown when called after <see cref="Initialize"/> has been invoked</exception>
+        public void SetChannelSerializer(IMessageSerializer serializer)
+        {
+            if (m_NetworkChannel != null)
+            {
+                throw new InvalidOperationException(
+                    "SetChannelSerializer must be called before Initialize().");
+            }
+            m_ChannelSerializer = serializer;
         }
 
         /// <summary>
@@ -71,11 +92,13 @@ namespace GameFrameX.Network.Runtime
                 else if (type.IsImplWithInterface(packetReceiveBodyHandlerBaseType))
                 {
                     var handler = (IPacketReceiveBodyHandler)Activator.CreateInstance(type);
+                    InjectChannelSerializer(handler, type);
                     m_NetworkChannel.RegisterHandler(handler);
                 }
                 else if (type.IsImplWithInterface(packetSendHeaderHandlerBaseType))
                 {
                     var handler = (IPacketSendHeaderHandler)Activator.CreateInstance(type);
+                    InjectChannelSerializer(handler, type);
                     m_NetworkChannel.RegisterHandler(handler);
                 }
                 else if (type.IsImplWithInterface(packetSendBodyHandlerBaseType))
@@ -167,6 +190,21 @@ namespace GameFrameX.Network.Runtime
         {
             m_NetworkChannel?.Close(NetworkCloseReason.Dispose, (ushort)NetworkErrorCode.DisposeError);
             m_NetworkChannel = null;
+            m_ChannelSerializer = null;
+        }
+
+        private void InjectChannelSerializer(object handler, Type type)
+        {
+            if (m_ChannelSerializer == null)
+            {
+                return;
+            }
+            // 处理器上的 ChannelSerializer 为 internal 属性，需包含 NonPublic 才能反射找到。
+            var prop = type.GetProperty("ChannelSerializer", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (prop != null && prop.PropertyType == typeof(IMessageSerializer) && prop.CanWrite)
+            {
+                prop.SetValue(handler, m_ChannelSerializer);
+            }
         }
 
         private void OnNetworkConnectedEventArgs(object sender, GameEventArgs e)

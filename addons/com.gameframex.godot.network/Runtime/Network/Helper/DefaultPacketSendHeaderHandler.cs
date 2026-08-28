@@ -10,6 +10,14 @@ namespace GameFrameX.Network.Runtime
     public class DefaultPacketSendHeaderHandler : IPacketSendHeaderHandler, IPacketHandler
     {
         /// <summary>
+        /// 通道级别的消息序列化器，为空时回退使用全局序列化器。
+        /// </summary>
+        /// <remarks>
+        /// Channel-level message serializer; falls back to the global serializer when null.
+        /// </remarks>
+        internal IMessageSerializer ChannelSerializer { get; set; }
+
+        /// <summary>
         /// 网络包长度
         /// </summary>
         private const int NetPacketLength = sizeof(uint);
@@ -84,7 +92,12 @@ namespace GameFrameX.Network.Runtime
             m_Offset = 0;
             var messageType = messageObject.GetType();
             Id = ProtoMessageIdHandler.GetReqMessageIdByType(messageType);
-            messageBodyBuffer = SerializerHelper.Serialize(messageObject);
+            var serializer = ChannelSerializer ?? MessageSerializerRegistry.Global;
+            messageBodyBuffer = serializer != null ? serializer.Serialize(messageObject) : SerializerHelper.Serialize(messageObject);
+            if (messageBodyBuffer == null)
+            {
+                return false;
+            }
             if (messageCompressHandler != null && messageBodyBuffer.Length > LimitCompressLength)
             {
                 IsZip = true;
