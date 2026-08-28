@@ -148,7 +148,7 @@
 | UnityEngine API | 推荐方案 |
 |---|---|
 | Canvas/CanvasScaler 设计分辨率 | 新建 Godot 版 `UIDesignResolutionComponent`：读 ProjectSettings stretch 配置 + 各组 Control anchors（参考 fairygui `Stage.UpdateContextScale` 思路） |
-| FairyGUI Spine/DragonBones/TextMeshPro/Filter/变灰 | 上游声明不支持。**接受现状**：GLoader3D 空分支保留 + 文档声明；若需 Spine 另立任务接 Godot Spine 插件 |
+| FairyGUI Spine/DragonBones/TextMeshPro/Filter/变灰 | 上游声明不支持。**接受现状**：GLoader3D 空分支保留 + 文档声明；若需 Spine 另立任务接 Godot Spine 插件（**已拍板 2026-08-28**：接受现状，后续按需补充） |
 | WebGL 软键盘输入 | `DisplayServer.ShowVirtualKeyboard`/`HideVirtualKeyboard`（fairygui InputTextField 补齐，Web 发布前必须） |
 | UGUI Editor 工具（代码生成器） | gdgui 按 Control 体系重做属大工程，Phase 4 按需 |
 
@@ -160,7 +160,7 @@
 | Time 时区子系统（15 文件） | 移植（纯 C# 无引擎依赖，成本低）：`SetTimeZone`/`CurrentTimeZone`/`*WithTimeZoneOffset` 全套 |
 | Unity 扩展（GameObject/Transform/Vector 5 文件） | 新建 Godot 等价：`Node` 扩展（GetOrAddChild/SetPositionX/Reparent 保持树语义）+ `Vector2/3` 扩展 |
 | mono 包 Focus/Pause 全局事件 | 补到核心包：`BaseComponent._Notification` 处理 `NotificationApplicationFocusIn/Out`/`NotificationApplicationPaused` 转发 EventComponent（network 包私有实现抽出） |
-| LuBan 配置表运行时 | **需决策**：Godot config 目前不依赖。推荐迁移（5 文件纯 C#，服务端/Unity 共用配置管线时必需）；若 Godot 端配置全走 JSON 直载则不迁 |
+| LuBan 配置表运行时 | **已拍板（2026-08-28）：迁移**。5 文件纯 C# 运行时（ByteBuf/BeanBase/ITypeId），服务端/Unity 共用配置管线 |
 
 ---
 
@@ -190,7 +190,7 @@
 | 1.7 | **entry 补全**（GameApp.Asset/Sound/Scene/UI/FairyGUIPackage 分部 + 各包宏） | 1.3-1.5 | 编译宏开合矩阵验证 |
 | 1.8 | 小项补齐：event.CheckUnsubscribe、localization Before/After 事件、setting Storage 抽象（不含小游戏后端）、procedure DestroyProcedures、getchannel 缺口确认 | 各自包 | 对应单元测试 |
 
-### Phase 2：assetsystem 语义补全（预计 2-3 周）
+### Phase 2：assetsystem 语义补全（预计 2-3 周）🚀 已启动（2026-08-28，B佬 拍板 A1-A4：启动 Phase 2、LuBan 迁移、FairyGUI 接受现状、小游戏暂缓）
 
 | 任务 | 验收 |
 |---|---|
@@ -224,7 +224,7 @@
 - UniTask/DOTween/LitJSON/SimpleJSON/UnityWebSocket 本体（已有替代）
 - entry 的 14 个 Unity-only SDK 分部（XLua/各平台登录/广告/统计/内购）——Godot 侧无 SDK，需要时按平台单独立项
 - RuntimeHost 自动装配（AutoLoad + 显式挂载规范替代）
-- 小游戏平台（微信/抖音/快手）支持
+- 小游戏平台（微信/抖音/快手）支持（2026-08-28 拍板：暂缓，后续回归时补充）
 
 ---
 
