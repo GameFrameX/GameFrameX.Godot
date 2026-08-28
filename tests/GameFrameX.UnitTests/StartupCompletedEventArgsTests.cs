@@ -9,6 +9,7 @@ namespace GameFrameX.UnitTests
     /// 启动完成事件参数测试（迁移自 Unity com.gameframex.unity.startup Tests/Runtime/StartupCompletedEventArgsTests.cs）。
     /// EventId 断言改为 Godot 侧实际命名空间（GameFrameX.Startup.Runtime）。
     /// </summary>
+    [Collection("ReferencePool")]
     public class StartupCompletedEventArgsTests
     {
         [Fact]

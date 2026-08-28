@@ -14,6 +14,7 @@ namespace GameFrameX.UnitTests
     /// 引擎耦合说明：SoundManager.PlaySound 公共入口依赖 IAssetManager.LoadAssetAsync（资源系统 + AudioStream）
     /// 与 m_Serial 序列号自增，归引擎/资源系统测试；此处只测 SoundGroup.PlaySound 的纯代理选择逻辑。
     /// </summary>
+    [Collection("ReferencePool")]
     public sealed class SoundGroupTests
     {
         private sealed class FakeSoundGroupHelper : ISoundGroupHelper

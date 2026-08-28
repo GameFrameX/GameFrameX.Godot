@@ -6,6 +6,7 @@ namespace GameFrameX.UnitTests
     /// <summary>
     /// 引用池行为测试。
     /// </summary>
+    [Collection("ReferencePool")]
     public sealed class ReferencePoolTests
     {
         private sealed class TestReference : IReference

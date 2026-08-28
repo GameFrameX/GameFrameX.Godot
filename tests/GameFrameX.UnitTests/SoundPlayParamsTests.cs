@@ -12,6 +12,8 @@ namespace GameFrameX.UnitTests
     /// Godot 运行时依赖的部分（SoundComponent、DefaultSoundAgentHelper 等节点辅助器）归引擎测试，
     /// 不在本文件覆盖；SoundManager/SoundGroup 代理选择算法见 SoundGroupTests.cs。
     /// </summary>
+    // 与其他操作全局 ReferencePool 的测试类同 Collection 串行，避免 ClearAll 并发清池踩掉本类的 Assert.Same
+    [Collection("ReferencePool")]
     public sealed class SoundPlayParamsTests
     {
         // ──────────────── PlaySoundErrorCode ────────────────

@@ -4,6 +4,7 @@ using Xunit;
 
 namespace GameFrameX.UnitTests
 {
+    [Collection("ReferencePool")]
     public class AssetPatchEventArgsTests
     {
         [Fact]
