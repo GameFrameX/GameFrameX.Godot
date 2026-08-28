@@ -149,12 +149,13 @@ namespace GameFrameX.Runtime
         /// 注册游戏框架组件。
         /// </summary>
         /// <param name="gameFrameworkComponent">要注册的游戏框架组件。</param>
-        internal static void RegisterComponent(GameFrameworkComponent gameFrameworkComponent)
+        /// <returns>是否注册游戏框架组件成功。</returns>
+        internal static bool RegisterComponent(GameFrameworkComponent gameFrameworkComponent)
         {
             if (gameFrameworkComponent == null)
             {
                 Log.Error("Game Framework component is invalid.");
-                return;
+                return false;
             }
 
             Type type = gameFrameworkComponent.GetType();
@@ -165,13 +166,14 @@ namespace GameFrameX.Runtime
                 if (current.Value.GetType() == type)
                 {
                     Log.Error("Game Framework component type '{0}' is already exist.", type.FullName);
-                    return;
+                    return false;
                 }
 
                 current = current.Next;
             }
 
             GameFrameworkComponents.AddLast(gameFrameworkComponent);
+            return true;
         }
     }
 }

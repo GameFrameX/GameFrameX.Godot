@@ -65,7 +65,13 @@ namespace GameFrameX.Runtime
         public override void _Ready()
         {
             base._Ready();
-            GameEntry.RegisterComponent(this);
+            if (GameEntry.RegisterComponent(this) == false)
+            {
+                // 与 Unity 版行为对齐：注册失败时禁用组件，避免重复组件继续参与框架循环
+                SetProcess(false);
+                return;
+            }
+
             if (IsAutoRegister)
             {
                 GameFrameworkGuard.NotNull(ImplementationComponentType, nameof(ImplementationComponentType));

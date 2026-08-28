@@ -191,11 +191,6 @@ namespace GameFrameX.Runtime
             _ = typeof(NewtonsoftJsonHelper);
         }
 
-        // TODO: Consider if Start() is needed in Godot or if logic should move to _Ready()
-        private void Start()
-        {
-        }
-
         public override void _Process(double delta)
         {
             GameFrameworkEntry.Update((float)delta, (float)(delta / Engine.TimeScale));

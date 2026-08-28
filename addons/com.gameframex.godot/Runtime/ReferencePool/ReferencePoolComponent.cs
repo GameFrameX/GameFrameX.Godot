@@ -63,9 +63,10 @@ namespace GameFrameX.Runtime
         {
             IsAutoRegister = false;
             base._Ready();
+            ApplyStrictCheck();
         }
 
-        private void Start()
+        private void ApplyStrictCheck()
         {
             switch (m_EnableStrictCheck)
             {
