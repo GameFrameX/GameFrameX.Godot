@@ -17,6 +17,11 @@ namespace GameFrameX.AssetSystem
             public string FileName;
 
             [AssetSystemPreserve]
+            public FileWrapper()
+            {
+            }
+
+            [AssetSystemPreserve]
             public FileWrapper(string bundleGUID, string fileName)
             {
                 BundleGUID = bundleGUID;

@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using Godot;
 using GameFrameX.AssetSystem;
+using GameFrameX.AssetSystem.Editor;
 
 [Tool]
 public partial class AssetSystemEditorPlugin : EditorPlugin
@@ -131,6 +132,8 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private const string BuilderStageManifest = "Manifest";
     private const string BuilderStageRuntimeLink = "RuntimeLink";
     private const string BuilderStageVerify = "Verify";
+    private const string BuilderStageBuildinCatalog = "BuildinCatalog";
+    private const string BuilderStagePckPack = "PckPack";
     private const string BuilderStageStartPrefix = "阶段开始: ";
     private const string BuilderStageCompletedPrefix = "阶段完成: ";
     private const string BuilderVerifyErrorOutputRootMissing = "构建校验失败：输出目录不存在。";
@@ -140,6 +143,7 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private const string BuilderVerifyErrorRuntimeVersionFileMissing = "构建校验失败：Runtime 版本文件不存在。";
     private const string BuilderVerifyErrorRuntimeManifestFileMissing = "构建校验失败：Runtime 清单文件不存在。";
     private const string BuilderVerifyErrorRuntimeHashFileMissing = "构建校验失败：Runtime 哈希文件不存在。";
+    private const string BuilderVerifyErrorBuildinCatalogFileMissing = "构建校验失败：BuildinCatalog 文件不存在。";
     private const string BuilderVerifyErrorFileCountMismatch = "构建校验失败：复制文件数与收集文件数不一致。";
     private const string BuilderVerifyErrorFileMissingPrefix = "构建校验失败：缺少输出文件 ";
     private const string BuilderModeNoOutputLog = "当前构建模式不会生成磁盘产物：";
@@ -222,6 +226,8 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private const string BuilderFilesDirectoryName = "files";
     private const string BuilderManifestFileName = "build_manifest.txt";
     private const string BuilderVersionFileName = "build_version.txt";
+    private const string BuilderBuildinCatalogFileName = "BuildinCatalog";
+    private const string BuilderPckFileExtension = ".pck";
     private const string ReportFieldPackageRoot = "PackageRoot";
     private const string ReportFieldManifestAvailable = "BuildManifestAvailable";
     private const string ReportFieldVersionAvailable = "BuildVersionAvailable";
@@ -1670,6 +1676,8 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         RunPackageBuildStage(context);
         RunManifestBuildStage(context);
         RunRuntimeLinkBuildStage(context);
+        RunBuildinCatalogBuildStage(context);
+        RunPckPackBuildStage(context);
         RunVerifyBuildStage(context);
         return new BuildExecutionResult
         {
@@ -1753,6 +1761,8 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     {
         AppendBuilderLog($"{BuilderStageStartPrefix}{BuilderStagePackage}");
         context.CopiedCount = 0;
+        // ponytail: 当前收集策略为"每文件一 bundle",DependIDs 恒为空(无依赖图);
+        // 升级路径:解析 .import/.tscn 的资源依赖关系构建依赖图后,才能产出共享 bundle 与非空 DependIDs。
         context.BundleEntries.Clear();
         foreach (var sourceFile in context.CollectedFiles)
         {
@@ -1867,6 +1877,96 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageRuntimeLink}");
     }
 
+    private void RunBuildinCatalogBuildStage(BuildOrchestrationContext context)
+    {
+        AppendBuilderLog($"{BuilderStageStartPrefix}{BuilderStageBuildinCatalog}");
+        // 运行时 DefaultBuildinFileSystem.GetBuildinCatalogFileLoadPath() 按 <输出根>/<包名>/BuildinCatalog
+        // (无扩展名、无版本段)定位内置清单,因此 BuildinCatalog 落在包目录(版本目录的上一级)。
+        var packageDirectory = Path.Combine(context.GlobalOutputPath, context.PackageName);
+        context.BuildinCatalogFilePath = Path.Combine(packageDirectory, BuilderBuildinCatalogFileName);
+        if (context.SkipWriteOutputs)
+        {
+            AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageBuildinCatalog}");
+            return;
+        }
+
+        Directory.CreateDirectory(packageDirectory);
+        var entries = new List<BuildinCatalogFileEntry>(context.BundleEntries.Count);
+        foreach (var entry in context.BundleEntries)
+        {
+            // 运行时 PackageBundle.BundleGUID 即 FileHash;FileName 为构建输出文件名(OutputNameStyle=1 时为 hash 风格)
+            entries.Add(new BuildinCatalogFileEntry(entry.FileHash, entry.OutputFileName));
+        }
+
+        var catalogJson = BuildinCatalogUtility.BuildJson(context.PackageName, context.PackageVersion, entries);
+        File.WriteAllText(context.BuildinCatalogFilePath, catalogJson, Encoding.UTF8);
+        AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStageBuildinCatalog}");
+    }
+
+    private void RunPckPackBuildStage(BuildOrchestrationContext context)
+    {
+        AppendBuilderLog($"{BuilderStageStartPrefix}{BuilderStagePckPack}");
+        context.PckFilePath = Path.Combine(context.PackageRoot, context.PackageName + BuilderPckFileExtension);
+        if (context.SkipWriteOutputs)
+        {
+            AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStagePckPack}");
+            return;
+        }
+
+        // PCK 内部路径约定(锁定,Phase 2.1 加载侧依赖):产物物理路径相对构建输出根的正斜杠路径
+        var packFiles = new List<string>(context.BundleEntries.Count + 4);
+        foreach (var entry in context.BundleEntries)
+        {
+            packFiles.Add(entry.DestinationFilePath);
+        }
+
+        packFiles.Add(context.RuntimeVersionFilePath);
+        packFiles.Add(context.RuntimeManifestFilePath);
+        packFiles.Add(context.RuntimeHashFilePath);
+        if (!string.IsNullOrEmpty(context.BuildinCatalogFilePath))
+        {
+            packFiles.Add(context.BuildinCatalogFilePath);
+        }
+
+        using (var packer = new Godot.PckPacker())
+        {
+            var startError = packer.PckStart(context.PckFilePath);
+            if (startError != Godot.Error.Ok)
+            {
+                throw new InvalidOperationException($"PCK 打包启动失败: {startError}");
+            }
+
+            foreach (var filePath in packFiles)
+            {
+                if (!File.Exists(filePath))
+                {
+                    continue;
+                }
+
+                var innerPath = AssetSystemPckPathUtility.GetPckInnerPath(filePath, context.GlobalOutputPath);
+                var addError = packer.AddFile(innerPath, filePath);
+                if (addError != Godot.Error.Ok)
+                {
+                    throw new InvalidOperationException($"PCK 写入文件失败: {innerPath}, Error={addError}");
+                }
+            }
+
+            var flushError = packer.Flush();
+            if (flushError != Godot.Error.Ok)
+            {
+                throw new InvalidOperationException($"PCK 封包失败: {flushError}");
+            }
+        }
+
+        AppendBuilderLog($"{BuilderStageCompletedPrefix}{BuilderStagePckPack}");
+    }
+
+    private static string GetCollectorSettingFilePath()
+    {
+        // Collector 数据模型配置的持久化挂点(user:// 下 JSON);读写经 AssetBundleCollectorSettingStore
+        return ProjectSettings.GlobalizePath("user://AssetBundleCollectorSetting.json");
+    }
+
     private void RunVerifyBuildStage(BuildOrchestrationContext context)
     {
         AppendBuilderLog($"{BuilderStageStartPrefix}{BuilderStageVerify}");
@@ -1906,6 +2006,10 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
             throw new InvalidOperationException(BuilderVerifyErrorRuntimeHashFileMissing);
         }
 
+        if (!File.Exists(context.BuildinCatalogFilePath))
+        {
+            throw new InvalidOperationException(BuilderVerifyErrorBuildinCatalogFileMissing);
+        }
         if (context.CopiedCount != context.CollectedFiles.Count)
         {
             throw new InvalidOperationException(BuilderVerifyErrorFileCountMismatch);
@@ -3818,6 +3922,8 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         public string SourceRoot { get; set; }
         public string PackageRoot { get; set; }
         public string FilesRoot { get; set; }
+        public string BuildinCatalogFilePath { get; set; }
+        public string PckFilePath { get; set; }
         public string ManifestPath { get; set; }
         public string VersionFilePath { get; set; }
         public string RuntimeVersionFilePath { get; set; }

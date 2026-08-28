@@ -50,6 +50,21 @@ namespace GameFrameX.AssetSystem
 
             try
             {
+                // 尝试把候选文件内容按 JSON 反序列化为 POCO(如 BuildinCatalog、AssetSystemSettings);
+                // 读取或解析失败时回退为空实例,保持原有行为
+                var deserialized = AssetSystemJson.FromJson<T>(File.ReadAllText(resolvedPath));
+                if (deserialized != null)
+                {
+                    return deserialized;
+                }
+            }
+            catch
+            {
+                // 忽略读取/解析异常,走空实例兜底
+            }
+
+            try
+            {
                 return Activator.CreateInstance(typeof(T)) as T;
             }
             catch
