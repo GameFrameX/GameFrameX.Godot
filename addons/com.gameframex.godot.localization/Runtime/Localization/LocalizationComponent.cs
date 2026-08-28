@@ -1,4 +1,4 @@
-﻿// ==========================================================================================
+// ==========================================================================================
 //  GameFrameX 组织及其衍生项目的版权、商标、专利及其他相关权利
 //  GameFrameX organization and its derivative projects' copyrights, trademarks, patents, and related rights
 //  均受中华人民共和国及相关国际法律法规保护。
@@ -125,8 +125,12 @@ namespace GameFrameX.Localization.Runtime
                     m_LocalizationManager.Language = value;
                     m_SettingComponent.SetString(nameof(LocalizationComponent) + "." + nameof(Language), value);
                     m_SettingComponent.Save();
+                    var localizationLanguageChangeBeforeEventArgs = LocalizationLanguageChangeBeforeEventArgs.Create(oldLanguage, value);
+                    m_EventComponent.Fire(this, localizationLanguageChangeBeforeEventArgs);
                     var localizationLanguageChangeEventArgs = LocalizationLanguageChangeEventArgs.Create(oldLanguage, value);
                     m_EventComponent.Fire(this, localizationLanguageChangeEventArgs);
+                    var localizationLanguageChangeAfterEventArgs = LocalizationLanguageChangeAfterEventArgs.Create(oldLanguage, value);
+                    m_EventComponent.Fire(this, localizationLanguageChangeAfterEventArgs);
                 }
             }
         }
