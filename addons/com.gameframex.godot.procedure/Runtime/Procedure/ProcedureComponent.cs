@@ -52,6 +52,18 @@ namespace GameFrameX.Procedure.Runtime
         [Export] private string m_EntranceProcedureTypeName = string.Empty;
 
         /// <summary>
+        /// 是否由 StartupRunner 接管启动流程。
+        /// </summary>
+        /// <remarks>
+        /// 为 true 时，本组件仅在 _Ready 中注册 IProcedureManager 模块，
+        /// 不再根据 Inspector 配置自动 Initialize 与 StartProcedure，
+        /// 由应用层通过 StartupRunner.Run 统一创建流程状态机并启动，
+        /// 避免两处 Initialize 导致 Already exist FSM 异常。
+        /// </remarks>
+        [Export] private bool m_UseStartupRunner = false;
+
+
+        /// <summary>
         /// 获取当前流程管理器。
         /// </summary>
         public IProcedureManager Procedure
@@ -98,6 +110,12 @@ namespace GameFrameX.Procedure.Runtime
         /// </summary>
         private void StartProcedureInternal()
         {
+            if (m_UseStartupRunner)
+            {
+                // 由应用层 StartupRunner.Run 接管 Initialize 与 StartProcedure，本组件仅负责注册 IProcedureManager 模块。
+                return;
+            }
+
             var availableProcedureTypeNames = BuildValidProcedureTypeNames();
             if (availableProcedureTypeNames.Length == 0)
             {
@@ -266,5 +284,28 @@ namespace GameFrameX.Procedure.Runtime
         {
             return m_ProcedureManager.GetProcedure(procedureType);
         }
+        /// <summary>
+        /// 销毁流程。
+        /// </summary>
+        public void DestroyProcedures()
+        {
+            m_ProcedureManager.DestroyProcedures();
+        }
+
+        /// <summary>
+        /// 重建流程并指定新的入口流程。
+        /// </summary>
+        /// <param name="procedures">新的流程集合。</param>
+        /// <param name="entranceProcedure">入口流程。</param>
+        public void ReinitializeProcedures(ProcedureBase[] procedures, ProcedureBase entranceProcedure)
+        {
+            m_ProcedureManager.ReinitializeProcedures(procedures);
+
+            if (entranceProcedure != null)
+            {
+                m_ProcedureManager.StartProcedure(entranceProcedure.GetType());
+            }
+        }
+
     }
 }

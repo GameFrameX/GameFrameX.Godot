@@ -221,5 +221,32 @@ namespace GameFrameX.Procedure.Runtime
 
             return (ProcedureBase)m_ProcedureFsm.GetState(procedureType);
         }
+        public void DestroyProcedures()
+        {
+            if (m_FsmManager == null)
+            {
+                return;
+            }
+
+            if (m_ProcedureFsm != null)
+            {
+                m_FsmManager.DestroyFsm(m_ProcedureFsm);
+                m_ProcedureFsm = null;
+            }
+        }
+
+        public void ReinitializeProcedures(params ProcedureBase[] procedures)
+        {
+            DestroyProcedures();
+
+            GameFrameworkGuard.NotNull(procedures, nameof(procedures));
+            if (procedures.Length <= 0)
+            {
+                throw new GameFrameworkException("Procedures is invalid.");
+            }
+
+            m_ProcedureFsm = m_FsmManager.CreateFsm(this, procedures);
+        }
+
     }
 }
