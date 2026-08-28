@@ -193,7 +193,10 @@ namespace GameFrameX.Runtime
 
         public override void _Process(double delta)
         {
-            GameFrameworkEntry.Update((float)delta, (float)(delta / Engine.TimeScale));
+            float scaledDelta = (float)delta;
+            // ponytail: TimeScale=0 时 delta 也为 0，直接透传避免除零产生 NaN/Infinity 污染 Unscaled 定时器累积器（此时 Unscaled 定时器随引擎暂停）；升级路径是改用 Time.GetUnixTimeFromSystem 差值计算真实流逝时间
+            float realDelta = Engine.TimeScale == 0f ? scaledDelta : (float)(delta / Engine.TimeScale);
+            GameFrameworkEntry.Update(scaledDelta, realDelta);
         }
 
         public override void _Notification(int what)
