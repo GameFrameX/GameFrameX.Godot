@@ -43,7 +43,9 @@ namespace GameFrameX.UnitTests
         {
             ReferencePool.Acquire<TestReference>();
             ReferencePool.ClearAll();
-            Assert.Equal(0, ReferencePool.Count);
+            // 不断言全局 Count == 0：其他测试类（Startup*/AssetPatch EventArgs 等）并行执行时会随时
+            // 注册新的引用集合，全局计数存在竞态；此处只断言本测试注册的 TestReference 集合确被移除。
+            Assert.DoesNotContain(ReferencePool.GetAllReferencePoolInfos(), info => info.Type == typeof(TestReference));
         }
     }
 }
