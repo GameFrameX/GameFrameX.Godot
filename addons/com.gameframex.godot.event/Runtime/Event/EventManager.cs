@@ -136,6 +136,19 @@ namespace GameFrameX.Event.Runtime
         }
 
         /// <summary>
+        /// 检查并取消订阅事件处理函数。当 handler 不存在时不执行任何操作。
+        /// </summary>
+        /// <param name="id">事件类型编号。</param>
+        /// <param name="handler">要取消订阅的事件处理函数。</param>
+        public void CheckUnsubscribe(string id, EventHandler<GameEventArgs> handler)
+        {
+            if (m_EventPool.Check(id, handler))
+            {
+                m_EventPool.Unsubscribe(id, handler);
+            }
+        }
+
+        /// <summary>
         /// 设置默认事件处理函数。
         /// </summary>
         /// <param name="handler">要设置的默认事件处理函数。</param>
