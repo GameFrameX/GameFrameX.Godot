@@ -1951,6 +1951,32 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
                 }
             }
 
+            // Phase 2.1(方向 a): 源资源按 res:// 相对路径补充打包(与 hash 产物份并存,体积约翻倍)。
+            // 运行时挂载本 PCK 后 ResourceLoader.Load(AssetPath) 直接命中——AssetPath 即源资源 res:// 路径
+            // (见 RunRuntimeLinkBuildStage 的 BuildRuntimeManifestAssetPath)。
+            foreach (var entry in context.BundleEntries)
+            {
+                if (!File.Exists(entry.SourceFilePath))
+                {
+                    continue;
+                }
+
+                var sourceDisplayPath = ToProjectDisplayPath(entry.SourceFilePath);
+                if (!sourceDisplayPath.StartsWith(ProjectDisplayPrefix, StringComparison.Ordinal))
+                {
+                    // 收集根默认为 res://,源文件不在工程内属配置异常;跳过并记录,不阻断构建
+                    AppendBuilderLog($"PCK skip source file outside project : {entry.SourceFilePath}");
+                    continue;
+                }
+
+                var sourceInnerPath = AssetSystemPckPathUtility.GetPckSourceInnerPath(sourceDisplayPath);
+                var sourceAddError = packer.AddFile(sourceInnerPath, entry.SourceFilePath);
+                if (sourceAddError != Godot.Error.Ok)
+                {
+                    throw new InvalidOperationException($"PCK 写入源资源失败: {sourceInnerPath}, Error={sourceAddError}");
+                }
+            }
+
             var flushError = packer.Flush();
             if (flushError != Godot.Error.Ok)
             {

@@ -20,6 +20,7 @@ namespace GameFrameX.AssetSystem
         private readonly PackageBundle _bundle;
         private BundleFileCreateRequest _createRequest;
         private bool _isWaitForAsyncComplete = false;
+        private bool _packagePckMountAttempted = false;
         private ESteps _steps = ESteps.None;
 
 
@@ -28,6 +29,27 @@ namespace GameFrameX.AssetSystem
         {
             _fileSystem = fileSystem;
             _bundle = bundle;
+        }
+
+        /// <summary>
+        /// 挂载构建产物 `<包名>.pck`（部署约定：与 BuildinCatalog 同目录，即 FileRoot 下）。
+        /// PCK 内含源资源 res:// 条目，挂载后 BundleFile 按 AssetPath 走 ResourceLoader 命中。
+        /// 挂载失败仅告警不失败：编辑器内源资源本就在 res:// 下，PCK 为非必需增强。
+        /// </summary>
+        [AssetSystemPreserve]
+        private void TryMountBuildinPackagePck()
+        {
+            if (_packagePckMountAttempted)
+            {
+                return;
+            }
+
+            _packagePckMountAttempted = true;
+            var pckFilePath = PathUtility.Combine(_fileSystem.FileRoot, _fileSystem.PackageName + ".pck");
+            if (AssetSystem.MountGodotResourcePackByPath(pckFilePath) == false)
+            {
+                AssetSystemLogger.Warning($"Buildin package pck not mounted (optional) : {pckFilePath}");
+            }
         }
 
         [AssetSystemPreserve]
@@ -48,6 +70,8 @@ namespace GameFrameX.AssetSystem
 
             if (_steps == ESteps.LoadAssetBundle)
             {
+                TryMountBuildinPackagePck();
+
                 if (_bundle.Encrypted)
                 {
                     if (_fileSystem.DecryptionServices == null)

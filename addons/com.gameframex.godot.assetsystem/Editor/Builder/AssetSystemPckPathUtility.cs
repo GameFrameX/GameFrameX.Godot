@@ -38,5 +38,26 @@ namespace GameFrameX.AssetSystem.Editor
 
             return relativePath.Replace('\\', '/');
         }
+
+        /// <summary>
+        /// 计算源资源文件在 PCK 内的路径(Phase 2.1 方向 a)。
+        /// PCK 内部路径 = 源资源 res:// 显示路径去掉 "res://" 前缀;
+        /// 运行时挂载 PCK 后以 "res://" + 返回值 命中 ResourceLoader.Load(AssetPath)。
+        /// </summary>
+        public static string GetPckSourceInnerPath(string projectDisplayPath)
+        {
+            if (string.IsNullOrWhiteSpace(projectDisplayPath))
+            {
+                throw new ArgumentException("源资源显示路径不能为空", nameof(projectDisplayPath));
+            }
+
+            var normalized = projectDisplayPath.Replace('\\', '/');
+            if (normalized.StartsWith("res://", StringComparison.Ordinal) == false)
+            {
+                throw new ArgumentException($"源资源显示路径必须以 res:// 开头: {projectDisplayPath}");
+            }
+
+            return normalized.Substring("res://".Length);
+        }
     }
 }

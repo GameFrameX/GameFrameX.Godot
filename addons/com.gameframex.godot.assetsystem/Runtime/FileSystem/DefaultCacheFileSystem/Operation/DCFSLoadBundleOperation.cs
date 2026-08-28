@@ -87,6 +87,11 @@ namespace GameFrameX.AssetSystem
 
             if (_steps == ESteps.LoadAssetBundle)
             {
+                // ponytail: 下载缓存的 bundle 物理文件是 hash 名原样字节，ResourceLoader 无法按扩展名识别。
+                // BundleFile.LoadAsset 现走 res:// 源路径命中（要求构建产物 PCK 已被挂载，如 DBFS 先行触发）
+                // 或图片字节解码兜底；其余类型在纯 DCFS 链路下会诚实失败。
+                // 升级路径：下载完成后按 AssetPath 把字节拷贝到 user://assetsystem_cache/<包>/<res://相对路径>
+                //（带正确扩展名）再 ResourceLoader.Load，即可脱离 PCK 挂载独立工作。
                 if (_bundle.Encrypted)
                 {
                     if (_fileSystem.DecryptionServices == null)

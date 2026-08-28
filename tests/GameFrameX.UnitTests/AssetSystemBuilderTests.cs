@@ -131,6 +131,23 @@ namespace GameFrameX.UnitTests
         }
 
         [Fact]
+        public void PckSourceInnerPath_Strips_ResPrefix()
+        {
+            // Phase 2.1 方向 a：源资源在 PCK 内按 res:// 相对路径存放，挂载后 ResourceLoader.Load(AssetPath) 直接命中
+            Assert.Equal("assets/ui/logo.png", AssetSystemPckPathUtility.GetPckSourceInnerPath("res://assets/ui/logo.png"));
+            Assert.Equal("scenes/main.tscn", AssetSystemPckPathUtility.GetPckSourceInnerPath("res://scenes/main.tscn"));
+            Assert.Equal("a/b.bin", AssetSystemPckPathUtility.GetPckSourceInnerPath("res://a/b.bin"));
+        }
+
+        [Fact]
+        public void PckSourceInnerPath_NonResPath_Throws()
+        {
+            Assert.Throws<ArgumentException>(() => AssetSystemPckPathUtility.GetPckSourceInnerPath("/abs/path/a.png"));
+            Assert.Throws<ArgumentException>(() => AssetSystemPckPathUtility.GetPckSourceInnerPath(string.Empty));
+            Assert.Throws<ArgumentException>(() => AssetSystemPckPathUtility.GetPckSourceInnerPath("user://a.png"));
+        }
+
+        [Fact]
         public void BuildinCatalog_Json_FieldNames_And_RoundTrip()
         {
             var entries = new List<BuildinCatalogFileEntry>
