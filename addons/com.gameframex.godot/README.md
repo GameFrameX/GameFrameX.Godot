@@ -53,21 +53,18 @@ GameFrameX 是一个面向独立游戏开发者的 Godot 游戏框架与插件�
 ### 基础使用
 
 ```csharp
+using Godot;
 using GameFrameX.Runtime;
 
-public class GameManager : MonoBehaviour
+public partial class GameManager : Node
 {
-    void Start()
+    public override void _Ready()
     {
         // 获取对象池组件
         var objectPool = GameEntry.GetComponent<ObjectPoolComponent>();
         
         // 获取引用池组件
         var referencePool = GameEntry.GetComponent<ReferencePoolComponent>();
-        
-        // 使用扩展方法
-        transform.SetPositionX(10f);
-        gameObject.SetActiveOptimized(true);
     }
 }
 ```
@@ -113,37 +110,27 @@ var obj = objectPool.Spawn<MyObject>("MyObjectPool");
 objectPool.Unspawn(obj);
 ```
 
-### 扩展方法使用
+### 辅助类使用
 
 ```csharp
-// Transform扩展
-transform.SetPositionX(10f);
-transform.SetLocalScaleXYZ(2f, 2f, 2f);
-transform.ResetTransformation();
+// GameObjectHelper 提供的节点查找、变换重置等能力（静态方法）
+var target = GameObjectHelper.FindChildNodeByName("Player");
+GameObjectHelper.ResetTransform(target);
 
-// GameObject扩展
-gameObject.SetActiveOptimized(true);
-gameObject.SetLayerRecursively(LayerMask.NameToLayer("UI"));
-
-// Vector扩展
-Vector3 pos = transform.position;
-pos = pos.WithX(5f).WithY(10f);
+// Node 扩展方法
+node.DestroyObject();
 ```
 
 ### 实用工具类
 
 ```csharp
-// 文件操作
-Utility.File.WriteAllBytes("path/to/file", data);
-byte[] content = Utility.File.ReadAllBytes("path/to/file");
-
 // 加密解密
-string encrypted = Utility.Encryption.Aes.Encrypt("plaintext", "key");
-string decrypted = Utility.Encryption.Aes.Decrypt(encrypted, "key");
+string encrypted = Utility.Encryption.Aes.AESEncrypt("plaintext", "key");
+string decrypted = Utility.Encryption.Aes.AESDecrypt(encrypted, "key");
 
 // 哈希计算
-string md5 = Utility.Hash.Md5.ComputeHash("input");
-string sha1 = Utility.Hash.Sha1.ComputeHash("input");
+string md5 = Utility.Hash.MD5.Hash("input");
+string sha1 = Utility.Hash.Sha1.Hash("input");
 ```
 
 ## 📚 文档与资源
