@@ -20,16 +20,6 @@ namespace GameFrameX.AssetSystem
         {
             return new[]
             {
-                typeof(WechatFileSystem),
-                typeof(WechatFileSystemCreater),
-                typeof(WXFSRequestPackageVersionOperation),
-                typeof(WXFSLoadPackageManifestOperation),
-                typeof(WXFSLoadBundleOperation),
-                typeof(WXFSInitializeOperation),
-                typeof(WXFSDownloadFileOperation),
-                typeof(RequestWechatPackageVersionOperation),
-                typeof(RequestWechatPackageHashOperation),
-                typeof(LoadWechatPackageManifestOperation),
                 typeof(AllAssetsHandle),
                 typeof(ApplicationFootPrint),
                 typeof(AssetHandle),
