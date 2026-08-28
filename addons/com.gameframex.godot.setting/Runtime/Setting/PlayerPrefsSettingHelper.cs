@@ -20,23 +20,11 @@
 //  Any legal disputes and liabilities arising from secondary development based on this project
 //  本项目组织与贡献者概不承担。
 //  shall be borne solely by the developer; the project organization and contributors assume no responsibility.
-//
-//  GitHub 仓库：https://github.com/GameFrameX
-//  GitHub Repository: https://github.com/GameFrameX
-//  Gitee  仓库：https://gitee.com/GameFrameX
-//  Gitee Repository:  https://gitee.com/GameFrameX
-//  CNB  仓库：https://cnb.cool/GameFrameX
-//  CNB Repository:  https://cnb.cool/GameFrameX
-//  官方文档：https://gameframex.doc.alianblank.com/
-//  Official Documentation: https://gameframex.doc.alianblank.com/
-// ==========================================================================================
 
 using GameFrameX;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using GameFrameX.Runtime;
-using Godot;
 
 namespace GameFrameX.Setting.Runtime
 {
@@ -45,11 +33,32 @@ namespace GameFrameX.Setting.Runtime
     /// </summary>
     public partial class PlayerPrefsSettingHelper : SettingHelperBase
     {
-        private const string ConfigFilePath = "user://GameFrameXPlayerPrefs.cfg";
-        private const string SectionName = "Settings";
+        private ISettingStorageBackend m_StorageBackend;
 
-        private ConfigFile m_ConfigFile;
-        private string m_FilePath;
+        /// <summary>
+        /// 惰性获取配置存储后端。
+        /// </summary>
+        private ISettingStorageBackend StorageBackend
+        {
+            get
+            {
+                if (m_StorageBackend == null)
+                {
+                    m_StorageBackend = SettingStorageBackendFactory.Create();
+                }
+
+                return m_StorageBackend;
+            }
+        }
+
+        /// <summary>
+        /// 注入配置存储后端，仅供测试使用。
+        /// </summary>
+        /// <param name="storageBackend">配置存储后端。</param>
+        internal void SetStorageBackendForTests(ISettingStorageBackend storageBackend)
+        {
+            m_StorageBackend = storageBackend ?? throw new GameFrameworkException("Storage backend is invalid.");
+        }
 
         /// <summary>
         /// 获取游戏配置项数量。
@@ -57,22 +66,12 @@ namespace GameFrameX.Setting.Runtime
         public override int Count => -1;
 
         /// <summary>
-        /// 节点初始化。
-        /// </summary>
-        public override void _Ready()
-        {
-            m_ConfigFile = new ConfigFile();
-            m_FilePath = ConfigFilePath;
-        }
-
-        /// <summary>
         /// 加载游戏配置。
         /// </summary>
         /// <returns>是否加载游戏配置成功。</returns>
         public override bool Load()
         {
-            Error error = m_ConfigFile.Load(m_FilePath);
-            return error == Error.Ok || error == Error.FileNotFound;
+            return StorageBackend.Load();
         }
 
         /// <summary>
@@ -81,14 +80,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>是否保存游戏配置成功。</returns>
         public override bool Save()
         {
-            Error error = m_ConfigFile.Save(m_FilePath);
-            if (error != Error.Ok)
-            {
-                Log.Warning("Save settings failure with error code '{0}'.", error);
-                return false;
-            }
-
-            return true;
+            return StorageBackend.Save();
         }
 
         /// <summary>
@@ -123,7 +115,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>指定的游戏配置项是否存在。</returns>
         public override bool HasSetting(string settingName)
         {
-            return m_ConfigFile.HasSectionKey(SectionName, settingName);
+            return StorageBackend.HasKey(settingName);
         }
 
         /// <summary>
@@ -133,13 +125,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>是否移除指定游戏配置项成功。</returns>
         public override bool RemoveSetting(string settingName)
         {
-            if (!HasSetting(settingName))
-            {
-                return false;
-            }
-
-            m_ConfigFile.EraseSectionKey(SectionName, settingName);
-            return true;
+            return StorageBackend.DeleteKey(settingName);
         }
 
         /// <summary>
@@ -147,12 +133,7 @@ namespace GameFrameX.Setting.Runtime
         /// </summary>
         public override void RemoveAllSettings()
         {
-            m_ConfigFile = new ConfigFile();
-            string absolutePath = ProjectSettings.GlobalizePath(m_FilePath);
-            if (File.Exists(absolutePath))
-            {
-                File.Delete(absolutePath);
-            }
+            StorageBackend.DeleteAll();
         }
 
         /// <summary>
@@ -162,7 +143,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>读取的布尔值。</returns>
         public override bool GetBool(string settingName)
         {
-            return Convert.ToInt32(m_ConfigFile.GetValue(SectionName, settingName, 0)) != 0;
+            return StorageBackend.GetInt(settingName, 0) != 0;
         }
 
         /// <summary>
@@ -173,7 +154,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>读取的布尔值。</returns>
         public override bool GetBool(string settingName, bool defaultValue)
         {
-            return Convert.ToInt32(m_ConfigFile.GetValue(SectionName, settingName, defaultValue ? 1 : 0)) != 0;
+            return StorageBackend.GetInt(settingName, defaultValue ? 1 : 0) != 0;
         }
 
         /// <summary>
@@ -183,7 +164,7 @@ namespace GameFrameX.Setting.Runtime
         /// <param name="value">要写入的布尔值。</param>
         public override void SetBool(string settingName, bool value)
         {
-            m_ConfigFile.SetValue(SectionName, settingName, value ? 1 : 0);
+            StorageBackend.SetInt(settingName, value ? 1 : 0);
         }
 
         /// <summary>
@@ -193,7 +174,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>读取的整数值。</returns>
         public override int GetInt(string settingName)
         {
-            return Convert.ToInt32(m_ConfigFile.GetValue(SectionName, settingName, 0));
+            return StorageBackend.GetInt(settingName, 0);
         }
 
         /// <summary>
@@ -204,7 +185,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>读取的整数值。</returns>
         public override int GetInt(string settingName, int defaultValue)
         {
-            return Convert.ToInt32(m_ConfigFile.GetValue(SectionName, settingName, defaultValue));
+            return StorageBackend.GetInt(settingName, defaultValue);
         }
 
         /// <summary>
@@ -214,7 +195,7 @@ namespace GameFrameX.Setting.Runtime
         /// <param name="value">要写入的整数值。</param>
         public override void SetInt(string settingName, int value)
         {
-            m_ConfigFile.SetValue(SectionName, settingName, value);
+            StorageBackend.SetInt(settingName, value);
         }
 
         /// <summary>
@@ -224,7 +205,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>读取的浮点数值。</returns>
         public override float GetFloat(string settingName)
         {
-            return Convert.ToSingle(m_ConfigFile.GetValue(SectionName, settingName, 0f));
+            return StorageBackend.GetFloat(settingName, 0f);
         }
 
         /// <summary>
@@ -235,7 +216,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>读取的浮点数值。</returns>
         public override float GetFloat(string settingName, float defaultValue)
         {
-            return Convert.ToSingle(m_ConfigFile.GetValue(SectionName, settingName, defaultValue));
+            return StorageBackend.GetFloat(settingName, defaultValue);
         }
 
         /// <summary>
@@ -245,7 +226,7 @@ namespace GameFrameX.Setting.Runtime
         /// <param name="value">要写入的浮点数值。</param>
         public override void SetFloat(string settingName, float value)
         {
-            m_ConfigFile.SetValue(SectionName, settingName, value);
+            StorageBackend.SetFloat(settingName, value);
         }
 
         /// <summary>
@@ -255,7 +236,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>读取的字符串值。</returns>
         public override string GetString(string settingName)
         {
-            return Convert.ToString(m_ConfigFile.GetValue(SectionName, settingName, string.Empty));
+            return StorageBackend.GetString(settingName, string.Empty);
         }
 
         /// <summary>
@@ -266,7 +247,7 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>读取的字符串值。</returns>
         public override string GetString(string settingName, string defaultValue)
         {
-            return Convert.ToString(m_ConfigFile.GetValue(SectionName, settingName, defaultValue));
+            return StorageBackend.GetString(settingName, defaultValue);
         }
 
         /// <summary>
@@ -276,7 +257,7 @@ namespace GameFrameX.Setting.Runtime
         /// <param name="value">要写入的字符串值。</param>
         public override void SetString(string settingName, string value)
         {
-            m_ConfigFile.SetValue(SectionName, settingName, value);
+            StorageBackend.SetString(settingName, value);
         }
 
         /// <summary>
