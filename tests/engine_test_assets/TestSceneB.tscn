@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tests/engine_test_assets/TestSceneMarker.cs" id="1"]
+
+[node name="TestSceneB" type="Node"]
+script = ExtResource("1")
+SceneMarker = "scene_B"
+
+[node name="LabelB" type="Label" parent="."]
+text = "engine test scene B"

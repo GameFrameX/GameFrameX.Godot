@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Godot.NET.Sdk/4.5.1">
+<Project Sdk="Godot.NET.Sdk/4.7.1">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
@@ -28,6 +28,9 @@
     <Compile Remove="addons/com.gameframex.godot.assetsystem/Editor/SettingLoader.cs" />
     <!-- 排除所有 Tests 目录 -->
     <Compile Remove="tests/**/*.cs" />
+    <!-- 引擎测试基建：排除规则之后显式加回 EngineTests 子树（headless 引擎验证用例） -->
+    <Compile Include="tests/EngineTests/src/**/*.cs" />
+    <Compile Include="tests/engine_test_assets/**/*.cs" />
     <!-- 排除树内子工程 obj 生成物，避免 AssemblyInfo 重复（CS0579） -->
     <Compile Remove="**/obj/**/*.cs" />
     <!-- Hotfix 独立编译到 Hotfix.csproj，主程序集不再重复编译 -->
