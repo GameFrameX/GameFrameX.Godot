@@ -244,7 +244,9 @@ namespace GameFrameX.AssetSystem
             {
                 var driver = new AssetSystemGodotDriver();
                 driver.Name = driverName;
-                sceneTree.Root.AddChild(driver);
+                // _Ready 传播期间 Root 处于 "busy setting up children" 状态，直接 AddChild 会被引擎拒绝
+                //（驱动节点实际未进树、无人驱动 OperationSystem）；按引擎提示改为 deferred 挂载，idle 时机安全进树。
+                sceneTree.Root.CallDeferred(Node.MethodName.AddChild, driver);
                 _godotDriver = driver;
             }
 

@@ -48,9 +48,10 @@ namespace GameFrameX.EngineTests
 
         public override void _Process(double delta)
         {
-            // 框架 Initialize 的 TryCreateGodotDriver 在 _Ready 期间 add_child 会被引擎拒绝
-            //（"Parent node is busy setting up children"），驱动节点实际未进树、无人驱动 OperationSystem；
-            // 这里每帧手动 Tick，保证异步操作持续前进（驱动节点创建成功时仅是每帧多推进一次，无副作用）。
+            // TryCreateGodotDriver 已改为 CallDeferred("add_child") 挂载（_Ready 传播期间 Root 处于
+            // "busy setting up children"，直接 AddChild 会被引擎拒绝），驱动节点进树后由其 _Process 自我驱动。
+            // 此处手动 Tick 保留为双保险：兜底 deferred 挂载生效前（首帧）的推进窗口，以及本节点被 C2 Single
+            // 模式场景切换释放后、驱动节点接管前的窗口；Update 幂等，同帧多次推进无副作用。
             global::GameFrameX.AssetSystem.AssetSystem.Tick();
         }
     }
