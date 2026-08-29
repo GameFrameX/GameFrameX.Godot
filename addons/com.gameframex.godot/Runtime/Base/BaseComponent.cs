@@ -30,6 +30,7 @@
 // ==========================================================================================
 
 using System;
+using GameFrameX.Event.Runtime;
 using Godot;
 
 namespace GameFrameX.Runtime
@@ -213,6 +214,62 @@ namespace GameFrameX.Runtime
                 // Equivalent dispose callback
                 GameFrameworkEntry.Shutdown();
             }
+            else
+            {
+                // 迁移自 Unity com.gameframex.unity.mono 的 OnApplicationFocus / OnApplicationPause 全局事件转发；
+                // Godot 侧无独立 MonoManager，由 BaseComponent 统一抛出；NotificationApplicationResumed 对应 IsPause = false。
+                GameEventArgs applicationEventArgs = ResolveApplicationEventArgs(what);
+                if (applicationEventArgs != null)
+                {
+                    FireApplicationEvent(this, applicationEventArgs);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 解析应用程序焦点/暂停通知对应的全局事件参数；非应用程序状态类通知返回 null。
+        /// </summary>
+        /// <param name="what">Godot 通知编号。</param>
+        /// <returns>对应的事件参数；不是应用程序状态通知时返回 null。</returns>
+        internal static GameEventArgs ResolveApplicationEventArgs(int what)
+        {
+            if (what == NotificationApplicationFocusIn)
+            {
+                return OnApplicationFocusChangedEventArgs.Create(true);
+            }
+
+            if (what == NotificationApplicationFocusOut)
+            {
+                return OnApplicationFocusChangedEventArgs.Create(false);
+            }
+
+            if (what == NotificationApplicationPaused)
+            {
+                return OnApplicationPauseChangedEventArgs.Create(true);
+            }
+
+            if (what == NotificationApplicationResumed)
+            {
+                return OnApplicationPauseChangedEventArgs.Create(false);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 通过事件组件抛出全局事件；事件组件尚未注册时静默跳过（通知可能早于组件就绪到达）。
+        /// </summary>
+        /// <param name="sender">事件发送者。</param>
+        /// <param name="e">事件参数。</param>
+        internal static void FireApplicationEvent(object sender, GameEventArgs e)
+        {
+            EventComponent eventComponent = GameEntry.GetComponent<EventComponent>();
+            if (eventComponent == null)
+            {
+                return;
+            }
+
+            eventComponent.Fire(sender, e);
         }
 
         /// <summary>
