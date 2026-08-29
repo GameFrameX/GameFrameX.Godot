@@ -150,16 +150,23 @@ namespace GameFrameX.Scene.Runtime
         /// </summary>
         public override void Shutdown()
         {
-            var loadedSceneAssetNames = m_LoadedSceneAssetNames.Keys.ToArray();
-            foreach (var loadedSceneAssetName in loadedSceneAssetNames)
+            // 迁移备注：Unity 基准此处逐场景走异步 UnloadScene（依赖后续帧驱动 OperationSystem）；
+            // Godot 下框架关停由 BaseComponent 的 Predelete/ExitTree 通知触发，引擎已处于退出/释放
+            // 流程，异步卸载操作没有后续帧可驱动，其挂起续体会在引擎 teardown 的最后帧踩到半销毁
+            // 状态（mutex lock failed SIGABRT，见 tests/EngineTests 引擎测试备案）。引擎退出本身会
+            // 释放整棵场景树，此处改为同步释放句柄引用并清空状态字典，不发起任何异步链。
+            foreach (var sceneHandle in m_LoadedSceneAssetNames.Values)
             {
-                if (SceneIsUnloading(loadedSceneAssetName))
-                {
-                    continue;
-                }
-
-                UnloadScene(loadedSceneAssetName);
+                sceneHandle.ReleaseInternal();
             }
+
+            foreach (var sceneHandle in m_UnloadingSceneAssetNames.Values)
+            {
+                sceneHandle.ReleaseInternal();
+            }
+
+            m_LoadedSceneAssetNames.Clear();
+            m_UnloadingSceneAssetNames.Clear();
         }
 
         /// <summary>

@@ -320,10 +320,13 @@ namespace GameFrameX.UnitTests
 
             _manager.Shutdown();
 
+            // 迁移备注：Shutdown 语义已从"逐场景异步卸载（进 unloading 等待后续帧驱动）"改为
+            // "同步释放句柄引用并清空状态字典"——引擎退出期（Predelete/ExitTree 触发）没有后续
+            // 帧驱动异步操作，挂起续体会踩到引擎 teardown 的半销毁状态（mutex lock SIGABRT）。
             Assert.False(_manager.SceneIsLoaded(SceneA));
             Assert.False(_manager.SceneIsLoaded(SceneB));
-            Assert.True(_manager.SceneIsUnloading(SceneA), "Shutdown should move loaded scenes into unloading");
-            Assert.True(_manager.SceneIsUnloading(SceneB), "Shutdown should move loaded scenes into unloading");
+            Assert.False(_manager.SceneIsUnloading(SceneA), "Shutdown should synchronously clear unloading entries");
+            Assert.False(_manager.SceneIsUnloading(SceneB), "Shutdown should synchronously clear unloading entries");
         }
 
         // ──────────────── 前置校验 ────────────────
@@ -460,7 +463,22 @@ namespace GameFrameX.UnitTests
                 SetProtectedProperty(provider, "Error", error);
             }
 
-            return (SceneHandle)InvokeConstructor(typeof(SceneHandle), provider);
+            var handle = (SceneHandle)InvokeConstructor(typeof(SceneHandle), provider);
+
+            // 迁移备注：GameSceneManager.Shutdown 已改为同步 ReleaseInternal（引擎退出期异步卸载
+            // 竞态修复），ReleaseHandle 要求句柄经 CreateHandle 注册（_handles 列表 + RefCount）。
+            // 反射构造绕过了注册，此处补齐，使 Shutdown 同步释放路径在测试环境可用。
+            // _handles 声明在基类 ProviderOperation（GetField 不搜基类，须从基类类型取）。
+            var providerBaseType = typeof(SceneHandle).Assembly.GetType("GameFrameX.AssetSystem.ProviderOperation");
+            Assert.NotNull(providerBaseType);
+            var handlesField = providerBaseType.GetField("_handles", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(handlesField);
+            ((List<HandleBase>)handlesField.GetValue(provider)).Add(handle);
+            var refCountProperty = providerBaseType.GetProperty("RefCount");
+            Assert.NotNull(refCountProperty);
+            refCountProperty.GetSetMethod(true).Invoke(provider, new object[] { 1 });
+
+            return handle;
         }
 
         private static object InvokeConstructor(Type type, params object[] args)
