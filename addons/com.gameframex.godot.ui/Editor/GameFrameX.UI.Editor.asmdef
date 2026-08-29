@@ -1,0 +1,20 @@
+{
+    "name": "GameFrameX.UI.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GameFrameX.Editor",
+        "GameFrameX.Runtime",
+        "GameFrameX.UI.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

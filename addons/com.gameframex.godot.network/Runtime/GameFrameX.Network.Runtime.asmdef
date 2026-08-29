@@ -1,0 +1,17 @@
+{
+    "name": "GameFrameX.Network.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GameFrameX.Event.Runtime",
+        "GameFrameX.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

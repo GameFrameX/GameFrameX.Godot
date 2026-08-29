@@ -1,0 +1,27 @@
+{
+    "name": "GameFrameX.Startup.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GameFrameX.Asset.Runtime",
+        "GameFrameX.Entry.Runtime",
+        "GameFrameX.Event.Runtime",
+        "GameFrameX.FSM.Runtime",
+        "GameFrameX.GlobalConfig.Runtime",
+        "GameFrameX.Localization.Runtime",
+        "GameFrameX.Procedure.Runtime",
+        "GameFrameX.Runtime",
+        "GameFrameX.Setting.Runtime",
+        "GameFrameX.SystemInfo.Runtime",
+        "GameFrameX.Web.Runtime",
+        "YooAsset.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

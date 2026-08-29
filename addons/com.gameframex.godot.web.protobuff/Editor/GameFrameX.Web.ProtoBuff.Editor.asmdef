@@ -1,0 +1,21 @@
+{
+    "name": "GameFrameX.Web.ProtoBuff.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GameFrameX.Editor",
+        "GameFrameX.Runtime",
+        "GameFrameX.Web.ProtoBuff.Runtime",
+        "GameFrameX.Web.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

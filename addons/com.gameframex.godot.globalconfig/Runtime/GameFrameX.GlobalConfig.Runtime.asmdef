@@ -1,0 +1,16 @@
+{
+    "name": "GameFrameX.GlobalConfig.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GameFrameX.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

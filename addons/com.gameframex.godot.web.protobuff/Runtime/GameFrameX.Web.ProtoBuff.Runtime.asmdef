@@ -1,0 +1,19 @@
+{
+    "name": "GameFrameX.Web.ProtoBuff.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GameFrameX.Network.Runtime",
+        "GameFrameX.Runtime",
+        "GameFrameX.Web.Runtime",
+        "ProtoBuffer.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

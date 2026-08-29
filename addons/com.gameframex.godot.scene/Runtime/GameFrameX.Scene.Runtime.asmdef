@@ -1,0 +1,19 @@
+{
+    "name": "GameFrameX.Scene.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GameFrameX.Asset.Runtime",
+        "GameFrameX.Event.Runtime",
+        "GameFrameX.Runtime",
+        "YooAsset.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

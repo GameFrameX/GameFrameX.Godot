@@ -1,0 +1,17 @@
+{
+    "name": "GameFrameX.Procedure.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GameFrameX.FSM.Runtime",
+        "GameFrameX.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

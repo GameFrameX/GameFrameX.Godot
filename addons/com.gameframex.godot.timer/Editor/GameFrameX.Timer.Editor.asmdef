@@ -1,0 +1,19 @@
+{
+    "name": "GameFrameX.Timer.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GameFrameX.Editor",
+        "GameFrameX.Timer.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
