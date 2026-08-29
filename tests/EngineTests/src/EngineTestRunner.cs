@@ -25,12 +25,25 @@ namespace GameFrameX.EngineTests
                 exitCode = 1;
             }
 
-            // ponytail: 游戏模式下 GetTree().Quit 后引擎 teardown 与 C# 挂起续体存在竞态，
-            // 曾在全部用例 PASS 后触发 mutex lock failed SIGABRT（exit 134 关停崩溃，栈关联
-            // GameSceneManager.Shutdown → UnloadScene 的关停期清理，已列入框架问题清单）；
-            // headless 测试进程只需退出码与日志，直接跳过引擎正常收尾（若本节点已被 Single 模式
-            // 场景切换释放，Quit 同样无法执行，Environment.Exit 两者兼治）。
-            System.Environment.Exit(exitCode);
+            // ponytail: 退出路径演进史（两次崩溃均在全部用例 PASS 之后的退出期）：
+            // 1) GetTree().Quit：引擎 teardown 与 GameSceneManager.Shutdown 发起的异步 Unload 链竞态，已在 556294c
+            //    同步化修复；
+            // 2) Environment.Exit：绕过引擎正常 teardown，libc exit() 在主线程直接跑 Godot C++ 静态析构器，与未停机的
+            //    WorkerThreadPool/StringName 全局态交叠，std::mutex::lock 抛 system_error(EINVAL) → SIGABRT
+            //    （2026-08-29 实测 10/10 必现；崩溃报告栈：Environment_Exit→exit→__cxa_finalize_ranges
+            //    →Godot 静态析构→mutex::lock，伴随 Unreferenced static string / PagedAllocator 报错）；
+            // 故回到 Quit() 正常 teardown 路径（editor 模式同一退出路径实测干净）；
+            // 本节点可能已被 C2 Single 模式场景切换释放，故经 Engine.GetMainLoop() 静态获取 SceneTree，
+            // 不依赖本节点存活；仅在拿不到 SceneTree 的极端情况下兜底 Environment.Exit。
+            var tree = Engine.GetMainLoop() as SceneTree;
+            if (tree != null)
+            {
+                tree.Quit(exitCode);
+            }
+            else
+            {
+                System.Environment.Exit(exitCode);
+            }
         }
 
         public override void _Process(double delta)
