@@ -31,6 +31,8 @@
     <!-- 引擎测试基建：排除规则之后显式加回 EngineTests 子树（headless 引擎验证用例） -->
     <Compile Include="tests/EngineTests/src/**/*.cs" />
     <Compile Include="tests/engine_test_assets/**/*.cs" />
+    <!-- 编辑器冒烟验收：EditorTests 子树（#if TOOLS 驱动，仅编辑器构建可达） -->
+    <Compile Include="tests/EditorTests/src/**/*.cs" />
     <!-- 排除树内子工程 obj 生成物，避免 AssemblyInfo 重复（CS0579） -->
     <Compile Remove="**/obj/**/*.cs" />
     <!-- Hotfix 独立编译到 Hotfix.csproj，主程序集不再重复编译 -->
