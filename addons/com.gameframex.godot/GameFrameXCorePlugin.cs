@@ -168,7 +168,7 @@ namespace GameFrameX.Editor
             RegisterTopToolbarMenu();
             RegisterAsmdefResourceFormats();
             m_RuntimeLogBridge = new RuntimeLogBridge();
-            m_AsmdefSyncService = new AsmdefSyncService();
+            m_AsmdefSyncService = new AsmdefSyncService(AsmdefPathUtility.FindAllAsmdefFiles);
             m_AsmdefSyncService.SetCallback(OnAsmdefSynced);
             m_AsmdefSyncService.RunSync();
             SetProcess(true);
@@ -652,12 +652,12 @@ namespace GameFrameX.Editor
 
             if (summary.HasError)
             {
-                AsmdefValidationIssue firstError = summary.Issues.Find(static x => x.Severity == AsmdefIssueSeverity.Error);
+                AsmdefValidationIssue firstError = summary.Issues.Find(x => x.Severity == AsmdefIssueSeverity.Error);
                 GD.PrintErr($"[Asmdef] 同步失败：{firstError?.Message}");
                 return;
             }
 
-            int warningCount = summary.Issues.Count(static x => x.Severity == AsmdefIssueSeverity.Warning);
+            int warningCount = summary.Issues.Count(x => x.Severity == AsmdefIssueSeverity.Warning);
             GD.Print($"[Asmdef] 同步完成：asmdef={summary.TotalAsmdefCount}, csproj={summary.GeneratedCsprojCount}, 更新={summary.UpdatedCsprojCount}, 警告={warningCount}");
         }
 

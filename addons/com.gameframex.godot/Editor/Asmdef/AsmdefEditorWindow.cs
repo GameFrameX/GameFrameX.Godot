@@ -16,6 +16,7 @@ namespace GameFrameX.Editor.Asmdef
         private LineEdit m_RootNamespaceEdit;
         private TextEdit m_ReferencesEdit;
         private TextEdit m_DefinesEdit;
+        private TextEdit m_PlatformDefinesEdit;
         private TextEdit m_IncludePlatformsEdit;
         private CheckBox m_EditorOnlyCheck;
         private Label m_StatusLabel;
@@ -122,6 +123,7 @@ namespace GameFrameX.Editor.Asmdef
 
             root.AddChild(CreateTextEditorGroup("引用列表（references，一行一个）", out m_ReferencesEdit));
             root.AddChild(CreateTextEditorGroup("宏定义（defines，一行一个）", out m_DefinesEdit));
+            root.AddChild(CreateTextEditorGroup("平台宏（platformDefines，一行一平台：windows: GF_WIN, GF_X）", out m_PlatformDefinesEdit));
             root.AddChild(CreateTextEditorGroup("包含平台（includePlatforms，一行一个）", out m_IncludePlatformsEdit));
 
             var actionRow = new HBoxContainer();
@@ -219,6 +221,7 @@ namespace GameFrameX.Editor.Asmdef
                 m_RootNamespaceEdit.Text = document.Model.RootNamespace ?? string.Empty;
                 m_ReferencesEdit.Text = string.Join("\n", document.Model.References ?? new List<string>());
                 m_DefinesEdit.Text = string.Join("\n", document.Model.Defines ?? new List<string>());
+                m_PlatformDefinesEdit.Text = AsmdefPlatformDefines.Format(document.Model.PlatformDefines);
                 m_IncludePlatformsEdit.Text = string.Join("\n", document.Model.IncludePlatforms ?? new List<string>());
                 m_EditorOnlyCheck.ButtonPressed = document.Model.EditorOnly;
                 SetStatus("asmdef 已加载。");
@@ -240,6 +243,17 @@ namespace GameFrameX.Editor.Asmdef
             try
             {
                 AsmdefModel model = BuildModelFromForm();
+
+                // 保存前即时校验：名称非法 / 自引用等 Error 直接阻止落盘（计划 7.3 风险对策）
+                var candidateDocument = new AsmdefDocument { FilePath = m_CurrentFilePath, Model = model };
+                AsmdefValidationResult validation = AsmdefValidator.Validate(new List<AsmdefDocument> { candidateDocument });
+                if (validation.HasError)
+                {
+                    AsmdefValidationIssue firstError = validation.Issues.First(x => x.Severity == AsmdefIssueSeverity.Error);
+                    SetStatus($"保存已阻止（校验失败）：{firstError.Message}", true);
+                    return;
+                }
+
                 AsmdefIO.SaveDocument(m_CurrentFilePath, model);
                 m_OnFileSaved?.Invoke(m_CurrentFilePath);
                 SetStatus("asmdef 已保存。");
@@ -279,7 +293,7 @@ namespace GameFrameX.Editor.Asmdef
                 return;
             }
 
-            int errorCount = issues.Count(static x => x.Severity == AsmdefIssueSeverity.Error);
+            int errorCount = issues.Count(x => x.Severity == AsmdefIssueSeverity.Error);
             int warningCount = issues.Count - errorCount;
             string firstIssue = issues[0].Message;
             SetStatus($"校验完成：错误 {errorCount}，警告 {warningCount}。首条：{firstIssue}", errorCount > 0);
@@ -340,6 +354,7 @@ namespace GameFrameX.Editor.Asmdef
             model.EditorOnly = m_EditorOnlyCheck.ButtonPressed;
             model.References = ParseLines(m_ReferencesEdit.Text);
             model.Defines = ParseLines(m_DefinesEdit.Text);
+            model.PlatformDefines = AsmdefPlatformDefines.Parse(m_PlatformDefinesEdit.Text);
             model.IncludePlatforms = ParseLines(m_IncludePlatformsEdit.Text);
             return model;
         }
@@ -348,8 +363,8 @@ namespace GameFrameX.Editor.Asmdef
         {
             return (text ?? string.Empty)
                 .Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                .Select(static x => x.Trim())
-                .Where(static x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Distinct(StringComparer.Ordinal)
                 .ToList();
         }
@@ -362,6 +377,7 @@ namespace GameFrameX.Editor.Asmdef
             m_RootNamespaceEdit.Text = string.Empty;
             m_ReferencesEdit.Text = string.Empty;
             m_DefinesEdit.Text = string.Empty;
+            m_PlatformDefinesEdit.Text = string.Empty;
             m_IncludePlatformsEdit.Text = string.Empty;
             m_EditorOnlyCheck.ButtonPressed = false;
         }

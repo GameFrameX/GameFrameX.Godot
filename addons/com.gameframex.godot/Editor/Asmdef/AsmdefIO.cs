@@ -1,4 +1,4 @@
-#if TOOLS
+// 说明：纯 BCL 逻辑，不包 #if TOOLS，供单元测试触达（同 AsmdefModel.cs）。
 using System;
 using System.IO;
 using System.Text;
@@ -111,4 +111,3 @@ namespace GameFrameX.Editor.Asmdef
         }
     }
 }
-#endif

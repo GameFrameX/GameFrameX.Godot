@@ -18,8 +18,8 @@ namespace GameFrameX.Editor.Asmdef
         {
             string root = GetProjectRootPath();
             var files = Directory.GetFiles(root, "*.asmdef", SearchOption.AllDirectories)
-                                 .Where(static path => !IsIgnoredPath(path))
-                                 .OrderBy(static path => path, StringComparer.OrdinalIgnoreCase)
+                                 .Where(path => !IsIgnoredPath(path))
+                                 .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
                                  .ToList();
             return files;
         }

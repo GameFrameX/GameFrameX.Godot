@@ -1,4 +1,4 @@
-#if TOOLS
+// 说明：纯 BCL 逻辑，不包 #if TOOLS，供单元测试触达（同 AsmdefModel.cs）。
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,14 +22,22 @@ namespace GameFrameX.Editor.Asmdef
     public sealed class AsmdefValidationResult
     {
         public List<AsmdefValidationIssue> Issues { get; } = new List<AsmdefValidationIssue>();
-        public bool HasError => Issues.Any(static x => x.Severity == AsmdefIssueSeverity.Error);
+        public bool HasError => Issues.Any(x => x.Severity == AsmdefIssueSeverity.Error);
     }
 
     public static class AsmdefValidator
     {
         private static readonly Regex AssemblyNameRegex = new Regex(@"^[A-Za-z_][A-Za-z0-9_.-]*$", RegexOptions.Compiled);
 
-        public static AsmdefValidationResult Validate(IReadOnlyList<AsmdefDocument> documents)
+        /// <summary>
+        /// 校验一组 asmdef 文档的配置完整性与依赖合法性。
+        /// </summary>
+        /// <param name="documents">待校验的文档集合。</param>
+        /// <param name="strictReferences">
+        /// 严格引用模式：true 时缺失引用按 Error 报告（保存前强校验用）；
+        /// 默认 false 按 Warning 报告，兼容引用仓外程序集（如 GodotSharp / 外部包）的场景。
+        /// </param>
+        public static AsmdefValidationResult Validate(IReadOnlyList<AsmdefDocument> documents, bool strictReferences = false)
         {
             var result = new AsmdefValidationResult();
             if (documents == null || documents.Count == 0)
@@ -62,7 +70,7 @@ namespace GameFrameX.Editor.Asmdef
                 }
             }
 
-            ValidateReferences(documents, localMap, result);
+            ValidateReferences(documents, localMap, result, strictReferences);
             ValidateCycles(localMap, result);
             return result;
         }
@@ -98,7 +106,7 @@ namespace GameFrameX.Editor.Asmdef
             }
         }
 
-        private static void ValidateReferences(IReadOnlyList<AsmdefDocument> documents, IReadOnlyDictionary<string, AsmdefDocument> localMap, AsmdefValidationResult result)
+        private static void ValidateReferences(IReadOnlyList<AsmdefDocument> documents, IReadOnlyDictionary<string, AsmdefDocument> localMap, AsmdefValidationResult result, bool strictReferences)
         {
             foreach (AsmdefDocument doc in documents)
             {
@@ -131,9 +139,11 @@ namespace GameFrameX.Editor.Asmdef
                     {
                         result.Issues.Add(new AsmdefValidationIssue
                         {
-                            Severity = AsmdefIssueSeverity.Warning,
+                            Severity = strictReferences ? AsmdefIssueSeverity.Error : AsmdefIssueSeverity.Warning,
                             FilePath = doc.FilePath,
-                            Message = $"引用 '{referenceName}' 未在本地 asmdef 集合中找到，将按外部程序集处理。"
+                            Message = strictReferences
+                                ? $"引用 '{referenceName}' 未在本地 asmdef 集合中找到（严格模式）。"
+                                : $"引用 '{referenceName}' 未在本地 asmdef 集合中找到，将按外部程序集处理。"
                         });
                     }
                 }
@@ -204,4 +214,3 @@ namespace GameFrameX.Editor.Asmdef
         }
     }
 }
-#endif

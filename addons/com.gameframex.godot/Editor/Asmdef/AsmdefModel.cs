@@ -1,4 +1,5 @@
-#if TOOLS
+// 说明：本文件与 AsmdefIO 为纯 BCL 逻辑（System.Text.Json），不依赖 Godot native API，
+// 不包 #if TOOLS，使标准构建与单元测试（tests/GameFrameX.UnitTests）均可触达。
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -41,4 +42,3 @@ namespace GameFrameX.Editor.Asmdef
         public AsmdefModel Model { get; set; } = new AsmdefModel();
     }
 }
-#endif

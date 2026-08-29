@@ -1,4 +1,5 @@
-#if TOOLS
+// 说明：纯 BCL 逻辑（System.Xml.Linq），不包 #if TOOLS，供单元测试触达（同 AsmdefModel.cs）。
+// 生成模板与仓内已入库生成物（YooAsset.Editor.csproj / YooAsset.Runtime.csproj）保持一致形态。
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,9 +32,9 @@ namespace GameFrameX.Editor.Asmdef
         {
             var results = new List<AsmdefGenerateResult>();
             var localMap = documents
-                .Where(static x => x?.Model != null && !string.IsNullOrWhiteSpace(x.Model.Name))
-                .GroupBy(static x => x.Model.Name.Trim(), StringComparer.Ordinal)
-                .ToDictionary(static x => x.Key, static x => x.First(), StringComparer.Ordinal);
+                .Where(x => x?.Model != null && !string.IsNullOrWhiteSpace(x.Model.Name))
+                .GroupBy(x => x.Model.Name.Trim(), StringComparer.Ordinal)
+                .ToDictionary(x => x.Key, x => x.First(), StringComparer.Ordinal);
 
             foreach (AsmdefDocument doc in documents)
             {
@@ -65,7 +66,10 @@ namespace GameFrameX.Editor.Asmdef
                 new XElement("AssemblyName", assemblyName),
                 new XElement("AllowUnsafeBlocks", model.AllowUnsafeCode ? "true" : "false"),
                 new XElement("Nullable", "enable"),
-                new XElement("LangVersion", "latest"));
+                new XElement("LangVersion", "latest"),
+                // 显式 Compile Include/Exclude 需关闭 SDK 默认 glob，否则 NETSDK1022 重复项编译失败
+                // （先例：Assets/Hotfix/Hotfix.csproj 同样启用 EnableDefaultCompileItems=false）
+                new XElement("EnableDefaultCompileItems", "false"));
 
             List<string> commonDefines = CollectCommonDefines(model);
             if (commonDefines.Count > 0)
@@ -107,7 +111,7 @@ namespace GameFrameX.Editor.Asmdef
                 allDefines.Add("ASMDEF_EDITOR_ONLY");
             }
 
-            return allDefines.OrderBy(static x => x, StringComparer.Ordinal).ToList();
+            return allDefines.OrderBy(x => x, StringComparer.Ordinal).ToList();
         }
 
         private static void AddPlatformDefineGroups(XElement project, AsmdefModel model)
@@ -117,8 +121,10 @@ namespace GameFrameX.Editor.Asmdef
                 return;
             }
 
-            foreach ((string platform, List<string> defines) in model.PlatformDefines.OrderBy(static x => x.Key, StringComparer.OrdinalIgnoreCase))
+            foreach (KeyValuePair<string, List<string>> pair in model.PlatformDefines.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
             {
+                string platform = pair.Key;
+                List<string> defines = pair.Value;
                 if (!PlatformConditionMap.TryGetValue(platform, out string condition))
                 {
                     continue;
@@ -137,7 +143,7 @@ namespace GameFrameX.Editor.Asmdef
 
                 project.Add(new XElement("PropertyGroup",
                     new XAttribute("Condition", condition),
-                    new XElement("DefineConstants", "$(DefineConstants);" + string.Join(";", normalizedDefines.OrderBy(static x => x, StringComparer.Ordinal)))));
+                    new XElement("DefineConstants", "$(DefineConstants);" + string.Join(";", normalizedDefines.OrderBy(x => x, StringComparer.Ordinal)))));
             }
         }
 
@@ -174,7 +180,7 @@ namespace GameFrameX.Editor.Asmdef
             }
 
             var itemGroup = new XElement("ItemGroup");
-            foreach (string refPath in projectReferencePaths.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(static x => x, StringComparer.OrdinalIgnoreCase))
+            foreach (string refPath in projectReferencePaths.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
             {
                 itemGroup.Add(new XElement("ProjectReference", new XAttribute("Include", refPath)));
             }
@@ -221,4 +227,3 @@ namespace GameFrameX.Editor.Asmdef
         }
     }
 }
-#endif

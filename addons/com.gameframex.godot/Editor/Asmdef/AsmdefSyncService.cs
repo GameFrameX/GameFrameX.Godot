@@ -1,9 +1,10 @@
-#if TOOLS
+// 说明：纯 BCL 逻辑，不包 #if TOOLS，供单元测试触达（同 AsmdefModel.cs）。
+// asmdef 文件发现与时间源通过构造函数注入：编辑器侧注入 AsmdefPathUtility.FindAllAsmdefFiles，
+// 单元测试注入 lambda 与可控时钟，避免依赖 Godot native API。
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Godot;
 
 namespace GameFrameX.Editor.Asmdef
 {
@@ -13,13 +14,15 @@ namespace GameFrameX.Editor.Asmdef
         public int GeneratedCsprojCount { get; set; }
         public int UpdatedCsprojCount { get; set; }
         public List<AsmdefValidationIssue> Issues { get; } = new List<AsmdefValidationIssue>();
-        public bool HasError => Issues.Any(static x => x.Severity == AsmdefIssueSeverity.Error);
+        public bool HasError => Issues.Any(x => x.Severity == AsmdefIssueSeverity.Error);
     }
 
     public sealed class AsmdefSyncService
     {
         private static readonly TimeSpan ScanInterval = TimeSpan.FromMilliseconds(500);
         private static readonly TimeSpan DebounceDuration = TimeSpan.FromMilliseconds(400);
+        private readonly Func<List<string>> m_FileFinder;
+        private readonly Func<DateTime> m_Clock;
         private readonly Dictionary<string, DateTime> m_FileWriteSnapshot = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, DateTime> m_PendingChanges = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, string> m_LastGeneratedCsprojByAsmdef = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -28,6 +31,14 @@ namespace GameFrameX.Editor.Asmdef
         private bool m_Initialized;
         private Action<AsmdefSyncSummary> m_OnSynced;
 
+        /// <param name="fileFinder">asmdef 文件发现器（编辑器侧传 AsmdefPathUtility.FindAllAsmdefFiles）。</param>
+        /// <param name="clock">时间源（默认 DateTime.UtcNow；测试注入可控时钟）。</param>
+        public AsmdefSyncService(Func<List<string>> fileFinder, Func<DateTime> clock = null)
+        {
+            m_FileFinder = fileFinder ?? throw new ArgumentNullException(nameof(fileFinder));
+            m_Clock = clock ?? (Func<DateTime>)(() => DateTime.UtcNow);
+        }
+
         public void SetCallback(Action<AsmdefSyncSummary> callback)
         {
             m_OnSynced = callback;
@@ -35,7 +46,7 @@ namespace GameFrameX.Editor.Asmdef
 
         public void Tick()
         {
-            DateTime now = DateTime.UtcNow;
+            DateTime now = m_Clock();
             if (now - m_LastScanAtUtc < ScanInterval)
             {
                 return;
@@ -47,6 +58,9 @@ namespace GameFrameX.Editor.Asmdef
             {
                 m_Initialized = true;
                 RunSync();
+                // 初始化扫描把存量文件记入了 pending；全量同步已覆盖它们，清掉避免
+                // 下一次跨防抖窗口的 Tick 触发一次多余的空同步
+                m_PendingChanges.Clear();
                 return;
             }
 
@@ -79,8 +93,8 @@ namespace GameFrameX.Editor.Asmdef
 
             List<AsmdefGenerateResult> generateResults = AsmdefCsprojGenerator.GenerateAll(documents);
             summary.GeneratedCsprojCount = generateResults.Count;
-            summary.UpdatedCsprojCount = generateResults.Count(static x => x.Written);
-            DeleteStaleGeneratedCsproj(generateResults.Select(static x => x.AsmdefFilePath));
+            summary.UpdatedCsprojCount = generateResults.Count(x => x.Written);
+            DeleteStaleGeneratedCsproj(generateResults.Select(x => x.AsmdefFilePath));
             UpdateGeneratedMap(generateResults);
             Notify(summary);
             return summary;
@@ -93,7 +107,7 @@ namespace GameFrameX.Editor.Asmdef
                 return;
             }
 
-            m_PendingChanges[asmdefFilePath] = DateTime.UtcNow;
+            m_PendingChanges[asmdefFilePath] = m_Clock();
         }
 
         private void Notify(AsmdefSyncSummary summary)
@@ -101,10 +115,10 @@ namespace GameFrameX.Editor.Asmdef
             m_OnSynced?.Invoke(summary);
         }
 
-        private static List<AsmdefDocument> LoadAllDocuments(List<AsmdefValidationIssue> issues)
+        private List<AsmdefDocument> LoadAllDocuments(List<AsmdefValidationIssue> issues)
         {
             var documents = new List<AsmdefDocument>();
-            foreach (string asmdefPath in AsmdefPathUtility.FindAllAsmdefFiles())
+            foreach (string asmdefPath in m_FileFinder())
             {
                 try
                 {
@@ -126,7 +140,7 @@ namespace GameFrameX.Editor.Asmdef
 
         private void ScanForChanges(DateTime now)
         {
-            List<string> files = AsmdefPathUtility.FindAllAsmdefFiles();
+            List<string> files = m_FileFinder();
             var currentSet = new HashSet<string>(files, StringComparer.OrdinalIgnoreCase);
 
             foreach (string file in files)
@@ -205,4 +219,3 @@ namespace GameFrameX.Editor.Asmdef
         }
     }
 }
-#endif
