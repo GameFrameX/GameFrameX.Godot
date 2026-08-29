@@ -57,6 +57,11 @@ namespace GameFrameX.Config.Runtime
 		public override void _Ready()
 		{
 			m_ConfigNameTypeMap.Clear();
+			if (string.IsNullOrEmpty(componentType))
+			{
+			    // 代码动态创建（LauncherAuto 场景）无场景序列化值，空值兜底默认实现，避免注册 Guard 中断
+			    componentType = typeof(ConfigManager).FullName;
+			}
 			ImplementationComponentType = Utility.Assembly.GetType(componentType);
 			InterfaceComponentType = typeof(IConfigManager);
 			base._Ready();

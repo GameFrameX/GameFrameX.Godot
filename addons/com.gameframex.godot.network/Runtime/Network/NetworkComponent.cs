@@ -94,6 +94,11 @@ namespace GameFrameX.Network.Runtime
         /// </summary>
         public override void _Ready()
         {
+            if (string.IsNullOrEmpty(componentType))
+            {
+                // 代码动态创建（LauncherAuto 场景）无场景序列化值，空值兜底默认实现，避免注册 Guard 中断
+                componentType = typeof(NetworkManager).FullName;
+            }
             ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(INetworkManager);
             base._Ready();
