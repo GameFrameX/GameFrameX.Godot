@@ -92,6 +92,11 @@ namespace GameFrameX.Procedure.Runtime
         /// </summary>
         public override void _Ready()
         {
+            if (string.IsNullOrEmpty(componentType))
+            {
+                // 代码动态创建（LauncherAuto 场景）无场景序列化值，空值兜底默认实现，避免注册 Guard 中断
+                componentType = typeof(ProcedureManager).FullName;
+            }
             ImplementationComponentType = Type.GetType(componentType);
             InterfaceComponentType = typeof(IProcedureManager);
             base._Ready();
@@ -305,6 +310,16 @@ namespace GameFrameX.Procedure.Runtime
             {
                 m_ProcedureManager.StartProcedure(entranceProcedure.GetType());
             }
+        }
+
+        /// <summary>
+        /// 配置可用流程与入口流程（代码建链场景用，等价场景序列化的 [Export] 值）。
+        /// </summary>
+        /// <remarks>必须在节点进入场景树之前调用：_Ready 触发的 StartProcedureInternal 会读取这两个配置自跑流程。</remarks>
+        public void ConfigureProcedures(string[] availableProcedureTypeNames, string entranceProcedureTypeName)
+        {
+            m_AvailableProcedureTypeNames = availableProcedureTypeNames ?? Array.Empty<string>();
+            m_EntranceProcedureTypeName = entranceProcedureTypeName ?? string.Empty;
         }
 
     }
