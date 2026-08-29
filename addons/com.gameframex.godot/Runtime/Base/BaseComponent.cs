@@ -212,6 +212,9 @@ namespace GameFrameX.Runtime
             else if (what == NotificationPredelete || what == NotificationExitTree)
             {
                 // Equivalent dispose callback
+                // 备案（2026-08-29 核实）：ExitTree 与 Predelete 两个通知各触发一次 Shutdown，第二次为严格幂等空转——
+                // GameFrameworkEntry.Shutdown 首次调用后模块链表已 Clear（各模块 Shutdown 不会重复执行），
+                // ReferencePool.ClearAll 对已清空字典为空转，FreeCachedHGlobal 有 IntPtr.Zero 守卫，SetLogHelper(null) 幂等；故不加短路标记，维持双通知兜底。
                 GameFrameworkEntry.Shutdown();
             }
             else
