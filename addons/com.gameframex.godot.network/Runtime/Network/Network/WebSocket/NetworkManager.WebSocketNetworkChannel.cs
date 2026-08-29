@@ -43,9 +43,14 @@ namespace GameFrameX.Network.Runtime
         /// <summary>
         /// Web Socket 网络频道。
         /// </summary>
-        
-        private sealed class WebSocketNetworkChannel : NetworkChannelBase
+
+        public sealed class WebSocketNetworkChannel : NetworkChannelBase
         {
+            /// <summary>
+            /// WebSocket 文本帧消息回调（Godot 侧新增能力，Unity 基准为二进制 only）。
+            /// </summary>
+            public Action<NetworkChannelBase, string> NetworkChannelTextMessage;
+
             /// <summary>
             /// 初始化网络频道的新实例。
             /// </summary>
@@ -69,7 +74,8 @@ namespace GameFrameX.Network.Runtime
                 }
 
                 base.Connect(address, userData);
-                PSocket = new WebSocketNetSocket(address.ToString(), ReceiveCallback, CloseCallback, ErrorCallback);
+                // ponytail: 引擎内固定装配 NativeWebSocketPeer；如需在外部替换连接实现，可在此改为注入工厂。
+                PSocket = new WebSocketNetSocket(new NativeWebSocketPeer(), address.ToString(), ReceiveCallback, ReceiveTextCallback, CloseCallback, ErrorCallback);
                 if (PSocket == null)
                 {
                     const string errorMessage = "Initialize network channel failure.";
@@ -90,7 +96,55 @@ namespace GameFrameX.Network.Runtime
             {
                 Close(reason, code);
             }
-            
+
+            /// <summary>
+            /// 以文本帧发送字符串（Godot 侧新增能力，不走二进制协议的包头+包体序列化管线）。
+            /// </summary>
+            /// <param name="text">要发送的文本。</param>
+            public void SendText(string text)
+            {
+                if (string.IsNullOrEmpty(text))
+                {
+                    const string errorMessage = "Text is invalid.";
+                    if (NetworkChannelError != null)
+                    {
+                        NetworkChannelError(this, NetworkErrorCode.SendError, SocketError.Success, errorMessage);
+                        return;
+                    }
+
+                    throw new GameFrameworkException(errorMessage);
+                }
+
+                if (!(PSocket is WebSocketNetSocket socket) || !socket.IsConnected)
+                {
+                    const string errorMessage = "WebSocket channel is not open.";
+                    if (NetworkChannelError != null)
+                    {
+                        NetworkChannelError(this, NetworkErrorCode.SendError, SocketError.Success, errorMessage);
+                        return;
+                    }
+
+                    throw new GameFrameworkException(errorMessage);
+                }
+
+                socket.SendText(text);
+                System.Threading.Interlocked.Increment(ref m_SentPacketCount);
+            }
+
+            /// <summary>
+            /// 文本帧接收回调：重置心跳并整帧上抛，对象级反序列化由上层订阅方自行处理。
+            /// </summary>
+            /// <param name="text">收到的文本帧内容。</param>
+            private void ReceiveTextCallback(string text)
+            {
+                lock (PHeartBeatState)
+                {
+                    PHeartBeatState.Reset(PResetHeartBeatElapseSecondsWhenReceivePacket);
+                }
+
+                NetworkChannelTextMessage?.Invoke(this, text);
+            }
+
             /// <summary>
             /// 套接字错误回调。
             /// </summary>
