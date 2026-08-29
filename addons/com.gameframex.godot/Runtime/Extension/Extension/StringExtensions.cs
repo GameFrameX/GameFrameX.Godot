@@ -51,6 +51,12 @@ public static class StringExtension
     /// <returns></returns>
     public static bool EndsWithFast(this string self, string target)
     {
+        // 迁移备注：null 防护与 Unity 基准对齐（null 输入返回 false，此前会抛 NRE；2026-08 补测试时发现）。
+        if (self == null || target == null)
+        {
+            return false;
+        }
+
         int ap = self.Length - 1;
         int bp = target.Length - 1;
 
@@ -71,6 +77,12 @@ public static class StringExtension
     /// <returns></returns>
     public static bool StartsWithFast(this string self, string target)
     {
+        // 迁移备注：null 防护与 Unity 基准对齐（null 输入返回 false，此前会抛 NRE；2026-08 补测试时发现）。
+        if (self == null || target == null)
+        {
+            return false;
+        }
+
         int aLen = self.Length;
         int bLen = target.Length;
 

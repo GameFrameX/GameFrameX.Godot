@@ -114,11 +114,21 @@ namespace System.Collections.Generic
         /// <returns></returns>
         public static string ListToString<T>(this List<T> list, string separator = ",")
         {
-            ListToStringBuilder.Clear();
-            foreach (T t in list)
+            // 迁移备注：与 Unity 基准对齐——null 返回空串，分隔符仅插在元素之间（此前有尾随分隔符；2026-08 补测试时发现）。
+            if (list == null)
             {
-                ListToStringBuilder.Append(t);
-                ListToStringBuilder.Append(separator);
+                return string.Empty;
+            }
+
+            ListToStringBuilder.Clear();
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (i > 0)
+                {
+                    ListToStringBuilder.Append(separator);
+                }
+
+                ListToStringBuilder.Append(list[i]);
             }
 
             return ListToStringBuilder.ToString();

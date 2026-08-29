@@ -4,7 +4,8 @@
     {
         public static int GetDaysFrom(this DateTime now, DateTime dt)
         {
-            return (int)(now.Date - dt).TotalDays;
+            // 迁移备注：dt 取 .Date 与 Unity 基准对齐（忽略时间分量；2026-08 补测试时发现的语义修复）。
+            return (int)(now.Date - dt.Date).TotalDays;
         }
 
         public static int GetDaysFromDefault(this DateTime now)
