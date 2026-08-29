@@ -65,8 +65,8 @@ namespace GameFrameX.ImageCache.Runtime
             var cachePath = string.IsNullOrEmpty(m_CachePath)
                 ? PathHelper.AppHotfixResPath + "/cache/images/"
                 : m_CachePath;
-            // 迁移备注：PathHelper.Combine 对不以分隔符结尾且以 "/" 开头的绝对路径不追加分隔符（粘连路径怪癖，
-            // 基准同样存在，生产默认路径以 "/" 结尾故未暴露）；在此信任边界统一保证尾分隔符，避免缓存文件写歪位置。
+            // 迁移备注：PathHelper.Combine 的绝对路径粘连怪癖已在核心包修复（StartsWith 分支移除）；
+            // 此处尾分隔符规范化保留作为信任边界纵深防御，防止外部传入的 CachePath 形态问题写歪缓存位置。
             if (!cachePath.EndsWith("/") && !cachePath.EndsWith("\\"))
             {
                 cachePath += "/";
