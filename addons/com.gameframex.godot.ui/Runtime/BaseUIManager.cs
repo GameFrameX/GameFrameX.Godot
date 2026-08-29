@@ -29,7 +29,9 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
+using System;
 using System.Collections.Generic;
+using GameFrameX.Asset.Runtime;
 using GameFrameX.ObjectPool;
 using GameFrameX.Runtime;
 
@@ -73,6 +75,10 @@ namespace GameFrameX.UI.Runtime
         /// 对象池管理器。
         /// </summary>
         protected IObjectPoolManager m_ObjectPoolManager;
+        /// <summary>
+        /// 资源管理器。
+        /// </summary>
+        protected IAssetManager m_AssetManager;
 
         /// <summary>
         /// 获取或设置界面实例对象池自动释放可释放对象的间隔秒数。
@@ -136,6 +142,20 @@ namespace GameFrameX.UI.Runtime
             set { m_IsEnableUIShowAnimation = value; }
         }
 
+        /// <summary>
+        /// 是否对指定界面类型采用单实例打开模式（迁移自 Unity BaseUIManager.UseSingletonOpenMode）。
+        /// </summary>
+        /// <param name="uiFormType">界面类型。</param>
+        /// <returns>是否采用单实例模式。</returns>
+        protected bool UseSingletonOpenMode(Type uiFormType)
+        {
+        if (uiFormType == null)
+        {
+        return false;
+        }
+        var allowMultiAttr = Attribute.GetCustomAttribute(uiFormType, typeof(OptionUIAllowMultiInstanceAttribute)) as OptionUIAllowMultiInstanceAttribute;
+        return allowMultiAttr == null || !allowMultiAttr.Enable;
+        }
         protected IObjectPool<UIFormInstanceObject> m_InstancePool = null;
         protected bool m_IsShutdown = false;
         protected IUIFormShowHandler m_UIFormShowHandler;
@@ -197,6 +217,15 @@ namespace GameFrameX.UI.Runtime
         /// 设置界面辅助器。
         /// </summary>
         /// <param name="uiFormHelper">界面辅助器。</param>
+        /// <summary>
+        /// 设置资源管理器。
+        /// </summary>
+        /// <param name="assetManager">资源管理器。</param>
+        public virtual void SetResourceManager(IAssetManager assetManager)
+        {
+        GameFrameworkGuard.NotNull(assetManager, nameof(assetManager));
+        m_AssetManager = assetManager;
+        }
         public void SetUIFormHelper(IUIFormHelper uiFormHelper)
         {
             GameFrameworkGuard.NotNull(uiFormHelper, nameof(uiFormHelper));

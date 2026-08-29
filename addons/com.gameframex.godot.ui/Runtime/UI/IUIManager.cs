@@ -32,6 +32,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GameFrameX.Asset.Runtime;
 using GameFrameX.ObjectPool;
 
 namespace GameFrameX.UI.Runtime
@@ -116,6 +117,11 @@ namespace GameFrameX.UI.Runtime
         /// 设置界面辅助器。
         /// </summary>
         /// <param name="uiFormHelper">界面辅助器。</param>
+        /// <summary>
+        /// 设置资源管理器。
+        /// </summary>
+        /// <param name="assetManager">资源管理器。</param>
+        void SetResourceManager(IAssetManager assetManager);
         void SetUIFormHelper(IUIFormHelper uiFormHelper);
 
         /// <summary>

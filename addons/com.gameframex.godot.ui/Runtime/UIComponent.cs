@@ -31,6 +31,7 @@
 
 using System;
 using System.Collections.Generic;
+using GameFrameX.Asset.Runtime;
 using GameFrameX.Event.Runtime;
 using GameFrameX.ObjectPool;
 using GameFrameX.Runtime;
@@ -53,6 +54,7 @@ namespace GameFrameX.UI.Runtime
         private EventComponent m_EventComponent = null;
         private Node m_GDGUIRoot = null;
         private Node m_FairyGUIRoot = null;
+        private UIDesignResolutionComponent m_DesignResolutionComponent = null;
 
         private readonly List<IUIForm> m_InternalUIFormResults = new List<IUIForm>();
         private const int MaxInitializeRetryFrames = 600;
@@ -70,6 +72,10 @@ namespace GameFrameX.UI.Runtime
         [Export] private bool m_EnableCloseUIFormCompleteEvent = true;
         [Export] private bool m_IsEnableUIShowAnimation = false;
         [Export] private bool m_IsEnableUIHideAnimation = false;
+        /// <summary>
+        /// 是否启用界面关闭后自动回收（释放资源链路）。
+        /// </summary>
+        [Export] private bool m_EnableAutoReleaseUIForm = true;
 
         [Export(PropertyHint.Range, "30,120,1")]
         private float m_InstanceAutoReleaseInterval = 60f;
@@ -214,6 +220,22 @@ namespace GameFrameX.UI.Runtime
         /// <summary>
         /// 游戏框架组件初始化。
         /// </summary>
+        /// <summary>
+        /// 获取或设置是否启用界面关闭后自动回收界面（关闭即释放资源，迁移自 Unity UIComponent.EnableAutoReleaseUIForm）。
+        /// </summary>
+        public bool EnableAutoReleaseUIForm
+        {
+        get { return m_EnableAutoReleaseUIForm; }
+        set { m_EnableAutoReleaseUIForm = value; }
+        }
+
+        /// <summary>
+        /// 获取 UI 设计分辨率配置组件。
+        /// </summary>
+        public UIDesignResolutionComponent DesignResolution
+        {
+        get { return EnsureDesignResolutionComponent(); }
+        }
         public override void _Ready()
         {
             componentType = ResolveUIManagerComponentTypeName();
@@ -327,7 +349,14 @@ namespace GameFrameX.UI.Runtime
                 ScheduleInitializeRetry("IObjectPoolManager not ready");
                 return;
             }
+                var assetManager = GameFrameworkEntry.GetModule<IAssetManager>();
+                if (assetManager == null)
+                {
+                ScheduleInitializeRetry("IAssetManager not ready");
+                return;
+                }
 
+            m_UIManager.SetResourceManager(assetManager);
             m_UIManager.SetObjectPoolManager(objectPoolManager);
             m_UIManager.InstanceAutoReleaseInterval = m_InstanceAutoReleaseInterval;
             m_UIManager.InstanceCapacity = m_InstanceCapacity;
@@ -409,6 +438,31 @@ namespace GameFrameX.UI.Runtime
         /// <summary>
         /// 功能：初始化 GDGUI 与 FairyGUI 根节点，并根据当前 Helper 名称选择主根节点。
         /// </summary>
+        /// <summary>
+        /// 获取或创建 UI 设计分辨率配置组件。
+        /// </summary>
+        /// <returns>UI 设计分辨率配置组件。</returns>
+        private UIDesignResolutionComponent EnsureDesignResolutionComponent()
+        {
+        if (m_DesignResolutionComponent != null && GodotObject.IsInstanceValid(m_DesignResolutionComponent))
+        {
+        return m_DesignResolutionComponent;
+        }
+        // ponytail: Unity 侧 FindSceneDesignResolutionComponent 会跨全部加载场景查找；
+        // Godot 单场景树下用递归子树查找替代，未找到时挂载到自身节点下。升级路径：
+        // 需要跨场景共享时由 autoload 持有全局实例，此处优先读取该实例。
+        var existing = FindChild(nameof(UIDesignResolutionComponent), true, false) as UIDesignResolutionComponent;
+        if (existing != null)
+        {
+        m_DesignResolutionComponent = existing;
+        return existing;
+        }
+        var created = new UIDesignResolutionComponent();
+        created.Name = nameof(UIDesignResolutionComponent);
+        AddChild(created);
+        m_DesignResolutionComponent = created;
+        return created;
+        }
         private void InitializeUIRoots()
         {
             Node configuredRoot = null;

@@ -40,7 +40,7 @@ namespace GameFrameX.UI.Runtime
         /// <param name="isNowRecycle">是否立即回收界面,默认是否</param>
         public void CloseUIForm(int serialId, bool isNowRecycle = false)
         {
-            m_UIManager.CloseUIForm(serialId, isNowRecycle);
+            m_UIManager.CloseUIForm(serialId, isNowRecycle || m_EnableAutoReleaseUIForm);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace GameFrameX.UI.Runtime
         /// <param name="isNowRecycle">是否立即回收界面,默认是否</param>
         public void CloseUIForm(int serialId, object userData, bool isNowRecycle = false)
         {
-            m_UIManager.CloseUIForm(serialId, userData, isNowRecycle);
+            m_UIManager.CloseUIForm(serialId, userData, isNowRecycle || m_EnableAutoReleaseUIForm);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace GameFrameX.UI.Runtime
         /// <param name="isNowRecycle">是否立即回收界面,默认是否</param>
         public void CloseUIForm(IUIForm uiForm, bool isNowRecycle = false)
         {
-            m_UIManager.CloseUIForm(uiForm, isNowRecycle);
+            m_UIManager.CloseUIForm(uiForm, isNowRecycle || m_EnableAutoReleaseUIForm);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace GameFrameX.UI.Runtime
         /// <param name="isNowRecycle">是否立即回收界面,默认是否</param>
         public void CloseUIForm<T>(object userData = null, bool isNowRecycle = false) where T : IUIForm
         {
-            m_UIManager.CloseUIForm<T>(userData, isNowRecycle);
+            m_UIManager.CloseUIForm<T>(userData, isNowRecycle || m_EnableAutoReleaseUIForm);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace GameFrameX.UI.Runtime
         /// <param name="isNowRecycle">是否立即回收界面,默认是否</param>
         public void CloseUIForm(IUIForm uiForm, object userData, bool isNowRecycle = false)
         {
-            m_UIManager.CloseUIForm(uiForm, userData, isNowRecycle);
+            m_UIManager.CloseUIForm(uiForm, userData, isNowRecycle || m_EnableAutoReleaseUIForm);
         }
 
         /// <summary>

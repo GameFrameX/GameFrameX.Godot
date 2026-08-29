@@ -33,6 +33,19 @@ namespace GameFrameX.UI.GDGUI.Runtime
 
             var uiFormAssetName = uiFormType.Name;
             var assetPath = PathHelper.Combine(uiFormAssetPath, uiFormAssetName);
+            // 单实例打开模式：同资源名已存在可用实例时直接复用，不再新开实例
+            // （迁移自 Unity BaseUIManager.UseSingletonOpenMode + OptionUIAllowMultiInstanceAttribute 语义）。
+            if (UseSingletonOpenMode(uiFormType))
+            {
+            var activeUIForms = GetUIForms(uiFormAssetName);
+            for (int i = 0; i < activeUIForms.Length; i++)
+            {
+            if (activeUIForms[i].Available)
+            {
+            return activeUIForms[i];
+            }
+            }
+            }
             var uiFormInstanceObject = m_InstancePool.Spawn(assetPath);
             if (uiFormInstanceObject != null)
             {

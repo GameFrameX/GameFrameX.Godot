@@ -124,5 +124,118 @@ namespace GameFrameX.UI.Runtime
         {
             m_UIManager.GetAllLoadingUIFormSerialIds(results);
         }
+    /// <summary>
+    /// 根据界面逻辑类型获取界面列表，会返回所有符合条件的集合。
+    /// </summary>
+    /// <typeparam name="T">UI的具体类型。</typeparam>
+    /// <returns>符合条件的界面列表。</returns>
+    public List<T> GetLoadedList<T>() where T : class, IUIForm
+    {
+    var fullName = typeof(T).FullName;
+    var uiForms = m_UIManager.GetAllLoadedUIForms();
+    var results = new List<T>();
+    foreach (var uiForm in uiForms)
+    {
+    if (uiForm.FullName == fullName)
+    {
+    results.Add(uiForm as T);
+    }
+    }
+    return results;
+    }
+
+    /// <summary>
+    /// 获取已加载且正在显示的UI。
+    /// </summary>
+    /// <param name="type">UI的具体类型。</param>
+    /// <returns>返回已加载且正在显示的UI实例，如果未找到则返回null。</returns>
+    public IUIForm GetLoadedAndShowing(Type type)
+    {
+    var fullName = type.FullName;
+    var uiForms = m_UIManager.GetAllLoadedUIForms();
+    foreach (var uiForm in uiForms)
+    {
+    if (uiForm.FullName == fullName && uiForm.Visible && uiForm.Available)
+    {
+    return uiForm;
+    }
+    }
+    return null;
+    }
+
+    /// <summary>
+    /// 获取已加载且正在显示的UI。
+    /// </summary>
+    /// <typeparam name="T">UI的具体类型。</typeparam>
+    /// <returns>返回已加载且正在显示的UI实例，如果未找到则返回null。</returns>
+    public T GetLoadedAndShowing<T>() where T : class, IUIForm
+    {
+    var fullName = typeof(T).FullName;
+    var uiForms = m_UIManager.GetAllLoadedUIForms();
+    foreach (var uiForm in uiForms)
+    {
+    if (uiForm.FullName == fullName && uiForm.Visible && uiForm.Available)
+    {
+    return uiForm as T;
+    }
+    }
+    return null;
+    }
+
+    /// <summary>
+    /// 是否存在已加载且正在显示的UI。
+    /// </summary>
+    /// <param name="uiFormAssetName">界面资源名称。</param>
+    /// <returns>是否存在已加载且正在显示的UI。</returns>
+    public bool HasLoadedAndShowing(string uiFormAssetName)
+    {
+    var uiForms = m_UIManager.GetAllLoadedUIForms();
+    foreach (var uiForm in uiForms)
+    {
+    if (uiForm.UIFormAssetName == uiFormAssetName && uiForm.Visible && uiForm.Available)
+    {
+    return true;
+    }
+    }
+    return false;
+    }
+
+    /// <summary>
+    /// 根据界面逻辑类型获取界面。只要找到任意的一个即返回。
+    /// </summary>
+    /// <param name="type">逻辑界面类型。</param>
+    /// <returns>返回已加载的UI实例，如果未找到则返回null。</returns>
+    public IUIForm GetLoaded(Type type)
+    {
+    var fullName = type.FullName;
+    var uiForms = m_UIManager.GetAllLoadedUIForms();
+    foreach (var uiForm in uiForms)
+    {
+    if (uiForm.FullName == fullName)
+    {
+    return uiForm;
+    }
+    }
+    return null;
+    }
+
+    /// <summary>
+    /// 根据界面逻辑类型获取界面。只要找到任意的一个即返回。
+    /// </summary>
+    /// <typeparam name="T">逻辑界面类型。</typeparam>
+    /// <returns>返回已加载的UI实例，如果未找到则返回null。</returns>
+    public T GetLoaded<T>() where T : class, IUIForm
+    {
+    var fullName = typeof(T).FullName;
+    var uiForms = m_UIManager.GetAllLoadedUIForms();
+    foreach (var uiForm in uiForms)
+    {
+    if (uiForm.FullName == fullName)
+    {
+    return uiForm as T;
+    }
+    }
+    return null;
+    }
     }
 }
