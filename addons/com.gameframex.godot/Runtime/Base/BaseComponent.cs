@@ -324,7 +324,8 @@ namespace GameFrameX.Runtime
         {
             if (string.IsNullOrEmpty(m_TextHelperTypeName))
             {
-                return;
+                // 旧场景（如 gfx.scn）可能序列化空串覆盖默认值；空值兜底为默认实现，避免静默跳过注册
+                m_TextHelperTypeName = typeof(DefaultTextHelper).FullName;
             }
 
             Type textHelperType = Utility.Assembly.GetType(m_TextHelperTypeName);
@@ -348,7 +349,8 @@ namespace GameFrameX.Runtime
         {
             if (string.IsNullOrEmpty(m_VersionHelperTypeName))
             {
-                return;
+                // 旧场景（如 gfx.scn）可能序列化空串覆盖默认值；空值兜底为默认实现，避免静默跳过注册
+                m_VersionHelperTypeName = typeof(DefaultVersionHelper).FullName;
             }
 
             Type versionHelperType = Utility.Assembly.GetType(m_VersionHelperTypeName);
@@ -373,7 +375,8 @@ namespace GameFrameX.Runtime
         {
             if (string.IsNullOrEmpty(m_LogHelperTypeName))
             {
-                return;
+                // 旧场景（如 gfx.scn）可能序列化空串覆盖默认值；空值兜底为默认实现，避免静默跳过注册
+                m_LogHelperTypeName = typeof(DefaultLogHelper).FullName;
             }
 
             Type logHelperType = Utility.Assembly.GetType(m_LogHelperTypeName);
@@ -398,7 +401,8 @@ namespace GameFrameX.Runtime
         {
             if (string.IsNullOrEmpty(m_CompressionHelperTypeName))
             {
-                return;
+                // 旧场景（如 gfx.scn）可能序列化空串覆盖默认值；空值兜底为默认实现，避免静默跳过注册
+                m_CompressionHelperTypeName = typeof(DefaultCompressionHelper).FullName;
             }
 
             Type compressionHelperType = Utility.Assembly.GetType(m_CompressionHelperTypeName);
@@ -423,7 +427,8 @@ namespace GameFrameX.Runtime
         {
             if (string.IsNullOrEmpty(m_JsonHelperTypeName))
             {
-                return;
+                // 旧场景（如 gfx.scn）可能序列化空串覆盖默认值；空值兜底为默认实现，避免静默跳过注册
+                m_JsonHelperTypeName = typeof(NewtonsoftJsonHelper).FullName;
             }
 
             Type jsonHelperType = Utility.Assembly.GetType(m_JsonHelperTypeName);
