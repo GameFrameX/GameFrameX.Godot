@@ -847,7 +847,7 @@ namespace LuBan.Runtime
 #else
             int xl = (Bytes[ReaderIndex + 3] << 24) | ((Bytes[ReaderIndex + 2] << 16)) | (Bytes[ReaderIndex + 1] << 8) | (Bytes[ReaderIndex]);
             int xh = (Bytes[ReaderIndex + 7] << 24) | (Bytes[ReaderIndex + 6] << 16) | (Bytes[ReaderIndex + 5] << 8) | Bytes[ReaderIndex + 4];
-            x = ((long)xh << 32) | (long)xl;
+            x = ((long)xh << 32) | (long)(uint)xl;
 #endif
             ReaderIndex += 8;
             return x;

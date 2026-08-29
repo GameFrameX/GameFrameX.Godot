@@ -113,14 +113,16 @@ namespace GameFrameX.UnitTests
             Assert.Equal(v, buf.ReadLong());
         }
 
-        // ponytail: 上游 ReadFlong 用 (long)xl 组装，xl 为负 int（低 32 位 >= 0x80000000）时符号扩展
-        // 经 OR 吞掉 xh 高位（long.MaxValue 读回 -1），Unity 基准同样如此；迁移保真不改实现，
-        // 用例避开低 32 位 >= 0x80000000 且高 32 位非全 1 的值，修复属上游同步任务。
+        // 已同步上游修复（luban 包 2.1.4 / commit 1b05bcc）：ReadFlong 低 32 位改为 (long)(uint)xl
+        // 零扩展再拼高位，低 32 位 >= 0x80000000 且高 32 位非全 1 的值（long.MaxValue 读回 -1、
+        // 0x123456789ABCDEF0 读错）不再复现，回归用例锁定该行为。
         [Theory]
         [InlineData(0L)]
         [InlineData(-1L)]
         [InlineData(-9223372036854775808L)]
+        [InlineData(9223372036854775807L)]
         [InlineData(0x1234567812345678L)]
+        [InlineData(0x123456789ABCDEF0L)]
         public void WriteRead_Flong_Fixed8_RoundTrips(long v)
         {
             var buf = new ByteBuf();
