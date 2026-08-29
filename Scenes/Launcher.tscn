@@ -1,0 +1,143 @@
+[gd_scene format=3 uid="uid://cg2gy3wpkudjy"]
+
+[ext_resource type="Script" path="res://addons/com.gameframex.godot/Runtime/Base/BaseComponent.cs" id="1_uf0nc"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot/Runtime/ObjectPool/ObjectPoolComponent.cs" id="2_l50wi"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot/Runtime/ReferencePool/ReferencePoolComponent.cs" id="3_evjea"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.event/Runtime/EventComponent.cs" id="4_d841n"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.fsm/Runtime/Fsm/FsmComponent.cs" id="5_gmaf7"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.procedure/Runtime/Procedure/ProcedureComponent.cs" id="6_btent"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.timer/Runtime/Timer/TimerComponent.cs" id="7_75k2n"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.web/Runtime/Web/WebComponent.cs" id="8_4kppe"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.web.protobuff/Runtime/Web/WebProtoBuffComponent.cs" id="9_uyl8v"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.setting/Runtime/Setting/Setting/SettingComponent.cs" id="10_ue10d"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.network/Runtime/Network/NetworkComponent.cs" id="11_foow6"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.localization/Runtime/Localization/LocalizationComponent.cs" id="12_1ke8i"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.globalconfig/Runtime/GlobalConfig/GlobalConfigComponent.cs" id="13_ghaut"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.config/Runtime/Config/ConfigComponent.cs" id="14_ps5my"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.entity/Runtime/Entity/EntityComponent.cs" id="15_nrbew"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.download/Runtime/Download/DownloadComponent.cs" id="16_tas22"]
+[ext_resource type="Script" path="res://addons/com.gameframex.godot.ui/Runtime/UIComponent.cs" id="17_j4yks"]
+
+[node name="GFX" type="Node2D"]
+script = ExtResource("1_uf0nc")
+m_TextHelperTypeName = null
+m_VersionHelperTypeName = null
+m_LogHelperTypeName = null
+m_CompressionHelperTypeName = null
+m_JsonHelperTypeName = null
+m_FrameRate = null
+m_GameSpeed = null
+m_RunInBackground = null
+m_NeverSleep = null
+componentType = "GameFrameX.Runtime.BaseComponent"
+
+[node name="ObjectPool" type="Node" parent="."]
+script = ExtResource("2_l50wi")
+componentType = "GameFrameX.ObjectPool.ObjectPoolManager"
+
+[node name="ReferencePool" type="Node" parent="."]
+script = ExtResource("3_evjea")
+m_EnableStrictCheck = null
+componentType = "GameFrameX.ObjectPool.ObjectPoolManager"
+
+[node name="Event" type="Node" parent="."]
+script = ExtResource("4_d841n")
+componentType = "GameFrameX.Event.Runtime.EventManager"
+
+[node name="FSM" type="Node" parent="."]
+script = ExtResource("5_gmaf7")
+componentType = "GameFrameX.Fsm.Runtime.FsmManager"
+
+[node name="Procedure" type="Node" parent="."]
+script = ExtResource("6_btent")
+m_AvailableProcedureTypeNames = PackedStringArray("Godot.Startup.Procedure.ProcedureCreateDownloader", "Godot.Startup.Procedure.ProcedureDownloadWebFiles", "Godot.Startup.Procedure.ProcedureGameLauncherState", "Godot.Startup.Procedure.ProcedureGetAppVersionInfoState", "Godot.Startup.Procedure.ProcedureGetGameAssetPackageVersionInfoByDefaultPackageState", "Godot.Startup.Procedure.ProcedureGetGlobalInfoState", "Godot.Startup.Procedure.ProcedureLauncherState", "Godot.Startup.Procedure.ProcedurePatchDone", "Godot.Startup.Procedure.ProcedurePatchInit", "Godot.Startup.Procedure.ProcedureUpdateManifest", "Godot.Startup.Procedure.ProcedureUpdateStaticVersion")
+m_EntranceProcedureTypeName = "Godot.Startup.Procedure.ProcedureLauncherState"
+componentType = "GameFrameX.Procedure.Runtime.ProcedureManager"
+
+[node name="Timer" type="Node" parent="."]
+script = ExtResource("7_75k2n")
+componentType = "GameFrameX.Timer.Runtime.TimerManager"
+
+[node name="Web" type="Node" parent="."]
+script = ExtResource("8_4kppe")
+m_Timeout = null
+componentType = "GameFrameX.Web.Runtime.WebManager"
+
+[node name="WebProtoBuff" type="Node" parent="."]
+script = ExtResource("9_uyl8v")
+m_Timeout = null
+componentType = "GameFrameX.Web.ProtoBuff.Runtime.WebProtoBuffManager"
+
+[node name="Setting" type="Node" parent="."]
+script = ExtResource("10_ue10d")
+m_SettingHelperTypeName = null
+componentType = "GameFrameX.Setting.Runtime.SettingManager"
+
+[node name="Network" type="Node" parent="."]
+script = ExtResource("11_foow6")
+m_IgnoredSendNetworkIds = null
+m_IgnoredReceiveNetworkIds = null
+m_rpcTimeout = null
+m_FocusHeartbeat = null
+componentType = "GameFrameX.Network.Runtime.NetworkManager"
+
+[node name="Localization" type="Node" parent="."]
+script = ExtResource("12_1ke8i")
+m_EditorLanguage = null
+m_DefaultLanguage = null
+m_EnableLoadDictionaryUpdateEvent = null
+m_IsEnableEditorMode = null
+m_LocalizationHelperTypeName = null
+componentType = "GameFrameX.Localization.Runtime.LocalizationManager"
+
+[node name="GlobalInfo" type="Node" parent="."]
+script = ExtResource("13_ghaut")
+m_checkAppVersionUrl = null
+m_checkResourceVersionUrl = null
+m_aotCodeList = null
+m_content = null
+m_hostServerUrl = null
+m_originalData = null
+componentType = null
+
+[node name="Config" type="Node" parent="."]
+script = ExtResource("14_ps5my")
+componentType = "GameFrameX.Config.Runtime.ConfigManager"
+
+[node name="Entity" type="Node" parent="."]
+script = ExtResource("15_nrbew")
+m_EnableShowEntityUpdateEvent = null
+m_EnableShowEntityDependencyAssetEvent = null
+m_EntityHelperTypeName = null
+m_EntityGroupHelperTypeName = null
+m_DefaultCapacity = null
+m_DefaultExpireTime = null
+componentType = "GameFrameX.Entity.Runtime.EntityManager"
+
+[node name="Download" type="Node" parent="."]
+script = ExtResource("16_tas22")
+m_DownloadAgentHelperTypeName = null
+m_DownloadAgentHelperCount = null
+m_Timeout = null
+m_FlushSize = null
+componentType = "GameFrameX.Download.Runtime.DownloadManager"
+
+[node name="UI" type="Node" parent="."]
+script = ExtResource("17_j4yks")
+m_EnableOpenUIFormSuccessEvent = null
+m_EnableOpenUIFormFailureEvent = null
+m_EnableOpenUIFormUpdateEvent = null
+m_EnableOpenUIFormDependencyAssetEvent = null
+m_EnableCloseUIFormCompleteEvent = null
+m_IsEnableUIShowAnimation = null
+m_IsEnableUIHideAnimation = null
+m_InstanceAutoReleaseInterval = 30.0
+m_InstanceExpireTime = 1200.0
+m_UIRootPath = NodePath("GDGUI")
+m_UIFormHelperTypeName = null
+m_UIGroupHelperTypeName = null
+componentType = "GameFrameX.UI.GDGUI.Runtime.UIManager"
+
+[node name="GDGUI" type="Node" parent="UI"]
+
+[node name="FGUI" type="Node" parent="UI"]
