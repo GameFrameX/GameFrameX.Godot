@@ -13,6 +13,7 @@ namespace GameFrameX.Editor.Asmdef
         public int TotalAsmdefCount { get; set; }
         public int GeneratedCsprojCount { get; set; }
         public int UpdatedCsprojCount { get; set; }
+        public int CleanedOrphanCount { get; set; }
         public List<AsmdefValidationIssue> Issues { get; } = new List<AsmdefValidationIssue>();
         public bool HasError => Issues.Any(x => x.Severity == AsmdefIssueSeverity.Error);
     }
@@ -22,6 +23,7 @@ namespace GameFrameX.Editor.Asmdef
         private static readonly TimeSpan ScanInterval = TimeSpan.FromMilliseconds(500);
         private static readonly TimeSpan DebounceDuration = TimeSpan.FromMilliseconds(400);
         private readonly Func<List<string>> m_FileFinder;
+        private readonly Func<List<string>> m_OrphanArtifactFinder;
         private readonly Func<DateTime> m_Clock;
         private readonly Dictionary<string, DateTime> m_FileWriteSnapshot = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, DateTime> m_PendingChanges = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
@@ -33,9 +35,13 @@ namespace GameFrameX.Editor.Asmdef
 
         /// <param name="fileFinder">asmdef 文件发现器（编辑器侧传 AsmdefPathUtility.FindAllAsmdefFiles）。</param>
         /// <param name="clock">时间源（默认 DateTime.UtcNow；测试注入可控时钟）。</param>
-        public AsmdefSyncService(Func<List<string>> fileFinder, Func<DateTime> clock = null)
+        /// <param name="orphanArtifactFinder">生成物候选发现器（编辑器侧传 AsmdefPathUtility.FindAllGeneratedArtifactCandidates；
+        /// 为 null 时禁用跨进程孤儿清理，保持旧行为）。</param>
+        public AsmdefSyncService(Func<List<string>> fileFinder, Func<DateTime> clock = null,
+            Func<List<string>> orphanArtifactFinder = null)
         {
             m_FileFinder = fileFinder ?? throw new ArgumentNullException(nameof(fileFinder));
+            m_OrphanArtifactFinder = orphanArtifactFinder;
             m_Clock = clock ?? (Func<DateTime>)(() => DateTime.UtcNow);
         }
 
@@ -96,6 +102,7 @@ namespace GameFrameX.Editor.Asmdef
             summary.UpdatedCsprojCount = generateResults.Count(x => x.Written);
             DeleteStaleGeneratedCsproj(generateResults.Select(x => x.AsmdefFilePath));
             UpdateGeneratedMap(generateResults);
+            CleanOrphanArtifacts(summary);
             Notify(summary);
             return summary;
         }
@@ -203,6 +210,61 @@ namespace GameFrameX.Editor.Asmdef
             foreach (AsmdefGenerateResult result in results)
             {
                 m_LastGeneratedCsprojByAsmdef[result.AsmdefFilePath] = result.CsprojFilePath;
+            }
+        }
+
+        /// <summary>
+        /// 跨进程孤儿清理：删除无同名 .asmdef 主文件的生成物（.csproj / .asmdef.uid）。
+        /// DeleteStaleGeneratedCsproj 只覆盖本进程生成过的 asmdef（内存映射），
+        /// 进程重启后映射为空，历史残留（asmdef 曾存在后被删）由此处兜底。
+        /// </summary>
+        private void CleanOrphanArtifacts(AsmdefSyncSummary summary)
+        {
+            if (m_OrphanArtifactFinder == null)
+            {
+                return;
+            }
+
+            List<string> candidates;
+            try
+            {
+                candidates = m_OrphanArtifactFinder();
+            }
+            catch
+            {
+                // 候选发现失败不影响主流程
+                return;
+            }
+
+            if (candidates == null)
+            {
+                return;
+            }
+
+            foreach (string candidate in candidates)
+            {
+                if (string.IsNullOrEmpty(candidate) || !File.Exists(candidate))
+                {
+                    continue;
+                }
+
+                string asmdefCounterpart = candidate.EndsWith(".asmdef.uid", StringComparison.OrdinalIgnoreCase)
+                    ? candidate.Substring(0, candidate.Length - ".uid".Length)
+                    : Path.ChangeExtension(candidate, ".asmdef");
+                if (File.Exists(asmdefCounterpart))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    File.Delete(candidate);
+                    summary.CleanedOrphanCount++;
+                }
+                catch
+                {
+                    // 删除失败静默，避免影响主流程
+                }
             }
         }
 

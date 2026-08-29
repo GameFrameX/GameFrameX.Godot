@@ -247,5 +247,76 @@ namespace GameFrameX.UnitTests
 
             Assert.False(File.Exists(CsprojPathOf(a)));
         }
+
+        [Fact]
+        public void RunSync_OrphanCsprojWithoutAsmdef_Deleted()
+        {
+            // 跨进程残留：csproj 存在、asmdef 本体已删（内存映射清理覆盖不到）
+            string orphanCsproj = Path.Combine(m_TempDir, "Sync.Orphan.csproj");
+            File.WriteAllText(orphanCsproj, "<Project />");
+            string live = WriteAsmdefFile("Sync.LiveA");
+            var summaries = new List<AsmdefSyncSummary>();
+            var service = new AsmdefSyncService(() => m_FileList.ToList(), m_Clock.Now,
+                () => new List<string> { orphanCsproj });
+            service.SetCallback(summaries.Add);
+
+            AsmdefSyncSummary summary = service.RunSync();
+
+            Assert.False(File.Exists(orphanCsproj));
+            Assert.Equal(1, summary.CleanedOrphanCount);
+            Assert.True(File.Exists(CsprojPathOf(live)));
+        }
+
+        [Fact]
+        public void RunSync_CsprojWithAsmdefCounterpart_Kept()
+        {
+            string live = WriteAsmdefFile("Sync.KeptA");
+            string liveCsproj = CsprojPathOf(live);
+            var summaries = new List<AsmdefSyncSummary>();
+            var service = new AsmdefSyncService(() => m_FileList.ToList(), m_Clock.Now,
+                () => new List<string> { liveCsproj });
+            service.SetCallback(summaries.Add);
+
+            AsmdefSyncSummary summary = service.RunSync();
+
+            Assert.True(File.Exists(liveCsproj));
+            Assert.Equal(0, summary.CleanedOrphanCount);
+        }
+
+        [Fact]
+        public void RunSync_OrphanAsmdefUid_Deleted()
+        {
+            string orphanUid = Path.Combine(m_TempDir, "Sync.Orphan.asmdef.uid");
+            File.WriteAllText(orphanUid, string.Empty);
+            WriteAsmdefFile("Sync.LiveA");
+            string liveUid = Path.Combine(m_TempDir, "Sync.LiveA.asmdef.uid");
+            File.WriteAllText(liveUid, string.Empty);
+            var summaries = new List<AsmdefSyncSummary>();
+            var service = new AsmdefSyncService(() => m_FileList.ToList(), m_Clock.Now,
+                () => new List<string> { orphanUid, liveUid });
+            service.SetCallback(summaries.Add);
+
+            AsmdefSyncSummary summary = service.RunSync();
+
+            Assert.False(File.Exists(orphanUid));
+            Assert.True(File.Exists(liveUid));
+            Assert.Equal(1, summary.CleanedOrphanCount);
+        }
+
+        [Fact]
+        public void RunSync_NoOrphanFinder_DisabledForBackwardCompatibility()
+        {
+            // 未注入候选发现器时禁用跨进程清理，保持旧装配行为不变
+            string orphanCsproj = Path.Combine(m_TempDir, "Sync.Legacy.csproj");
+            File.WriteAllText(orphanCsproj, "<Project />");
+            WriteAsmdefFile("Sync.LegacyA");
+            var summaries = new List<AsmdefSyncSummary>();
+            var service = new AsmdefSyncService(() => m_FileList.ToList(), m_Clock.Now);
+            service.SetCallback(summaries.Add);
+
+            service.RunSync();
+
+            Assert.True(File.Exists(orphanCsproj));
+        }
     }
 }
