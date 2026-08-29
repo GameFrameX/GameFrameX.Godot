@@ -11,3 +11,13 @@ migration-progress/
 
 # IDE user settings
 *.DotSettings.user
+
+# 编辑器为 asmdef 生成的子工程副本与 asmdef uid（主 Godot.csproj 为手写需跟踪）
+addons/**/*.csproj
+addons/**/*.asmdef.uid
+
+# 热更输出目录
+/Hotfix/
+
+# 引擎测试运行日志（每次跑脚本生成）
+tests/EngineTests/last_run_*.log
