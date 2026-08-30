@@ -11,16 +11,17 @@
 
 namespace Hotfix.Config
 { 
-	public enum GiftUIType
-	{
-		/// <summary>
-		/// 普通界面
-		/// </summary>
-		Normal = 0,
-		/// <summary>
-		/// 特殊界面
-		/// </summary>
-		Style_1 = 1,
-	}
+    public enum GiftUIType
+    {
+        /// <summary>
+        /// 普通界面
+        /// </summary>
+        Normal = 0,
+        /// <summary>
+        /// 特殊界面
+        /// </summary>
+        Style_1 = 1,
+    }
 
 } 
+
