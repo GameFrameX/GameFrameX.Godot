@@ -2,7 +2,7 @@
   "name": "com.gameframex.godot.luban",
   "displayName": "Game Frame X LuBan",
   "category": "GameFrameX",
-  "description": "独立游戏前后端一体化解决方案 https://gameframex.doc.alianblank.com/\n\n独立游戏前后端一体化解决方案 https://gameframex.doc.alianblank.com/",
+  "description": "GameFrameX LuBan — configuration-table runtime for GameFrameX Godot projects, ported from focus-creative-games/luban with ByteBuf and bean support.\n\nGameFrameX LuBan — GameFrameX Godot 工程的配置表运行时，移植自 focus-creative-games/luban，含 ByteBuf 与 Bean 支持。",
   "version": "1.0.0",
   "godot": "4.7",
   "keywords": [

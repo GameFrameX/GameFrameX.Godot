@@ -2,7 +2,7 @@
   "name": "com.gameframex.godot.fairygui.godot",
   "displayName": "FairyGUI",
   "category": "GameFrameX",
-  "description": "FairyGUI is a Cross Platform UI Editor & UI framework\n\nFairyGUI is a Cross Platform UI Editor & UI framework",
+  "description": "GameFrameX FairyGUI — FairyGUI runtime for Godot, a cross-platform UI editor and framework, vendored with GameFrameX integration on top.\n\nGameFrameX FairyGUI — FairyGUI 的 Godot 运行时（跨平台 UI 编辑器与框架），GameFrameX 内嵌分发并叠加集成层。",
   "version": "1.0.0",
   "godot": "4.7",
   "keywords": [

@@ -2,7 +2,7 @@
   "name": "com.gameframex.godot.google.protobuf",
   "displayName": "Google Protocol Buffers",
   "category": "GameFrameX",
-  "description": "Google Protocol Buffers\n\nGoogle Protocol Buffers",
+  "description": "GameFrameX Google Protobuf — Google Protocol Buffers C# runtime library, repackaged for GameFrameX Godot projects with proto codegen tooling support.\n\nGameFrameX Google Protobuf — 为 GameFrameX Godot 工程重发的 Google Protocol Buffers C# 运行时库，支持协议代码生成工具链。",
   "version": "1.0.0",
   "godot": "4.7",
   "keywords": [
