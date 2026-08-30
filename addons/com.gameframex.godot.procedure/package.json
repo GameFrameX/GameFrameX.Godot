@@ -1,0 +1,38 @@
+{
+  "name": "com.gameframex.godot.procedure",
+  "displayName": "Game Frame X Procedure",
+  "category": "GameFrameX",
+  "description": "GameFrameX Procedure — Godot FSM-based game flow management package. Drives game lifecycle stages (splash, preload, login, main menu, etc.) through swappable procedure states with full lifecycle callbacks (OnInit, OnEnter, OnUpdate, OnFixedUpdate, OnLeave, OnDestroy) and configurable entrance procedure via Inspector.\n\nGameFrameX Procedure — Godot 基于 FSM 的游戏流程管理功能包。通过可切换的过程状态驱动游戏生命周期阶段（闪屏、预加载、登录、主菜单等），提供完整生命周期回调（OnInit、OnEnter、OnUpdate、OnFixedUpdate、OnLeave、OnDestroy），并支持通过 Inspector 配置入口过程。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.procedure/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.procedure/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.procedure",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.procedure.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.fsm": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

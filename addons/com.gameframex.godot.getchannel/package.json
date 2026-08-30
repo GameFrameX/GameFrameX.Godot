@@ -1,0 +1,35 @@
+{
+  "name": "com.gameframex.godot.getchannel",
+  "displayName": "Game Frame X Get Channel",
+  "category": "GameFrameX",
+  "description": "GameFrameX GetChannel — cross-platform channel identifier package. Reads the application's distribution channel at runtime from platform-specific sources: Android (AndroidManifest meta-data), iOS (Info.plist via P/Invoke), Editor/PC (Resources config file).\n\nGameFrameX GetChannel — 跨平台渠道标识功能包。在运行时从平台特定来源读取应用的分发渠道：Android（AndroidManifest meta-data）、iOS（通过 P/Invoke 读取 Info.plist）、Editor/PC（Resources 配置文件）。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.getchannel/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.getchannel/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.getchannel",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.getchannel.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "com.gameframex.godot.assetsystem",
+  "displayName": "GameFrameXAssetSystem",
+  "category": "GameFrameX",
+  "description": "GameFrameX Asset System — resource management system for Godot, ported from YooAsset. Supports editor simulation, built-in PCK bundles, offline and download-driven play modes, with async loading and dependency-aware lifecycle.\n\nGameFrameX Asset System — Godot 资源管理系统，移植自 YooAsset。支持编辑器模拟、内建 PCK 包、离线与下载驱动的运行模式，提供异步加载与依赖感知的生命周期管理。",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.assetsystem/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.assetsystem/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.assetsystem",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.assetsystem.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

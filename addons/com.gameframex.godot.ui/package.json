@@ -1,0 +1,41 @@
+{
+  "name": "com.gameframex.godot.ui",
+  "displayName": "Game Frame X UI",
+  "category": "GameFrameX",
+  "description": "GameFrameX UI — Godot UI-framework-agnostic form management package. Handles opening, closing, grouping, and lifecycle of UI forms with depth-based layering, async form loading via the asset system with object pooling, configurable show/hide animations, and event notifications for open/close lifecycle.\n\nGameFrameX UI — Godot 跨 UI 框架的窗体管理功能包。处理 UI 窗体的打开、关闭、分组和生命周期，支持基于深度的分层，通过资源系统异步加载窗体并集成对象池，可配置显示/隐藏动画，以及打开/关闭生命周期的事件通知。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.ui/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.ui/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.ui",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.ui.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.asset": "1.0.0",
+    "com.gameframex.godot.assetsystem": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0",
+    "com.gameframex.godot.localization": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

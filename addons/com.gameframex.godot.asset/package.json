@@ -1,0 +1,39 @@
+{
+  "name": "com.gameframex.godot.asset",
+  "displayName": "Game Frame X Asset",
+  "category": "GameFrameX",
+  "description": "GameFrameX Asset — Godot asset management package built on YooAsset. Provides synchronous and asynchronous loading of assets, sub-assets, raw files, scenes, and asset bundles. Supports multi-package management with configurable play modes, hot-update URLs, resource path separation, and automatic cleanup of unused assets and bundle files.\n\nGameFrameX Asset — 基于 YooAsset 的 Godot 资源管理功能包。提供资源、子资源、原始文件、场景和资源包的同步与异步加载。支持多包管理，可配置运行模式、热更新地址、资源路径分离，以及未使用资源与资源包的自动清理。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.asset/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.asset/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.asset",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.asset.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.assetsystem": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

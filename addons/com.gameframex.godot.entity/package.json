@@ -1,0 +1,40 @@
+{
+  "name": "com.gameframex.godot.entity",
+  "displayName": "Game Frame X Entity",
+  "category": "GameFrameX",
+  "description": "GameFrameX Entity — Godot entity management package. Manages showing, hiding, grouping, and parent-child hierarchy of game entities with async spawning (async/await-based). Integrates with the asset system for resource loading and object pools for instance reuse, with event notifications for show/hide lifecycle.\n\nGameFrameX Entity — Godot 实体管理功能包。管理游戏实体的显示、隐藏、分组与父子层级关系，支持异步生成（基于 async/await）。集成资源系统进行资源加载，集成对象池实现实例复用，并提供显示/隐藏生命周期的事件通知。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.entity/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.entity/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.entity",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.entity.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.asset": "1.0.0",
+    "com.gameframex.godot.assetsystem": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

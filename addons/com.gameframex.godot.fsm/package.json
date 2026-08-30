@@ -1,0 +1,37 @@
+{
+  "name": "com.gameframex.godot.fsm",
+  "displayName": "Game Frame X FSM",
+  "category": "GameFrameX",
+  "description": "GameFrameX FSM — Godot generic finite state machine package. Manages creation, lifecycle, and state transitions of typed state machines with per-FSM data dictionaries (Variable). Supports named states, generic data storage across states, FixedUpdate polling, and both generic and named FSM overloads.\n\nGameFrameX FSM — Godot 泛型有限状态机功能包。管理类型化状态机的创建、生命周期和状态转换，支持每个 FSM 的数据字典（Variable）。支持命名状态、跨状态泛型数据存储、FixedUpdate 轮询，以及泛型和命名 FSM 重载。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.fsm/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.fsm/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.fsm",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.fsm.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

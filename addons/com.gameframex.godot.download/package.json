@@ -1,0 +1,38 @@
+{
+  "name": "com.gameframex.godot.download",
+  "displayName": "Game Frame X Download",
+  "category": "GameFrameX",
+  "description": "GameFrameX Download — Godot multi-agent download manager package. Handles concurrent file downloads with priority queuing, configurable agent pools, pause/resume support, real-time speed reporting, timeout settings, and event-driven callbacks for start/update/success/failure.\n\nGameFrameX Download — Godot 多代理下载管理功能包。处理并发文件下载，支持优先级队列、可配置代理池、暂停/恢复、实时速度上报、超时设置，以及开始/更新/成功/失败的事件驱动回调。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.download/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.download/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.download",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.download.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

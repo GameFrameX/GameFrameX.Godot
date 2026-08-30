@@ -1,0 +1,38 @@
+{
+  "name": "com.gameframex.godot",
+  "displayName": "Game Frame X",
+  "category": "GameFrameX",
+  "description": "GameFrameX Godot core package — the essential runtime and editor foundation for the GameFrameX framework on Godot. Component system, object/reference pools, helper and utility libraries, extension methods, and editor tooling.\n\nGameFrameX Godot 核心包 — GameFrameX 框架在 Godot 上的运行时与编辑器基础。提供组件系统、对象池/引用池、Helper 与实用工具库、扩展方法及编辑器工具。",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot",
+    "GameFramework"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot.assetsystem": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

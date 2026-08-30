@@ -1,0 +1,41 @@
+{
+  "name": "com.gameframex.godot.sound",
+  "displayName": "Game Frame X Sound",
+  "category": "GameFrameX",
+  "description": "GameFrameX Sound — Godot audio management package. Provides organized playback through sound groups with independent mute/volume/priority, async playback with priority queuing, full lifecycle control (stop, pause, resume with fade), spatial audio binding to game entities, and event-driven success/failure notifications.\n\nGameFrameX Sound — Godot 音频管理功能包。通过声音组提供组织化播放，各组独立静音/音量/优先级，支持异步优先级队列播放、完整生命周期控制（停止、暂停、恢复含淡入淡出）、空间音频绑定到游戏实体，以及事件驱动的成功/失败通知。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.sound/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.sound/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.sound",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.sound.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.asset": "1.0.0",
+    "com.gameframex.godot.assetsystem": "1.0.0",
+    "com.gameframex.godot.entity": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

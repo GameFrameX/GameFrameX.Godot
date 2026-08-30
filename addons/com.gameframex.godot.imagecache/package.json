@@ -1,0 +1,38 @@
+{
+  "name": "com.gameframex.godot.imagecache",
+  "displayName": "Game Frame X Image Cache",
+  "category": "GameFrameX",
+  "description": "GameFrameX Image Cache — Godot remote image download and disk cache package. Downloads images from HTTP/HTTPS URLs, caches them on disk with MD5-based filenames, and loads them as Texture2D. Provides configurable cache path, with extensible support for max disk size and expiry. All-in-One Solution for Indie Game Development · Empowering Indie Developers' Dreams.\n\nGameFrameX Image Cache — Godot 远程图片下载与磁盘缓存功能包。从 HTTP/HTTPS URL 下载图片，使用基于 MD5 的文件名缓存到磁盘，并加载为 Texture2D。提供可配置的缓存路径，支持扩展最大磁盘容量和过期时间。独立游戏前后端一体化解决方案 · 独立游戏开发者的圆梦大使。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.imagecache/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.imagecache/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.imagecache",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.imagecache.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.download": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "com.gameframex.godot.luban",
+  "displayName": "Game Frame X LuBan",
+  "category": "GameFrameX",
+  "description": "独立游戏前后端一体化解决方案 https://gameframex.doc.alianblank.com/\n\n独立游戏前后端一体化解决方案 https://gameframex.doc.alianblank.com/",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.luban/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.luban/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.luban",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.luban.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

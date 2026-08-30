@@ -1,65 +1,54 @@
-# com.gameframex.godot.ui.gdgui
+<div align="center">
 
-GameFrameX 在 Godot 下的 `GDGUI` 风格适配层，提供 UIManager、UIFormHelper、UIGroupHelper、按钮/图片扩展与裁剪保活辅助。
+<img src="https://download.alianblank.com/gameframex/gameframex_logo_320.png" alt="Game Frame X Logo" width="160" />
 
-## 依赖
+# GameFrameX UI GDGUI (Godot)
 
-- `com.gameframex.godot`
-- `com.gameframex.godot.ui`
+[![License](https://img.shields.io/github/license/GameFrameX/com.gameframex.godot.ui.gdgui)](https://github.com/GameFrameX/com.gameframex.godot.ui.gdgui/blob/main/LICENSE.md)
+[![Version](https://img.shields.io/github/v/release/GameFrameX/com.gameframex.godot.ui.gdgui)](https://github.com/GameFrameX/com.gameframex.godot.ui.gdgui/releases)
+[![Godot Version](https://img.shields.io/badge/Godot-4.7-blue?logo=godotengine)](https://godotengine.org/)
+[![Documentation](https://img.shields.io/badge/Documentation-docs-blue)](https://gameframex.doc.alianblank.com)
 
-## 已提供内容
+All-in-One Solution for Indie Game Development · Empowering Indie Developers' Dreams
 
-- `UIManager`：基于 `BaseUIManager` 的 GDGUI 实现。
-- `GDGUIFormHelper`：使用 `PackedScene.Instantiate()` 创建 UI，使用 `QueueFree()` 释放。
-- `GDGUIUIGroupHelper`：按 UIGroup 创建容器并管理深度。
-- `GDGUI`：UI 基类，适配显示/隐藏处理器。
-- `GDGUIButtonExtension`：按钮事件 `Add/Remove/Set/Clear`。
-- `GDGUIImageExtension` + `UIImage`：图片异步设置纹理能力。
-- `GameFrameXUIGDGUICroppingHelper`：防裁剪类型引用保活。
+<br />
 
-## 默认接入行为
+[Documentation](https://gameframex.doc.alianblank.com) · [Quick Start](#installation) · QQ Group: 467608841 / 233840761
 
-项目已支持自动接入：
+<br />
 
-- `UIComponent` 的默认 `UIFormHelper` 指向 `GameFrameX.UI.GDGUI.Runtime.GDGUIFormHelper`。
-- `UIComponent` 的默认 `UIGroupHelper` 指向 `GameFrameX.UI.GDGUI.Runtime.GDGUIUIGroupHelper`。
-- 当 `componentType` 为空时，优先解析 `GameFrameX.UI.GDGUI.Runtime.UIManager`。
+**English** | [简体中文](README.zh-CN.md)
 
-## 回退策略
+</div>
 
-当 GDGUI 类型在运行时不可解析时，会自动回退到基础实现：
+## Overview
 
-- `UIManager` 回退到 `GameFrameX.UI.Runtime.UIManager`。
-- `UIFormHelper` 回退到 `GameFrameX.UI.Runtime.DefaultUIFormHelper`。
-- `UIGroupHelper` 回退到 `GameFrameX.UI.Runtime.DefaultUIGroupHelper`。
+GameFrameX UI GdGUI — Godot native Control-based UI implementation for the GameFrameX UI framework. UIForm lifecycle, open/close management and layer routing on top of Godot built-in UI controls.
 
-## 资源路径约定
+## Quick Start
 
-`UIManager.Open` 在加载 `PackedScene` 时会按以下顺序尝试：
+### Installation
 
-1. 原始路径
-2. `原始路径.tscn`
-3. `原始路径.scn`
+Copy the package into your Godot project's `addons/` directory:
 
-并支持将包含 `/Godot/` 的绝对路径规范化为 `res://` 资源路径。
-
-## 最小使用示例
-
-```csharp
-using GameFrameX.UI.GDGUI.Runtime;
-
-namespace Demo
-{
-    /// <summary>
-    /// 示例界面。
-    /// </summary>
-    public partial class DemoMainUI : GDGUI
-    {
-    }
-}
+```
+addons/com.gameframex.godot.ui.gdgui/
 ```
 
-## 备注
+The package is also published to the GameFrameX npm registry, so package-management tooling can consume it directly:
 
-- 插件元信息见 `plugin.cfg`。
-- 若需要切换自定义 Helper，可在 `UIComponent` 的导出字段中覆盖类型名。
+```
+https://npm.cnb.cool/GameFrameX/npm/-/packages/
+```
+
+### Dependencies
+
+- [`com.gameframex.godot`](https://github.com/GameFrameX/com.gameframex.godot)
+- [`com.gameframex.godot.asset`](https://github.com/GameFrameX/com.gameframex.godot.asset)
+- [`com.gameframex.godot.assetsystem`](https://github.com/GameFrameX/com.gameframex.godot.assetsystem)
+- [`com.gameframex.godot.event`](https://github.com/GameFrameX/com.gameframex.godot.event)
+- [`com.gameframex.godot.ui`](https://github.com/GameFrameX/com.gameframex.godot.ui)
+
+## License
+
+Apache-2.0 — see [LICENSE.md](LICENSE.md).

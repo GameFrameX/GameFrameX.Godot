@@ -1,0 +1,38 @@
+{
+  "name": "com.gameframex.godot.network",
+  "displayName": "Game Frame X Network",
+  "category": "GameFrameX",
+  "description": "GameFrameX Network — Godot channel-based network communication package. Supports multiple named connections with configurable packet handling pipelines (send/receive header and body handlers, heartbeat, compression/decompression), RPC timeout, focus-based heartbeat control, and event-driven connection status notifications.\n\nGameFrameX Network — Godot 基于通道的网络通信功能包。支持多个命名连接，可配置数据包处理管道（发送/接收头部与包体处理器、心跳、压缩/解压），RPC 超时、焦点控制心跳，以及事件驱动的连接状态通知。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.network/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.network/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.network",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.network.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

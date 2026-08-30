@@ -1,0 +1,35 @@
+{
+  "name": "com.gameframex.godot.operationclipboard",
+  "displayName": "Game Frame X Operation Clipboard",
+  "category": "GameFrameX",
+  "description": "GameFrameX OperationClipboard — cross-platform clipboard access package. Provides unified read/write operations for the system clipboard across platforms: Editor/Standalone (TextEditor), WebGL (Douyin/WeChat SDK), Android (JNI), iOS (P/Invoke).\n\nGameFrameX OperationClipboard — 跨平台剪贴板访问功能包。提供跨平台统一的系统剪贴板读写操作：Editor/Standalone（TextEditor）、WebGL（抖音/微信 SDK）、Android（JNI）、iOS（P/Invoke）。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.operationclipboard/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.operationclipboard/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.operationclipboard",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.operationclipboard.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

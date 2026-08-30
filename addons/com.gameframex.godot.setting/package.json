@@ -1,0 +1,37 @@
+{
+  "name": "com.gameframex.godot.setting",
+  "displayName": "Game Frame X Setting",
+  "category": "GameFrameX",
+  "description": "GameFrameX Setting — Godot persistent game settings package. Provides typed key-value storage (bool, int, float, string, serializable objects) with pluggable storage backends (defaulting to Godot PlayerPrefs), supporting load/save lifecycle, existence checks, and bulk removal.\n\nGameFrameX Setting — Godot 持久化游戏设置功能包。提供类型化键值存储（bool、int、float、string、可序列化对象），支持可插拔存储后端（默认使用 Godot PlayerPrefs），提供加载/保存生命周期、存在性检查和批量删除。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.setting/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.setting/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.setting",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.setting.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

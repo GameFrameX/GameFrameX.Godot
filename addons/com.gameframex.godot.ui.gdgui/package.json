@@ -1,0 +1,41 @@
+{
+  "name": "com.gameframex.godot.ui.gdgui",
+  "displayName": "GameFrameX UI GDGUI",
+  "category": "GameFrameX",
+  "description": "GameFrameX UI GdGUI — Godot native Control-based UI implementation for the GameFrameX UI framework. UIForm lifecycle, open/close management and layer routing on top of Godot built-in UI controls.\n\nGameFrameX UI GdGUI — 基于 Godot 原生 Control 的 GameFrameX UI 框架实现。提供 UIForm 生命周期、打开/关闭管理与层级路由。",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.ui.gdgui/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.ui.gdgui/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.ui.gdgui",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.ui.gdgui.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.asset": "1.0.0",
+    "com.gameframex.godot.assetsystem": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0",
+    "com.gameframex.godot.ui": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

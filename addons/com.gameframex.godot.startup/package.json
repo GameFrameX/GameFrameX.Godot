@@ -1,0 +1,48 @@
+{
+  "name": "com.gameframex.godot.startup",
+  "displayName": "Game Frame X Startup",
+  "category": "GameFrameX",
+  "description": "GameFrameX Startup — Godot generic game startup flow scaffold. Encapsulates the common flow from app launch to hotfix loading: launcher UI → fetch global info (primary-backup URL failover) → fetch app version → fetch asset package version → YooAsset patch → hotfix launch. All project-specific variables (URL list, HTTP params, hotfix entry, UI implementation) are injected via StartupOptions ScriptableObject + two interfaces (IStartupUIHandler / IHotfixLauncher).\n\nGameFrameX Startup — Godot 通用启动流程脚手架。封装从游戏启动到热更加载的完整流程：启动 UI → 拉全局信息（URL 主备 failover）→ 拉版本信息 → 拉资源包版本 → YooAsset 补丁 → 启动热更。所有项目可变项（URL 列表、HTTP 公共参数、热更入口、UI 实现）通过 StartupOptions ScriptableObject 配置资产 + 两个接口（IStartupUIHandler / IHotfixLauncher）注入。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.startup/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.startup/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.startup",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.startup.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.asset": "1.0.0",
+    "com.gameframex.godot.assetsystem": "1.0.0",
+    "com.gameframex.godot.entry": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0",
+    "com.gameframex.godot.fsm": "1.0.0",
+    "com.gameframex.godot.globalconfig": "1.0.0",
+    "com.gameframex.godot.localization": "1.0.0",
+    "com.gameframex.godot.procedure": "1.0.0",
+    "com.gameframex.godot.setting": "1.0.0",
+    "com.gameframex.godot.systeminfo": "1.0.0",
+    "com.gameframex.godot.web": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

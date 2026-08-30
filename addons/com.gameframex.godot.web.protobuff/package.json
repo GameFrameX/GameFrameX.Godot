@@ -1,0 +1,40 @@
+{
+  "name": "com.gameframex.godot.web.protobuff",
+  "displayName": "Game Frame X Web ProtoBuff",
+  "category": "GameFrameX",
+  "description": "GameFrameX Web ProtoBuf — Godot Protobuf HTTP POST package. Extends the Web layer with binary message support, serializing MessageObject instances and deserializing typed IResponseMessage responses via conditional compilation.\n\nGameFrameX Web ProtoBuf — Godot Protobuf HTTP POST 功能包。扩展 Web 层以支持二进制消息，序列化 MessageObject 实例并通过条件编译反序列化类型化的 IResponseMessage 响应。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.web.protobuff/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.web.protobuff/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.web.protobuff",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.web.protobuff.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.google.protobuf": "1.0.0",
+    "com.gameframex.godot.network": "1.0.0",
+    "com.gameframex.godot.web": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

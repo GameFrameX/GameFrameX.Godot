@@ -1,0 +1,37 @@
+{
+  "name": "com.gameframex.godot.globalconfig",
+  "displayName": "Game Frame X Global Config",
+  "category": "GameFrameX",
+  "description": "GameFrameX GlobalConfig — Godot global configuration package. Stores and manages global game configuration retrieved from remote servers, including version check URLs, AOT metadata lists for hybridclr, and host server addresses. Provides request/response model classes for app version, asset package version, and global info queries.\n\nGameFrameX GlobalConfig — Godot 全局配置功能包。存储和管理从远程服务器获取的全局游戏配置，包括版本检测地址、hybridclr 的 AOT 元数据列表和主机服务器地址。提供应用版本、资源包版本和全局信息查询的请求/响应模型类。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.globalconfig/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.globalconfig/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.globalconfig",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.globalconfig.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

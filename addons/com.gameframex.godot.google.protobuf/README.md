@@ -1,21 +1,50 @@
-# ProtoBuf
+<div align="center">
 
-protobuf-net is a contract based serializer for .NET code, that happens to write data in the "protocol buffers" serialization format engineered by Google. The API, however, is very different to Google's, and follows typical .NET patterns (it is broadly comparable, in usage, to XmlSerializer,
-DataContractSerializer, etc). It should work for most .NET languages that write standard types and can use attributes.
+<img src="https://download.alianblank.com/gameframex/gameframex_logo_320.png" alt="Game Frame X Logo" width="160" />
 
-该库主要服务于 `https://github.com/AlianBlank/GameFrameX` 作为子库使用。
+# Google Protocol Buffers (Godot)
 
-# 使用方式
+[![License](https://img.shields.io/github/license/GameFrameX/com.gameframex.godot.google.protobuf)](https://github.com/GameFrameX/com.gameframex.godot.google.protobuf/blob/main/LICENSE.md)
+[![Version](https://img.shields.io/github/v/release/GameFrameX/com.gameframex.godot.google.protobuf)](https://github.com/GameFrameX/com.gameframex.godot.google.protobuf/releases)
+[![Godot Version](https://img.shields.io/badge/Godot-4.7-blue?logo=godotengine)](https://godotengine.org/)
+[![Documentation](https://img.shields.io/badge/Documentation-docs-blue)](https://gameframex.doc.alianblank.com)
 
-1. 直接使用本 Godot 仓库中的 `addons/com.gameframex.godot.google.protobuf`
-2. 或者将对应插件目录复制到目标 Godot 项目的 `addons/` 目录
+All-in-One Solution for Indie Game Development · Empowering Indie Developers' Dreams
 
-# 改动功能
+<br />
 
-1. 作为 Godot 项目插件目录使用
+[Documentation](https://gameframex.doc.alianblank.com) · [Quick Start](#installation) · QQ Group: 467608841 / 233840761
 
-# 当前版本 `22.2.0`
+<br />
 
-# 使用文档
+**English** | [简体中文](README.zh-CN.md)
 
-https://github.com/protobuf-net/protobuf-net
+</div>
+
+## Overview
+
+Google Protocol Buffers
+
+## Quick Start
+
+### Installation
+
+Copy the package into your Godot project's `addons/` directory:
+
+```
+addons/com.gameframex.godot.google.protobuf/
+```
+
+The package is also published to the GameFrameX npm registry, so package-management tooling can consume it directly:
+
+```
+https://npm.cnb.cool/GameFrameX/npm/-/packages/
+```
+
+### Dependencies
+
+- [`com.gameframex.godot.network`](https://github.com/GameFrameX/com.gameframex.godot.network)
+
+## License
+
+Apache-2.0 — see [LICENSE.md](LICENSE.md).

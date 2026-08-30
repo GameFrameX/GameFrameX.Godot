@@ -1,0 +1,55 @@
+{
+  "name": "com.gameframex.godot.entry",
+  "displayName": "Game Frame X Entry",
+  "category": "GameFrameX",
+  "description": "GameFrameX Entry — application entry point and facade layer package. Provides a static GameApp class aggregating lazy-loaded accessors to all framework subsystems (Procedure, Scene, Network, FSM, Entity, Download, Timer, UI, Audio, Analytics, etc.) with conditional compilation so only used subsystems are compiled in.\n\nGameFrameX Entry — 应用入口与门面层功能包。提供静态 GameApp 类，聚合所有框架子系统的延迟加载访问器（Procedure、Scene、Network、FSM、Entity、Download、Timer、UI、Audio、Analytics 等），通过条件编译确保只编译已使用的子系统。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.entry/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.entry/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.entry",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.entry.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.asset": "1.0.0",
+    "com.gameframex.godot.config": "1.0.0",
+    "com.gameframex.godot.download": "1.0.0",
+    "com.gameframex.godot.entity": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0",
+    "com.gameframex.godot.fsm": "1.0.0",
+    "com.gameframex.godot.globalconfig": "1.0.0",
+    "com.gameframex.godot.localization": "1.0.0",
+    "com.gameframex.godot.network": "1.0.0",
+    "com.gameframex.godot.procedure": "1.0.0",
+    "com.gameframex.godot.scene": "1.0.0",
+    "com.gameframex.godot.setting": "1.0.0",
+    "com.gameframex.godot.sound": "1.0.0",
+    "com.gameframex.godot.timer": "1.0.0",
+    "com.gameframex.godot.ui": "1.0.0",
+    "com.gameframex.godot.ui.fairygui": "1.0.0",
+    "com.gameframex.godot.web": "1.0.0",
+    "com.gameframex.godot.web.protobuff": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

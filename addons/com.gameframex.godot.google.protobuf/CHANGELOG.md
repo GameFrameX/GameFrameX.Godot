@@ -1,8 +1,10 @@
+# 1.0.0 (2026-08-30)
+
+
+### Features
+
+* initial commit ([eceef2b](https://github.com/gameframex/com.gameframex.godot.google.protobuf/commit/eceef2b7f6ba2f0298a06f96c32dc4b39a4eca1f))
+
 # Changelog
 
-Google Protobuf 插件的历史变更最初来自迁移前的旧仓库。
-
-当前 Godot 版本以后，以本仓库的提交记录和发布说明为准：
-
-- 仓库：`GameFrameX/GameFrameX.Godot`
-- 插件目录：`addons/com.gameframex.godot.google.protobuf`
+All notable changes to this project will be documented in this file.

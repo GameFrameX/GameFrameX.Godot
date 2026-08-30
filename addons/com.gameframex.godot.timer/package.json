@@ -1,0 +1,38 @@
+{
+  "name": "com.gameframex.godot.timer",
+  "displayName": "Game Frame X Timer",
+  "category": "GameFrameX",
+  "description": "GameFrameX Timer — Godot lightweight timer/scheduler package. Supports repeating timers (configurable count), one-shot timers, and per-frame update callbacks, with pause/resume, tag-based grouping, and query APIs. Docs: https://gameframex.doc.alianblank.com\n\nGameFrameX Timer — Godot 轻量级计时器/调度器功能包。支持重复计时器（可配置次数）、一次性计时器和每帧更新回调，提供暂停/恢复、标签分组管理和查询 API。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot",
+    "Timer"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.timer/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.timer/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.timer",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.timer.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

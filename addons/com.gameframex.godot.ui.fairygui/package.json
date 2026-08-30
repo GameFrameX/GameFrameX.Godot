@@ -1,0 +1,42 @@
+{
+  "name": "com.gameframex.godot.ui.fairygui",
+  "displayName": "Game Frame X UI FairyGUI",
+  "category": "GameFrameX",
+  "description": "GameFrameX UI FairyGUI — FairyGUI adapter for the GameFrameX UI system. Provides FairyGUI-native form instantiation (UIPackage.CreateObject), GComponent-based UI groups with GRoot integration, proper FairyGUI disposal, and async resource loading for FairyGUI packages.\n\nGameFrameX UI FairyGUI — GameFrameX UI 系统的 FairyGUI 适配器。提供 FairyGUI 原生窗体实例化（UIPackage.CreateObject）、基于 GComponent 的 UI 分组与 GRoot 集成、FairyGUI 资源的正确释放，以及 FairyGUI 包的异步资源加载。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.ui.fairygui/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.ui.fairygui/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.ui.fairygui",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.ui.fairygui.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.asset": "1.0.0",
+    "com.gameframex.godot.assetsystem": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0",
+    "com.gameframex.godot.fairygui.godot": "1.0.0",
+    "com.gameframex.godot.ui": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

@@ -1,8 +1,10 @@
+# 1.0.0 (2026-08-30)
+
+
+### Features
+
+* initial commit ([a2a9f58](https://github.com/gameframex/com.gameframex.godot.assetsystem/commit/a2a9f58099bac4a59e9d4921d1cdc12527be9662))
+
 # Changelog
 
-资源系统插件的历史变更最初来自迁移前的旧实现。
-
-当前 Godot 版本以后，以本仓库的提交记录和发布说明为准：
-
-- 仓库：`GameFrameX/GameFrameX.Godot`
-- 插件目录：`addons/com.gameframex.godot.assetsystem`
+All notable changes to this project will be documented in this file.

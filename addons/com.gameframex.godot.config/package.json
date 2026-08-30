@@ -1,0 +1,39 @@
+{
+  "name": "com.gameframex.godot.config",
+  "displayName": "Game Frame X Config",
+  "category": "GameFrameX",
+  "description": "GameFrameX Config — Godot configuration and data table management package. Provides named configuration management with generic data tables (IDataTable<T>), supporting lookup by int/long/string IDs, LINQ-style queries (Find, FindList, ForEach, Max, Min, Sum), and async data table loading for non-blocking initialization.\n\nGameFrameX Config — Godot 配置与数据表管理功能包。提供命名配置管理与泛型数据表（IDataTable<T>），支持按 int/long/string ID 查找、LINQ 风格查询（Find、FindList、ForEach、Max、Min、Sum），以及异步数据表加载，实现非阻塞初始化。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.config/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.config/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.config",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.config.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.asset": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

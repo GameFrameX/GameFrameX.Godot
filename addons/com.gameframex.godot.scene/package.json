@@ -1,0 +1,40 @@
+{
+  "name": "com.gameframex.godot.scene",
+  "displayName": "Game Frame X Scene",
+  "category": "GameFrameX",
+  "description": "GameFrameX Scene — Godot scene management package built on YooAsset. Handles async scene loading/unloading with configurable LoadSceneMode, progress tracking, active-scene ordering system, automatic camera refresh, and event notifications for scene state changes.\n\nGameFrameX Scene — 基于 YooAsset 的 Godot 场景管理功能包。处理异步场景加载/卸载，支持可配置 LoadSceneMode、进度追踪、活跃场景排序系统、自动相机刷新，以及场景状态变更的事件通知。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.scene/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.scene/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.scene",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.scene.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.asset": "1.0.0",
+    "com.gameframex.godot.assetsystem": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "com.gameframex.godot.localization",
+  "displayName": "Game Frame X Localization",
+  "category": "GameFrameX",
+  "description": "GameFrameX Localization — Godot multi-language localization package. Provides dictionary-based string translations with parameterized formatting (up to 16 typed parameters), runtime language switching with event notifications, automatic fallback to system or default language, and persistence of language preference via the Setting system.\n\nGameFrameX Localization — Godot 多语言本地化功能包。提供基于字典的字符串翻译，支持参数化格式化（最多 16 个类型化参数），运行时语言切换与事件通知，自动回退到系统或默认语言，并通过 Setting 系统持久化语言偏好。文档：https://gameframex.doc.alianblank.com",
+  "version": "1.0.0",
+  "godot": "4.7",
+  "keywords": [
+    "GameFrameX",
+    "Godot"
+  ],
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/GameFrameX/com.gameframex.godot.localization/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/GameFrameX/com.gameframex.godot.localization/blob/main/LICENSE.md",
+  "repository": {
+    "name": "com.gameframex.godot.localization",
+    "url": "git+https://github.com/gameframex/com.gameframex.godot.localization.git",
+    "type": "git"
+  },
+  "author": {
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
+  },
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0",
+    "com.gameframex.godot.asset": "1.0.0",
+    "com.gameframex.godot.event": "1.0.0",
+    "com.gameframex.godot.setting": "1.0.0"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  }
+}
