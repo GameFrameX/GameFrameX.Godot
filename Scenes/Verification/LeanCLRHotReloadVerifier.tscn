@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Assets/LeanCLR/Scripts/HotfixDemo.lcs" id="1_hotfix_lcs"]
+[ext_resource type="Script" path="res://Assets/LeanCLR/Scripts/LeanCLRHotReloadRelay.gd" id="2_relay"]
+
+[node name="LeanCLRHotReloadVerifier" type="Node"]
+
+[node name="Demo" type="Node" parent="."]
+script = ExtResource("1_hotfix_lcs")
+
+[node name="LiveHotReloadHost" type="LeanCLRHotReloadHost" parent="."]
+
+[node name="Relay" type="Node" parent="."]
+script = ExtResource("2_relay")
+hot_reload_host_path = NodePath("../LiveHotReloadHost")
+demo_path = NodePath("../Demo")
