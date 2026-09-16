@@ -1,0 +1,46 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <LangVersion>latest</LangVersion>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <AssemblyName>LeanCLRHotfix</AssemblyName>
+    <RootNamespace>GameFrameX.LeanCLR</RootNamespace>
+    <NoStandardLib>true</NoStandardLib>
+    <NoConfig>true</NoConfig>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <OutputPath>Assemblies\</OutputPath>
+    <LeanCLRRoot>$(MSBuildThisFileDirectory)..\..\Native\leanclr-godot</LeanCLRRoot>
+    <LeanCLRBcl>$(LeanCLRRoot)\thirdparty\leanclr\src\libraries\dotnetframework4.x-linux</LeanCLRBcl>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Scripts\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>$(LeanCLRBcl)\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>$(LeanCLRBcl)\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>$(LeanCLRBcl)\System.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="GodotSharpCompat">
+      <HintPath>Assemblies\GodotSharpCompat.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- msbuild 会清理 OutputPath 中不属于本工程的文件，BCL 与 Compat 必须声明为 Content 以在每次构建后回补。 -->
+    <Content Include="$(LeanCLRBcl)\*.dll">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assemblies\GodotSharpCompat.dll">
+      <Link>GodotSharpCompat.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

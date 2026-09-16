@@ -1,0 +1,3 @@
+assembly=LeanCLRHotfix
+type=GameFrameX.LeanCLR.HotfixDemo
+base=Node

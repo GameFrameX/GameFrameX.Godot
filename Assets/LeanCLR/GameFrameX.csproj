@@ -1,0 +1,87 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <LangVersion>latest</LangVersion>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <AssemblyName>Game</AssemblyName>
+    <RootNamespace>GameFrameX</RootNamespace>
+    <NoStandardLib>true</NoStandardLib>
+    <NoConfig>true</NoConfig>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <OutputPath>Assemblies\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- core 包运行时（GameFrameX.Runtime：Entry/Component/EventPool/ReferencePool/Utility/Helper） -->
+    <Compile Include="..\..\addons\com.gameframex.godot\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.event\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.fsm\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.procedure\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.timer\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.web\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.web.protobuff\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.setting\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.network\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.localization\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.globalconfig\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.config\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.entity\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.download\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.ui\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.assetsystem\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.asset\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.fairygui.godot\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.google.protobuf\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.luban\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.systeminfo\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.getchannel\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.operationclipboard\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.scene\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.sound\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.imagecache\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.startup\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.entry\Runtime\**\*.cs" />
+    <Compile Include="..\..\addons\com.gameframex.godot.ui.gdgui\Runtime\**\*.cs" />
+    <Compile Include="Scripts\NetFxCompatShim.cs" />
+    <Compile Include="Scripts\LeanClrSmokeTest.cs" />
+    <!-- net8 Span/Buffers 扩展在 netfx 目标下排除 -->
+    <Compile Remove="..\..\addons\com.gameframex.godot\Runtime\Extension\SequenceReader\**\*.cs" />
+    <Compile Remove="..\..\addons\com.gameframex.godot\Runtime\Extension\Extension\BufferExtension.cs" />
+    <Compile Remove="..\..\addons\com.gameframex.godot\Runtime\Utility\Utility.Verifier.Crc64.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>..\..\Native\leanclr-godot\thirdparty\leanclr\src\libraries\dotnetframework4.x-linux\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>..\..\Native\leanclr-godot\thirdparty\leanclr\src\libraries\dotnetframework4.x-linux\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>..\..\Native\leanclr-godot\thirdparty\leanclr\src\libraries\dotnetframework4.x-linux\System.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml">
+      <HintPath>..\..\Native\leanclr-godot\thirdparty\leanclr\src\libraries\dotnetframework4.x-linux\System.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+      <HintPath>Assemblies\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics">
+      <HintPath>Assemblies\System.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Assemblies\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="netstandard">
+      <HintPath>Assemblies\netstandard.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>Assemblies\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="GodotSharpCompat">
+      <HintPath>Assemblies\GodotSharpCompat.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
