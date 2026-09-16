@@ -22,7 +22,9 @@
     "email": "alianblank@outlook.com",
     "url": "https://gameframex.doc.alianblank.com"
   },
-  "dependencies": {},
+  "dependencies": {
+    "com.gameframex.godot": "1.0.0"
+  },
   "devDependencies": {
     "semantic-release": "^24.2.0",
     "@semantic-release/changelog": "^6.0.3",

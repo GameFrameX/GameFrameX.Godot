@@ -1,7 +1,9 @@
 {
     "name": "YooAsset.Runtime",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GameFrameX.Runtime"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
