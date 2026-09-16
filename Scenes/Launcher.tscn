@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://addons/com.gameframex.godot.entity/Runtime/Entity/EntityComponent.cs" id="15_nrbew"]
 [ext_resource type="Script" path="res://addons/com.gameframex.godot.download/Runtime/Download/DownloadComponent.cs" id="16_tas22"]
 [ext_resource type="Script" path="res://addons/com.gameframex.godot.ui/Runtime/UIComponent.cs" id="17_j4yks"]
+[ext_resource type="Script" path="res://Scripts/Verification/LoginFlowAutoDriver.cs" id="18_autoflow"]
 
 [node name="GFX" type="Node2D"]
 script = ExtResource("1_uf0nc")
@@ -141,3 +142,6 @@ componentType = "GameFrameX.UI.GDGUI.Runtime.UIManager"
 [node name="GDGUI" type="Node" parent="UI"]
 
 [node name="FGUI" type="Node" parent="UI"]
+
+[node name="LoginFlowAutoDriver" type="Node" parent="."]
+script = ExtResource("18_autoflow")

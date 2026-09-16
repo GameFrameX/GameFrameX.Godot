@@ -36,7 +36,9 @@
   <Target Name="CopyHotfixAssemblyToUserHotfix" AfterTargets="Build">
     <PropertyGroup>
       <GodotUserHotfixDir Condition="'$(APPDATA)' != ''">$(APPDATA)\Godot\app_userdata\Godot\hotfix\</GodotUserHotfixDir>
-      <GodotUserHotfixDir Condition="'$(APPDATA)' == '' and '$(HOME)' != ''">$(HOME)/.local/share/godot/app_userdata/Godot/hotfix/</GodotUserHotfixDir>
+      <!-- macOS：Godot user:// 根为 ~/Library/Application Support/Godot（先于 Linux XDG 分支匹配） -->
+      <GodotUserHotfixDir Condition="'$(GodotUserHotfixDir)' == '' and '$(HOME)' != '' and Exists('$(HOME)/Library/Application Support/Godot')">$(HOME)/Library/Application Support/Godot/app_userdata/Godot/hotfix/</GodotUserHotfixDir>
+      <GodotUserHotfixDir Condition="'$(GodotUserHotfixDir)' == '' and '$(HOME)' != ''">$(HOME)/.local/share/godot/app_userdata/Godot/hotfix/</GodotUserHotfixDir>
       <GodotUserHotfixDir Condition="'$(GodotUserHotfixDir)' == ''">..\..\BuildArtifacts\Assemblies\UserHotfix\</GodotUserHotfixDir>
     </PropertyGroup>
     <MakeDir Directories="$(GodotUserHotfixDir)" />

@@ -9,6 +9,7 @@ using System.Text.Json;
 using Godot;
 using GameFrameX.AssetSystem;
 using GameFrameX.AssetSystem.Editor;
+using GameFrameX.Editor;
 
 [Tool]
 public partial class AssetSystemEditorPlugin : EditorPlugin

@@ -13,8 +13,12 @@ namespace Godot.Hotfix.FairyGUI
 	{
 		private const string LoginScenePath = "res://Assets/Bundles/UI/FGUI/UILogin/UILogin.tscn";
 		private const string MainScenePath = "res://Assets/Bundles/UI/FGUI/UIMain/UIMain.tscn";
+		private const string PlayerListScenePath = "res://Assets/Bundles/UI/FGUI/UILogin/UIPlayerListForm.tscn";
+		private const string PlayerCreateScenePath = "res://Assets/Bundles/UI/FGUI/UILogin/UIPlayerCreateForm.tscn";
 		private const string LoginTypeFullName = "Godot.Hotfix.FairyGUI.UILogin";
 		private const string MainTypeFullName = "Godot.Hotfix.FairyGUI.UIMain";
+		private const string PlayerListTypeFullName = "Godot.Hotfix.FairyGUI.UIPlayerListForm";
+		private const string PlayerCreateTypeFullName = "Godot.Hotfix.FairyGUI.UIPlayerCreateForm";
 #if NOT_EDITOR
 		private const string LoginPckPackageName = "fgui_uilogin";
 #endif
@@ -212,27 +216,125 @@ namespace Godot.Hotfix.FairyGUI
 					await sceneTree.ToSignal(sceneTree, SceneTree.SignalName.ProcessFrame);
 				}
 
-				GD.Print("[UILauncher-FGUI] login clicked, continue to main.");
-				HotfixTypeResolver.TryUnsubscribeEvent(_loginForm, "LoginClicked", (Action)OnLoginClicked);
-				uiComponent.CloseUIForm(_loginForm, true);
-				_loginForm = null;
+			GD.Print("[UILauncher-FGUI] login clicked, continue to player selection.");
+			HotfixTypeResolver.TryUnsubscribeEvent(_loginForm, "LoginClicked", (Action)OnLoginClicked);
+			uiComponent.CloseUIForm(_loginForm, true);
+			_loginForm = null;
 
-				var mainForm = await OpenUiByKnownTypeAsync(uiComponent, MainScenePath, MainTypeFullName);
-				if (mainForm == null)
-				{
-					GD.PushError($"[UILauncher-FGUI] Open UIMain failed. path={MainScenePath}");
-					return;
-				}
-
-				if (!HotfixTypeResolver.TryInvokeMethod(mainForm, "SetPlayerInfo", "GameFrameX", "Lv.1"))
-				{
-					GD.PushWarning("[UILauncher-FGUI] SetPlayerInfo invoke failed.");
-				}
+			var role = await RunRoleSelectionAsync(uiComponent, flowGeneration);
+			if (flowGeneration != _flowGeneration)
+			{
+				return;
 			}
+
+			if (role == null)
+			{
+				GD.PushError("[UILauncher-FGUI] role selection finished without role.");
+				return;
+			}
+
+			var mainForm = await OpenUiByKnownTypeAsync(uiComponent, MainScenePath, MainTypeFullName);
+			if (mainForm == null)
+			{
+				GD.PushError($"[UILauncher-FGUI] Open UIMain failed. path={MainScenePath}");
+				return;
+			}
+
+			GD.Print($"[UILauncher-FGUI] 进入游戏。role={role.Name} level={role.Level}");
+			if (!HotfixTypeResolver.TryInvokeMethod(mainForm, "SetPlayerInfo", role.Name, $"Lv.{role.Level}"))
+			{
+				GD.PushWarning("[UILauncher-FGUI] SetPlayerInfo invoke failed.");
+			}
+		}
 			catch (Exception exception)
 			{
 				GD.PushError($"[UILauncher-FGUI] RunFlowAsync exception: {exception}");
 			}
+		}
+
+		/// <summary>
+		/// 登录成功后的角色选择/创建环节：已有角色进入列表选择，无角色进入创建。
+		/// 返回最终确定进入游戏的角色；null 表示失败。
+		/// </summary>
+		private async Task<Godot.Startup.Account.LocalAccountStore.RoleRecord> RunRoleSelectionAsync(UIComponent uiComponent, int flowGeneration)
+		{
+			var roles = Godot.Startup.Account.LocalAccountStore.GetCurrentRoles();
+			var useCreate = roles.Count == 0;
+			var scenePath = useCreate ? PlayerCreateScenePath : PlayerListScenePath;
+			var typeFullName = useCreate ? PlayerCreateTypeFullName : PlayerListTypeFullName;
+			GD.Print($"[UILauncher-FGUI] open player selection. mode={(useCreate ? "create" : "list")} path={scenePath}");
+
+			var roleForm = await OpenUiByKnownTypeAsync(uiComponent, scenePath, typeFullName);
+			if (roleForm == null)
+			{
+				GD.PushError($"[UILauncher-FGUI] Open role form failed. path={scenePath}");
+				return null;
+			}
+
+			var roleChosen = false;
+			var waitFrames = 0;
+			if (roleForm is UIPlayerListForm listForm)
+			{
+				void OnRoleSelected()
+				{
+					roleChosen = true;
+				}
+
+				listForm.RoleSelected += OnRoleSelected;
+				while (!roleChosen)
+				{
+					if (flowGeneration != _flowGeneration)
+					{
+						listForm.RoleSelected -= OnRoleSelected;
+						return null;
+					}
+
+					waitFrames++;
+					if (waitFrames == 300 || waitFrames % 900 == 0)
+					{
+						GD.PushWarning($"[UILauncher-FGUI] still waiting role selection. frames={waitFrames}");
+					}
+
+					await (Engine.GetMainLoop() as SceneTree).ToSignal(Engine.GetMainLoop() as SceneTree, SceneTree.SignalName.ProcessFrame);
+				}
+
+				listForm.RoleSelected -= OnRoleSelected;
+			}
+			else if (roleForm is UIPlayerCreateForm createForm)
+			{
+				void OnRoleCreated()
+				{
+					roleChosen = true;
+				}
+
+				createForm.RoleCreated += OnRoleCreated;
+				while (!roleChosen)
+				{
+					if (flowGeneration != _flowGeneration)
+					{
+						createForm.RoleCreated -= OnRoleCreated;
+						return null;
+					}
+
+					waitFrames++;
+					if (waitFrames == 300 || waitFrames % 900 == 0)
+					{
+						GD.PushWarning($"[UILauncher-FGUI] still waiting role creation. frames={waitFrames}");
+					}
+
+					await (Engine.GetMainLoop() as SceneTree).ToSignal(Engine.GetMainLoop() as SceneTree, SceneTree.SignalName.ProcessFrame);
+				}
+
+				createForm.RoleCreated -= OnRoleCreated;
+			}
+			else
+			{
+				GD.PushError($"[UILauncher-FGUI] unexpected role form type. type={roleForm.GetType().FullName}");
+				return null;
+			}
+
+			uiComponent.CloseUIForm(roleForm, true);
+			return Godot.Startup.Account.LocalAccountStore.SelectedRole;
 		}
 
 		private static async Task<IUIForm> OpenUiByKnownTypeAsync(UIComponent uiComponent, string scenePath, string uiTypeFullName)
