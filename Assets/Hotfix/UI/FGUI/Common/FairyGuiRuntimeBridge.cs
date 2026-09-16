@@ -27,6 +27,9 @@ namespace Godot.Hotfix.FairyGUI
             if (!s_Initialized)
             {
                 _ = Stage.inst;
+                // SystemFont 底层字体异步解析会导致静态文本首绘为空且不再重绘；
+                // 默认字体改用仓库内同步加载的中文字体文件（含 ASCII/CJK）。
+                UIConfig.defaultFont = "res://addons/ds_inspector/Fonts/WenQuanYiMicroHei.ttf";
                 s_Initialized = true;
             }
 

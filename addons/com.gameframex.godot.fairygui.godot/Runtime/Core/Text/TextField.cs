@@ -270,6 +270,14 @@ namespace FairyGUI
             Name = "TextField";
             _oldSize = _size;
         }
+
+        public override void _EnterTree()
+        {
+            base._EnterTree();
+            // 构造期（未入树）文本/格式设置触发的 QueueRedraw 不生效；
+            // 入树时补一次重绘，保证 XML 静态文本能完成首次绘制。
+            QueueRedraw();
+        }
         public new virtual void Dispose()
         {
         }
