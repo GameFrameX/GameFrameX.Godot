@@ -65,11 +65,6 @@ namespace GameFrameX.Editor
         private const int LogDefineEnableFatalAndAboveLogsId = 106;
         
         /// <summary>
-        /// 顶部菜单项：资源打包器（兼容旧入口）。
-        /// </summary>
-        private const int TopMenuAssetBuilderId = 20;
-        
-        /// <summary>
         /// 顶部菜单项：生成客户端配置。
         /// </summary>
         private const int TopMenuGenerateClientConfigId = 21;
@@ -123,7 +118,6 @@ namespace GameFrameX.Editor
         /// </summary>
         private string m_CurrentLocale;
         private RuntimeLogBridge m_RuntimeLogBridge;
-        private AssetSystemBuilderDialog m_AssetSystemBuilderDialog;
         private ScriptingDefineSymbolsWindow m_ScriptingDefineSymbolsWindow;
         private AsmdefEditorWindow m_AsmdefEditorWindow;
         private AsmdefSyncService m_AsmdefSyncService;
@@ -186,12 +180,6 @@ namespace GameFrameX.Editor
             ScriptingDefineSymbols.DefineSymbolsChanged -= OnDefineSymbolsChanged;
             SetProcess(false);
             UnregisterTopToolbarMenu();
-            if (m_AssetSystemBuilderDialog != null)
-            {
-                m_AssetSystemBuilderDialog.QueueFree();
-                m_AssetSystemBuilderDialog = null;
-            }
-
             if (m_ScriptingDefineSymbolsWindow != null)
             {
                 m_ScriptingDefineSymbolsWindow.QueueFree();
@@ -227,7 +215,6 @@ namespace GameFrameX.Editor
 
         private void CloseTransientEditorWindowsForDefineSwitch()
         {
-            SafeCloseWindow(ref m_AssetSystemBuilderDialog);
             SafeCloseWindow(ref m_ScriptingDefineSymbolsWindow);
         }
 
@@ -309,7 +296,6 @@ namespace GameFrameX.Editor
             m_TopMenuButton.Text = "GameFrameX";
 
             m_TopPopupMenu = m_TopMenuButton.GetPopup();
-            m_TopPopupMenu.AddItem(L("资源打包器", "Asset Builder"), TopMenuAssetBuilderId);
             m_TopPopupMenu.AddItem(L("生成客户端配置", "Generate Client Config"), TopMenuGenerateClientConfigId);
             m_TopPopupMenu.AddItem(L("Asmdef 属性编辑器", "Asmdef Editor"), TopMenuAsmdefEditorId);
             m_TopPopupMenu.AddSeparator();
@@ -442,16 +428,6 @@ namespace GameFrameX.Editor
         /// <param name="id">菜单项标识。</param>
         private void OnTopMenuIdPressed(long id)
         {
-            if (id == TopMenuAssetBuilderId)
-            {
-                if (!ShowUnifiedAssetBuilderDialog() && global::AssetSystemEditorPlugin.RequestOpenBuilderFromCompatibilityEntry() == false)
-                {
-                    GD.PrintErr("无法打开资源打包器：统一窗口与 AssetSystem 入口均不可用。");
-                }
-
-                return;
-            }
-
             if (id == TopMenuGenerateClientConfigId)
             {
                 RunGenerateClientConfig();
@@ -475,40 +451,6 @@ namespace GameFrameX.Editor
 
             GD.PrintErr(summary);
         }
-
-        private bool ShowUnifiedAssetBuilderDialog()
-        {
-            try
-            {
-                if (m_AssetSystemBuilderDialog == null || !GodotObject.IsInstanceValid(m_AssetSystemBuilderDialog))
-                {
-                    m_AssetSystemBuilderDialog = new AssetSystemBuilderDialog();
-                    var parent = EditorInterface.Singleton?.GetBaseControl();
-                    if (parent == null)
-                    {
-                        return false;
-                    }
-
-                    parent.AddChild(m_AssetSystemBuilderDialog);
-                }
-
-                var popupSize = m_AssetSystemBuilderDialog.Size;
-                if (popupSize.X <= 0 || popupSize.Y <= 0)
-                {
-                    popupSize = new Vector2I(1700, 860);
-                }
-
-                m_AssetSystemBuilderDialog.PopupCentered(popupSize);
-                m_AssetSystemBuilderDialog.Show();
-                return true;
-            }
-            catch (Exception exception)
-            {
-                GD.PrintErr($"打开统一资源打包窗口失败: {exception.Message}");
-                return false;
-            }
-        }
-
         /// <summary>
         /// 功能：处理日志宏定义二级菜单点击事件。
         /// </summary>

@@ -2,8 +2,7 @@
     "name": "GameFrameX.Editor",
     "rootNamespace": "",
     "references": [
-        "GameFrameX.Runtime",
-        "YooAsset.Editor"
+        "GameFrameX.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
