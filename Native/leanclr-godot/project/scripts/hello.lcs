@@ -1,0 +1,3 @@
+assembly=Game
+type=Game.ClassDbMain
+base=Node

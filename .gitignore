@@ -23,7 +23,7 @@ addons/**/*.asmdef.uid
 tests/EngineTests/last_run_*.log
 
 # LeanCLR（Native/leanclr-godot 内部构建规则见其自带 .gitignore）
-/Assets/LeanCLR/Assemblies/
+/Assets/LeanCLR/Assemblies/*
 !/Assets/LeanCLR/Assemblies/.gitkeep
 /Assets/LeanCLR/live_reload.txt
 !Native/leanclr-godot/extension_api.json

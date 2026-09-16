@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LeanAOT.Core\LeanAOT.Core.csproj" />
+    <ProjectReference Include="..\LeanAOT.GenerationPlan\LeanAOT.GenerationPlan.csproj" />
+  </ItemGroup>
+
+</Project>
