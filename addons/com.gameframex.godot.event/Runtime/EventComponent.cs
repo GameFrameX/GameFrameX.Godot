@@ -40,7 +40,7 @@ namespace GameFrameX.Event.Runtime
     /// <summary>
     /// 事件组件。
     /// </summary>
-    public sealed partial class EventComponent : GameFrameworkComponent
+    public sealed partial class EventComponent : GameFrameworkComponent, IEventPublisher
     {
         private IEventManager m_EventManager = null;
 
