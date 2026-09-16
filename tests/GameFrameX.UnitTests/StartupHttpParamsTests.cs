@@ -16,7 +16,7 @@ namespace GameFrameX.UnitTests
         public StartupHttpParamsTests()
         {
             // 测试宿主无引擎组件装配，手动注册工程默认 JSON helper（BaseComponent._Ready 中完成同一注册）。
-            Utility.Json.SetJsonHelper(new NewtonsoftJsonHelper());
+            Utility.Json.SetJsonHelper(new SystemTextJsonHelper());
         }
 
         [Fact]

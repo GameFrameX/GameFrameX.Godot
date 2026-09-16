@@ -53,7 +53,7 @@ namespace GameFrameX.Runtime
 
         [Export] private string m_CompressionHelperTypeName = "GameFrameX.Runtime.DefaultCompressionHelper";
 
-        [Export] private string m_JsonHelperTypeName = "GameFrameX.Runtime.NewtonsoftJsonHelper";
+        [Export] private string m_JsonHelperTypeName = "GameFrameX.Runtime.SystemTextJsonHelper";
 
         [Export(PropertyHint.Range, "30,120,1")] private int m_FrameRate = 30;
 
@@ -188,7 +188,7 @@ namespace GameFrameX.Runtime
             _ = typeof(DefaultVersionHelper);
             _ = typeof(DefaultLogHelper);
             _ = typeof(DefaultCompressionHelper);
-            _ = typeof(NewtonsoftJsonHelper);
+            _ = typeof(SystemTextJsonHelper);
         }
 
         public override void _Process(double delta)
@@ -427,7 +427,7 @@ namespace GameFrameX.Runtime
             if (string.IsNullOrEmpty(m_JsonHelperTypeName))
             {
                 // 旧场景（如 gfx.scn）可能序列化空串覆盖默认值；空值兜底为默认实现，避免静默跳过注册
-                m_JsonHelperTypeName = typeof(NewtonsoftJsonHelper).FullName;
+                m_JsonHelperTypeName = typeof(SystemTextJsonHelper).FullName;
             }
 
             Type jsonHelperType = Utility.Assembly.GetType(m_JsonHelperTypeName);

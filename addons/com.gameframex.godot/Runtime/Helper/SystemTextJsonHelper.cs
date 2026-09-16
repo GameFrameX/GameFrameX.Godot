@@ -15,9 +15,9 @@
 //  禁止利用本项目实施任何危害国家安全、破坏社会秩序、
 //  It is prohibited to use this project to engage in any activities that endanger national security, disrupt social order,
 //  侵犯他人合法权益等法律法规所禁止的行为！
-//  or infringe upon the legitimate rights and interests of others, as prohibited by laws and regulations!
+//  or infringe upon the legal rights and interests of others, as prohibited by laws and regulations!
 //  因基于本项目二次开发所产生的一切法律纠纷与责任，
-//  Any legal disputes and liabilities arising from secondary development based on this project
+//  Any legal disputes or liabilities arising from secondary development based on this project
 //  本项目组织与贡献者概不承担。
 //  shall be borne solely by the developer; the project organization and contributors assume no responsibility.
 // 
@@ -29,14 +29,15 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using System;using Newtonsoft.Json;
+using System;
+using System.Text.Json;
 
 namespace GameFrameX.Runtime
 {
     /// <summary>
-    /// 默认 JSON 函数集辅助器。
+    /// 默认 JSON 函数集辅助器（基于 System.Text.Json 原生实现）。
     /// </summary>
-    public class NewtonsoftJsonHelper : Utility.Json.IJsonHelper
+    public class SystemTextJsonHelper : Utility.Json.IJsonHelper
     {
         /// <summary>
         /// 将对象序列化为 JSON 字符串。
@@ -45,7 +46,7 @@ namespace GameFrameX.Runtime
         /// <returns>序列化后的 JSON 字符串。</returns>
         public string ToJson(object obj)
         {
-            return JsonConvert.SerializeObject(obj);
+            return JsonSerializer.Serialize(obj);
         }
 
         /// <summary>
@@ -56,7 +57,7 @@ namespace GameFrameX.Runtime
         /// <returns>反序列化后的对象。</returns>
         public T ToObject<T>(string json)
         {
-            return JsonConvert.DeserializeObject<T>(json);
+            return JsonSerializer.Deserialize<T>(json);
         }
 
         /// <summary>
@@ -67,7 +68,7 @@ namespace GameFrameX.Runtime
         /// <returns>反序列化后的对象。</returns>
         public object ToObject(Type objectType, string json)
         {
-            return JsonConvert.DeserializeObject(json, objectType);
+            return JsonSerializer.Deserialize(json, objectType);
         }
     }
 }
