@@ -30,7 +30,6 @@
 // ==========================================================================================
 
 using System;
-using GameFrameX.Event.Runtime;
 using Godot;
 
 namespace GameFrameX.Runtime
@@ -260,19 +259,19 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
-        /// 通过事件组件抛出全局事件；事件组件尚未注册时静默跳过（通知可能早于组件就绪到达）。
+        /// 通过事件发布契约抛出全局事件；事件组件尚未注册时静默跳过（通知可能早于组件就绪到达）。
         /// </summary>
         /// <param name="sender">事件发送者。</param>
         /// <param name="e">事件参数。</param>
         internal static void FireApplicationEvent(object sender, GameEventArgs e)
         {
-            EventComponent eventComponent = GameEntry.GetComponent<EventComponent>();
-            if (eventComponent == null)
+            IEventPublisher eventPublisher = GameEntry.GetComponentInterface<IEventPublisher>();
+            if (eventPublisher == null)
             {
                 return;
             }
 
-            eventComponent.Fire(sender, e);
+            eventPublisher.Fire(sender, e);
         }
 
         /// <summary>

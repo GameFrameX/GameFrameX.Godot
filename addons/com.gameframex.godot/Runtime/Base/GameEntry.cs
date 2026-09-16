@@ -101,6 +101,28 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
+        /// 获取实现指定接口的游戏框架组件（依赖倒置入口）。
+        /// 核心层通过本方法拿到上层组件实现的契约（如 <see cref="IEventPublisher"/>），避免反向依赖具体组件类型。
+        /// </summary>
+        /// <typeparam name="TInterface">要获取的接口类型。</typeparam>
+        /// <returns>第一个实现该接口的组件；不存在时返回 null。</returns>
+        public static TInterface GetComponentInterface<TInterface>() where TInterface : class
+        {
+            LinkedListNode<GameFrameworkComponent> current = GameFrameworkComponents.First;
+            while (current != null)
+            {
+                if (current.Value is TInterface matching)
+                {
+                    return matching;
+                }
+
+                current = current.Next;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// 关闭游戏框架。
         /// </summary>
         /// <param name="shutdownType">关闭游戏框架类型。</param>
