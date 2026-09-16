@@ -44,13 +44,17 @@ namespace GameFrameX.Runtime
             private const int CachedBytesLength = 0x1000;
             private static readonly byte[] SCachedBytes = new byte[CachedBytesLength];
             private static readonly Crc32 SAlgorithm = new Crc32();
+#if NET8_0_OR_GREATER
+            // Crc64 实现基于 System.Buffers Span（Utility.Verifier.Crc64.cs），仅 net8 目标可用
             private static readonly Crc64 SAlgorithm64 = new Crc64();
+#endif
 
             /// <summary>
             /// 计算二进制流的CRC64
             /// </summary>
             /// <param name="bytes"></param>
             /// <returns></returns>
+#if NET8_0_OR_GREATER
             public static ulong GetCrc64(byte[] bytes)
             {
                 SAlgorithm64.Reset();
@@ -69,7 +73,7 @@ namespace GameFrameX.Runtime
                 SAlgorithm64.Append(stream);
                 return SAlgorithm64.GetCurrentHashAsUInt64();
             }
-
+#endif
             /// <summary>
             /// 计算二进制流的 CRC32。
             /// </summary>
