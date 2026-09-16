@@ -31,31 +31,31 @@
 
 using System;
 using System.Collections.Generic;
-using System;
+
 namespace GameFrameX.UI.Runtime
 {
-    /// <summary>
-    /// 控制指定界面是否允许多实例打开。
-    /// </summary>
-    /// <remarks>
-    /// 迁移自 Unity com.gameframex.unity.ui 的 OptionUIAllowMultiInstanceAttribute（移除 UnityEngine.Preserve）。
-    /// 配合 BaseUIManager.UseSingletonOpenMode 使用：未标注此特性或 Enable=false 时为单实例打开模式。
-    /// </remarks>
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class OptionUIAllowMultiInstanceAttribute : Attribute
-    {
-        /// <summary>
-        /// 是否允许多实例打开，默认为 false（即默认单实例）。
-        /// </summary>
-        public bool Enable { get; private set; }
+	/// <summary>
+	/// 控制指定界面是否允许多实例打开。
+	/// </summary>
+	/// <remarks>
+	/// 迁移自 Unity com.gameframex.unity.ui 的 OptionUIAllowMultiInstanceAttribute（移除 UnityEngine.Preserve）。
+	/// 配合 BaseUIManager.UseSingletonOpenMode 使用：未标注此特性或 Enable=false 时为单实例打开模式。
+	/// </remarks>
+	[AttributeUsage(AttributeTargets.Class)]
+	public sealed class OptionUIAllowMultiInstanceAttribute : Attribute
+	{
+		/// <summary>
+		/// 是否允许多实例打开，默认为 false（即默认单实例）。
+		/// </summary>
+		public bool Enable { get; private set; }
 
-        /// <summary>
-        /// 初始化特性实例。
-        /// </summary>
-        /// <param name="enable">是否允许多实例打开。</param>
-        public OptionUIAllowMultiInstanceAttribute(bool enable = true)
-        {
-            Enable = enable;
-        }
-    }
+		/// <summary>
+		/// 初始化特性实例。
+		/// </summary>
+		/// <param name="enable">是否允许多实例打开。</param>
+		public OptionUIAllowMultiInstanceAttribute(bool enable = true)
+		{
+			Enable = enable;
+		}
+	}
 }

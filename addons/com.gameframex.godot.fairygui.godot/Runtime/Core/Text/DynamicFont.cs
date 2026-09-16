@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -153,7 +153,7 @@ namespace FairyGUI
     public class DynamicFont : BaseFont
     {
         Font _font;
-        RID _fontRid;
+        Rid _fontRid;
         int _fontSize;
         int _normalizedFontSize;
         int _outlineSize;
@@ -188,7 +188,21 @@ namespace FairyGUI
             else
             {
                 SystemFont font = new SystemFont();
-                font.FontNames = new string[] { fontPathOrName };
+                // UIConfig 约定字体名支持逗号拼接（多平台回退），按逗号拆分填入 FontNames。
+                var fontNames = fontPathOrName.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                if (fontNames.Length == 0)
+                {
+                    fontNames = new string[] { fontPathOrName };
+                }
+
+                font.FontNames = fontNames;
+                // 目标字体未安装时 Godot 回退到引擎默认字体（缺中文字形）；FairyGUI 包内
+                // 常引用编辑器默认字体（如 Open Sans SemiBold），此时回退到 UIConfig.defaultFont。
+                if (!font.HasChar('中') && UIConfig.defaultFont != fontPathOrName)
+                {
+                    return LoadFont(UIConfig.defaultFont);
+                }
+
                 return new DynamicFont(font);
             }
             return null;
@@ -227,11 +241,15 @@ namespace FairyGUI
                     if (Rids.Count > 0)
                         _fontRid = Rids[0];
                     else
-                        _fontRid = new RID();
+                    {
+                        // SystemFont 底层字体未解析时 GetRids 为空；回退到字体自身 RID，
+                        // 避免拿无效 RID 渲染出空文本。
+                        _fontRid = _font.GetRid();
+                    }
                 }
                 else
                 {
-                    _fontRid = new RID();
+                    _fontRid = new Rid();
                 }
             }
         }
