@@ -35,16 +35,22 @@ using ProtoBuf.Meta;
 namespace ProtoBuf
 {
     /// <summary>
-    /// Protobuf 序列化器初始化器，将 <see cref="ProtobufMessageSerializer"/> 注册为全局默认。
-    /// Godot 没有 Unity 的 RuntimeInitializeOnLoadMethod 自动初始化机制，需在游戏启动时显式调用（如 GameApp 初始化）。
+    /// Protobuf 序列化器初始化器：将 network 消息基类契约注册进 protobuf-net 运行时模型，
+    /// 并可将 <see cref="ProtobufMessageSerializer"/> 注册为全局默认。
+    /// network 基类契约由 <see cref="SerializerHelper"/> 惰性幂等注册，无需启动期显式调用；
+    /// Register() 仅在需要把 Protobuf 设为全局默认序列化器时调用（如 GameApp 初始化）。
     /// </summary>
     /// <remarks>
-    /// Protobuf serializer initializer that registers <see cref="ProtobufMessageSerializer"/> as the global default.
-    /// Godot has no Unity-style RuntimeInitializeOnLoadMethod, so Register() must be called explicitly
-    /// during game startup (e.g. in GameApp initialization).
+    /// Protobuf serializer initializer: registers the network message base contracts into the
+    /// protobuf-net runtime model, and optionally installs <see cref="ProtobufMessageSerializer"/>
+    /// as the global default. Contracts are lazily and idempotently ensured by
+    /// <see cref="SerializerHelper"/>; Register() is only needed to set the global default serializer.
     /// </remarks>
     public static class ProtobufSerializerInitializer
     {
+        private static volatile bool s_NetworkMessageContractsRegistered;
+        private static readonly object s_RegisterLock = new object();
+
         /// <summary>
         /// 初始化 Protobuf 序列化器并注册为全局默认消息序列化器。
         /// </summary>
@@ -53,22 +59,52 @@ namespace ProtoBuf
         /// </remarks>
         public static void Register()
         {
-            RegisterMessageHttpObject();
+            EnsureNetworkMessageContracts();
             MessageSerializerRegistry.RegisterGlobal(new ProtobufMessageSerializer());
         }
 
-        private static void RegisterMessageHttpObject()
+        /// <summary>
+        /// 幂等注册 network 包消息基类契约；<see cref="SerializerHelper"/> 每次序列化前调用，
+        /// 保证不依赖任何启动期显式初始化（此前 network 源码内联 [ProtoContract] 注解，移除注解后由本方法等价接管）。
+        /// </summary>
+        /// <remarks>
+        /// Idempotently registers the network package's message base contracts.
+        /// MessageObject registers as an empty contract (inheritance root only);
+        /// MessageHttpObject fields 1=Id, 2=UniqueId, 3=Body — wire-compatible with the removed inline attributes.
+        /// </remarks>
+        public static void EnsureNetworkMessageContracts()
         {
-            var model = RuntimeTypeModel.Default;
-            var type = typeof(MessageHttpObject);
-            if (model.CanSerialize(type))
+            if (s_NetworkMessageContractsRegistered)
             {
                 return;
             }
-            var metaType = model.Add(type, false);
-            metaType.Add(1, nameof(MessageHttpObject.Id));
-            metaType.Add(2, nameof(MessageHttpObject.UniqueId));
-            metaType.Add(3, nameof(MessageHttpObject.Body));
+
+            lock (s_RegisterLock)
+            {
+                if (s_NetworkMessageContractsRegistered)
+                {
+                    return;
+                }
+
+                var model = RuntimeTypeModel.Default;
+
+                var messageType = typeof(MessageObject);
+                if (model.CanSerialize(messageType) == false)
+                {
+                    model.Add(messageType, false);
+                }
+
+                var httpType = typeof(MessageHttpObject);
+                if (model.CanSerialize(httpType) == false)
+                {
+                    var metaType = model.Add(httpType, false);
+                    metaType.Add(1, nameof(MessageHttpObject.Id));
+                    metaType.Add(2, nameof(MessageHttpObject.UniqueId));
+                    metaType.Add(3, nameof(MessageHttpObject.Body));
+                }
+
+                s_NetworkMessageContractsRegistered = true;
+            }
         }
     }
 }

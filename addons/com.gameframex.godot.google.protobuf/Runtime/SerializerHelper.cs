@@ -18,6 +18,7 @@ namespace ProtoBuf
         /// <returns></returns>
         public static byte[] Serialize<T>(T value)
         {
+            ProtobufSerializerInitializer.EnsureNetworkMessageContracts();
             using (var memoryStream = new MemoryStream())
             {
                 Serializer.Serialize(memoryStream, value);
@@ -35,6 +36,7 @@ namespace ProtoBuf
         /// <returns></returns>
         public static byte[] SerializeWithLengthPrefix<T>(T value, PrefixStyle prefixStyle, int fieldNumber)
         {
+            ProtobufSerializerInitializer.EnsureNetworkMessageContracts();
             using (var memoryStream = new MemoryStream())
             {
                 Serializer.SerializeWithLengthPrefix(memoryStream, value, prefixStyle, fieldNumber);
@@ -59,6 +61,7 @@ namespace ProtoBuf
         /// <returns></returns>
         public static T Deserialize<T>(byte[] data)
         {
+            ProtobufSerializerInitializer.EnsureNetworkMessageContracts();
             using (var memoryStream = new MemoryStream(data))
             {
                 return (T)Serializer.Deserialize(typeof(T), memoryStream);
@@ -73,6 +76,7 @@ namespace ProtoBuf
         /// <returns></returns>
         public static object Deserialize(byte[] data, Type type)
         {
+            ProtobufSerializerInitializer.EnsureNetworkMessageContracts();
             using (var memoryStream = new MemoryStream(data))
             {
                 return Serializer.Deserialize(type, memoryStream);
@@ -157,6 +161,7 @@ namespace ProtoBuf
         /// <returns></returns>
         public static T DeserializeWithLengthPrefix<T>(byte[] data, PrefixStyle prefixStyle, int fieldNumber)
         {
+            ProtobufSerializerInitializer.EnsureNetworkMessageContracts();
             using (var memoryStream = new MemoryStream(data))
             {
                 return Serializer.DeserializeWithLengthPrefix<T>(memoryStream, prefixStyle, fieldNumber);
