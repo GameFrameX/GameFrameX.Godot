@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Godot;
+using Array = System.Array;
 
 namespace GameFrameX.AssetSystem
 {

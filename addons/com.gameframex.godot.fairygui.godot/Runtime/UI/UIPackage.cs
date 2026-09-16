@@ -4,6 +4,7 @@ using System.IO;
 using Godot;
 using FairyGUI.Utils;
 using FileAccess = Godot.FileAccess;
+using Array = System.Array;
 
 
 namespace FairyGUI

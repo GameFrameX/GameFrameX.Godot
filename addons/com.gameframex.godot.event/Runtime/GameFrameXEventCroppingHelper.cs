@@ -1,3 +1,4 @@
+using GameFrameX.Runtime;
 using Godot;
 
 namespace GameFrameX.Event.Runtime

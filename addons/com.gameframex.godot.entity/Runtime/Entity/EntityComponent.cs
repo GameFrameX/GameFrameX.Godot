@@ -36,6 +36,7 @@ using System.Threading.Tasks;
 using GameFrameX.Event.Runtime;
 using GameFrameX.Runtime;
 using Godot;
+using Array = System.Array;
 
 namespace GameFrameX.Entity.Runtime
 {

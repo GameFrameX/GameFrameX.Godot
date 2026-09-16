@@ -35,6 +35,7 @@ using GameFrameX.Asset.Runtime;
 using GameFrameX.Event.Runtime;
 using GameFrameX.Runtime;
 using Godot;
+using Array = System.Array;
 
 namespace GameFrameX.Sound.Runtime
 {
