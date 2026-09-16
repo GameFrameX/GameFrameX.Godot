@@ -29,7 +29,7 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
-using System;
+using System;using Newtonsoft.Json;
 
 namespace GameFrameX.Runtime
 {
@@ -45,7 +45,7 @@ namespace GameFrameX.Runtime
         /// <returns>序列化后的 JSON 字符串。</returns>
         public string ToJson(object obj)
         {
-            return System.Text.Json.JsonSerializer.Serialize(obj);
+            return JsonConvert.SerializeObject(obj);
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace GameFrameX.Runtime
         /// <returns>反序列化后的对象。</returns>
         public T ToObject<T>(string json)
         {
-            return System.Text.Json.JsonSerializer.Deserialize<T>(json);
+            return JsonConvert.DeserializeObject<T>(json);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace GameFrameX.Runtime
         /// <returns>反序列化后的对象。</returns>
         public object ToObject(Type objectType, string json)
         {
-            return System.Text.Json.JsonSerializer.Deserialize(json, objectType);
+            return JsonConvert.DeserializeObject(json, objectType);
         }
     }
 }
