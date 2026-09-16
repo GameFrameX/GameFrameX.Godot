@@ -18,6 +18,7 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private const string BuilderMenu = "AssetSystem/AssetBundle Builder";
     private const string CollectorMenu = "AssetSystem/AssetBundle Collector";
     private const string ReporterMenu = "AssetSystem/AssetBundle Reporter";
+    private const string PckBuilderMenu = "AssetSystem/PCK Builder";
     private const string DebuggerMenu = "AssetSystem/AssetBundle Debugger";
     private const int BuilderTabIndex = 0;
     private const int CollectorTabIndex = 1;
@@ -500,6 +501,7 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private ConfigFile _builderSettings;
     private IEditorPlatformBridge _editorPlatformBridge;
     private bool _collectorRulesSyncing;
+    private AssetSystemBuilderDialog _pckBuilderDialog;
 
     /// <summary>
     /// 插件进入编辑器树时挂载菜单与面板
@@ -534,6 +536,7 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
 
         UnmountDock();
         UnregisterToolMenus();
+        ClosePckBuilderDialog();
         _isLifecycleMounted = false;
         s_ActiveInstance = null;
     }
@@ -603,7 +606,7 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         }
 
         RegisterToolMenuItem(HomePageMenu, OpenHomePage);
-        RegisterToolMenuItem(BuilderMenu, OpenBuilder);
+        RegisterToolMenuItem(PckBuilderMenu, OpenPckBuilderDialog);
         RegisterToolMenuItem(CollectorMenu, OpenCollector);
         RegisterToolMenuItem(ReporterMenu, OpenReporter);
         RegisterToolMenuItem(DebuggerMenu, OpenDebugger);
@@ -624,7 +627,7 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         RemoveToolMenuItem(BuilderMenu);
         RemoveToolMenuItem(CollectorMenu);
         RemoveToolMenuItem(ReporterMenu);
-        RemoveToolMenuItem(DebuggerMenu);
+        RemoveToolMenuItem(PckBuilderMenu);
         _toolMenusRegistered = false;
     }
 
@@ -632,6 +635,58 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     {
         RemoveToolMenuItem(menuPath);
         AddToolMenuItem(menuPath, Callable.From(callback));
+    }
+
+    /// <summary>
+    /// 打开统一 PCK 打包窗口（自 com.gameframex.godot 核心包迁入，替代原核心菜单入口）。
+    /// </summary>
+    private void OpenPckBuilderDialog()
+    {
+        try
+        {
+            if (_pckBuilderDialog == null || GodotObject.IsInstanceValid(_pckBuilderDialog) == false)
+            {
+                _pckBuilderDialog = new AssetSystemBuilderDialog();
+                var parent = EditorInterface.Singleton?.GetBaseControl();
+                if (parent == null)
+                {
+                    _pckBuilderDialog = null;
+                    GD.PrintErr("无法打开 PCK 打包窗口：编辑器根控件不可用。");
+                    return;
+                }
+
+                parent.AddChild(_pckBuilderDialog);
+            }
+
+            var popupSize = _pckBuilderDialog.Size;
+            if (popupSize.X <= 0 || popupSize.Y <= 0)
+            {
+                popupSize = new Vector2I(1700, 860);
+            }
+
+            _pckBuilderDialog.PopupCentered(popupSize);
+            _pckBuilderDialog.Show();
+        }
+        catch (Exception exception)
+        {
+            GD.PrintErr($"打开 PCK 打包窗口失败: {exception.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 释放统一 PCK 打包窗口实例。
+    /// </summary>
+    private void ClosePckBuilderDialog()
+    {
+        if (_pckBuilderDialog != null)
+        {
+            if (GodotObject.IsInstanceValid(_pckBuilderDialog))
+            {
+                _pckBuilderDialog.QueueFree();
+            }
+
+            _pckBuilderDialog = null;
+        }
     }
 
     /// <summary>
