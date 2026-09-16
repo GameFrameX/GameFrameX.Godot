@@ -153,7 +153,7 @@ namespace FairyGUI
     public class DynamicFont : BaseFont
     {
         Font _font;
-        Rid _fontRid;
+        RID _fontRid;
         int _fontSize;
         int _normalizedFontSize;
         int _outlineSize;
@@ -227,11 +227,11 @@ namespace FairyGUI
                     if (Rids.Count > 0)
                         _fontRid = Rids[0];
                     else
-                        _fontRid = new Rid();
+                        _fontRid = new RID();
                 }
                 else
                 {
-                    _fontRid = new Rid();
+                    _fontRid = new RID();
                 }
             }
         }
