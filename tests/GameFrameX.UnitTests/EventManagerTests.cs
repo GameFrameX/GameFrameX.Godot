@@ -1,4 +1,5 @@
 using System;
+using GameFrameX.Runtime;
 using GameFrameX.Event.Runtime;
 using Xunit;
 
