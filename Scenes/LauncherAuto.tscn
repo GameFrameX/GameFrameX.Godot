@@ -1,6 +1,10 @@
 [gd_scene format=3 uid="uid://b44dtjg0u32f7"]
 
 [ext_resource type="Script" uid="uid://ckkpceyexf4wa" path="res://Scripts/Framework/Startup/ApplicationStartupEntry.cs" id="1_entry"]
+[ext_resource type="Script" uid="uid://dn4tuoy6lhu8k" path="res://addons/com.gameframex.godot.ui/Runtime/UIDesignResolutionComponent.cs" id="2_70sia"]
 
 [node name="Main" type="Node" unique_id=44380437]
 script = ExtResource("1_entry")
+
+[node name="Node" type="Node" parent="." unique_id=337509475]
+script = ExtResource("2_70sia")
