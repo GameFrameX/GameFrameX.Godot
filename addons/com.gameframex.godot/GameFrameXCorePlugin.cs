@@ -18,6 +18,10 @@ namespace GameFrameX.Editor
     public partial class GameFrameXCorePlugin : EditorPlugin
     {
         private const string TopMenuButtonNodeName = "GameFrameXTopMenuButton";
+        /// <summary>
+        /// 编辑器主屏按钮行（2D/3D/脚本/游戏/资源商店）的容器节点名（Godot 4.7 源码 editor_node.cpp 中命名）。
+        /// </summary>
+        private const string MainScreenButtonContainerNodeName = "EditorMainScreenButtons";
 
         /// <summary>
         /// 顶部菜单项：日志宏定义子菜单。
@@ -307,7 +311,7 @@ namespace GameFrameX.Editor
                 m_TopPopupMenu.AddSubmenuNodeItem(L("脚本宏定义", "Scripting Define Symbols"), m_LogDefinePopupMenu);
             }
 
-            AddControlToContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
+            AddTopMenuButtonToMainScreenRow();
         }
 
         /// <summary>
@@ -317,6 +321,51 @@ namespace GameFrameX.Editor
         {
             UnregisterTopToolbarMenu();
             RegisterTopToolbarMenu();
+        }
+
+        /// <summary>
+        /// 功能：把顶部菜单按钮挂到编辑器主屏按钮行（2D/3D/脚本/游戏/资源商店）末尾。
+        /// 找不到该容器时回退到默认 Toolbar 容器（右上角，即旧行为）。
+        /// </summary>
+        private void AddTopMenuButtonToMainScreenRow()
+        {
+            HBoxContainer mainScreenButtonRow = FindMainScreenButtonRow();
+            if (mainScreenButtonRow == null)
+            {
+                AddControlToContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
+                return;
+            }
+
+            m_TopMenuButton.ThemeTypeVariation = "MainScreenButton";
+            mainScreenButtonRow.AddChild(m_TopMenuButton);
+        }
+
+        /// <summary>
+        /// 功能：在编辑器 UI 树中查找主屏按钮行容器。
+        /// </summary>
+        private static HBoxContainer FindMainScreenButtonRow()
+        {
+            Control root = EditorInterface.Singleton?.GetBaseControl();
+            return root != null ? FindMainScreenButtonRowRecursive(root) : null;
+        }
+
+        private static HBoxContainer FindMainScreenButtonRowRecursive(Node node)
+        {
+            foreach (Node child in node.GetChildren())
+            {
+                if (child is HBoxContainer hbox && hbox.Name == MainScreenButtonContainerNodeName)
+                {
+                    return hbox;
+                }
+
+                HBoxContainer result = FindMainScreenButtonRowRecursive(child);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -369,7 +418,11 @@ namespace GameFrameX.Editor
                     popupMenu.IdPressed -= OnTopMenuIdPressed;
                 }
 
-                RemoveControlFromContainer(CustomControlContainer.Toolbar, m_TopMenuButton);
+                Node buttonParent = m_TopMenuButton.GetParent();
+                if (buttonParent != null)
+                {
+                    buttonParent.RemoveChild(m_TopMenuButton);
+                }
                 m_TopMenuButton.QueueFree();
                 m_TopMenuButton = null;
             }
