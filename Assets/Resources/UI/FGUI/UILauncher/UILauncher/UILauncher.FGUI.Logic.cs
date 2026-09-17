@@ -241,7 +241,7 @@ namespace Godot.Hotfix.FairyGUI
 			}
 
 			GD.Print($"[UILauncher-FGUI] 进入游戏。role={role.Name} level={role.Level}");
-			if (!HotfixTypeResolver.TryInvokeMethod(mainForm, "SetPlayerInfo", role.Name, $"Lv.{role.Level}"))
+			if (!HotfixTypeResolver.TryInvokeMethod(mainForm, "SetPlayerInfo", role.Name, $"当前等级:{role.Level}", "1"))
 			{
 				GD.PushWarning("[UILauncher-FGUI] SetPlayerInfo invoke failed.");
 			}
