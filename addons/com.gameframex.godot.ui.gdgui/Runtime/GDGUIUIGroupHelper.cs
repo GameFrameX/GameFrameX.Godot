@@ -49,6 +49,9 @@ namespace GameFrameX.UI.GDGUI.Runtime
                 return null;
             }
 
+            // 对齐 Unity UGUIUIGroupHelper：建组时把 UIComponent.DesignResolution 应用到显示层。
+            ApplyDesignResolution(FindUIComponent(root)?.DesignResolution);
+
             var container = new Control
             {
                 Name = groupName
@@ -62,6 +65,43 @@ namespace GameFrameX.UI.GDGUI.Runtime
             container.AddChild(this);
             SetDepth(depth);
             return this;
+        }
+
+        /// <summary>
+        /// 沿父链查找所属界面组件。
+        /// </summary>
+        /// <param name="root">UI 根节点。</param>
+        /// <returns>所属界面组件，未找到返回 null。</returns>
+        private static UIComponent FindUIComponent(Node root)
+        {
+            var current = root;
+            while (current != null)
+            {
+                if (current is UIComponent component)
+                {
+                    return component;
+                }
+
+                current = current.GetParent();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 把设计分辨率配置应用到 GDGUI 显示层。
+        /// </summary>
+        /// <param name="designResolution">设计分辨率组件，可为 null。</param>
+        private static void ApplyDesignResolution(UIDesignResolutionComponent designResolution)
+        {
+            if (designResolution == null)
+            {
+                return;
+            }
+
+            // 等价 Unity 侧 CanvasScaler：配置写入 Window content scale，GDGUI 控件随 Viewport 拉伸自动适配。
+            // ReferencePixelsPerUnit 在 Godot 无对应机制，仅作为配置保留在组件上。
+            designResolution.Apply();
         }
     }
 }

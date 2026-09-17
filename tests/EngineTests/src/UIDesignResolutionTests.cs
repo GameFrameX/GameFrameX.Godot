@@ -40,13 +40,14 @@ namespace GameFrameX.EngineTests
     /// 组 E：UI 设计分辨率组件（Phase 3.2 迁移自 Unity com.gameframex.unity.ui 的 UIDesignResolutionComponent）。
     /// 断言：默认配置与钳制、配置到 Window content scale 的映射、分辨率变化回调触发。
     /// </summary>
-    public static class UIDesignResolutionTests
+    public static partial class UIDesignResolutionTests
     {
         public static void Register(List<EngineTestCase> cases)
         {
             cases.Add(new EngineTestCase("UIDesignResolution", "E1_DefaultConfigAndClamp", DefaultConfigAsync));
             cases.Add(new EngineTestCase("UIDesignResolution", "E2_ContentScaleMapping", ContentScaleMappingAsync));
             cases.Add(new EngineTestCase("UIDesignResolution", "E3_ResolutionChangedCallback", ResolutionChangedAsync));
+            cases.Add(new EngineTestCase("UIDesignResolution", "E4_GroupHelperAppliesDesignResolution", GroupHelperAppliesDesignResolutionAsync));
         }
         private static async Task DefaultConfigAsync()
         {
@@ -133,6 +134,58 @@ namespace GameFrameX.EngineTests
                 subViewport.QueueFree();
             }
             await EngineTestWait.FramesAsync(1);
+        }
+
+        private static async Task GroupHelperAppliesDesignResolutionAsync()
+        {
+            // 无 UIComponent 祖先：建组直通，不创建设计分辨率组件（对齐 Unity 空配置安全路径）。
+            var orphanRoot = new Node();
+            var orphanHelper = new GameFrameX.UI.GDGUI.Runtime.GDGUIUIGroupHelper().Handler(orphanRoot, "OrphanGroup", null, null, 0);
+            EngineAssert.True(orphanHelper != null, "group helper created without UIComponent ancestor");
+            EngineAssert.True(orphanRoot.FindChild(nameof(UIDesignResolutionComponent), true, false) == null, "no design resolution component without UIComponent ancestor");
+            orphanRoot.Free();
+
+            // 带 UIComponent 祖先：建组应触发设计分辨率组件创建并把默认设计分辨率写入 Window content scale。
+            // 用静默子类抑制 UIComponent._Ready 的框架注册副作用，只验证设计分辨率链路。
+            var window = new Window();
+            EngineTestContext.Root.AddChild(window);
+            var uiComponent = new SilentUIComponent();
+            window.AddChild(uiComponent);
+            var root = new Node
+            {
+                Name = "GDGUI"
+            };
+            uiComponent.AddChild(root);
+            try
+            {
+                var helper = new GameFrameX.UI.GDGUI.Runtime.GDGUIUIGroupHelper().Handler(root, "ResolutionGroup", null, null, 0);
+                EngineAssert.True(helper != null, "gdgui group helper created with UIComponent ancestor");
+                EngineAssert.True(uiComponent.DesignResolution != null, "design resolution ensured by group helper");
+                EngineAssert.Equal(Window.ContentScaleModeEnum.CanvasItems, window.ContentScaleMode, "content scale mode written by group helper");
+                EngineAssert.Equal(new Vector2I(1920, 1080), window.ContentScaleSize, "design size written by group helper");
+
+                // FairyGUI 组辅助器同样应用设计分辨率，并强制 Stage/GRoot 重算缩放（不抛错即通过链路）。
+                var fairyGuiHelper = new GameFrameX.UI.FairyGUI.Runtime.FairyGUIUIGroupHelper().Handler(root, "FairyGroup", null, null, 0);
+                EngineAssert.True(fairyGuiHelper != null, "fairygui group helper created with UIComponent ancestor");
+                EngineAssert.Equal(Window.ContentScaleModeEnum.CanvasItems, window.ContentScaleMode, "content scale mode kept after fairygui group helper");
+                EngineAssert.Equal(new Vector2I(1920, 1080), window.ContentScaleSize, "design size kept after fairygui group helper");
+            }
+            finally
+            {
+                window.QueueFree();
+            }
+
+            await EngineTestWait.FramesAsync(1);
+        }
+
+        /// <summary>
+        /// 抑制 _Ready 的 UIComponent 测试替身：避免触发框架组件注册与初始化重试。
+        /// </summary>
+        private sealed partial class SilentUIComponent : UIComponent
+        {
+            public override void _Ready()
+            {
+            }
         }
     }
 }

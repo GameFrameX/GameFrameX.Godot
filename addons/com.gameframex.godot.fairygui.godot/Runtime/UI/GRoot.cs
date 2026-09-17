@@ -44,6 +44,15 @@ namespace FairyGUI
             get { return Stage.contentScaleLevel; }
         }
 
+        /// <summary>
+        /// 立即按当前 Window content scale（或项目 stretch 设置）重算缩放，并同步 GRoot 尺寸。
+        /// 对齐 Unity FairyGUI 的 GRoot.ApplyContentScaleFactor，供 UI 框架在设计分辨率变化后强制刷新。
+        /// </summary>
+        public static void ApplyContentScaleFactor()
+        {
+            Stage.inst.HandleScreenSizeChanged();
+        }
+
 
         public GRoot()
         {

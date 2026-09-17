@@ -49,6 +49,9 @@ namespace GameFrameX.UI.FairyGUI.Runtime
                 return null;
             }
 
+            // 对齐 Unity FairyGUIUIGroupHelper：建组时把 UIComponent.DesignResolution 应用到 FairyGUI 显示层。
+            ApplyDesignResolution(FindUIComponent(root)?.DesignResolution);
+
             var container = new Control
             {
                 Name = groupName
@@ -78,6 +81,44 @@ namespace GameFrameX.UI.FairyGUI.Runtime
             control.GrowHorizontal = Control.GrowDirection.Both;
             control.GrowVertical = Control.GrowDirection.Both;
             control.Position = Vector2.Zero;
+        }
+
+        /// <summary>
+        /// 沿父链查找所属界面组件。
+        /// </summary>
+        /// <param name="root">UI 根节点。</param>
+        /// <returns>所属界面组件，未找到返回 null。</returns>
+        private static UIComponent FindUIComponent(Node root)
+        {
+            var current = root;
+            while (current != null)
+            {
+                if (current is UIComponent component)
+                {
+                    return component;
+                }
+
+                current = current.GetParent();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 把设计分辨率配置应用到 FairyGUI 显示层。
+        /// </summary>
+        /// <param name="designResolution">设计分辨率组件，可为 null。</param>
+        private static void ApplyDesignResolution(UIDesignResolutionComponent designResolution)
+        {
+            if (designResolution == null)
+            {
+                return;
+            }
+
+            // 等价 Unity 侧 UIContentScaler：配置写入 Window content scale 后，
+            // 强制 Stage/GRoot 重算缩放并同步尺寸（等价 GRoot.inst.ApplyContentScaleFactor()）。
+            designResolution.Apply();
+            global::FairyGUI.GRoot.ApplyContentScaleFactor();
         }
     }
 }

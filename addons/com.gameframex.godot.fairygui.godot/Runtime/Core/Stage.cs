@@ -1,6 +1,8 @@
 ﻿using System;
 using Godot;
 using System.Collections.Generic;
+// FairyGUI 命名空间内存在同名 Window（FairyGUI.Window），用别名区分引擎窗口类型。
+using GodotWindow = Godot.Window;
 
 
 namespace FairyGUI
@@ -95,14 +97,31 @@ namespace FairyGUI
 
         static void UpdateContextScale()
         {
-            int dx = ProjectSettings.GetSetting("display/window/size/viewport_width").AsInt32();
-            int dy = ProjectSettings.GetSetting("display/window/size/viewport_height").AsInt32();
-            string aspect = ProjectSettings.GetSetting("display/window/stretch/aspect").AsString();
-            double scale = ProjectSettings.GetSetting("display/window/stretch/scale").AsDouble();
-            string scale_mode = ProjectSettings.GetSetting("display/window/stretch/scale_mode").AsString();
+            int dx;
+            int dy;
+            string aspect;
+            double scale;
+            string scale_mode;
+            if (TryGetRuntimeDesignSize(out var designSize))
+            {
+                // 运行期 Window content scale（由 GameFrameX UIDesignResolutionComponent 等写入）优先于项目设置，
+                // 使运行时设置的设计分辨率同样驱动文本渲染缩放与高清贴图层级选择。
+                dx = designSize.X;
+                dy = designSize.Y;
+                aspect = GetAspectName(StageWindow.ContentScaleAspect);
+                scale = StageWindow.ContentScaleFactor;
+                scale_mode = "fractional";
+            }
+            else
+            {
+                dx = ProjectSettings.GetSetting("display/window/size/viewport_width").AsInt32();
+                dy = ProjectSettings.GetSetting("display/window/size/viewport_height").AsInt32();
+                aspect = ProjectSettings.GetSetting("display/window/stretch/aspect").AsString();
+                scale = ProjectSettings.GetSetting("display/window/stretch/scale").AsDouble();
+                scale_mode = ProjectSettings.GetSetting("display/window/stretch/scale_mode").AsString();
+            }
             float screenWidth = Stage.width;
             float screenHeight = Stage.height;
-
             if (scale_mode == "integer")
                 scale = Math.Floor(scale);
 
@@ -135,6 +154,39 @@ namespace FairyGUI
                 _contentScaleLevel = 1; //x2
             else
                 _contentScaleLevel = 0;
+        }
+
+        static GodotWindow StageWindow
+        {
+            get { return (Engine.GetMainLoop() as SceneTree)?.Root; }
+        }
+
+        static bool TryGetRuntimeDesignSize(out Vector2I designSize)
+        {
+            designSize = Vector2I.Zero;
+            var window = StageWindow;
+            if (window == null || window.ContentScaleMode == GodotWindow.ContentScaleModeEnum.Disabled)
+            {
+                return false;
+            }
+
+            designSize = window.ContentScaleSize;
+            return designSize.X > 0 && designSize.Y > 0;
+        }
+
+        static string GetAspectName(global::Godot.Window.ContentScaleAspectEnum aspect)
+        {
+            switch (aspect.ToString())
+            {
+                case "Keep":
+                    return "keep";
+                case "KeepWidth":
+                    return "keep_width";
+                case "KeepHeight":
+                    return "keep_height";
+                default:
+                    return "expand";
+            }
         }
 
         /// <summary>
