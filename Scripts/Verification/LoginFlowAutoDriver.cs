@@ -138,8 +138,9 @@ namespace Godot.Startup.Verification
 				return;
 			}
 
+			await VerifySweepLightAsync(sceneTree);
+
 			GD.Print($"[AutoFlow][阶段4] 进入游戏成功。账号={LocalAccountStore.CurrentAccountName} 角色={role.Name} 等级=Lv.{role.Level}");
-			GD.Print("[AutoFlow] === 全流程完成：账号创建 → 登录 → 创建角色 → 进入游戏 ===");
 
 			if (autoQuit)
 			{
@@ -150,6 +151,112 @@ namespace Godot.Startup.Verification
 
 				GetTree().Quit(0);
 			}
+		}
+
+		/// <summary>
+		/// 验证从 Unity 包移植的扫光效果：贴一个 GImageSweepLight，
+		/// 对比两个时刻截图的亮度差异（扫光带移动必然产生变化）。
+		/// </summary>
+		private async Task VerifySweepLightAsync(SceneTree sceneTree)
+		{
+			try
+			{
+				GD.Print($"[AutoFlow][扫光验证] Engine.TimeScale={Engine.TimeScale} MaxFps={Engine.MaxFps}");
+				var package = global::FairyGUI.UIPackage.GetByName("UICommonAvatar");
+				var item = package?.GetItemByName("1");
+				var texture = item != null ? package.GetItemAsset(item) as global::FairyGUI.NTexture : null;
+				if (texture == null)
+				{
+					GD.PushWarning("[AutoFlow][扫光验证] UICommonAvatar/1 贴图不可用，跳过。");
+					return;
+				}
+
+				var sweep = new global::FairyGUI.GImageSweepLight
+				{
+					texture = texture,
+				};
+				sweep.SetSize(320, 320);
+				sweep.xy = new Godot.Vector2(500, 220);
+				sweep.sortingOrder = int.MaxValue;
+				// 连续扫光（无空闲间隔），保证采样窗口内扫光带必然移动。
+				sweep.SetSweepLightParameters(0.5f, 0.4f, 0.0f, 30.0f, 2.0f);
+				global::FairyGUI.GRoot.inst.AddChild(sweep);
+
+				var region = new Godot.Rect2I(500, 220, 320, 320);
+				var brightA = CaptureRegionBrightness(region);
+				for (var i = 0; i < 12; i++)
+				{
+					await NextFrameAsync(sceneTree);
+				}
+
+				var brightB = CaptureRegionBrightness(region);
+				for (var i = 0; i < 12; i++)
+				{
+					await NextFrameAsync(sceneTree);
+				}
+
+				var brightC = CaptureRegionBrightness(region);
+
+				// 禁用扫光后亮度应稳定，作为对照排除画面其它动画干扰。
+				sweep.StopSweepLight();
+				await SettleAsync(sceneTree);
+				var brightOff = CaptureRegionBrightness(region);
+				Screenshot("sweep_a");
+				sweep.StartSweepLight();
+				for (var i = 0; i < 8; i++)
+				{
+					await NextFrameAsync(sceneTree);
+				}
+
+				Screenshot("sweep_b");
+				for (var i = 0; i < 8; i++)
+				{
+					await NextFrameAsync(sceneTree);
+				}
+
+				Screenshot("sweep_c");
+				global::FairyGUI.GRoot.inst.RemoveChild(sweep);
+				sweep.Dispose();
+
+
+				var delta1 = Math.Abs(brightB - brightA);
+				var delta2 = Math.Abs(brightC - brightB);
+				GD.Print($"[AutoFlow][扫光验证] 平均亮度 A={brightA:F1} B={brightB:F1} C={brightC:F1} 关闭={brightOff:F1} Δ1={delta1:F3} Δ2={delta2:F3}");
+				if (delta1 > 0.3f || delta2 > 0.3f)
+				{
+					GD.Print("[AutoFlow][扫光验证] 通过：扫光带在移动。");
+				}
+				else
+				{
+					GD.PushWarning("[AutoFlow][扫光验证] 亮度无变化，扫光可能未生效。");
+			}
+			}
+			catch (Exception exception)
+			{
+				GD.PushError($"[AutoFlow][扫光验证] 异常：{exception}");
+			}
+		}
+
+		private float CaptureRegionBrightness(Godot.Rect2I region)
+		{
+			var image = GetViewport().GetTexture().GetImage();
+			var cropped = image.GetRegion(new Godot.Rect2I(
+				Math.Clamp(region.Position.X, 0, image.GetWidth() - 1),
+				Math.Clamp(region.Position.Y, 0, image.GetHeight() - 1),
+				Math.Clamp(region.Size.X, 1, image.GetWidth()),
+				Math.Clamp(region.Size.Y, 1, image.GetHeight())));
+			double total = 0;
+			for (var y = 0; y < cropped.GetHeight(); y += 4)
+			{
+				for (var x = 0; x < cropped.GetWidth(); x += 4)
+				{
+					var c = cropped.GetPixel(x, y);
+					total += (c.R8 + c.G8 + c.B8) / 3.0;
+				}
+			}
+
+			var samples = (cropped.GetWidth() / 4 + 1) * (cropped.GetHeight() / 4 + 1);
+			return (float)(total / Math.Max(1, samples));
 		}
 
 		private async Task<IUIForm> WaitForFormAsync(SceneTree sceneTree, UIComponent uiComponent, string formName)
