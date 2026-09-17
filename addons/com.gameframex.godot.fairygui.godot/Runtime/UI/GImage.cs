@@ -38,6 +38,15 @@ namespace FairyGUI
             set { _content.flip = value; }
         }
 
+        /// <summary>
+        /// 图像材质（对应 Unity 侧 GObject.material），用于扫光等效果。
+        /// </summary>
+        public Godot.Material material
+        {
+            get { return _content.Material; }
+            set { _content.Material = value; }
+        }
+
         public FillMethod fillMethod
         {
             get { return _content.fillMethod; }
