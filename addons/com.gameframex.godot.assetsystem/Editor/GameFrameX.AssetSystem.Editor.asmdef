@@ -1,12 +1,12 @@
 {
-    "name": "GameFrameX.Asset.Runtime",
+    "name": "GameFrameX.AssetSystem.Editor",
     "rootNamespace": "",
     "references": [
-        "GameFrameX.Event.Runtime",
-        "GameFrameX.Runtime",
         "GameFrameX.AssetSystem.Runtime"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

@@ -1,10 +1,8 @@
 {
-    "name": "GameFrameX.Asset.Runtime",
+    "name": "GameFrameX.AssetSystem.Runtime",
     "rootNamespace": "",
     "references": [
-        "GameFrameX.Event.Runtime",
-        "GameFrameX.Runtime",
-        "GameFrameX.AssetSystem.Runtime"
+        "GameFrameX.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

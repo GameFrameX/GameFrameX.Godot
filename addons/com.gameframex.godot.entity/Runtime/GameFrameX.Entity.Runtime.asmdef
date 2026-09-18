@@ -5,7 +5,7 @@
         "GameFrameX.Asset.Runtime",
         "GameFrameX.Event.Runtime",
         "GameFrameX.Runtime",
-        "YooAsset.Runtime"
+        "GameFrameX.AssetSystem.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

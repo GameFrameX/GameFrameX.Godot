@@ -13,7 +13,7 @@
         "GameFrameX.Setting.Runtime",
         "GameFrameX.SystemInfo.Runtime",
         "GameFrameX.Web.Runtime",
-        "YooAsset.Runtime"
+        "GameFrameX.AssetSystem.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
