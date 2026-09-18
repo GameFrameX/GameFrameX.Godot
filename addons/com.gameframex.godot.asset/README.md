@@ -23,7 +23,7 @@ All-in-One Solution for Indie Game Development · Empowering Indie Developers' D
 
 ## Overview
 
-GameFrameX Asset — Godot asset management package built on YooAsset. Provides synchronous and asynchronous loading of assets, sub-assets, raw files, scenes, and asset bundles. Supports multi-package management with configurable play modes, hot-update URLs, resource path separation, and automatic cleanup of unused assets and bundle files.
+GameFrameX Asset — Godot asset management package built on GameFrameX AssetSystem. Provides synchronous and asynchronous loading of assets, sub-assets, raw files, scenes, and asset bundles. Supports multi-package management with configurable play modes, hot-update URLs, resource path separation, and automatic cleanup of unused assets and bundle files.
 
 ## Quick Start
 

@@ -23,7 +23,7 @@
 
 ## 简介
 
-GameFrameX Startup — Godot 通用启动流程脚手架。封装从游戏启动到热更加载的完整流程：启动 UI → 拉全局信息（URL 主备 failover）→ 拉版本信息 → 拉资源包版本 → YooAsset 补丁 → 启动热更。所有项目可变项（URL 列表、HTTP 公共参数、热更入口、UI 实现）通过 StartupOptions ScriptableObject 配置资产 + 两个接口（IStartupUIHandler / IHotfixLauncher）注入。文档：https://gameframex.doc.alianblank.com
+GameFrameX Startup — Godot 通用启动流程脚手架。封装从游戏启动到热更加载的完整流程：启动 UI → 拉全局信息（URL 主备 failover）→ 拉版本信息 → 拉资源包版本 → 资源系统补丁 → 启动热更。所有项目可变项（URL 列表、HTTP 公共参数、热更入口、UI 实现）通过 StartupOptions ScriptableObject 配置资产 + 两个接口（IStartupUIHandler / IHotfixLauncher）注入。文档：https://gameframex.doc.alianblank.com
 
 ## 快速开始
 

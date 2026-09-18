@@ -26,7 +26,7 @@ namespace GameFrameX.UnitTests
         [Fact]
         public void FilterByType_TypeMismatch_YieldsEmptyArrayNotNull()
         {
-            // SubAssets 语义：主资源类型与请求类型不匹配时结果是空集合而非 null（空集合按 YooAsset 语义算成功）
+            // SubAssets 语义：主资源类型与请求类型不匹配时结果是空集合而非 null（空集合按资源系统语义算成功）
             var filtered = BundleAssetLoadUtility.FilterByType(new object[] { "hello" }, typeof(int));
 
             Assert.NotNull(filtered);

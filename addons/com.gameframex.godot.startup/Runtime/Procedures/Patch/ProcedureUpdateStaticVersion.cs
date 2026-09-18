@@ -68,7 +68,7 @@ namespace Godot.Startup.Procedure.Patch
         /// <returns>版本获取任务 / Version request task</returns>
         private async Task GetStaticVersionAsync(IFsm<IProcedureManager> procedureOwner)
         {
-            // 说明：Unity 版通过 YooAssets.GetPackage 获取默认包；Godot 侧统一走 AssetComponent.GetAssetsPackage 组件层转发。
+            // 说明：Unity 版通过默认包静态入口 GetPackage 获取；Godot 侧统一走 AssetComponent.GetAssetsPackage 组件层转发。
             var package = GameEntry.GetComponent<AssetComponent>().GetAssetsPackage(AssetComponent.BuildInPackageName);
             var operation = package.RequestPackageVersionAsync();
             await operation.Task;

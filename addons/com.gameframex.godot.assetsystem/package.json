@@ -2,7 +2,7 @@
   "name": "com.gameframex.godot.assetsystem",
   "displayName": "GameFrameXAssetSystem",
   "category": "GameFrameX",
-  "description": "GameFrameX Asset System — resource management system for Godot, ported from YooAsset. Supports editor simulation, built-in PCK bundles, offline and download-driven play modes, with async loading and dependency-aware lifecycle.\n\nGameFrameX Asset System — Godot 资源管理系统，移植自 YooAsset。支持编辑器模拟、内建 PCK 包、离线与下载驱动的运行模式，提供异步加载与依赖感知的生命周期管理。",
+  "description": "GameFrameX Asset System — resource management system for Godot, built on GameFrameX AssetSystem. Supports editor simulation, built-in PCK bundles, offline and download-driven play modes, with async loading and dependency-aware lifecycle.\n\nGameFrameX Asset System — Godot 资源管理系统，基于 GameFrameX AssetSystem。支持编辑器模拟、内建 PCK 包、离线与下载驱动的运行模式，提供异步加载与依赖感知的生命周期管理。",
   "version": "1.0.0",
   "godot": "4.7",
   "keywords": [

@@ -23,7 +23,7 @@
 
 ## 简介
 
-GameFrameX Scene — 基于 YooAsset 的 Godot 场景管理功能包。处理异步场景加载/卸载，支持可配置 LoadSceneMode、进度追踪、活跃场景排序系统、自动相机刷新，以及场景状态变更的事件通知。文档：https://gameframex.doc.alianblank.com
+GameFrameX Scene — 基于 GameFrameX AssetSystem 的 Godot 场景管理功能包。处理异步场景加载/卸载，支持可配置 LoadSceneMode、进度追踪、活跃场景排序系统、自动相机刷新，以及场景状态变更的事件通知。文档：https://gameframex.doc.alianblank.com
 
 ## 快速开始
 

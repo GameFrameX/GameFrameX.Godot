@@ -23,7 +23,7 @@
 
 ## 简介
 
-GameFrameX Asset System — Godot 资源管理系统，移植自 YooAsset。支持编辑器模拟、内建 PCK 包、离线与下载驱动的运行模式，提供异步加载与依赖感知的生命周期管理。
+GameFrameX Asset System — Godot 资源管理系统，基于 GameFrameX AssetSystem。支持编辑器模拟、内建 PCK 包、离线与下载驱动的运行模式，提供异步加载与依赖感知的生命周期管理。
 
 ## 快速开始
 

@@ -64,8 +64,8 @@ namespace GameFrameX.AssetSystem
             }
 
             // 2. 加载资源对象集合
-            // ponytail: Godot 没有 Unity 的“子资产（SubAsset）”概念，这里将语义映射为“加载同路径主资源 + 类型过滤”，
-            // 即请求 Texture2D 子资产时返回的集合里要么是主资源本身（类型匹配），要么为空集合（类型不匹配，按 YooAsset 语义不算失败）。
+            // Godot 没有 Unity 的“子资产（SubAsset）”概念，这里将语义映射为“加载同路径主资源 + 类型过滤”，
+            // 即请求 Texture2D 子资产时返回的集合里要么是主资源本身（类型匹配），要么为空集合（类型不匹配，不算失败）。
             // 升级路径：若未来需要 .tres 内嵌 SubResource 级别的枚举，改为加载主资源后遍历其子资源并按类型过滤。
             if (_steps == ESteps.Loading)
             {

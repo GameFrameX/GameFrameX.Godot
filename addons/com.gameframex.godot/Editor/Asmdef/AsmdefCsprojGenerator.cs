@@ -1,5 +1,5 @@
 // 说明：纯 BCL 逻辑（System.Xml.Linq），不包 #if TOOLS，供单元测试触达（同 AsmdefModel.cs）。
-// 生成模板与仓内已入库生成物（YooAsset.Editor.csproj / YooAsset.Runtime.csproj）保持一致形态。
+// 生成模板与仓内已入库生成物（GameFrameX.AssetSystem.Editor.csproj / GameFrameX.AssetSystem.Runtime.csproj）保持一致形态。
 using System;
 using System.Collections.Generic;
 using System.IO;

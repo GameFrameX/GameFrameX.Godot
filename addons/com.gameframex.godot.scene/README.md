@@ -23,7 +23,7 @@ All-in-One Solution for Indie Game Development · Empowering Indie Developers' D
 
 ## Overview
 
-GameFrameX Scene — Godot scene management package built on YooAsset. Handles async scene loading/unloading with configurable LoadSceneMode, progress tracking, active-scene ordering system, automatic camera refresh, and event notifications for scene state changes.
+GameFrameX Scene — Godot scene management package built on GameFrameX AssetSystem. Handles async scene loading/unloading with configurable LoadSceneMode, progress tracking, active-scene ordering system, automatic camera refresh, and event notifications for scene state changes.
 
 ## Quick Start
 

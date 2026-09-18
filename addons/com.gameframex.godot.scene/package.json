@@ -2,7 +2,7 @@
   "name": "com.gameframex.godot.scene",
   "displayName": "Game Frame X Scene",
   "category": "GameFrameX",
-  "description": "GameFrameX Scene — Godot scene management package built on YooAsset. Handles async scene loading/unloading with configurable LoadSceneMode, progress tracking, active-scene ordering system, automatic camera refresh, and event notifications for scene state changes.\n\nGameFrameX Scene — 基于 YooAsset 的 Godot 场景管理功能包。处理异步场景加载/卸载，支持可配置 LoadSceneMode、进度追踪、活跃场景排序系统、自动相机刷新，以及场景状态变更的事件通知。文档：https://gameframex.doc.alianblank.com",
+  "description": "GameFrameX Scene — Godot scene management package built on GameFrameX AssetSystem. Handles async scene loading/unloading with configurable LoadSceneMode, progress tracking, active-scene ordering system, automatic camera refresh, and event notifications for scene state changes.\n\nGameFrameX Scene — 基于 GameFrameX AssetSystem 的 Godot 场景管理功能包。处理异步场景加载/卸载，支持可配置 LoadSceneMode、进度追踪、活跃场景排序系统、自动相机刷新，以及场景状态变更的事件通知。文档：https://gameframex.doc.alianblank.com",
   "version": "1.0.0",
   "godot": "4.7",
   "keywords": [

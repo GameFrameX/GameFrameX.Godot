@@ -23,7 +23,7 @@ All-in-One Solution for Indie Game Development · Empowering Indie Developers' D
 
 ## Overview
 
-GameFrameX Startup — Godot generic game startup flow scaffold. Encapsulates the common flow from app launch to hotfix loading: launcher UI → fetch global info (primary-backup URL failover) → fetch app version → fetch asset package version → YooAsset patch → hotfix launch. All project-specific variables (URL list, HTTP params, hotfix entry, UI implementation) are injected via StartupOptions ScriptableObject + two interfaces (IStartupUIHandler / IHotfixLauncher).
+GameFrameX Startup — Godot generic game startup flow scaffold. Encapsulates the common flow from app launch to hotfix loading: launcher UI → fetch global info (primary-backup URL failover) → fetch app version → fetch asset package version → asset system patch → hotfix launch. All project-specific variables (URL list, HTTP params, hotfix entry, UI implementation) are injected via StartupOptions ScriptableObject + two interfaces (IStartupUIHandler / IHotfixLauncher).
 
 ## Quick Start
 

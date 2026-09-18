@@ -23,7 +23,7 @@
 
 ## 简介
 
-GameFrameX Asset — 基于 YooAsset 的 Godot 资源管理功能包。提供资源、子资源、原始文件、场景和资源包的同步与异步加载。支持多包管理，可配置运行模式、热更新地址、资源路径分离，以及未使用资源与资源包的自动清理。文档：https://gameframex.doc.alianblank.com
+GameFrameX Asset — 基于 GameFrameX AssetSystem 的 Godot 资源管理功能包。提供资源、子资源、原始文件、场景和资源包的同步与异步加载。支持多包管理，可配置运行模式、热更新地址、资源路径分离，以及未使用资源与资源包的自动清理。文档：https://gameframex.doc.alianblank.com
 
 ## 快速开始
 

@@ -66,7 +66,7 @@ namespace Godot.Startup.Procedure.Patch
         /// <param name="procedureOwner">流程所有者 / Procedure owner</param>
         private void CreateDownloader(IFsm<IProcedureManager> procedureOwner)
         {
-            // 说明：Unity 版为 YooAssets.CreateResourceDownloader(10, 3)（默认包静态入口）；
+            // 说明：Unity 版为默认包静态入口 CreateResourceDownloader(10, 3)；
             // Godot 侧为 ResourcePackage 实例方法 CreateResourceDownloader(downloadingMax, failedTryAgain)。
             var package = GameEntry.GetComponent<AssetComponent>().GetAssetsPackage(AssetComponent.BuildInPackageName);
             var downloader = package.CreateResourceDownloader(10, 3);

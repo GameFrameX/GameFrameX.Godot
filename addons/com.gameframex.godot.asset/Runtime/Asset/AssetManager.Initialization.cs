@@ -19,22 +19,22 @@ namespace GameFrameX.Asset.Runtime
                 case EPlayMode.EditorSimulateMode:
                 {
                     // 编辑器下的模拟模式
-                    return InitializeYooAssetEditorSimulateMode(resourcePackage);
+                    return InitializeEditorSimulateMode(resourcePackage);
                 }
                 case EPlayMode.OfflinePlayMode:
                 {
                     // 单机运行模式
-                    return InitializeYooAssetOfflinePlayMode(resourcePackage);
+                    return InitializeOfflinePlayMode(resourcePackage);
                 }
                 case EPlayMode.HostPlayMode:
                 {
                     // 联机运行模式
-                    return InitializeYooAssetHostPlayMode(resourcePackage, hostServerURL, fallbackHostServerURL);
+                    return InitializeHostPlayMode(resourcePackage, hostServerURL, fallbackHostServerURL);
                 }
                 case EPlayMode.WebPlayMode:
                 {
                     // WebGL运行模式
-                    return InitializeYooAssetWebPlayMode(resourcePackage, hostServerURL, fallbackHostServerURL);
+                    return InitializeWebPlayMode(resourcePackage, hostServerURL, fallbackHostServerURL);
                 }
                 default:
                 {
@@ -48,7 +48,7 @@ namespace GameFrameX.Asset.Runtime
         /// </summary>
         /// <param name="resourcePackage">资源包</param>
         /// <returns></returns>
-        private InitializationOperation InitializeYooAssetEditorSimulateMode(ResourcePackage resourcePackage)
+        private InitializationOperation InitializeEditorSimulateMode(ResourcePackage resourcePackage)
         {
             var simulateBuildResult = EditorSimulateModeHelper.SimulateBuild(nameof(EDefaultBuildPipeline.BuiltinBuildPipeline), ConstDefaultPackageName);
             var createParameters = new EditorSimulateModeParameters();
@@ -61,7 +61,7 @@ namespace GameFrameX.Asset.Runtime
         /// </summary>
         /// <param name="resourcePackage">资源包</param>
         /// <returns></returns>
-        private InitializationOperation InitializeYooAssetOfflinePlayMode(ResourcePackage resourcePackage)
+        private InitializationOperation InitializeOfflinePlayMode(ResourcePackage resourcePackage)
         {
             var buildinFileSystem = FileSystemParameters.CreateDefaultBuildinFileSystemParameters();
             var initParameters = new OfflinePlayModeParameters();
@@ -76,7 +76,7 @@ namespace GameFrameX.Asset.Runtime
         /// <param name="hostServerURL">主机服务器URL</param>
         /// <param name="fallbackHostServerURL">备用主机服务器URL</param>
         /// <returns></returns>
-        private InitializationOperation InitializeYooAssetWebPlayMode(ResourcePackage resourcePackage, string hostServerURL, string fallbackHostServerURL)
+        private InitializationOperation InitializeWebPlayMode(ResourcePackage resourcePackage, string hostServerURL, string fallbackHostServerURL)
         {
             // 说明：Godot 侧无微信/抖音/快手小游戏条件编译分支，统一使用默认 Web 文件系统。
             var initParameters = new WebPlayModeParameters();
@@ -91,7 +91,7 @@ namespace GameFrameX.Asset.Runtime
         /// <param name="hostServerURL">主机服务器URL</param>
         /// <param name="fallbackHostServerURL">备用主机服务器URL</param>
         /// <returns></returns>
-        private InitializationOperation InitializeYooAssetHostPlayMode(ResourcePackage resourcePackage, string hostServerURL, string fallbackHostServerURL)
+        private InitializationOperation InitializeHostPlayMode(ResourcePackage resourcePackage, string hostServerURL, string fallbackHostServerURL)
         {
             var remoteServices = new RemoteServices(hostServerURL, fallbackHostServerURL);
             var createParameters = new HostPlayModeParameters

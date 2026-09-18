@@ -397,7 +397,7 @@ namespace GameFrameX.Scene.Runtime
 
                 // Godot 迁移说明：Unity 在 Single 模式下由引擎自动销毁其他场景的 GameObject；
                 // Godot 侧由 assetsystem 的场景加载流程（DatabaseSceneProvider.TryAttachSceneNode）负责
-                // QueueFree 旧的 CurrentScene，框架侧仍需主动释放 YooAsset 资源引用并清理字典残留，
+                // QueueFree 旧的 CurrentScene，框架侧仍需主动释放资源系统引用并清理字典残留，
                 // 否则后续重新加载（含重启同场景）会报 "already loaded" 异常，故统一清理。
                 UnloadAllLoadedScenesInternal();
             }

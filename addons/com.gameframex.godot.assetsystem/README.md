@@ -23,7 +23,7 @@ All-in-One Solution for Indie Game Development · Empowering Indie Developers' D
 
 ## Overview
 
-GameFrameX Asset System — resource management system for Godot, ported from YooAsset. Supports editor simulation, built-in PCK bundles, offline and download-driven play modes, with async loading and dependency-aware lifecycle.
+GameFrameX Asset System — resource management system for Godot, built on GameFrameX AssetSystem. Supports editor simulation, built-in PCK bundles, offline and download-driven play modes, with async loading and dependency-aware lifecycle.
 
 ## Quick Start
 
