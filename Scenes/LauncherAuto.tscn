@@ -8,3 +8,13 @@ script = ExtResource("1_entry")
 
 [node name="Node" type="Node" parent="." unique_id=337509475]
 script = ExtResource("2_70sia")
+m_ScaleMode = null
+m_ScreenMatchMode = null
+m_DesignWidth = null
+m_DesignHeight = null
+m_MatchWidthOrHeight = null
+m_ConstantScaleFactor = null
+m_ReferencePixelsPerUnit = null
+m_FallbackScreenDPI = null
+m_DefaultSpriteDPI = null
+m_IgnoreOrientation = null
