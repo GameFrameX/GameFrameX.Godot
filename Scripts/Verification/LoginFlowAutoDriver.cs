@@ -85,6 +85,13 @@ namespace Godot.Startup.Verification
 				return;
 			}
 
+			// GDGUI 编译模式：登录演示流（UILauncher 自动进度 → UILogin 点击 → UIMain 玩家信息）。
+			if (loginForm is Godot.Hotfix.GodotGUI.UILogin gdguiLogin)
+			{
+				await RunGdguiFlowAsync(sceneTree, uiComponent, gdguiLogin, autoQuit);
+				return;
+			}
+
 			if (loginForm is not Godot.Hotfix.FairyGUI.UILogin login)
 			{
 				Fail($"UILogin 类型异常：{loginForm.GetType().FullName}");
@@ -154,11 +161,71 @@ namespace Godot.Startup.Verification
 		}
 
 		/// <summary>
+		/// GDGUI 登录演示流：与 FairyGUI 分支等价的自动化驱动。
+		/// UILogin 点击登录按钮 → UILauncher 流程接管打开 UIMain → 校验玩家信息按演示内容刷新。
+		/// </summary>
+		private async Task RunGdguiFlowAsync(SceneTree sceneTree, UIComponent uiComponent, Godot.Hotfix.GodotGUI.UILogin login, bool autoQuit)
+		{
+			GD.Print("[AutoFlow][GDGUI] 登录演示流开始");
+
+			await SettleAsync(sceneTree);
+			Screenshot("gdgui_login");
+
+			GD.Print("[AutoFlow][GDGUI][阶段1] 登录：点击登录按钮");
+			login.AutoSubmitLogin();
+
+			// 阶段 2：UILauncher 流程关闭登录界面并打开主界面。
+			var mainForm = await WaitForFormAsync(sceneTree, uiComponent, "UIMain");
+			if (mainForm == null)
+			{
+				Fail("[GDGUI] UIMain 未打开");
+				return;
+			}
+
+			await SettleAsync(sceneTree);
+			Screenshot("gdgui_main");
+
+			if (mainForm is not Node mainNode)
+			{
+				Fail($"[GDGUI] UIMain 类型异常：{mainForm.GetType().FullName}");
+				return;
+			}
+
+			var playerNameLabel = mainNode.FindChild("PlayerNameLabel", true, false) as Label;
+			var playerLevelLabel = mainNode.FindChild("PlayerLevelLabel", true, false) as Label;
+			if (playerNameLabel == null || playerLevelLabel == null)
+			{
+				Fail("[GDGUI] UIMain 玩家信息标签缺失");
+				return;
+			}
+
+			// UILauncher 演示流以 SetPlayerInfo("GameFrameX", "Lv.1") 刷新主界面。
+			if (playerNameLabel.Text != "Player: GameFrameX" || playerLevelLabel.Text != "Level: Lv.1")
+			{
+				Fail($"[GDGUI] UIMain 玩家信息未按演示内容刷新：name='{playerNameLabel.Text}' level='{playerLevelLabel.Text}'");
+				return;
+			}
+
+			GD.Print($"[AutoFlow][GDGUI][阶段2] 进入游戏成功。{playerNameLabel.Text} {playerLevelLabel.Text}");
+
+			if (autoQuit)
+			{
+				for (var i = 0; i < SettleFrames; i++)
+				{
+					await NextFrameAsync(sceneTree);
+				}
+
+				GetTree().Quit(0);
+			}
+		}
+
+		/// <summary>
 		/// 验证从 Unity 包移植的扫光效果：贴一个 GImageSweepLight，
 		/// 对比两个时刻截图的亮度差异（扫光带移动必然产生变化）。
 		/// </summary>
 		private async Task VerifySweepLightAsync(SceneTree sceneTree)
 		{
+
 			try
 			{
 				GD.Print($"[AutoFlow][扫光验证] Engine.TimeScale={Engine.TimeScale} MaxFps={Engine.MaxFps}");

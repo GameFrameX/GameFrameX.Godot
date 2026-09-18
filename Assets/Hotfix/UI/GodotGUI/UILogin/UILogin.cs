@@ -96,6 +96,22 @@ namespace Godot.Hotfix.GodotGUI
 			LoginClicked?.Invoke();
 		}
 
+		/// <summary>
+		/// 自动化驱动入口：等价于用户点击登录按钮（走真实绑定信号，供 LoginFlowAutoDriver 等验证流程使用）。
+		/// </summary>
+		public void AutoSubmitLogin()
+		{
+			BindLoginButton();
+			if (_loginButton == null)
+			{
+				GD.PushError("[UILogin] AutoSubmitLogin failed: LoginButton not found.");
+				return;
+			}
+
+			GD.Print("[UILogin] AutoSubmitLogin: emit LoginButton pressed");
+			_loginButton.EmitSignal(Button.SignalName.Pressed);
+		}
+
 		private static async Task TryRequestHttpSmokeAsync()
 		{
 			try
