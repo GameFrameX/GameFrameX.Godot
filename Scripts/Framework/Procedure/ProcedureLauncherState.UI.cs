@@ -12,7 +12,7 @@ public sealed partial class ProcedureLauncherState
     private static bool s_IsLauncherUiFlowRunning;
     private static bool s_LauncherUiFlowStarted;
 
-#if FAIRY_GUI
+#if ENABLE_UI_FAIRYGUI
     private const string LauncherScenePath = "res://Assets/Resources/UI/FGUI/UILauncher/UILauncher.tscn";
 #else
     private const string LauncherScenePath = "res://Assets/Resources/UI/GGUI/UILauncher/UILauncher.tscn";
@@ -45,8 +45,8 @@ public sealed partial class ProcedureLauncherState
     {
         try
         {
-#if FAIRY_GUI
-            Log.Info("[LauncherUI] 编译模式：FAIRY_GUI caller={0}", callerTag);
+#if ENABLE_UI_FAIRYGUI
+            Log.Info("[LauncherUI] 编译模式：ENABLE_UI_FAIRYGUI caller={0}", callerTag);
 #else
             Log.Info("[LauncherUI] 编译模式：GDGUI caller={0}", callerTag);
 #endif

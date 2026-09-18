@@ -306,11 +306,19 @@ namespace GameFrameX.UI.Runtime
             const string gdGuiUIManagerType = "GameFrameX.UI.GDGUI.Runtime.UIManager";
             const string runtimeUIManagerType = "GameFrameX.UI.Runtime.UIManager";
 
-#if FAIRY_GUI
+#if ENABLE_UI_FAIRYGUI
             const string fairyGuiUIManagerType = "GameFrameX.UI.FairyGUI.Runtime.UIManager";
             if (Utility.Assembly.GetType(fairyGuiUIManagerType) != null)
             {
                 return fairyGuiUIManagerType;
+            }
+#endif
+
+#if ENABLE_UI_GDGUI
+            // 显式选择 GDGUI 后端时强制使用 GDGUI 界面管理器，忽略场景中遗留的旧后端配置。
+            if (Utility.Assembly.GetType(gdGuiUIManagerType) != null)
+            {
+                return gdGuiUIManagerType;
             }
 #endif
 
@@ -518,7 +526,7 @@ namespace GameFrameX.UI.Runtime
 
         private static string GetDefaultUIFormHelperTypeName()
         {
-#if FAIRY_GUI
+#if ENABLE_UI_FAIRYGUI
             return "GameFrameX.UI.FairyGUI.Runtime.FairyGUIFormHelper";
 #else
             return "GameFrameX.UI.GDGUI.Runtime.GDGUIFormHelper";
@@ -527,7 +535,7 @@ namespace GameFrameX.UI.Runtime
 
         private static string GetDefaultUIGroupHelperTypeName()
         {
-#if FAIRY_GUI
+#if ENABLE_UI_FAIRYGUI
             return "GameFrameX.UI.FairyGUI.Runtime.FairyGUIUIGroupHelper";
 #else
             return "GameFrameX.UI.GDGUI.Runtime.GDGUIUIGroupHelper";
@@ -555,7 +563,7 @@ namespace GameFrameX.UI.Runtime
         /// <returns>当前系统对应的根节点。</returns>
         private Node GetCurrentUIRoot()
         {
-#if FAIRY_GUI
+#if ENABLE_UI_FAIRYGUI
             return m_FairyGUIRoot ?? m_GDGUIRoot;
 #else
             return m_GDGUIRoot ?? m_FairyGUIRoot;
@@ -567,7 +575,7 @@ namespace GameFrameX.UI.Runtime
         /// </summary>
         private void EnsureFairyGuiDisplayRootAttached()
         {
-#if FAIRY_GUI
+#if ENABLE_UI_FAIRYGUI
             if (m_FairyGUIRoot == null)
             {
                 return;
