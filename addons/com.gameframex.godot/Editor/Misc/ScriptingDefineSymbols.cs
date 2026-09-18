@@ -15,6 +15,7 @@ namespace GameFrameX.Editor
     {
         private const string GodotCsprojFilePath = "res://Godot.csproj";
         private const string HotfixCsprojFilePath = "res://Assets/Hotfix/Hotfix.csproj";
+        private const string LeanClrCsprojFilePath = "res://Assets/LeanCLR/GameFrameX.csproj";
         private const string CompileTriggerStampFilePath = "res://addons/com.gameframex.godot/Editor/Misc/CompileTriggerStamp.cs";
         private const string HotfixCompileTriggerStampFilePath = "res://Assets/Hotfix/CompileTriggerStamp.cs";
         public static event Action DefineSymbolsChanged;
@@ -110,6 +111,17 @@ namespace GameFrameX.Editor
         /// <param name="scriptingDefineSymbols">要设置的脚本宏定义。</param>
         public static void SetScriptingDefineSymbols(string[] scriptingDefineSymbols)
         {
+            SetScriptingDefineSymbols(scriptingDefineSymbols, triggerRecompile: true);
+        }
+
+        /// <summary>
+        /// 设置当前工程的脚本宏定义，可选择是否立即触发重编译。
+        /// headless 冒烟验证等只关心写回正确性的场景应传 false，避免热重载与进程退出竞态。
+        /// </summary>
+        /// <param name="scriptingDefineSymbols">要设置的脚本宏定义。</param>
+        /// <param name="triggerRecompile">是否停止运行场景、广播变更并触发自动重编译。</param>
+        public static void SetScriptingDefineSymbols(string[] scriptingDefineSymbols, bool triggerRecompile)
+        {
             string[] symbols = scriptingDefineSymbols ?? Array.Empty<string>();
             string defineValue = string.Join(";",
                 symbols
@@ -117,7 +129,7 @@ namespace GameFrameX.Editor
                     .Select(x => x.Trim())
                     .Distinct(StringComparer.Ordinal));
             bool changed = SaveDefineConstantsValue(defineValue);
-            if (changed)
+            if (changed && triggerRecompile)
             {
                 PrepareEditorForRecompile();
                 NotifyDefineSymbolsChanged();
@@ -195,7 +207,9 @@ namespace GameFrameX.Editor
         {
             bool godotChanged = SaveDefineConstantsValueToProject(GetGodotCsprojPath(), defineConstantsValue);
             bool hotfixChanged = SaveDefineConstantsValueToProject(GetHotfixCsprojPath(), defineConstantsValue);
-            return godotChanged || hotfixChanged;
+            // LeanCLR 热更运行时工程与主工程共用同一套宏，切换 UI 后端等场景必须同步，避免热更侧编译语义漂移。
+            bool leanClrChanged = SaveDefineConstantsValueToProject(GetLeanClrCsprojPath(), defineConstantsValue);
+            return godotChanged || hotfixChanged || leanClrChanged;
         }
 
         private static bool SaveDefineConstantsValueToProject(string csprojPath, string defineConstantsValue)
@@ -221,17 +235,19 @@ namespace GameFrameX.Editor
                 return false;
             }
 
-            XElement propertyGroup = project.Elements("PropertyGroup").FirstOrDefault();
+            // 兼容两种工程格式：SDK 风格无 xmlns；旧式 MSBuild（如 LeanCLR GameFrameX.csproj）带默认命名空间。
+            // 统一按局部名查找节点，新建节点时继承所属元素的命名空间。
+            XElement propertyGroup = project.Elements().FirstOrDefault(static e => e.Name.LocalName == "PropertyGroup");
             if (propertyGroup == null)
             {
-                propertyGroup = new XElement("PropertyGroup");
+                propertyGroup = new XElement(project.Name.Namespace + "PropertyGroup");
                 project.AddFirst(propertyGroup);
             }
 
-            XElement defineNode = propertyGroup.Element("DefineConstants");
+            XElement defineNode = propertyGroup.Elements().FirstOrDefault(static e => e.Name.LocalName == "DefineConstants");
             if (defineNode == null)
             {
-                defineNode = new XElement("DefineConstants");
+                defineNode = new XElement(propertyGroup.Name.Namespace + "DefineConstants");
                 propertyGroup.Add(defineNode);
             }
 
@@ -303,6 +319,15 @@ namespace GameFrameX.Editor
         private static string GetHotfixCsprojPath()
         {
             return ProjectSettings.GlobalizePath(HotfixCsprojFilePath);
+        }
+
+        /// <summary>
+        /// 获取 LeanCLR 热更运行时 GameFrameX.csproj 的绝对路径。
+        /// </summary>
+        /// <returns>工程文件绝对路径。</returns>
+        private static string GetLeanClrCsprojPath()
+        {
+            return ProjectSettings.GlobalizePath(LeanClrCsprojFilePath);
         }
     }
 }
