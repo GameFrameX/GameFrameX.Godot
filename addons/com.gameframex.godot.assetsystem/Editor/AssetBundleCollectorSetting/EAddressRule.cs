@@ -1,7 +1,7 @@
 namespace GameFrameX.AssetSystem.Editor
 {
     /// <summary>
-    /// 寻址规则(枚举子集,语义对齐 YooAsset Unity 版 DefaultAddressRule)
+    /// 寻址规则(枚举子集,语义对齐 GameFrameX Godot 版 DefaultAddressRule)
     /// </summary>
     public enum EAddressRule
     {

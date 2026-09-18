@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace GameFrameX.AssetSystem.Editor
 {
     /// <summary>
-    /// Collector 配置根数据类(语义对齐 YooAsset Unity 版,ScriptableObject 改为普通可序列化类)
+    /// Collector 配置根数据类(语义对齐 GameFrameX Godot 版,ScriptableObject 改为普通可序列化类)
     /// </summary>
     [Serializable]
     public class AssetBundleCollectorSetting

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace GameFrameX.AssetSystem.Editor
 {
     /// <summary>
-    /// 资源收集包裹(语义对齐 YooAsset Unity 版)
+    /// 资源收集包裹(语义对齐 GameFrameX Godot 版)
     /// </summary>
     [Serializable]
     public class AssetBundleCollectorPackage

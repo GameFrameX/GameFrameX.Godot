@@ -3,7 +3,7 @@ using System;
 namespace GameFrameX.AssetSystem.Editor
 {
     /// <summary>
-    /// 资源收集器(语义对齐 YooAsset Unity 版,规则字段由类名改为枚举直存)
+    /// 资源收集器(语义对齐 GameFrameX Godot 版,规则字段由类名改为枚举直存)
     /// </summary>
     [Serializable]
     public class AssetBundleCollector

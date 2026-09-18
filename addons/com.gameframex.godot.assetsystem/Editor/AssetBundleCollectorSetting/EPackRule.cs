@@ -1,7 +1,7 @@
 namespace GameFrameX.AssetSystem.Editor
 {
     /// <summary>
-    /// 打包规则(枚举子集,语义对齐 YooAsset Unity 版 DefaultPackRule)
+    /// 打包规则(枚举子集,语义对齐 GameFrameX Godot 版 DefaultPackRule)
     /// </summary>
     public enum EPackRule
     {

@@ -1,7 +1,7 @@
 namespace GameFrameX.AssetSystem.Editor
 {
     /// <summary>
-    /// 收集器类型(语义对齐 YooAsset Unity 版)
+    /// 收集器类型(语义对齐 GameFrameX Godot 版)
     /// </summary>
     public enum ECollectorType
     {

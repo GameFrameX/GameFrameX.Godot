@@ -1,7 +1,7 @@
 namespace GameFrameX.AssetSystem.Editor
 {
     /// <summary>
-    /// 忽略规则(枚举子集,语义对齐 YooAsset Unity 版 DefaultIgnoreRule)
+    /// 忽略规则(枚举子集,语义对齐 GameFrameX Godot 版 DefaultIgnoreRule)
     /// </summary>
     public enum EIgnoreRule
     {

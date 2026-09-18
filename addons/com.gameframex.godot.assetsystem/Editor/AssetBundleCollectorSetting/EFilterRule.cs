@@ -1,7 +1,7 @@
 namespace GameFrameX.AssetSystem.Editor
 {
     /// <summary>
-    /// 过滤规则(枚举子集,语义对齐 YooAsset Unity 版 DefaultFilterRule,后缀按 Godot 资源类型适配)
+    /// 过滤规则(枚举子集,语义对齐 GameFrameX Godot 版 DefaultFilterRule,后缀按 Godot 资源类型适配)
     /// </summary>
     public enum EFilterRule
     {
