@@ -207,7 +207,8 @@ namespace GameFrameX.Editor
         {
             bool godotChanged = SaveDefineConstantsValueToProject(GetGodotCsprojPath(), defineConstantsValue);
             bool hotfixChanged = SaveDefineConstantsValueToProject(GetHotfixCsprojPath(), defineConstantsValue);
-            // LeanCLR 热更运行时工程与主工程共用同一套宏，切换 UI 后端等场景必须同步，避免热更侧编译语义漂移。
+            // LeanCLR 热更为可选特性：工程文件存在时才同步同一套宏，避免热更侧编译语义漂移；
+            // 未安装（Assets/LeanCLR 被移除）时 SaveDefineConstantsValueToProject 跳过且不创建占位工程。
             bool leanClrChanged = SaveDefineConstantsValueToProject(GetLeanClrCsprojPath(), defineConstantsValue);
             return godotChanged || hotfixChanged || leanClrChanged;
         }
@@ -219,15 +220,14 @@ namespace GameFrameX.Editor
                 return false;
             }
 
-            XDocument doc;
-            if (File.Exists(csprojPath))
+            // 可选工程（如 LeanCLR 热更运行时 GameFrameX.csproj）不存在视为未安装：跳过写入且不创建占位工程，
+            // 保证移除可选特性后主工程与 Hotfix 的宏同步不受影响。
+            if (!File.Exists(csprojPath))
             {
-                doc = XDocument.Load(csprojPath);
+                return false;
             }
-            else
-            {
-                doc = new XDocument(new XElement("Project", new XElement("PropertyGroup")));
-            }
+
+            XDocument doc = XDocument.Load(csprojPath);
 
             XElement project = doc.Root;
             if (project == null)
@@ -322,7 +322,7 @@ namespace GameFrameX.Editor
         }
 
         /// <summary>
-        /// 获取 LeanCLR 热更运行时 GameFrameX.csproj 的绝对路径。
+        /// 获取 LeanCLR 热更运行时 GameFrameX.csproj 的绝对路径（可选特性，工程可能不存在）。
         /// </summary>
         /// <returns>工程文件绝对路径。</returns>
         private static string GetLeanClrCsprojPath()

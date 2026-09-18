@@ -9,8 +9,8 @@ namespace GameFrameX.UI.Editor
     /// <summary>
     /// UI 模块脚本宏定义帮助类。
     /// ENABLE_UI_FAIRYGUI 与 ENABLE_UI_GDGUI 为互斥后端宏：切换必须成对原子替换（移除另一个、写入当前个），
-    /// 并通过一次 SetScriptingDefineSymbols 调用统一写回 Godot/Hotfix/LeanCLR 三个工程，避免中间态。
-    /// </summary>
+    /// 并通过一次 SetScriptingDefineSymbols 调用统一写回存在的工程（Godot/Hotfix/LeanCLR，
+    /// LeanCLR 为可选特性、未安装时自动跳过），避免中间态。
     public static class UIScriptingDefineSymbols
     {
         public const string FairyGuiScriptingDefineSymbol = "ENABLE_UI_FAIRYGUI";
