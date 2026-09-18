@@ -2,9 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using Godot;
-using IOFile = System.IO.File;
 
 namespace GameFrameX.Editor
 {
@@ -15,7 +13,6 @@ namespace GameFrameX.Editor
     public partial class ScriptingDefineSymbolsWindow : Window
     {
         private const string SymbolCatalogPath = "user://gameframex_scripting_define_symbol_catalog.txt";
-        private const string SymbolRuleConfigPath = "res://addons/com.gameframex.godot/Editor/Misc/define_symbols.rules.json";
         private const string UngroupedBucketName = "UNGROUPED";
 
         private readonly List<string> m_CurrentSymbols = new List<string>();
@@ -135,7 +132,7 @@ namespace GameFrameX.Editor
 
             m_AddSymbolEdit = new LineEdit
             {
-                PlaceholderText = "输入新宏名，例如 FAIRY_GUI",
+                PlaceholderText = "输入新宏名，例如 ENABLE_UI_FAIRYGUI",
                 SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
             };
             m_AddSymbolEdit.TextSubmitted += OnAddSymbolSubmitted;
@@ -444,84 +441,113 @@ namespace GameFrameX.Editor
             m_SymbolRules.Clear();
             m_SymbolGroups.Clear();
 
-            var absolutePath = ProjectSettings.GlobalizePath(SymbolRuleConfigPath);
-            if (!IOFile.Exists(absolutePath))
+            var catalogChanged = false;
+            SymbolRuleItem[] rules = BuildBuiltinSymbolRules();
+            for (var i = 0; i < rules.Length; i++)
             {
-                return false;
-            }
-
-            try
-            {
-                var json = IOFile.ReadAllText(absolutePath);
-                var config = JsonSerializer.Deserialize<SymbolRuleConfig>(json, new JsonSerializerOptions
+                var rule = rules[i];
+                var normalized = NormalizeSymbolName(rule.Symbol);
+                if (string.IsNullOrWhiteSpace(normalized))
                 {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (config?.symbols == null || config.symbols.Length == 0)
-                {
-                    return false;
+                    continue;
                 }
 
-                var catalogChanged = false;
-                for (var i = 0; i < config.symbols.Length; i++)
+                rule.Symbol = normalized;
+                rule.Group = string.IsNullOrWhiteSpace(rule.Group) ? string.Empty : rule.Group.Trim();
+                rule.Mode = string.IsNullOrWhiteSpace(rule.Mode) ? string.Empty : rule.Mode.Trim();
+                rule.Conflicts = NormalizeSymbolArray(rule.Conflicts);
+                rule.Implies = NormalizeSymbolArray(rule.Implies);
+                m_SymbolRules[normalized] = rule;
+
+                if (!string.IsNullOrWhiteSpace(rule.Group))
                 {
-                    var rule = config.symbols[i];
-                    if (rule == null)
+                    if (!m_SymbolGroups.TryGetValue(rule.Group, out var list))
                     {
-                        continue;
+                        list = new List<string>();
+                        m_SymbolGroups.Add(rule.Group, list);
                     }
 
-                    var normalized = NormalizeSymbolName(rule.symbol);
-                    if (string.IsNullOrWhiteSpace(normalized))
+                    var exists = false;
+                    for (var j = 0; j < list.Count; j++)
                     {
-                        continue;
-                    }
-
-                    rule.symbol = normalized;
-                    rule.group = string.IsNullOrWhiteSpace(rule.group) ? string.Empty : rule.group.Trim();
-                    rule.mode = string.IsNullOrWhiteSpace(rule.mode) ? string.Empty : rule.mode.Trim();
-                    rule.conflicts = NormalizeSymbolArray(rule.conflicts);
-                    rule.implies = NormalizeSymbolArray(rule.implies);
-                    m_SymbolRules[normalized] = rule;
-
-                    if (!string.IsNullOrWhiteSpace(rule.group))
-                    {
-                        if (!m_SymbolGroups.TryGetValue(rule.group, out var list))
+                        if (string.Equals(list[j], normalized, StringComparison.Ordinal))
                         {
-                            list = new List<string>();
-                            m_SymbolGroups.Add(rule.group, list);
-                        }
-
-                        var exists = false;
-                        for (var j = 0; j < list.Count; j++)
-                        {
-                            if (string.Equals(list[j], normalized, StringComparison.Ordinal))
-                            {
-                                exists = true;
-                                break;
-                            }
-                        }
-
-                        if (!exists)
-                        {
-                            list.Add(normalized);
+                            exists = true;
+                            break;
                         }
                     }
 
-                    if (AddSymbolToCatalog(normalized))
+                    if (!exists)
                     {
-                        catalogChanged = true;
+                        list.Add(normalized);
                     }
                 }
 
-                return catalogChanged;
+                if (AddSymbolToCatalog(normalized))
+                {
+                    catalogChanged = true;
+                }
             }
-            catch (Exception exception)
+
+            return catalogChanged;
+        }
+
+        /// <summary>
+        /// 内置宏规则表（原 define_symbols.rules.json，固定写死于代码，与 Unity 宏体系对齐）。
+        /// </summary>
+        private static SymbolRuleItem[] BuildBuiltinSymbolRules()
+        {
+            return new[]
             {
-                GD.PushWarning($"[ScriptingDefineSymbolsWindow] load rules failed: {exception.Message}");
-                return false;
-            }
+                new SymbolRuleItem { Symbol = "ENABLE_LOG", Label = "Enable Log", Conflicts = new[] { "ENABLE_DEBUG_AND_ABOVE_LOG", "ENABLE_INFO_AND_ABOVE_LOG", "ENABLE_WARNING_AND_ABOVE_LOG", "ENABLE_ERROR_AND_ABOVE_LOG", "ENABLE_FATAL_AND_ABOVE_LOG", "ENABLE_DEBUG_LOG", "ENABLE_INFO_LOG", "ENABLE_WARNING_LOG", "ENABLE_ERROR_LOG", "ENABLE_FATAL_LOG" } },
+                new SymbolRuleItem { Symbol = "FAIRY_GUI", Label = "FairyGUI" },
+                new SymbolRuleItem { Symbol = "NOT_EDITOR", Label = "Force Runtime Load" },
+                new SymbolRuleItem { Symbol = "ENABLE_GAME_FRAME_X_WEB_SOCKET", Label = "WebSocket" },
+                new SymbolRuleItem { Symbol = "ENABLE_GAME_FRAME_X_PROTOBUF", Label = "Protobuf", Group = "DATA_FORMAT", Mode = "single", Conflicts = new[] { "ENABLE_GAME_FRAME_X_JSON" } },
+                new SymbolRuleItem { Symbol = "ENABLE_GAME_FRAME_X_JSON", Label = "Json", Group = "DATA_FORMAT", Mode = "single", Conflicts = new[] { "ENABLE_GAME_FRAME_X_PROTOBUF" } },
+
+                // 通道日志宏
+                new SymbolRuleItem { Symbol = "ENABLE_GAMEFRAMEX_NETWORK_SEND_LOG", Label = "Network Send Log", Group = "CHANNEL_LOG" },
+                new SymbolRuleItem { Symbol = "ENABLE_GAMEFRAMEX_NETWORK_RECEIVE_LOG", Label = "Network Receive Log", Group = "CHANNEL_LOG" },
+                new SymbolRuleItem { Symbol = "ENABLE_GAMEFRAMEX_WEB_SEND_LOG", Label = "Web Send Log", Group = "CHANNEL_LOG" },
+                new SymbolRuleItem { Symbol = "ENABLE_GAMEFRAMEX_WEB_RECEIVE_LOG", Label = "Web Receive Log", Group = "CHANNEL_LOG" },
+
+                // 日志级别宏（与 Unity LogScriptingDefineSymbols 一致：级别宏互斥，且与总开关互斥）
+                new SymbolRuleItem { Symbol = "ENABLE_DEBUG_AND_ABOVE_LOG", Label = "Debug And Above Logs", Group = "LOG_LEVEL", Mode = "single", Conflicts = new[] { "ENABLE_LOG" } },
+                new SymbolRuleItem { Symbol = "ENABLE_INFO_AND_ABOVE_LOG", Label = "Info And Above Logs", Group = "LOG_LEVEL", Mode = "single", Conflicts = new[] { "ENABLE_LOG" } },
+                new SymbolRuleItem { Symbol = "ENABLE_WARNING_AND_ABOVE_LOG", Label = "Warning And Above Logs", Group = "LOG_LEVEL", Mode = "single", Conflicts = new[] { "ENABLE_LOG" } },
+                new SymbolRuleItem { Symbol = "ENABLE_ERROR_AND_ABOVE_LOG", Label = "Error And Above Logs", Group = "LOG_LEVEL", Mode = "single", Conflicts = new[] { "ENABLE_LOG" } },
+                new SymbolRuleItem { Symbol = "ENABLE_FATAL_AND_ABOVE_LOG", Label = "Fatal And Above Logs", Group = "LOG_LEVEL", Mode = "single", Conflicts = new[] { "ENABLE_LOG" } },
+                new SymbolRuleItem { Symbol = "ENABLE_DEBUG_LOG", Label = "Debug Logs", Group = "LOG_LEVEL", Mode = "single", Conflicts = new[] { "ENABLE_LOG" } },
+                new SymbolRuleItem { Symbol = "ENABLE_INFO_LOG", Label = "Info Logs", Group = "LOG_LEVEL", Mode = "single", Conflicts = new[] { "ENABLE_LOG" } },
+                new SymbolRuleItem { Symbol = "ENABLE_WARNING_LOG", Label = "Warning Logs", Group = "LOG_LEVEL", Mode = "single", Conflicts = new[] { "ENABLE_LOG" } },
+                new SymbolRuleItem { Symbol = "ENABLE_ERROR_LOG", Label = "Error Logs", Group = "LOG_LEVEL", Mode = "single", Conflicts = new[] { "ENABLE_LOG" } },
+                new SymbolRuleItem { Symbol = "ENABLE_FATAL_LOG", Label = "Fatal Logs", Group = "LOG_LEVEL", Mode = "single", Conflicts = new[] { "ENABLE_LOG" } },
+
+                // 小游戏平台宏（与 Unity MiniGameDefineSymbolHelper 一致：平台互斥，implies 联动厂商宏与统一宏）
+                new SymbolRuleItem { Symbol = "ENABLE_WECHAT_MINI_GAME", Label = "WeChat Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "WEIXINMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_DOUYIN_MINI_GAME", Label = "DouYin Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "DOUYINMINIGAME", "TTSDK_MIX_ENGINE", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_KUAISHOU_MINI_GAME", Label = "KuaiShou Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "KUAISHOUMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_BAIDU_MINI_GAME", Label = "Baidu Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "BAIDUMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_ALIPAY_MINI_GAME", Label = "Alipay Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "ALIPAYMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_MEITUAN_MINI_GAME", Label = "Meituan Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "MEITUANMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_BILIBILI_MINI_GAME", Label = "Bilibili Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "BILIBILIMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_JINGDONG_MINI_GAME", Label = "JingDong Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "JINGDONGMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_TAOBAO_MINI_GAME", Label = "Taobao Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "TAOBAOMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_DISCORD_MINI_GAME", Label = "Discord Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "DISCORDMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_YOUTUBE_MINI_GAME", Label = "YouTube Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "YOUTUBEMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_FACEBOOK_MINI_GAME", Label = "Facebook Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "FACEBOOKMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_GOOGLEPLAY_MINI_GAME", Label = "Google Play Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "GOOGLEPLAYMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_TIKTOK_MINI_GAME", Label = "TikTok Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "TIKTOKMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_CRAZYGAMES_MINI_GAME", Label = "CrazyGames Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "CRAZYGAMESMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_POKI_MINI_GAME", Label = "Poki Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "POKIMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_VIVO_MINI_GAME", Label = "Vivo Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "VIVOMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_OPPO_MINI_GAME", Label = "OPPO Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "OPPOSMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_XIAOMI_MINI_GAME", Label = "Xiaomi Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "XIAOMIMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_HUAWEI_MINI_GAME", Label = "Huawei Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "HUAWEIMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_TAPTAP_MINI_GAME", Label = "TapTap Mini Game", Group = "MINI_GAME", Mode = "single", Implies = new[] { "TAPTAPMINIGAME", "ENABLE_WEBGL_MINI_GAME" } },
+                new SymbolRuleItem { Symbol = "ENABLE_WEBGL_MINI_GAME", Label = "Unified WebGL Mini Game", Group = "MINI_GAME" },
+            };
         }
 
         private static string[] NormalizeSymbolArray(string[] symbols)
@@ -554,9 +580,9 @@ namespace GameFrameX.Editor
             var catalogChanged = false;
 
             // single + group 表示该组互斥，仅允许一个启用。
-            if (string.Equals(rule.mode, "single", StringComparison.OrdinalIgnoreCase) &&
-                !string.IsNullOrWhiteSpace(rule.group) &&
-                m_SymbolGroups.TryGetValue(rule.group, out var groupedSymbols))
+            if (string.Equals(rule.Mode, "single", StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(rule.Group) &&
+                m_SymbolGroups.TryGetValue(rule.Group, out var groupedSymbols))
             {
                 for (var i = 0; i < groupedSymbols.Count; i++)
                 {
@@ -568,19 +594,19 @@ namespace GameFrameX.Editor
                 }
             }
 
-            if (rule.conflicts != null)
+            if (rule.Conflicts != null)
             {
-                for (var i = 0; i < rule.conflicts.Length; i++)
+                for (var i = 0; i < rule.Conflicts.Length; i++)
                 {
-                    RemoveSymbol(m_CurrentSymbols, rule.conflicts[i]);
+                    RemoveSymbol(m_CurrentSymbols, rule.Conflicts[i]);
                 }
             }
 
-            if (rule.implies != null)
+            if (rule.Implies != null)
             {
-                for (var i = 0; i < rule.implies.Length; i++)
+                for (var i = 0; i < rule.Implies.Length; i++)
                 {
-                    var implied = rule.implies[i];
+                    var implied = rule.Implies[i];
                     AddSymbol(m_CurrentSymbols, implied);
                     if (AddSymbolToCatalog(implied))
                     {
@@ -589,14 +615,15 @@ namespace GameFrameX.Editor
                 }
             }
 
+
             return catalogChanged;
         }
 
         private string GetSymbolGroupName(string symbol)
         {
-            if (m_SymbolRules.TryGetValue(symbol, out var rule) && rule != null && !string.IsNullOrWhiteSpace(rule.group))
+            if (m_SymbolRules.TryGetValue(symbol, out var rule) && rule != null && !string.IsNullOrWhiteSpace(rule.Group))
             {
-                return rule.group;
+                return rule.Group;
             }
 
             return string.Empty;
@@ -610,7 +637,7 @@ namespace GameFrameX.Editor
             }
 
             var extras = new List<string>();
-            var label = string.IsNullOrWhiteSpace(rule.label) ? string.Empty : rule.label.Trim();
+            var label = string.IsNullOrWhiteSpace(rule.Label) ? string.Empty : rule.Label.Trim();
             if (!string.IsNullOrWhiteSpace(label) &&
                 !string.Equals(label, symbol, StringComparison.Ordinal))
             {
@@ -785,19 +812,17 @@ namespace GameFrameX.Editor
             Hide();
         }
 
-        private sealed class SymbolRuleConfig
-        {
-            public SymbolRuleItem[] symbols { get; set; } = Array.Empty<SymbolRuleItem>();
-        }
-
+        /// <summary>
+        /// 内置宏规则项（字段含义见 BuildBuiltinSymbolRules）。
+        /// </summary>
         private sealed class SymbolRuleItem
         {
-            public string symbol { get; set; }
-            public string label { get; set; }
-            public string group { get; set; }
-            public string mode { get; set; }
-            public string[] conflicts { get; set; }
-            public string[] implies { get; set; }
+            public string Symbol { get; set; }
+            public string Label { get; set; }
+            public string Group { get; set; }
+            public string Mode { get; set; }
+            public string[] Conflicts { get; set; }
+            public string[] Implies { get; set; }
         }
     }
 }
