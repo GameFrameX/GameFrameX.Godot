@@ -15,17 +15,19 @@ using GameFrameX.Editor;
 public partial class AssetSystemEditorPlugin : EditorPlugin
 {
     private static WeakReference<AssetSystemEditorPlugin> s_ActiveInstance;
-    private const string HomePageMenu = "AssetSystem/Home Page";
-    private const string BuilderMenu = "AssetSystem/AssetBundle Builder";
-    private const string CollectorMenu = "AssetSystem/AssetBundle Collector";
-    private const string ReporterMenu = "AssetSystem/AssetBundle Reporter";
-    private const string PckBuilderMenu = "AssetSystem/PCK Builder";
-    private const string DebuggerMenu = "AssetSystem/AssetBundle Debugger";
-    private const int BuilderTabIndex = 0;
-    private const int CollectorTabIndex = 1;
-    private const int ReporterTabIndex = 2;
-    private const int DebuggerTabIndex = 3;
-    private const int DefaultTabIndex = BuilderTabIndex;
+    private const string GameFrameXMenuTitle = "GameFrameX";
+    private const string MenuItemHomePage = "Home Page";
+    private const string MenuItemAssetBundleCollector = "AssetBundle Collector";
+    private const string MenuItemAssetBundleBuilder = "AssetBundle Builder";
+    private const string MenuItemAssetBundleReporter = "AssetBundle Reporter";
+    private const string MenuItemPckBuilder = "PCK Builder";
+    private const string MenuItemAssetBundleDebugger = "AssetBundle Debugger";
+    private const int GameFrameXMenuItemHomePage = 0;
+    private const int GameFrameXMenuItemAssetBundleCollector = 1;
+    private const int GameFrameXMenuItemAssetBundleBuilder = 2;
+    private const int GameFrameXMenuItemAssetBundleReporter = 3;
+    private const int GameFrameXMenuItemPckBuilder = 4;
+    private const int GameFrameXMenuItemAssetBundleDebugger = 5;
     private const int BuilderScanLimit = 20000;
     private const string ManifestUnavailableNone = "None";
     private const string ManifestUnavailableNotFound = "ManifestNotFound";
@@ -198,10 +200,6 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private const string DebuggerLogAlignmentPassed = "字段对齐校验通过。";
     private const string DebuggerLogAlignmentMissingPrefix = "字段缺失: ";
     private const string DebuggerLogAlignmentInvalidPrefix = "字段无效: ";
-    private const string TabSwitchStatusPrefix = "已切换到 ";
-    private const string TabSwitchStatusSuffix = " 模块。";
-    private const string TabSwitchStatusUnavailable = "模块切换失败：插件面板未就绪。";
-    private const string TabSwitchStatusOutOfRangePrefix = "模块切换失败：索引越界 ";
     private const string PackageNameEmptyError = "Package Name 不能为空。";
     private const string OutputPathEmptyError = "Output Path 不能为空。";
     private const string BuilderDefaultScanRoot = ProjectDisplayPrefix;
@@ -244,9 +242,6 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private const string ExtensionSummarySortModeAsc = "Extension Asc";
     private const string ExtensionSummaryEmpty = "(empty)";
     private const string ExtensionSummaryLineFormat = "{0}. {1} : {2}";
-    private const string PluginRootName = "AssetSystem";
-    private const string PluginTitleText = "AssetSystem Editor (Godot)";
-    private const string PluginLoadedStatus = "AssetSystem 插件已加载。";
         private const string HomePageUrl = "https://github.com/GameFrameX/GameFrameX.Godot";
     private const string BuilderModuleName = "Builder";
     private const string CollectorModuleName = "Collector";
@@ -409,7 +404,6 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private const float DebuggerPollMinHeight = 150f;
     // TODO: IndependAssets / 重复资源检测依赖依赖分析，按 Phase 2.5 决策明确推迟，不在本期实现
 
-    private const DockSlot PluginDockSlot = DockSlot.LeftUl;
     private static readonly HashSet<string> RawFilePipelineExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         SourceFilterSceneExtension,
@@ -451,10 +445,32 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         BuilderBuildModeIncrementalBuild,
         BuilderBuildModeSimulateBuild
     };
+    // ModuleWindow-style UI styling (single-window per module)
+    private const int ModuleWindowWindowMinWidth = 1100;
+    private const int ModuleWindowWindowMinHeight = 720;
+    private const int ModuleWindowWindowDefaultWidth = 1280;
+    private const int ModuleWindowWindowDefaultHeight = 760;
+    private const int ModuleWindowTitleFontSize = 18;
+    private const int ModuleWindowButtonFontSize = 14;
+    private static readonly Color ModuleWindowPrimaryButtonColor = new Color(0.18f, 0.545f, 0.341f);
+    private static readonly Color ModuleWindowButtonTextColor = new Color(1f, 1f, 1f);
+    private const string ModuleWindowBuilderWindowTitle = "AssetBundle Builder";
+    private const string ModuleWindowCollectorWindowTitle = "AssetBundle Collector";
+    private const string ModuleWindowReporterWindowTitle = "AssetBundle Reporter";
+    private const string ModuleWindowDebuggerWindowTitle = "AssetBundle Debugger";
+    private const string ModuleWindowBuilderPrimaryButtonText = "Click Build";
+    private const string ModuleWindowCollectorPrimaryButtonText = "Run Collector";
+    private const string ModuleWindowReporterPrimaryButtonText = "Run Reporter";
+    private const string ModuleWindowDebuggerPrimaryButtonText = "Refresh Snapshot";
 
-    private Control _dock;
-    private TabContainer _tabContainer;
-    private RichTextLabel _statusView;
+    private Window _builderWindow;
+    private Window _collectorWindow;
+    private Window _reporterWindow;
+    private Window _debuggerWindow;
+    private bool _builderWindowMounted;
+    private bool _collectorWindowMounted;
+    private bool _reporterWindowMounted;
+    private bool _debuggerWindowMounted;
     private OptionButton _builderPackageOptions;
     private LineEdit _builderPackageNameInput;
     private LineEdit _builderOutputPathInput;
@@ -493,12 +509,15 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     private RichTextLabel _reporterManifestView;
     private CheckButton _debuggerAutoRefreshToggle;
     private Timer _debuggerPollTimer;
+    private PopupMenu _hostGameFrameXPopup;
+    private PopupMenu _assetSystemSubmenu;
+    private bool _menuRegistrationPending;
     private RichTextLabel _debuggerPollView;
 
     private bool _isLifecycleMounted;
     private bool _toolMenusRegistered;
+    // ModuleWindow-style: each module opens as a singleton window on demand.
     private bool _builderProfileSyncing;
-    private int _lastOpenedTabIndex = DefaultTabIndex;
     private ConfigFile _builderSettings;
     private IEditorPlatformBridge _editorPlatformBridge;
     private bool _collectorRulesSyncing;
@@ -518,7 +537,7 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         }
 
         RegisterToolMenus();
-        MountDock();
+        // ModuleWindow-style: modules open as singleton windows on demand, no dock mount.
         _isLifecycleMounted = true;
         EnsureLifecycleState();
     }
@@ -535,7 +554,7 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
             return;
         }
 
-        UnmountDock();
+        CloseAllModuleWindows();
         UnregisterToolMenus();
         ClosePckBuilderDialog();
         _isLifecycleMounted = false;
@@ -574,10 +593,6 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
             RegisterToolMenus();
         }
 
-        if (_dock == null || _tabContainer == null)
-        {
-            MountDock();
-        }
     }
 
     /// <summary>
@@ -585,19 +600,17 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     /// </summary>
     private void ForceCleanupOrphanState()
     {
-        if (_dock != null || _tabContainer != null || _statusView != null)
-        {
-            UnmountDock();
-        }
+        CloseAllModuleWindows();
 
         if (_toolMenusRegistered)
         {
             UnregisterToolMenus();
         }
     }
-
     /// <summary>
-    /// 注册工具菜单入口
+    /// 找到 com.gameframex.godot 插件创建的 GameFrameX 顶级 MenuButton，
+    /// 把 6 项 AssetBundle 子菜单挂到它的 Popup 上。
+    /// 如果还没就绪（插件加载顺序），用 CallDeferred 推迟重试。
     /// </summary>
     private void RegisterToolMenus()
     {
@@ -606,17 +619,86 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
             return;
         }
 
-        RegisterToolMenuItem(HomePageMenu, OpenHomePage);
-        RegisterToolMenuItem(PckBuilderMenu, OpenPckBuilderDialog);
-        RegisterToolMenuItem(CollectorMenu, OpenCollector);
-        RegisterToolMenuItem(ReporterMenu, OpenReporter);
-        RegisterToolMenuItem(DebuggerMenu, OpenDebugger);
-        _toolMenusRegistered = true;
+        if (TryAppendItemsToHostGameFrameXPopup())
+        {
+            _toolMenusRegistered = true;
+            return;
+        }
+
+        // 核心插件尚未就绪：延迟一帧重试，最多 60 帧。
+        if (_menuRegistrationPending == false)
+        {
+            _menuRegistrationPending = true;
+            CallDeferred(MethodName.AttemptRegisterToolMenusDeferred);
+        }
     }
 
-    /// <summary>
-    /// 注销工具菜单入口
-    /// </summary>
+    private void AttemptRegisterToolMenusDeferred()
+    {
+        if (_toolMenusRegistered)
+        {
+            _menuRegistrationPending = false;
+            return;
+        }
+
+        if (TryAppendItemsToHostGameFrameXPopup())
+        {
+            _toolMenusRegistered = true;
+            _menuRegistrationPending = false;
+            return;
+        }
+
+        // 简单轮询：每帧重试直到超时（约 1 秒）。
+        if (Engine.GetProcessFrames() % 60 == 0)
+        {
+            GD.PushWarning("GameFrameX 菜单尚未就绪，继续重试…");
+        }
+        CallDeferred(MethodName.AttemptRegisterToolMenusDeferred);
+    }
+
+    private const string GameFrameXSubmenuName = "AssetSystem";
+
+    private bool TryAppendItemsToHostGameFrameXPopup()
+    {
+        var baseControl = EditorInterface.Singleton?.GetBaseControl();
+        if (baseControl == null)
+        {
+            return false;
+        }
+
+        var hostButton = baseControl.FindChild("GameFrameXTopMenuButton", true, false) as MenuButton;
+        if (hostButton == null)
+        {
+            return false;
+        }
+
+        var hostPopup = hostButton.GetPopup();
+        if (hostPopup == null)
+        {
+            return false;
+        }
+
+        // 自建 AssetSystem 子 PopupMenu，承载 6 项。
+        var submenu = new PopupMenu();
+        submenu.Name = "AssetSystemSubmenu";
+        submenu.AddItem(MenuItemHomePage, GameFrameXMenuItemHomePage);
+        submenu.AddItem(MenuItemAssetBundleCollector, GameFrameXMenuItemAssetBundleCollector);
+        submenu.AddItem(MenuItemAssetBundleBuilder, GameFrameXMenuItemAssetBundleBuilder);
+        submenu.AddItem(MenuItemAssetBundleReporter, GameFrameXMenuItemAssetBundleReporter);
+        submenu.AddSeparator();
+        submenu.AddItem(MenuItemPckBuilder, GameFrameXMenuItemPckBuilder);
+        submenu.AddItem(MenuItemAssetBundleDebugger, GameFrameXMenuItemAssetBundleDebugger);
+        submenu.IdPressed += OnGameFrameXMenuItemPressed;
+        hostPopup.AddChild(submenu);
+
+        // 主菜单项以子菜单入口形式出现。
+        hostPopup.AddSubmenuNodeItem(GameFrameXSubmenuName, submenu);
+
+        _hostGameFrameXPopup = hostPopup;
+        _assetSystemSubmenu = submenu;
+        return true;
+    }
+
     private void UnregisterToolMenus()
     {
         if (_toolMenusRegistered == false)
@@ -624,19 +706,71 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
             return;
         }
 
-        RemoveToolMenuItem(HomePageMenu);
-        RemoveToolMenuItem(BuilderMenu);
-        RemoveToolMenuItem(CollectorMenu);
-        RemoveToolMenuItem(ReporterMenu);
-        RemoveToolMenuItem(PckBuilderMenu);
+        // 释放 AssetSystem 子 PopupMenu（同时从主 Popup 里移除对应入口）。
+        if (_hostGameFrameXPopup != null && GodotObject.IsInstanceValid(_hostGameFrameXPopup))
+        {
+            RemoveSubmenuEntriesByName(_hostGameFrameXPopup, GameFrameXSubmenuName);
+            _hostGameFrameXPopup = null;
+        }
+
+        if (_assetSystemSubmenu != null && GodotObject.IsInstanceValid(_assetSystemSubmenu))
+        {
+            _assetSystemSubmenu.IdPressed -= OnGameFrameXMenuItemPressed;
+            _assetSystemSubmenu.QueueFree();
+            _assetSystemSubmenu = null;
+        }
+
+        _menuRegistrationPending = false;
         _toolMenusRegistered = false;
     }
 
-    private void RegisterToolMenuItem(string menuPath, Action callback)
+    /// <summary>
+    /// 从 PopupMenu 中按子菜单名移除入口项。
+    /// </summary>
+    private static void RemoveSubmenuEntriesByName(PopupMenu popup, string submenuName)
     {
-        RemoveToolMenuItem(menuPath);
-        AddToolMenuItem(menuPath, Callable.From(callback));
+        if (popup == null)
+        {
+            return;
+        }
+        for (var index = popup.ItemCount - 1; index >= 0; index--)
+        {
+            var submenuNode = popup.GetItemSubmenuNode(index);
+            if (submenuNode != null && string.Equals(popup.GetItemText(index), submenuName, StringComparison.Ordinal))
+            {
+                popup.RemoveItem(index);
+            }
+        }
     }
+
+    /// <summary>
+    /// 处理 GameFrameX 顶级菜单的子项点击。
+    /// </summary>
+    private void OnGameFrameXMenuItemPressed(long id)
+    {
+        switch ((int)id)
+        {
+            case GameFrameXMenuItemHomePage:
+                OpenHomePage();
+                break;
+            case GameFrameXMenuItemAssetBundleCollector:
+                OpenCollector();
+                break;
+            case GameFrameXMenuItemAssetBundleBuilder:
+                OpenBuilder();
+                break;
+            case GameFrameXMenuItemAssetBundleReporter:
+                OpenReporter();
+                break;
+            case GameFrameXMenuItemPckBuilder:
+                OpenPckBuilderDialog();
+                break;
+            case GameFrameXMenuItemAssetBundleDebugger:
+                OpenDebugger();
+                break;
+        }
+    }
+
 
     /// <summary>
     /// 打开统一 PCK 打包窗口（自 com.gameframex.godot 核心包迁入，替代原核心菜单入口）。
@@ -691,109 +825,186 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
     }
 
     /// <summary>
-    /// 创建并挂载主面板
+    /// ModuleWindow 风格：按需打开/聚焦指定模块的独立 Window。
     /// </summary>
-    private void MountDock()
+    private void ShowModuleWindow(ref Window windowRef, ref bool mountedFlag, string title, string primaryButtonText, Action primaryAction)
     {
         EnsureEditorBridge();
-        if (_dock != null)
+        var baseControl = EditorInterface.Singleton?.GetBaseControl();
+        if (baseControl == null)
         {
+            GD.PushError($"{title} 打开失败：编辑器根控件不可用。");
             return;
         }
 
-        var root = new VBoxContainer();
-        root.Name = PluginRootName;
-        root.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-        root.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
-
-        var title = new Label();
-        title.Text = PluginTitleText;
-        root.AddChild(title);
-
-        var actions = new HBoxContainer();
-        actions.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-        root.AddChild(actions);
-
-        actions.AddChild(CreateActionButton(BuilderModuleName, OpenBuilder));
-        actions.AddChild(CreateActionButton(CollectorModuleName, OpenCollector));
-        actions.AddChild(CreateActionButton(ReporterModuleName, OpenReporter));
-        actions.AddChild(CreateActionButton(DebuggerModuleName, OpenDebugger));
-
-        _tabContainer = new TabContainer();
-        _tabContainer.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-        _tabContainer.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
-        root.AddChild(_tabContainer);
-
-        _tabContainer.AddChild(CreateBuilderPage());
-        _tabContainer.AddChild(CreateCollectorPage());
-        _tabContainer.AddChild(CreateReporterPage());
-        _tabContainer.AddChild(CreateDebuggerPage());
-        if (_lastOpenedTabIndex >= 0 && _lastOpenedTabIndex < _tabContainer.GetTabCount())
+        if (windowRef != null && GodotObject.IsInstanceValid(windowRef))
         {
-            _tabContainer.CurrentTab = _lastOpenedTabIndex;
+            if (windowRef.Visible == false)
+            {
+                windowRef.Show();
+            }
+            windowRef.GrabFocus();
+            return;
         }
 
-        _statusView = new RichTextLabel();
-        _statusView.FitContent = true;
-        _statusView.ScrollActive = false;
-        _statusView.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-        root.AddChild(_statusView);
-        SetStatus(PluginLoadedStatus);
+        Control content = title switch
+        {
+            ModuleWindowBuilderWindowTitle => CreateBuilderPage(),
+            ModuleWindowCollectorWindowTitle => CreateCollectorPage(),
+            ModuleWindowReporterWindowTitle => CreateReporterPage(),
+            ModuleWindowDebuggerWindowTitle => CreateDebuggerPage(),
+            _ => new VBoxContainer()
+        };
 
-        _dock = root;
-#pragma warning disable CS0618
-        AddControlToDock(PluginDockSlot, _dock);
-#pragma warning restore CS0618
+        var window = BuildModuleWindowWindow(title, primaryButtonText, primaryAction, content);
+        baseControl.AddChild(window);
+        window.PopupCentered(new Vector2I(ModuleWindowWindowDefaultWidth, ModuleWindowWindowDefaultHeight));
+        window.Show();
+
+        windowRef = window;
+        mountedFlag = true;
     }
 
     /// <summary>
-    /// 卸载并释放主面板
+    /// ModuleWindow 风格窗口壳：标题居中 + 右侧绿色主操作按钮 + 分隔线 + 内容。
     /// </summary>
-    private void UnmountDock()
+    private Window BuildModuleWindowWindow(string title, string primaryButtonText, Action primaryAction, Control content)
     {
-        if (_tabContainer != null && _tabContainer.GetTabCount() > 0)
-        {
-            _lastOpenedTabIndex = _tabContainer.CurrentTab;
-        }
+        var window = new Window();
+        window.Title = title;
+        window.MinSize = new Vector2I(ModuleWindowWindowMinWidth, ModuleWindowWindowMinHeight);
+        window.Transient = true;
+        window.Exclusive = false;
+        window.CloseRequested += () => window.Hide();
 
-        if (_dock != null)
-        {
-#pragma warning disable CS0618
-            RemoveControlFromDocks(_dock);
-#pragma warning restore CS0618
-            _dock.QueueFree();
-            _dock = null;
-        }
-        _tabContainer = null;
-        _statusView = null;
-        _builderPackageOptions = null;
-        _builderPackageNameInput = null;
-        _builderOutputPathInput = null;
-        _builderBuildOutputInput = null;
-        _builderBuildVersionInput = null;
-        _builderPipelineOptions = null;
-        _builderBuildModeOptions = null;
-        _builderFileNameStyleOptions = null;
-        _builderLogView = null;
-        _collectorScanRootInput = null;
-        _collectorKeywordInput = null;
-        _collectorRulesJsonEdit = null;
-        _collectorPreviewView = null;
-        _collectorLogView = null;
-        _reporterScanRootInput = null;
-        _reporterKeywordInput = null;
-        _reporterSortOptions = null;
-        _reporterSummaryView = null;
-        _reporterLogView = null;
-        _debuggerStatusLabel = null;
-        _debuggerPathLabel = null;
-        _debuggerLogView = null;
-        _reporterManifestView = null;
-        _debuggerAutoRefreshToggle = null;
-        _debuggerPollTimer = null;
-        _debuggerPollView = null;
+        var root = new VBoxContainer();
+        root.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        root.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+        window.AddChild(root);
 
-        _collectorRulesSyncing = false;
+        // ModuleWindow 风格：标题居中 + 右侧主操作按钮
+        var topBar = new HBoxContainer();
+        topBar.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        topBar.AddThemeConstantOverride("separation", 8);
+        root.AddChild(topBar);
+
+        var spacerLeft = new Control();
+        spacerLeft.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        topBar.AddChild(spacerLeft);
+
+        var titleLabel = new Label();
+        titleLabel.Text = title;
+        titleLabel.HorizontalAlignment = HorizontalAlignment.Center;
+        titleLabel.VerticalAlignment = VerticalAlignment.Center;
+        titleLabel.AddThemeFontSizeOverride("font_size", ModuleWindowTitleFontSize);
+        topBar.AddChild(titleLabel);
+
+        var spacerRight = new Control();
+        spacerRight.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        topBar.AddChild(spacerRight);
+
+        var primaryButton = CreateModuleWindowPrimaryButton(primaryButtonText, primaryAction);
+        topBar.AddChild(primaryButton);
+
+        var separator = new HSeparator();
+        separator.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        root.AddChild(separator);
+
+        content.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        content.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+        root.AddChild(content);
+
+        return window;
+    }
+
+    /// <summary>
+    /// 创建 ModuleWindow 风格绿底主操作按钮。
+    /// </summary>
+    private static Button CreateModuleWindowPrimaryButton(string text, Action onPressed)
+    {
+        var button = new Button();
+        button.Text = text;
+        button.AddThemeFontSizeOverride("font_size", ModuleWindowButtonFontSize);
+        button.CustomMinimumSize = new Vector2(140, 32);
+        button.Pressed += onPressed;
+
+        var styleNormal = new StyleBoxFlat
+        {
+            BgColor = ModuleWindowPrimaryButtonColor,
+            ContentMarginLeft = 16,
+            ContentMarginRight = 16,
+            ContentMarginTop = 6,
+            ContentMarginBottom = 6,
+            CornerRadiusTopLeft = 4,
+            CornerRadiusTopRight = 4,
+            CornerRadiusBottomLeft = 4,
+            CornerRadiusBottomRight = 4
+        };
+        var styleHover = new StyleBoxFlat
+        {
+            BgColor = ModuleWindowPrimaryButtonColor.Lightened(0.1f),
+            ContentMarginLeft = 16,
+            ContentMarginRight = 16,
+            ContentMarginTop = 6,
+            ContentMarginBottom = 6,
+            CornerRadiusTopLeft = 4,
+            CornerRadiusTopRight = 4,
+            CornerRadiusBottomLeft = 4,
+            CornerRadiusBottomRight = 4
+        };
+        var stylePressed = new StyleBoxFlat
+        {
+            BgColor = ModuleWindowPrimaryButtonColor.Darkened(0.1f),
+            ContentMarginLeft = 16,
+            ContentMarginRight = 16,
+            ContentMarginTop = 6,
+            ContentMarginBottom = 6,
+            CornerRadiusTopLeft = 4,
+            CornerRadiusTopRight = 4,
+            CornerRadiusBottomLeft = 4,
+            CornerRadiusBottomRight = 4
+        };
+        var styleDisabled = new StyleBoxFlat
+        {
+            BgColor = ModuleWindowPrimaryButtonColor.Darkened(0.4f),
+            ContentMarginLeft = 16,
+            ContentMarginRight = 16,
+            ContentMarginTop = 6,
+            ContentMarginBottom = 6,
+            CornerRadiusTopLeft = 4,
+            CornerRadiusTopRight = 4,
+            CornerRadiusBottomLeft = 4,
+            CornerRadiusBottomRight = 4
+        };
+        button.AddThemeStyleboxOverride("normal", styleNormal);
+        button.AddThemeStyleboxOverride("hover", styleHover);
+        button.AddThemeStyleboxOverride("pressed", stylePressed);
+        button.AddThemeStyleboxOverride("disabled", styleDisabled);
+        button.AddThemeColorOverride("font_color", ModuleWindowButtonTextColor);
+        button.AddThemeColorOverride("font_hover_color", ModuleWindowButtonTextColor);
+        button.AddThemeColorOverride("font_pressed_color", ModuleWindowButtonTextColor);
+        return button;
+    }
+
+    /// <summary>
+    /// ModuleWindow 风格：关闭并释放所有模块窗口。
+    /// </summary>
+    private void CloseAllModuleWindows()
+    {
+        DisposeModuleWindow(ref _builderWindow, ref _builderWindowMounted);
+        DisposeModuleWindow(ref _collectorWindow, ref _collectorWindowMounted);
+        DisposeModuleWindow(ref _reporterWindow, ref _reporterWindowMounted);
+        DisposeModuleWindow(ref _debuggerWindow, ref _debuggerWindowMounted);
+    }
+
+    private void DisposeModuleWindow(ref Window windowRef, ref bool mountedFlag)
+    {
+        if (windowRef != null && GodotObject.IsInstanceValid(windowRef))
+        {
+            windowRef.QueueFree();
+        }
+        windowRef = null;
+        mountedFlag = false;
     }
 
     private void OpenHomePage()
@@ -804,46 +1015,22 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
 
     private void OpenBuilder()
     {
-        OpenModule(BuilderTabIndex, BuilderModuleName);
+        ShowModuleWindow(ref _builderWindow, ref _builderWindowMounted, ModuleWindowBuilderWindowTitle, ModuleWindowBuilderPrimaryButtonText, () => RunBuilderAligned());
     }
 
     private void OpenCollector()
     {
-        OpenModule(CollectorTabIndex, CollectorModuleName);
+        ShowModuleWindow(ref _collectorWindow, ref _collectorWindowMounted, ModuleWindowCollectorWindowTitle, ModuleWindowCollectorPrimaryButtonText, () => RunCollectorPrototype());
     }
 
     private void OpenReporter()
     {
-        OpenModule(ReporterTabIndex, ReporterModuleName);
+        ShowModuleWindow(ref _reporterWindow, ref _reporterWindowMounted, ModuleWindowReporterWindowTitle, ModuleWindowReporterPrimaryButtonText, () => RunReporterPrototype());
     }
 
     private void OpenDebugger()
     {
-        OpenModule(DebuggerTabIndex, DebuggerModuleName);
-    }
-
-    private void OpenModule(int tabIndex, string moduleName)
-    {
-        EnsureDockReady();
-        SwitchTab(tabIndex, moduleName);
-    }
-
-    private void EnsureDockReady()
-    {
-        EnsureEditorBridge();
-        if (_dock == null || _tabContainer == null)
-        {
-            MountDock();
-        }
-    }
-
-    private Button CreateActionButton(string text, Action onPressed)
-    {
-        var button = new Button();
-        button.Text = text;
-        button.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-        button.Pressed += onPressed;
-        return button;
+        ShowModuleWindow(ref _debuggerWindow, ref _debuggerWindowMounted, ModuleWindowDebuggerWindowTitle, ModuleWindowDebuggerPrimaryButtonText, () => RefreshDebuggerSnapshot());
     }
 
     private Control CreateBuilderPage()
@@ -4128,34 +4315,11 @@ public partial class AssetSystemEditorPlugin : EditorPlugin
         logView.AppendText($"{PluginLogEntryPrefix}{time}{PluginLogEntrySuffix}{message}{PluginLogLineTerminator}");
     }
 
-    private void SwitchTab(int tabIndex, string moduleName)
-    {
-        if (_tabContainer == null)
-        {
-            SetStatus(TabSwitchStatusUnavailable);
-            return;
-        }
-
-        if (tabIndex < 0 || tabIndex >= _tabContainer.GetTabCount())
-        {
-            SetStatus($"{TabSwitchStatusOutOfRangePrefix}{tabIndex}");
-            return;
-        }
-
-        _tabContainer.CurrentTab = tabIndex;
-        _lastOpenedTabIndex = tabIndex;
-        SetStatus($"{TabSwitchStatusPrefix}{moduleName}{TabSwitchStatusSuffix}");
-    }
-
     private void SetStatus(string message)
     {
-        if (_statusView == null)
-        {
-            return;
-        }
-
-        _statusView.Clear();
-        _statusView.AppendText(message);
+        // ModuleWindow 风格：状态文本不再单独显示面板（每个模块窗口内部已有日志/状态字段）。
+        // 保留该方法仅为兼容既有调用点，统一写入 Godot Print，避免丢信息。
+        GD.Print($"[AssetSystem] {message}");
     }
 
     /// <summary>
