@@ -329,7 +329,6 @@ namespace GameFrameX.Editor
             m_TopPopupMenu.AddItem(L("生成客户端配置", "Generate Client Config"), TopMenuGenerateClientConfigId);
             m_TopPopupMenu.AddItem(L("Asmdef 属性编辑器", "Asmdef Editor"), TopMenuAsmdefEditorId);
             m_TopPopupMenu.AddSeparator();
-            m_TopPopupMenu.IdPressed -= OnTopMenuIdPressed;
             m_TopPopupMenu.IdPressed += OnTopMenuIdPressed;
             BuildLogDefineSubmenu();
             if (m_LogDefinePopupMenu != null)
@@ -418,7 +417,6 @@ namespace GameFrameX.Editor
             m_LogDefinePopupMenu.AddItem(L("开启警告及以上日志", "Enable Warning+ Logs"), LogDefineEnableWarningAndAboveLogsId);
             m_LogDefinePopupMenu.AddItem(L("开启错误及以上日志", "Enable Error+ Logs"), LogDefineEnableErrorAndAboveLogsId);
             m_LogDefinePopupMenu.AddItem(L("开启严重错误及以上日志", "Enable Fatal+ Logs"), LogDefineEnableFatalAndAboveLogsId);
-            m_LogDefinePopupMenu.IdPressed -= OnLogDefineMenuIdPressed;
             m_LogDefinePopupMenu.IdPressed += OnLogDefineMenuIdPressed;
             m_TopPopupMenu.AddChild(m_LogDefinePopupMenu);
         }
@@ -455,7 +453,6 @@ namespace GameFrameX.Editor
                     categoryMenu.AddItem(L($"关闭[{platformName}]小游戏适配", $"Disable {platform.NameEn} Mini Game"), idBase + i * 2 + 1);
                 }
 
-                categoryMenu.IdPressed -= OnMiniGameDefineMenuIdPressed;
                 categoryMenu.IdPressed += OnMiniGameDefineMenuIdPressed;
                 m_LogDefinePopupMenu.AddChild(categoryMenu);
                 m_LogDefinePopupMenu.AddSubmenuNodeItem(L(nameZh, nameEn), categoryMenu);
@@ -586,12 +583,8 @@ namespace GameFrameX.Editor
                     continue;
                 }
 
-                var stalePopup = staleButton.GetPopup();
-                if (stalePopup != null)
-                {
-                    stalePopup.IdPressed -= OnTopMenuIdPressed;
-                }
-
+                // 陈旧按钮的 id_pressed 连接目标是旧的插件实例，无法在此实例上断开；
+                // 按钮连同其 PopupMenu 子树一起 QueueFree，连接由引擎随节点销毁自动清理。
                 staleButton.QueueFree();
             }
         }
