@@ -1,5 +1,6 @@
 #if TOOLS
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using GameFrameX.Editor.Asmdef;
 using Godot;
@@ -67,7 +68,27 @@ namespace GameFrameX.Editor
         /// 日志宏定义菜单项：开启严重错误及以上日志。
         /// </summary>
         private const int LogDefineEnableFatalAndAboveLogsId = 106;
-        
+
+        /// <summary>
+        /// 小游戏菜单项 ID 基数：分类内 平台序号*2 + (0=开启, 1=关闭)。
+        /// </summary>
+        private const int MiniGameDomesticIdBase = 2000;
+
+        /// <summary>
+        /// 小游戏菜单项 ID 基数：国际小游戏。
+        /// </summary>
+        private const int MiniGameInternationalIdBase = 3000;
+
+        /// <summary>
+        /// 小游戏菜单项 ID 基数：设备厂商。
+        /// </summary>
+        private const int MiniGameDeviceOEMIdBase = 4000;
+
+        /// <summary>
+        /// 小游戏菜单项 ID 基数：游戏平台。
+        /// </summary>
+        private const int MiniGameGamePlatformIdBase = 5000;
+
         /// <summary>
         /// 顶部菜单项：生成客户端配置。
         /// </summary>
@@ -116,6 +137,11 @@ namespace GameFrameX.Editor
         /// 日志宏定义二级菜单实例。
         /// </summary>
         private PopupMenu m_LogDefinePopupMenu;
+
+        /// <summary>
+        /// 小游戏分类子菜单实例集合（与 MiniGamePlatformCategory 一一对应，随日志宏菜单销毁）。
+        /// </summary>
+        private readonly List<PopupMenu> m_MiniGameCategoryPopupMenus = new List<PopupMenu>();
 
         /// <summary>
         /// 当前语言代码缓存。
@@ -311,6 +337,8 @@ namespace GameFrameX.Editor
                 m_TopPopupMenu.AddSubmenuNodeItem(L("脚本宏定义", "Scripting Define Symbols"), m_LogDefinePopupMenu);
             }
 
+            BuildMiniGameDefineSubmenus();
+
             AddTopMenuButtonToMainScreenRow();
         }
 
@@ -396,10 +424,103 @@ namespace GameFrameX.Editor
         }
 
         /// <summary>
+        /// 功能：构建小游戏宏定义分类三级菜单（国内/国际/设备厂商/游戏平台，对应 Unity 版菜单结构）。
+        /// </summary>
+        private void BuildMiniGameDefineSubmenus()
+        {
+            if (m_LogDefinePopupMenu == null || m_MiniGameCategoryPopupMenus.Count > 0)
+            {
+                return;
+            }
+
+            var categories = new[]
+            {
+                (MiniGamePlatformCategory.DomesticMiniGame, MiniGameDomesticIdBase, "国内小游戏", "Domestic Mini Games"),
+                (MiniGamePlatformCategory.InternationalMiniGame, MiniGameInternationalIdBase, "国际小游戏", "International Mini Games"),
+                (MiniGamePlatformCategory.DeviceOEM, MiniGameDeviceOEMIdBase, "设备厂商", "Device OEMs"),
+                (MiniGamePlatformCategory.GamePlatform, MiniGameGamePlatformIdBase, "游戏平台", "Game Platforms"),
+            };
+
+            m_LogDefinePopupMenu.AddSeparator();
+            foreach (var (category, idBase, nameZh, nameEn) in categories)
+            {
+                var categoryMenu = new PopupMenu();
+                categoryMenu.Name = $"MiniGameDefineSubmenu_{category}";
+                var platforms = MiniGameDefineSymbolHelper.GetPlatforms(category);
+                for (var i = 0; i < platforms.Count; i++)
+                {
+                    var platform = platforms[i];
+                    string platformName = L(platform.NameZh, platform.NameEn);
+                    categoryMenu.AddItem(L($"开启[{platformName}]小游戏适配", $"Enable {platform.NameEn} Mini Game"), idBase + i * 2);
+                    categoryMenu.AddItem(L($"关闭[{platformName}]小游戏适配", $"Disable {platform.NameEn} Mini Game"), idBase + i * 2 + 1);
+                }
+
+                categoryMenu.IdPressed -= OnMiniGameDefineMenuIdPressed;
+                categoryMenu.IdPressed += OnMiniGameDefineMenuIdPressed;
+                m_LogDefinePopupMenu.AddChild(categoryMenu);
+                m_LogDefinePopupMenu.AddSubmenuNodeItem(L(nameZh, nameEn), categoryMenu);
+                m_MiniGameCategoryPopupMenus.Add(categoryMenu);
+            }
+        }
+
+        /// <summary>
+        /// 功能：处理小游戏宏定义三级菜单点击事件（ID = 分类基数 + 平台序号*2 + 操作位）。
+        /// </summary>
+        /// <param name="id">菜单项标识。</param>
+        private void OnMiniGameDefineMenuIdPressed(long id)
+        {
+            var mapping = new[]
+            {
+                (MiniGamePlatformCategory.DomesticMiniGame, MiniGameDomesticIdBase),
+                (MiniGamePlatformCategory.InternationalMiniGame, MiniGameInternationalIdBase),
+                (MiniGamePlatformCategory.DeviceOEM, MiniGameDeviceOEMIdBase),
+                (MiniGamePlatformCategory.GamePlatform, MiniGameGamePlatformIdBase),
+            };
+
+            foreach (var (category, idBase) in mapping)
+            {
+                long offset = id - idBase;
+                if (offset < 0)
+                {
+                    continue;
+                }
+
+                var platforms = MiniGameDefineSymbolHelper.GetPlatforms(category);
+                int platformIndex = (int)(offset / 2);
+                if (platformIndex >= platforms.Count)
+                {
+                    continue;
+                }
+
+                var platform = platforms[platformIndex];
+                bool enable = offset % 2 == 0;
+                if (enable)
+                {
+                    ApplyLogDefineAction(() => MiniGameDefineSymbolHelper.Enable(platform.Key),
+                        $"已开启 [{L(platform.NameZh, platform.NameEn)}] 小游戏适配宏定义。");
+                }
+                else
+                {
+                    ApplyLogDefineAction(() => MiniGameDefineSymbolHelper.Disable(platform.Key),
+                        $"已关闭 [{L(platform.NameZh, platform.NameEn)}] 小游戏适配宏定义。");
+                }
+
+                return;
+            }
+        }
+
+        /// <summary>
         /// 功能：注销编辑器顶部工具栏下拉菜单。
         /// </summary>
         private void UnregisterTopToolbarMenu()
         {
+            foreach (var categoryMenu in m_MiniGameCategoryPopupMenus)
+            {
+                categoryMenu.IdPressed -= OnMiniGameDefineMenuIdPressed;
+            }
+
+            m_MiniGameCategoryPopupMenus.Clear();
+
             if (m_LogDefinePopupMenu != null)
             {
                 m_LogDefinePopupMenu.IdPressed -= OnLogDefineMenuIdPressed;
