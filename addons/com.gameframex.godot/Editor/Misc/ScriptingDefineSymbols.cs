@@ -15,7 +15,6 @@ namespace GameFrameX.Editor
     {
         private const string GodotCsprojFilePath = "res://Godot.csproj";
         private const string HotfixCsprojFilePath = "res://Assets/Hotfix/Hotfix.csproj";
-        private const string LeanClrCsprojFilePath = "res://Assets/LeanCLR/GameFrameX.csproj";
         private const string CompileTriggerStampFilePath = "res://addons/com.gameframex.godot/Editor/Misc/CompileTriggerStamp.cs";
         private const string HotfixCompileTriggerStampFilePath = "res://Assets/Hotfix/CompileTriggerStamp.cs";
         public static event Action DefineSymbolsChanged;
@@ -207,10 +206,7 @@ namespace GameFrameX.Editor
         {
             bool godotChanged = SaveDefineConstantsValueToProject(GetGodotCsprojPath(), defineConstantsValue);
             bool hotfixChanged = SaveDefineConstantsValueToProject(GetHotfixCsprojPath(), defineConstantsValue);
-            // LeanCLR 热更为可选特性：工程文件存在时才同步同一套宏，避免热更侧编译语义漂移；
-            // 未安装（Assets/LeanCLR 被移除）时 SaveDefineConstantsValueToProject 跳过且不创建占位工程。
-            bool leanClrChanged = SaveDefineConstantsValueToProject(GetLeanClrCsprojPath(), defineConstantsValue);
-            return godotChanged || hotfixChanged || leanClrChanged;
+            return godotChanged || hotfixChanged;
         }
 
         private static bool SaveDefineConstantsValueToProject(string csprojPath, string defineConstantsValue)
@@ -220,12 +216,7 @@ namespace GameFrameX.Editor
                 return false;
             }
 
-            // 可选工程（如 LeanCLR 热更运行时 GameFrameX.csproj）不存在视为未安装：跳过写入且不创建占位工程，
-            // 保证移除可选特性后主工程与 Hotfix 的宏同步不受影响。
-            if (!File.Exists(csprojPath))
-            {
-                return false;
-            }
+            // 工程文件不存在时跳过写入且不创建占位工程，保证可选工程移除后宏同步不受影响。
 
             XDocument doc = XDocument.Load(csprojPath);
 
@@ -235,7 +226,7 @@ namespace GameFrameX.Editor
                 return false;
             }
 
-            // 兼容两种工程格式：SDK 风格无 xmlns；旧式 MSBuild（如 LeanCLR GameFrameX.csproj）带默认命名空间。
+            // 兼容两种工程格式：SDK 风格无 xmlns；旧式 MSBuild 带默认命名空间。
             // 统一按局部名查找节点，新建节点时继承所属元素的命名空间。
             XElement propertyGroup = project.Elements().FirstOrDefault(static e => e.Name.LocalName == "PropertyGroup");
             if (propertyGroup == null)
@@ -319,15 +310,6 @@ namespace GameFrameX.Editor
         private static string GetHotfixCsprojPath()
         {
             return ProjectSettings.GlobalizePath(HotfixCsprojFilePath);
-        }
-
-        /// <summary>
-        /// 获取 LeanCLR 热更运行时 GameFrameX.csproj 的绝对路径（可选特性，工程可能不存在）。
-        /// </summary>
-        /// <returns>工程文件绝对路径。</returns>
-        private static string GetLeanClrCsprojPath()
-        {
-            return ProjectSettings.GlobalizePath(LeanClrCsprojFilePath);
         }
     }
 }

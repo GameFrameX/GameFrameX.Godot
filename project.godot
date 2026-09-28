@@ -38,7 +38,6 @@ enabled=PackedStringArray("res://addons/com.gameframex.godot.asset/plugin.cfg", 
 
 [gameframex]
 
-leanclr/assembly_directory="res://Assets/LeanCLR/Assemblies"
 startup/app_version="1.0.0"
 editor/asset_builder/window_width=1872
 editor/asset_builder/window_height=1202

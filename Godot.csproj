@@ -37,9 +37,6 @@
     <Compile Remove="**/obj/**/*.cs" />
     <!-- Hotfix 独立编译到 Hotfix.csproj，主程序集不再重复编译 -->
     <Compile Remove="Assets/Hotfix/**/*.cs" />
-    <!-- LeanCLR：native 树与热更脚本均由各自的非 SDK 工程编译（Native/leanclr-godot、Assets/LeanCLR），主程序集不参与 -->
-    <Compile Remove="Native/**/*.cs" />
-    <Compile Remove="Assets/LeanCLR/**/*.cs" />
     <!-- 已迁移到 Resources 的 Hotfix UI 脚本默认由 Hotfix.csproj 统一编译 -->
     <Compile Remove="Assets/Resources/UI/FGUI/UILauncher/UILauncher/**/*.cs" />
     <Compile Remove="Assets/Resources/UI/GGUI/UILauncher/UILauncher/**/*.cs" />

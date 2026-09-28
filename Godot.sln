@@ -22,6 +22,7 @@ Global
 		{52D0FFC9-1BB2-4840-A9CD-670471A506AE}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		
 		{52D0FFC9-1BB2-4840-A9CD-670471A506AE}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{52D0FFC9-1BB2-4840-A9CD-670471A506AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		
 	EndGlobalSection
 EndGlobal

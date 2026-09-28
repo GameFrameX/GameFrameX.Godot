@@ -12,8 +12,7 @@ namespace GameFrameX.EditorTests
     /// <summary>
     /// UI 后端宏快捷切换 headless 冒烟验收。
     /// 在真实编辑器进程（--headless -e -s）内驱动 UIScriptingDefineSymbols 全流程：
-    /// 切到 GDGUI → 校验各工程（Godot/Hotfix，及存在时的 LeanCLR）互斥写入 → 切回原后端 → 校验还原。
-    /// LeanCLR 为可选特性：工程文件不存在时跳过该项校验，且宏同步不得重建该工程。
+    /// 切到 GDGUI → 校验各工程（Godot/Hotfix）互斥写入 → 切回原后端 → 校验还原。
     /// 结果行：=== UI_DEFINE_SMOKE_RESULT: total=N passed=N failed=N ===（shell 层据此判定）。
     /// </summary>
     public sealed partial class UiDefineSwitchSmokeTest : Node
@@ -22,7 +21,6 @@ namespace GameFrameX.EditorTests
         {
             "res://Godot.csproj",
             "res://Assets/Hotfix/Hotfix.csproj",
-            "res://Assets/LeanCLR/GameFrameX.csproj",
         };
 
         private int m_Total;
@@ -49,14 +47,7 @@ namespace GameFrameX.EditorTests
 
         private void RunTests()
         {
-            // LeanCLR 为可选特性：仅校验磁盘上实际存在的工程，未安装时跳过且不创建。
-            string[] csprojPaths = CsprojPaths
-                .Where(static path => File.Exists(ProjectSettings.GlobalizePath(path)))
-                .ToArray();
-            foreach (string skippedPath in CsprojPaths.Except(csprojPaths))
-            {
-                GD.Print($"[UiDefineSmoke] SKIP optional project absent: {skippedPath}");
-            }
+            string[] csprojPaths = CsprojPaths;
 
             string[] originalSymbols = ScriptingDefineSymbols.GetScriptingDefineSymbols();
             m_OriginalBackend = originalSymbols.FirstOrDefault(static x =>
