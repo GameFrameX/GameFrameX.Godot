@@ -1,0 +1,29 @@
+# 可重建产物不入库：由 bootstrap.sh / csharp-wasm/bootstrap.sh 重建
+deps/
+deps-csharp/
+build/
+build-web/
+
+# dotnet 构建中间产物
+managed/bin/
+managed/obj/
+csharp-wasm/WasmLogic/bin/
+csharp-wasm/WasmLogic/bin_out/
+csharp-wasm/WasmLogic/obj/
+csharp-wasm/WasmLogicV2/bin/
+csharp-wasm/WasmLogicV2/obj/
+
+# 浏览器 PoC 站点（运行时全家桶 + BCL 复制品，csharp-wasm/bootstrap.sh 重建）
+csharp-wasm/www/
+
+# 微信工程里的 C# 运行时目录（csharp-wasm/bootstrap.sh 重建；分包入口 game.js 保留）
+wechat-csharp-probe/dotnet/
+
+# Godot 编辑器缓存与导出产物
+.godot/
+*.tmp
+
+# 过程截图等一次性取证
+sim-*.png
+wx-ide-*.png
+capture-sim-window.py
