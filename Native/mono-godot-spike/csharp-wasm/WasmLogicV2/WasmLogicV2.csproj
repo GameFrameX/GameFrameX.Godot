@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <!-- JSExport 源生成器产出 C# 12 语法；仅本桥接程序集上调，业务 Hotfix 程序集保持 7.3 -->
+    <LangVersion>12</LangVersion>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- 阶段4 热更验证：程序集名版本化，与 V1 同包共存、按名二次 load 切换 -->
+    <AssemblyName>WasmLogicV2</AssemblyName>
+    <RootNamespace>WasmLogicV2</RootNamespace>
+  </PropertyGroup>
+</Project>
