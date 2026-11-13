@@ -1,0 +1,7 @@
+[configuration]
+entry_symbol = "web_probe_library_init"
+compatibility_minimum = "4.7"
+
+[libraries]
+web.debug = "../build-web/libweb-probe.wasm"
+web.release = "../build-web/libweb-probe.wasm"
