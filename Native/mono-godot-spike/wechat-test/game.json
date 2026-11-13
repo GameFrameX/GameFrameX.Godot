@@ -1,0 +1,16 @@
+{
+	"deviceOrientation": "portrait",
+	"iOSHighPerformance": true,
+	"iOSHighPerformance+": true,
+	"plugins": {},
+	"subpackages": [
+		{
+			"name": "engine",
+			"root": "engine/"
+		},
+		{
+			"name": "subpack",
+			"root": "subpackages/subpack/"
+		}
+	]
+}

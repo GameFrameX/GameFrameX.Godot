@@ -1,0 +1,13 @@
+{
+    "description": "C1 Spike-W2：微信小游戏容器 C# wasm 加载能力探针",
+    "setting": {
+        "urlCheck": false,
+        "es6": false,
+        "enhance": false,
+        "minified": false
+    },
+    "compileType": "game",
+    "libVersion": "3.15.2",
+    "appid": "wxda5f10e2e9114855",
+    "projectname": "csharp-wasm-probe"
+}
