@@ -1,0 +1,19 @@
+{
+    "items": {
+        "_MonoRuntimeComponentLinking": [
+            { "identity": "static", "RuntimeIdentifier": "browser-wasm" },
+        ],
+        "_MonoRuntimeComponentSharedLibExt": [
+            { "identity": ".so", "RuntimeIdentifier": "browser-wasm" },
+        ],
+        "_MonoRuntimeComponentStaticLibExt": [
+            { "identity": ".a", "RuntimeIdentifier": "browser-wasm" },
+        ],
+        "_MonoRuntimeAvailableComponents": [
+            { "identity": "debugger", "RuntimeIdentifier": "browser-wasm" },
+{ "identity": "hot_reload", "RuntimeIdentifier": "browser-wasm" },
+{ "identity": "diagnostics_tracing", "RuntimeIdentifier": "browser-wasm" },
+{ "identity": "marshal-ilgen", "RuntimeIdentifier": "browser-wasm" },
+        ],
+    }
+}
