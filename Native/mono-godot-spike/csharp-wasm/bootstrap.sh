@@ -3,7 +3,6 @@
 # 重建三个运行时组装目录（均为可重建产物，不入 git）：
 #   csharp-wasm/www                      浏览器 PoC 站点（dotnet.js 全家 + BCL + WasmLogic + config）
 #   wechat-integrated/dotnetsdk          微信合体工程 C# 分包（CJS 化运行时 + .bin 程序集）
-#   wechat-csharp-probe/dotnet           微信探针工程运行时目录（同上 + V2）
 # 依赖：dotnet SDK 10、node/npm（esbuild）、curl。
 # 用法：bash Native/mono-godot-spike/csharp-wasm/bootstrap.sh
 set -euo -o pipefail
@@ -73,6 +72,4 @@ assemble_wechat_runtime "${SPIKE_DIRECTORY}/wechat-integrated/dotnetsdk" yes
 # 微信分包根必须有自己的 game.js（已入 git，重建时保留）
 [ -f "${SPIKE_DIRECTORY}/wechat-integrated/dotnetsdk/game.js" ] || \
     echo '/* dotnetsdk 分包入口（微信要求每个分包根有 game.js）*/' > "${SPIKE_DIRECTORY}/wechat-integrated/dotnetsdk/game.js"
-assemble_wechat_runtime "${SPIKE_DIRECTORY}/wechat-csharp-probe/dotnet" yes
-
-echo "== 完成：www/、wechat-integrated/dotnetsdk/、wechat-csharp-probe/dotnet/ 均已重建 =="
+echo "== 完成：www/、wechat-integrated/dotnetsdk/ 均已重建 =="
