@@ -1,2 +1,0 @@
-WasmLogic.dll
-System.Runtime.dll
