@@ -31,6 +31,7 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
+using System;
 using System.Threading.Tasks;
 using GameFrameX.Asset.Runtime;
 using GameFrameX.AssetSystem;
@@ -53,7 +54,16 @@ namespace Godot.Startup.Procedure.Patch
         protected internal override async void OnEnter(IFsm<IProcedureManager> procedureOwner)
         {
             base.OnEnter(procedureOwner);
-            await InitPatchAsync(procedureOwner);
+            try
+            {
+                await InitPatchAsync(procedureOwner);
+            }
+            catch (Exception exception)
+            {
+                // 对齐包内其他状态的失败路径：资源包初始化异常必须终结启动管线并回传失败结果，不能让流程挂死
+                Log.Error("ProcedurePatchInit failed: {0}", exception.Message);
+                StartupProcedureUtility.CompleteFailure(procedureOwner, nameof(ProcedurePatchInit), string.Empty, exception.Message);
+            }
         }
 
         /// <summary>
@@ -75,8 +85,13 @@ namespace Godot.Startup.Procedure.Patch
             }
 
             var packageUrl = procedureOwner.GetData<VarString>(AssetComponent.BuildInPackageName);
-            await assetComponent.InitPackageAsync(AssetComponent.BuildInPackageName, packageUrl.Value, packageUrl.Value, true);
-            procedureOwner.RemoveData(AssetComponent.BuildInPackageName);
+            // 防御：SkipRemoteStartupRequests 跳过远程请求时不会注入 package URL，空 URL 交给资源系统按本地清单解析
+            var packageUrlValue = packageUrl != null ? packageUrl.Value : string.Empty;
+            await assetComponent.InitPackageAsync(AssetComponent.BuildInPackageName, packageUrlValue, packageUrlValue, true);
+            if (packageUrl != null)
+            {
+                procedureOwner.RemoveData(AssetComponent.BuildInPackageName);
+            }
             await StartupProcedureUtility.WaitForNextFrameAsync();
             ChangeState<ProcedureUpdateStaticVersion>(procedureOwner);
         }
