@@ -292,6 +292,24 @@ const assemblyClassMap = {
 
 const now = () => (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
 
+// ===== 场景化热更桥：多方法句柄链 + MEMFS 文件编解码 =====
+const bridgeMethodNames = ['Tick', 'WriteSceneSpec', 'WriteUiSpec'];
+function invokeVoidExport(methodHandle) {
+    heapBytes.fill(0, argsPointer, argsPointer + SLOT_SIZE * SLOT_COUNT);
+    invokeExport(methodHandle, argsPointer);
+    return heapBytes[argsPointer + 12] === 0 ? 1 : 0;
+}
+function encodeFileContent(content) {
+    return String(content).replace(/\r?\n/g, ';').replace(/ /g, '~').trim();
+}
+function buildMethodHandles(classHandle) {
+    const methodHandles = {};
+    for (const methodName of bridgeMethodNames) {
+        methodHandles[methodName] = findMethodFunction(classHandle, cstringOf(methodName), -1);
+    }
+    return methodHandles;
+}
+
 const bridge = {
     // 桥是否完成 boot 并通过自检（Godot 轮询此入口）
     isBridgeReady: function () { return results.bridgeReady ? 1 : 0; },
@@ -304,10 +322,10 @@ const bridge = {
     },
     // 驱动当前激活程序集的 Tick 一次（记录单次跨桥耗时）
     invokeTick: function () {
-        if (!activeHandles || !argsPointer) return -1;
+        if (!activeHandles || !argsPointer || !activeHandles.methods.Tick) return -1;
         const start = now();
         heapBytes.fill(0, argsPointer, argsPointer + SLOT_SIZE * SLOT_COUNT);
-        invokeExport(activeHandles.tickMethod, argsPointer);
+        invokeExport(activeHandles.methods.Tick, argsPointer);
         const elapsed = now() - start;
         results.invokeTimingsMilliseconds = results.invokeTimingsMilliseconds || [];
         if (results.invokeTimingsMilliseconds.length < 600) results.invokeTimingsMilliseconds.push(Number(elapsed.toFixed(4)));
@@ -359,13 +377,13 @@ const bridge = {
             return 0;
         }
         const classHandle = findClassFunction(assemblyHandle, cstringOf(info.namespaceName), cstringOf(info.className));
-        const tickHandle = findMethodFunction(classHandle, cstringOf('Tick'), -1);
-        if (!classHandle || !tickHandle) {
+        const methodHandles = classHandle ? buildMethodHandles(classHandle) : null;
+        if (!classHandle || !methodHandles || !methodHandles.Tick || !methodHandles.WriteSceneSpec || !methodHandles.WriteUiSpec) {
             results.hotSwitchError = 'handle chain broken for ' + assemblyName;
             save();
             return 0;
         }
-        activeHandles = { assemblyName: assemblyName, assemblyHandle: assemblyHandle, classHandle: classHandle, tickMethod: tickHandle };
+        activeHandles = { assemblyName: assemblyName, assemblyHandle: assemblyHandle, classHandle: classHandle, methods: methodHandles };
         results.hotSwitchHistory = results.hotSwitchHistory || [];
         results.hotSwitchHistory.push({ at: Date.now() - results.startedAt, assemblyName: assemblyName, version: info.version });
         save('hot-switched-' + assemblyName);
@@ -396,8 +414,8 @@ function handleGodotCommand(rawLine) {
     try { sequence = parseInt(parts[1], 10) || 0; } catch (stepError) { stepFail('parse-seq', stepError); }
     let commandName = '';
     try { commandName = parts[0]; } catch (stepError) { stepFail('cmd', stepError); }
-    // 修复：SWITCH/PROBE 带目标参数，格式为 "<命令> <目标> <序号> msec="（此前把目标当序号 → 响应序号错位被 Godot 去重丢弃）
-    if ((commandName === 'SWITCH' || commandName === 'PROBE') && parts.length >= 4) {
+    // 修复：SWITCH/PROBE/SPEC/UIEV 带目标参数，格式为 "<命令> <目标> <序号> msec="（目标在 parts[1]，序号在 parts[2]）
+    if ((commandName === 'SWITCH' || commandName === 'PROBE' || commandName === 'SPEC' || commandName === 'UIEV') && parts.length >= 4) {
         sequence = parseInt(parts[2], 10) || 0;
     }
     try { godotMsecMatch = /msec=(\d+)/.exec(line); } catch (stepError) { stepFail('exec', stepError); }
@@ -424,7 +442,10 @@ function handleGodotCommand(rawLine) {
         commandTrace('read-ok count=' + count);
         const version = bridge.readAssemblyVersion();
         commandTrace('version-ok ver=' + version);
-        response = 'OK ' + sequence + ' count=' + count + ' ver=' + version + ' msec=' + godotMsec;
+        let stateEncoded = '';
+        try { stateEncoded = encodeFileContent(fsModule.readFile('/ui-state.txt', { encoding: 'utf8' })); } catch (stateError) { stateEncoded = ''; }
+        commandTrace('state-ok len=' + stateEncoded.length);
+        response = 'OK ' + sequence + ' count=' + count + ' ver=' + version + ' state=' + stateEncoded + ' msec=' + godotMsec;
     } else if (commandName === 'SWITCH') {
         const target = parts[1] || ''; // 目标参数在 parts[1]（SWITCH <目标> <序号> msec=）
         const switched = bridge.hotSwitchAssembly(target);
@@ -433,6 +454,40 @@ function handleGodotCommand(rawLine) {
         const target = parts[1] || ''; // 目标参数在 parts[1]（PROBE <目标> <序号> msec=）
         const handle = bridge.probeAssemblyHandle(target);
         response = 'OK ' + sequence + ' handle=' + handle + ' target=' + target + ' msec=' + godotMsec;
+    } else if (commandName === 'SPEC') {
+        // 场景化热更：驱动当前程序集下发场景与 UI 规格（MEMFS 文件 → 编码进响应）
+        let sceneEncoded = '';
+        let uiEncoded = '';
+        let specError = '';
+        try {
+            const sceneResult = invokeVoidExport(activeHandles.methods.WriteSceneSpec);
+            sceneEncoded = sceneResult ? encodeFileContent(fsModule.readFile('/scene-spec.txt', { encoding: 'utf8' })) : '';
+            const uiResult = invokeVoidExport(activeHandles.methods.WriteUiSpec);
+            uiEncoded = uiResult ? encodeFileContent(fsModule.readFile('/ui-spec.txt', { encoding: 'utf8' })) : '';
+            if (!sceneResult) { specError = 'scene-invoke-exception'; }
+            else if (!uiResult) { specError = 'ui-invoke-exception'; }
+            else if (!sceneEncoded || !uiEncoded) { specError = 'spec-file-empty'; }
+        } catch (specFailure) {
+            specError = 'spec:' + (specFailure && specFailure.message);
+        }
+        results.specDelivered = (results.specDelivered || 0) + 1;
+        results.specAssemblyName = activeHandles.assemblyName;
+        save();
+        response = 'OK ' + sequence + ' assembly=' + activeHandles.assemblyName + ' scene=' + sceneEncoded + ' ui=' + uiEncoded + ' specError=' + specError + ' msec=' + godotMsec;
+    } else if (commandName === 'UIEV') {
+        // 交互事件转发：写入 C# MEMFS 事件文件，下一次 TICK 由 C# 消费
+        const eventId = parts[1] || '';
+        let eventError = '';
+        try {
+            let existingEvents = '';
+            try { existingEvents = fsModule.readFile('/ui-events.txt', { encoding: 'utf8' }); } catch (readError) { existingEvents = ''; }
+            fsModule.writeFile('/ui-events.txt', existingEvents + 'button:' + eventId + '\n');
+            results.uiEventForwarded = (results.uiEventForwarded || 0) + 1;
+            save();
+        } catch (eventFailure) {
+            eventError = (eventFailure && eventFailure.message) || 'write-failed';
+        }
+        response = 'OK ' + sequence + ' event=' + eventId + ' eventError=' + eventError + ' msec=' + godotMsec;
     }
     const processingMilliseconds = now() - processStart;
     results.commandLog = results.commandLog || [];
@@ -552,15 +607,18 @@ async function bootCSharp() {
     activeHandles = {
         assemblyName: 'WasmLogic',
         assemblyHandle: assemblyLoadFunction(cstringOf('WasmLogic')),
-        classHandle: null, tickMethod: null,
+        classHandle: null,
+        methods: null,
     };
     const v1Info = assemblyClassMap.WasmLogic;
     activeHandles.classHandle = findClassFunction(activeHandles.assemblyHandle, cstringOf(v1Info.namespaceName), cstringOf(v1Info.className));
-    activeHandles.tickMethod = findMethodFunction(activeHandles.classHandle, cstringOf('Tick'), -1);
-    if (!activeHandles.assemblyHandle || !activeHandles.classHandle || !activeHandles.tickMethod) {
+    activeHandles.methods = activeHandles.classHandle ? buildMethodHandles(activeHandles.classHandle) : null;
+    if (!activeHandles.assemblyHandle || !activeHandles.classHandle
+        || !activeHandles.methods || !activeHandles.methods.Tick
+        || !activeHandles.methods.WriteSceneSpec || !activeHandles.methods.WriteUiSpec) {
         throw new Error('handle chain broken: ' + JSON.stringify(activeHandles));
     }
-    results.bridgeHandles = { assemblyHandle: activeHandles.assemblyHandle, classHandle: activeHandles.classHandle, tickMethod: activeHandles.tickMethod };
+    results.bridgeHandles = { assemblyHandle: activeHandles.assemblyHandle, classHandle: activeHandles.classHandle, methods: bridgeMethodNames.join(',') };
 
     argsPointer = runtimeModule._malloc(SLOT_SIZE * SLOT_COUNT);
     heapBytes.fill(0, argsPointer, argsPointer + SLOT_SIZE * SLOT_COUNT);

@@ -16,7 +16,8 @@
     "compileHotReLoad": false,
     "checkInvalidKey": true,
     "ignoreDevUnusedFiles": true,
-    "bigPackageSizeSupport": false
+    "bigPackageSizeSupport": false,
+    "useGlassEaselForWxml": false
   },
   "libVersion": "3.15.2",
   "condition": {}
