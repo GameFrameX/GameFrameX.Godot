@@ -51,8 +51,8 @@ GameFrameX Godot 是 GameFrameX 框架的 Godot .NET 專案與整合範例，整
 
 可執行以下場景：
 
-- `Scenes/Launcher.tscn`：使用場景設定的元件鏈。
-- `Scenes/LauncherAuto.tscn`：使用程式碼建立的元件鏈。
+- `Scenes/Launcher.tscn`：主場景，元件由自動 Host 注入，`StartupRunner` 驅動啟動管線（版本請求 → 清單 → 下載 → 熱更入口）。
+- `Scenes/LauncherAuto.tscn`：程式碼驅動的啟動入口（元件同樣由自動 Host 注入）。
 - `Scenes/Verification/AssetSystemRuntimeVerifier.tscn`：資源系統執行階段檢查。
 - `Scenes/Verification/ProtoMessageRuntimeVerifier.tscn`：Protobuf HTTP 回環檢查。
 
@@ -82,7 +82,7 @@ public partial class GameManager : Node
 - `Scripts/`：專案級啟動、流程、UI 流程與驗證腳本。
 - `Assets/`：熱更新組件、產生的設定程式碼、UI 資源與執行階段資料。
 
-`Scenes/Launcher.tscn` 序列化標準元件鏈；`Scenes/LauncherAuto.tscn` 使用 C# 建立等價元件鏈，用於程式碼驅動的啟動驗證。
+`GameFrameXRuntimeBootstrap`（autoload）在主場景載入前宣告接管，並於首個閒置幀建立 `[GameFrameX]` Host，按 `[GameFrameXAutoComponent]` 宣告的順序與依賴自動掛載全部元件。`Scenes/Launcher.tscn` 只承載業務節點，`Scenes/LauncherAuto.tscn` 提供程式碼驅動的啟動入口——兩者共享同一自動注入執行階段與 `StartupRunner` 啟動管線。
 
 ## 平台支援
 

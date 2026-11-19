@@ -49,10 +49,32 @@ GameFrameX Godot 是 GameFrameX 框架的 Godot .NET 项目与集成示例，整
 
 克隆仓库，在 Godot .NET 编辑器中打开项目目录，并等待 .NET 依赖还原。GameFrameX 模块位于 `addons/`，核心模块通过 `project.godot` 启用。
 
+### 零配置启动（自动注入）
+
+安装即生效：`GameFrameXRuntimeBootstrap` 以 autoload 注册，主场景加载前宣告接管并在首帧创建 `[GameFrameX]` 常驻 Host，按依赖顺序自动挂载全部框架组件——无需在场景摆放任何组件节点，任意场景零改动即可启动。场景里手工摆放的 GameFrameX 组件会被自动检测并自我抑制（输出 `[GameFrameX]` 前缀告警）。
+
+模块参数经 `GameFrameXOptions` 在模块首次实例化前一次性注入：
+
+```csharp
+using GameFrameX.Runtime;
+using GameFrameX.Timer.Runtime;
+
+// 实现 IGameFrameXOptionsContributor 的类会被静默发现并自动应用，无需注册代码
+public sealed class MyGameOptionsContributor : IGameFrameXOptionsContributor
+{
+    public void ConfigureOptions(GameFrameXOptionsContributorContext context)
+    {
+        context.Configure(new TimerOptions { CatchCallbackExceptions = true });
+    }
+}
+```
+
+组件保留为薄入口（纯转发），运行期调整一律走 `GetModule<T>()` / `GameApp.X` 模块 API。
+
 可运行以下场景：
 
-- `Scenes/Launcher.tscn`：使用场景配置的组件链。
-- `Scenes/LauncherAuto.tscn`：使用代码创建的组件链。
+- `Scenes/Launcher.tscn`：主场景，经自动 Host 注入组件并由 `StartupRunner` 驱动启动管线（版本请求 → 清单 → 下载 → 热更入口）。
+- `Scenes/LauncherAuto.tscn`：代码驱动的启动入口，行为与 Launcher 一致（组件仍由自动 Host 注入）。
 - `Scenes/Verification/AssetSystemRuntimeVerifier.tscn`：资源系统运行时检查。
 - `Scenes/Verification/ProtoMessageRuntimeVerifier.tscn`：Protobuf HTTP 回环检查。
 
@@ -82,7 +104,7 @@ public partial class GameManager : Node
 - `Scripts/`：项目级启动、流程、UI 流程和验证脚本。
 - `Assets/`：热更新程序集、生成的配置代码、UI 资源和运行时数据。
 
-`Scenes/Launcher.tscn` 序列化标准组件链；`Scenes/LauncherAuto.tscn` 使用 C# 构建等价组件链，用于代码驱动的启动验证。
+`GameFrameXRuntimeBootstrap`（autoload）在主场景加载前接管并在首帧创建 `[GameFrameX]` Host，按 `[GameFrameXAutoComponent]` 声明的顺序与依赖自动挂载全部组件；`Scenes/Launcher.tscn` 只承载业务节点，`Scenes/LauncherAuto.tscn` 提供代码驱动的启动入口，两者共享同一自动注入运行时与 `StartupRunner` 启动管线。
 
 ## 平台支持
 

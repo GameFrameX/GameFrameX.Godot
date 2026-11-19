@@ -51,8 +51,8 @@ GameFrameX Godot は、GameFrameX フレームワーク向けの Godot .NET プ�
 
 実行できるサンプルシーン：
 
-- `Scenes/Launcher.tscn`：シーン設定によるコンポーネントチェーン。
-- `Scenes/LauncherAuto.tscn`：コードで作成するコンポーネントチェーン。
+- `Scenes/Launcher.tscn`：メインシーン。コンポーネントは自動 Host が注入し、`StartupRunner` が起動パイプライン（バージョン取得 → マニフェスト → ダウンロード → ホットフィックス入口）を駆動します。
+- `Scenes/LauncherAuto.tscn`：コード駆動の起動入口（コンポーネントは同じく自動 Host が注入）。
 - `Scenes/Verification/AssetSystemRuntimeVerifier.tscn`：アセットシステムのランタイム検証。
 - `Scenes/Verification/ProtoMessageRuntimeVerifier.tscn`：Protobuf HTTP ループバック検証。
 
@@ -82,7 +82,7 @@ public partial class GameManager : Node
 - `Scripts/`：プロジェクト固有の起動、プロシージャ、UI フロー、検証スクリプト。
 - `Assets/`：ホットフィックスアセンブリ、生成された設定コード、UI リソース、ランタイムデータ。
 
-`Scenes/Launcher.tscn` は標準コンポーネントチェーンをシリアライズします。`Scenes/LauncherAuto.tscn` は C# で同等のチェーンを構築し、コード駆動の起動を検証します。
+`GameFrameXRuntimeBootstrap`（autoload）はメインシーン読み込み前に実行権を宣言し、最初のアイドルフレームで `[GameFrameX]` Host を作成して、`[GameFrameXAutoComponent]` が宣言した順序と依存関係に従って全コンポーネントを自動マウントします。`Scenes/Launcher.tscn` はビジネスノードのみを持ち、`Scenes/LauncherAuto.tscn` はコード駆動の起動入口です。両者は同じ自動注入ランタイムと `StartupRunner` 起動パイプラインを共有します。
 
 ## プラットフォーム対応
 

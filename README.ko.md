@@ -51,8 +51,8 @@ GameFrameX Godot은 GameFrameX 프레임워크를 위한 Godot .NET 프로젝트
 
 실행할 수 있는 샘플 씬:
 
-- `Scenes/Launcher.tscn`: 씬에 설정된 컴포넌트 체인.
-- `Scenes/LauncherAuto.tscn`: 코드로 생성하는 컴포넌트 체인.
+- `Scenes/Launcher.tscn`: 메인 씬. 컴포넌트는 자동 Host가 주입하고 `StartupRunner`가 시작 파이프라인(버전 요청 → 매니페스트 → 다운로드 → 핫픽스 진입점)을 구동합니다.
+- `Scenes/LauncherAuto.tscn`: 코드 기반 시작 진입점(컴포넌트는 동일하게 자동 Host가 주입).
 - `Scenes/Verification/AssetSystemRuntimeVerifier.tscn`: 에셋 시스템 런타임 검사.
 - `Scenes/Verification/ProtoMessageRuntimeVerifier.tscn`: Protobuf HTTP 루프백 검사.
 
@@ -82,7 +82,7 @@ public partial class GameManager : Node
 - `Scripts/`: 프로젝트 수준의 시작, 프로시저, UI 흐름 및 검증 스크립트.
 - `Assets/`: 핫픽스 어셈블리, 생성된 설정 코드, UI 리소스 및 런타임 데이터.
 
-`Scenes/Launcher.tscn`은 표준 컴포넌트 체인을 직렬화합니다. `Scenes/LauncherAuto.tscn`은 C#으로 동일한 체인을 구성하여 코드 기반 시작을 검증합니다.
+`GameFrameXRuntimeBootstrap`(autoload)는 메인 씬 로드 전에 소유권을 선언하고 첫 유휴 프레임에 `[GameFrameX]` Host를 생성하여 `[GameFrameXAutoComponent]`가 선언한 순서와 의존성에 따라 모든 컴포넌트를 자동으로 마운트합니다. `Scenes/Launcher.tscn`은 비즈니스 노드만 담고, `Scenes/LauncherAuto.tscn`은 코드 기반 시작 진입점입니다. 둘은 동일한 자동 주입 런타임과 `StartupRunner` 시작 파이프라인을 공유합니다.
 
 ## 플랫폼 지원
 

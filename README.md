@@ -49,10 +49,32 @@ Requirements:
 
 Clone the repository, open it in the Godot .NET editor, and wait for .NET dependencies to restore. GameFrameX modules are under `addons/` and core modules are enabled through `project.godot`.
 
+### Zero-configuration startup (auto injection)
+
+Effective on install: `GameFrameXRuntimeBootstrap` is registered as an autoload. It claims ownership before the main scene loads and creates the persistent `[GameFrameX]` host on the first idle frame, mounting every framework component automatically in dependency order — no component nodes in scenes, zero scene changes required. GameFrameX components placed by hand in a scene are detected and self-suppressed with a `[GameFrameX]`-prefixed warning.
+
+Module parameters are injected once, before first module instantiation, via `GameFrameXOptions`:
+
+```csharp
+using GameFrameX.Runtime;
+using GameFrameX.Timer.Runtime;
+
+// Classes implementing IGameFrameXOptionsContributor are discovered silently and applied automatically — no registration code
+public sealed class MyGameOptionsContributor : IGameFrameXOptionsContributor
+{
+    public void ConfigureOptions(GameFrameXOptionsContributorContext context)
+    {
+        context.Configure(new TimerOptions { CatchCallbackExceptions = true });
+    }
+}
+```
+
+Components stay thin entries (pure forwarding); runtime adjustments go through the `GetModule<T>()` / `GameApp.X` module APIs.
+
 Run one of these scenes:
 
-- `Scenes/Launcher.tscn` — scene-configured component chain.
-- `Scenes/LauncherAuto.tscn` — code-created component chain.
+- `Scenes/Launcher.tscn` — main scene; components are injected by the auto host and the startup pipeline (version requests → manifest → download → hotfix entry) is driven by `StartupRunner`.
+- `Scenes/LauncherAuto.tscn` — code-driven startup entry behaving like Launcher (components still injected by the auto host).
 - `Scenes/Verification/AssetSystemRuntimeVerifier.tscn` — asset-system runtime check.
 - `Scenes/Verification/ProtoMessageRuntimeVerifier.tscn` — Protobuf HTTP loopback check.
 
@@ -82,7 +104,7 @@ See the README in the corresponding `addons/com.gameframex.godot.*` directory fo
 - `Scripts/` contains project startup, procedure, UI flow, and verification scripts.
 - `Assets/` contains hotfix assemblies, generated configuration code, UI resources, and runtime data.
 
-`Scenes/Launcher.tscn` serializes the standard component chain. `Scenes/LauncherAuto.tscn` builds an equivalent chain in C# for code-driven startup validation.
+`GameFrameXRuntimeBootstrap` (autoload) claims ownership before the main scene and creates the `[GameFrameX]` host on the first idle frame, mounting all components automatically in the order and dependency declared by `[GameFrameXAutoComponent]`. `Scenes/Launcher.tscn` carries only business nodes, while `Scenes/LauncherAuto.tscn` provides a code-driven startup entry — both share the same auto-injected runtime and the `StartupRunner` startup pipeline.
 
 ## Platform Support
 
