@@ -18,6 +18,7 @@ namespace GameFrameX.Download.Runtime
     /// <summary>
     /// 下载组件。
     /// </summary>
+    [GameFrameXAutoComponent(-4000)]
     public sealed partial class DownloadComponent : GameFrameworkComponent
     {
         private const int DefaultPriority = 0;
@@ -28,13 +29,13 @@ namespace GameFrameX.Download.Runtime
 
         [Export] private Node m_InstanceRoot = null;
 
-        [Export] private string m_DownloadAgentHelperTypeName = "GameFrameX.Download.Runtime.GodotWebRequestDownloadAgentHelper";
+        private string m_DownloadAgentHelperTypeName = "GameFrameX.Download.Runtime.GodotWebRequestDownloadAgentHelper";
 
-        [Export] private int m_DownloadAgentHelperCount = 3;
+        private int m_DownloadAgentHelperCount = 3;
 
-        [Export(PropertyHint.Range, "30,3000,1")] private float m_Timeout = 30f;
+        private float m_Timeout = 30f;
 
-        [Export] private int m_FlushSize = OneMegaBytes;
+        private int m_FlushSize = DownloadOptions.OneMegaBytes;
 
         /// <summary>
         /// 获取或设置下载是否被暂停。
@@ -87,12 +88,16 @@ namespace GameFrameX.Download.Runtime
         }
 
         /// <summary>
-        /// 获取或设置将缓冲区写入磁盘的临界大小，仅当开启断点续传时有效。
+        /// 获取将缓冲区写入磁盘的临界大小，仅当开启断点续传时有效（启动期参数，运行期只读）。
         /// </summary>
         public int FlushSize
         {
             get { return m_DownloadManager.FlushSize; }
-            set { m_DownloadManager.FlushSize = m_FlushSize = value; }
+            set
+            {
+                // 启动期型参数：仅模块首次实例化前经 GameFrameXOptions.Configure 生效，运行期修改响亮拒绝
+                Log.Warning("FlushSize 是启动期参数，运行期修改已被拒绝，请在启动前经 GameFrameXOptions.Configure 配置。");
+            }
         }
 
         /// <summary>
@@ -144,6 +149,14 @@ namespace GameFrameX.Download.Runtime
             }
             ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(IDownloadManager);
+            if (GameFrameXOptions.TryGet<DownloadOptions>(out var downloadOptions))
+            {
+                m_DownloadAgentHelperTypeName = downloadOptions.DownloadAgentHelperTypeName;
+                m_DownloadAgentHelperCount = downloadOptions.AgentHelperCount;
+                m_Timeout = downloadOptions.Timeout;
+                m_FlushSize = downloadOptions.FlushSize;
+            }
+
             base._Ready();
             m_DownloadManager = GameFrameworkEntry.GetModule<IDownloadManager>();
             if (m_DownloadManager == null)

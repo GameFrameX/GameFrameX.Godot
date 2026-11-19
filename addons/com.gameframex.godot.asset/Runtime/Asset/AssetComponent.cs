@@ -10,6 +10,7 @@ namespace GameFrameX.Asset.Runtime
     /// 资源组件。
     /// </summary>
     [GlobalClass]
+    [GameFrameXAutoComponent(-4000)]
     public sealed partial class AssetComponent : GameFrameworkComponent
     {
         /// <summary>
@@ -17,7 +18,7 @@ namespace GameFrameX.Asset.Runtime
         /// </summary>
         public const string BuildInPackageName = "DefaultPackage";
 
-        [Export] private EPlayMode m_GamePlayMode = EPlayMode.EditorSimulateMode;
+        private EPlayMode m_GamePlayMode = EPlayMode.EditorSimulateMode;
 
         private IAssetManager _assetManager = null;
 
@@ -90,6 +91,11 @@ namespace GameFrameX.Asset.Runtime
 
         public override void _Ready()
         {
+            if (GameFrameXOptions.TryGet<AssetOptions>(out var assetOptions))
+            {
+                m_GamePlayMode = assetOptions.GamePlayMode;
+            }
+
             // 说明：Godot 编辑器导出/运行时无模拟构建上下文，与 Unity 一样在非编辑器环境下将 EditorSimulateMode 回退为 HostPlayMode。
 #if !TOOLS
             if (m_GamePlayMode == EPlayMode.EditorSimulateMode)

@@ -38,6 +38,7 @@ namespace GameFrameX.Config.Runtime
 	/// <summary>
 	/// 全局配置组件。
 	/// </summary>
+	[GameFrameXAutoComponent(-5000)]
 	public sealed partial class ConfigComponent : GameFrameworkComponent
 	{
 		private IConfigManager m_ConfigManager = null;

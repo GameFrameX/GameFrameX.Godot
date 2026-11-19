@@ -39,7 +39,7 @@ namespace GameFrameX.Network.Runtime
     /// <summary>
     /// 网络组件。
     /// </summary>
-            
+    [GameFrameXAutoComponent(1000)]
     public sealed partial class NetworkComponent : GameFrameworkComponent
     {
         private INetworkManager m_NetworkManager = null;
@@ -48,22 +48,22 @@ namespace GameFrameX.Network.Runtime
         /// <summary>
         /// 忽略发送的网络消息ID的日志打印
         /// </summary>
-        [Export] private int[] m_IgnoredSendNetworkIds = new int[0];
+        private List<int> m_IgnoredSendNetworkIds = new List<int>();
 
         /// <summary>
         /// 忽略接收的网络消息ID的日志打印
         /// </summary>
-        [Export] private int[] m_IgnoredReceiveNetworkIds = new int[0];
+        private List<int> m_IgnoredReceiveNetworkIds = new List<int>();
 
         /// <summary>
         /// RPC超时时间，以毫秒为单位,默认为5秒
         /// </summary>
-        [Export] private int m_rpcTimeout = 5000;
+        private int m_rpcTimeout = 5000;
 
         /// <summary>
         /// 是否在应用程序获得焦点时发送心跳包,默认为false
         /// </summary>
-        [Export] private bool m_FocusHeartbeat = false;
+        private bool m_FocusHeartbeat = false;
 
         /// <summary>
         /// 获取网络频道数量。
@@ -94,14 +94,16 @@ namespace GameFrameX.Network.Runtime
         /// </summary>
         public override void _Ready()
         {
-            if (string.IsNullOrEmpty(componentType))
-            {
-                // 代码动态创建（LauncherAuto 场景）无场景序列化值，空值兜底默认实现，避免注册 Guard 中断
-                componentType = typeof(NetworkManager).FullName;
-            }
-            ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(INetworkManager);
             base._Ready();
+            if (GameFrameXOptions.TryGet<NetworkOptions>(out var networkOptions))
+            {
+                m_rpcTimeout = networkOptions.RpcTimeout;
+                m_FocusHeartbeat = networkOptions.FocusHeartbeat;
+                m_IgnoredSendNetworkIds = networkOptions.IgnoredSendNetworkIds;
+                m_IgnoredReceiveNetworkIds = networkOptions.IgnoredReceiveNetworkIds;
+            }
+
             m_NetworkManager = GameFrameworkEntry.GetModule<INetworkManager>();
             if (m_NetworkManager == null)
             {
@@ -189,7 +191,7 @@ namespace GameFrameX.Network.Runtime
         {
             GameFrameworkGuard.NotNullOrEmpty(channelName, nameof(channelName));
             var networkChannel = m_NetworkManager.CreateNetworkChannel(channelName, networkChannelHelper, m_rpcTimeout);
-            networkChannel.SetIgnoreLogNetworkIds(new List<int>(m_IgnoredSendNetworkIds), new List<int>(m_IgnoredReceiveNetworkIds));
+            networkChannel.SetIgnoreLogNetworkIds(m_IgnoredSendNetworkIds, m_IgnoredReceiveNetworkIds);
             return networkChannel;
         }
 

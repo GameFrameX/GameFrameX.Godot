@@ -71,10 +71,6 @@ namespace GameFrameX.UI.Editor
             return new Dictionary<string, Type>(System.StringComparer.OrdinalIgnoreCase)
             {
                 { "componentType", GetManagerType() },
-                { "mUIFormHelperTypeName", typeof(IUIFormHelper) },
-                { "UIFormHelperTypeName", typeof(IUIFormHelper) },
-                { "mUIGroupHelperTypeName", typeof(IUIGroupHelper) },
-                { "UIGroupHelperTypeName", typeof(IUIGroupHelper) },
             };
         }
 

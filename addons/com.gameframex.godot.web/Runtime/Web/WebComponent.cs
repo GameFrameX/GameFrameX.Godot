@@ -43,6 +43,7 @@ namespace GameFrameX.Web.Runtime
     /// 支持字符串和字节数组格式的请求结果。
     /// 可以设置请求超时时间。
     /// </summary>
+    [GameFrameXAutoComponent(1600)]
     public sealed partial class WebComponent : GameFrameworkComponent
     {
         /// <summary>
@@ -51,19 +52,13 @@ namespace GameFrameX.Web.Runtime
         private IWebManager m_WebManager;
 
         /// <summary>
-        /// 请求超时时间配置
-        /// </summary>
-        [Export(PropertyHint.Range, "0.5,120,0.1")]
-        private float m_Timeout = 5f;
-
-        /// <summary>
         /// 获取或设置下载超时时长，以秒为单位。
         /// 当请求超过此时间未完成时会自动终止。
         /// </summary>
         public float Timeout
         {
             get { return m_WebManager.Timeout; }
-            set { m_WebManager.Timeout = m_Timeout = value; }
+            set { m_WebManager.Timeout = value; }
         }
 
         /// <summary>
@@ -72,12 +67,6 @@ namespace GameFrameX.Web.Runtime
         /// </summary>
         public override void _Ready()
         {
-            if (string.IsNullOrEmpty(componentType))
-            {
-                // 代码动态创建（LauncherAuto 场景）无场景序列化值，空值兜底默认实现，避免注册 Guard 中断
-                componentType = typeof(WebManager).FullName;
-            }
-            ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(IWebManager);
             base._Ready();
             m_WebManager = GameFrameworkEntry.GetModule<IWebManager>();
@@ -86,8 +75,6 @@ namespace GameFrameX.Web.Runtime
                 Log.Fatal("Web manager is invalid.");
                 return;
             }
-
-            m_WebManager.Timeout = m_Timeout;
         }
 
         /// <summary>

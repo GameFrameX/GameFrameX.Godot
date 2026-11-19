@@ -43,6 +43,7 @@ namespace GameFrameX.Entity.Runtime
 	/// <summary>
 	/// 实体组件。
 	/// </summary>
+	[GameFrameXAutoComponent(300)]
 	public sealed partial class EntityComponent : GameFrameworkComponent
 	{
 		private const int DefaultPriority = 0;
@@ -51,21 +52,21 @@ namespace GameFrameX.Entity.Runtime
 
 		private readonly List<IEntity> m_InternalEntityResults = new List<IEntity>();
 
-		[Export] private bool m_EnableShowEntityUpdateEvent = false;
+		private bool m_EnableShowEntityUpdateEvent = false;
 
-		[Export] private bool m_EnableShowEntityDependencyAssetEvent = false;
+		private bool m_EnableShowEntityDependencyAssetEvent = false;
 
 		[Export] private Node m_InstanceRoot = null;
 
-		[Export] private string m_EntityHelperTypeName = "GameFrameX.Entity.Runtime.DefaultEntityHelper";
+		private Func<EntityHelperBase> m_EntityHelperFactory = () => new DefaultEntityHelper();
 
-		[Export] private string m_EntityGroupHelperTypeName = "GameFrameX.Entity.Runtime.DefaultEntityGroupHelper";
+		private Func<EntityGroupHelperBase> m_EntityGroupHelperFactory = () => new DefaultEntityGroupHelper();
 
 		private EntityGroup[] m_EntityGroups = null;
 
-		[Export] private int m_DefaultCapacity = 512;
+		private int m_DefaultCapacity = 512;
 
-		[Export] private float m_DefaultExpireTime = 3600f;
+		private float m_DefaultExpireTime = 3600f;
 
 		/// <summary>
 		/// 获取实体数量。
@@ -89,7 +90,11 @@ namespace GameFrameX.Entity.Runtime
 		public int DefaultCapacity
 		{
 			get { return m_DefaultCapacity; }
-			set { m_DefaultCapacity = value; }
+			set
+			{
+				// 启动期型参数：仅模块首次实例化前经 GameFrameXOptions.Configure 生效，运行期修改响亮拒绝
+				Log.Warning("DefaultCapacity 是启动期参数，运行期修改已被拒绝，请在启动前经 GameFrameXOptions.Configure 配置。");
+			}
 		}
 
 		/// <summary>
@@ -98,7 +103,11 @@ namespace GameFrameX.Entity.Runtime
 		public float DefaultExpireTime
 		{
 			get { return m_DefaultExpireTime; }
-			set { m_DefaultExpireTime = value; }
+			set
+			{
+				// 启动期型参数：仅模块首次实例化前经 GameFrameXOptions.Configure 生效，运行期修改响亮拒绝
+				Log.Warning("DefaultExpireTime 是启动期参数，运行期修改已被拒绝，请在启动前经 GameFrameXOptions.Configure 配置。");
+			}
 		}
 
 		/// <summary>
@@ -106,14 +115,22 @@ namespace GameFrameX.Entity.Runtime
 		/// </summary>
 		public override void _Ready()
 		{
-			if (string.IsNullOrEmpty(componentType))
-			{
-			    // 代码动态创建（LauncherAuto 场景）无场景序列化值，空值兜底默认实现，避免注册 Guard 中断
-			    componentType = typeof(EntityManager).FullName;
-			}
-			ImplementationComponentType = Utility.Assembly.GetType(componentType);
 			InterfaceComponentType = typeof(IEntityManager);
 			base._Ready();
+			if (!IsRuntimeComponentReady)
+			{
+				return;
+			}
+
+			if (GameFrameXOptions.TryGet<EntityOptions>(out var entityOptions))
+			{
+				m_EnableShowEntityUpdateEvent = entityOptions.EnableShowEntityUpdateEvent;
+				m_EnableShowEntityDependencyAssetEvent = entityOptions.EnableShowEntityDependencyAssetEvent;
+				m_EntityHelperFactory = entityOptions.EntityHelperFactory;
+				m_EntityGroupHelperFactory = entityOptions.EntityGroupHelperFactory;
+				m_DefaultCapacity = entityOptions.DefaultCapacity;
+				m_DefaultExpireTime = entityOptions.DefaultExpireTime;
+			}
 			m_EntityManager = GameFrameworkEntry.GetModule<IEntityManager>();
 			if (m_EntityManager == null)
 			{
@@ -143,9 +160,7 @@ namespace GameFrameX.Entity.Runtime
 				return;
 			}
 
-			m_EntityManager.SetObjectPoolManager(GameFrameworkEntry.GetModule<IObjectPoolManager>());
-
-			EntityHelperBase entityHelper = Helper.CreateHelper<EntityHelperBase>(m_EntityHelperTypeName, null);
+			EntityHelperBase entityHelper = m_EntityHelperFactory != null ? m_EntityHelperFactory() : null;
 			if (entityHelper == null)
 			{
 				Log.Error("Can not create entity helper.");
@@ -248,7 +263,7 @@ namespace GameFrameX.Entity.Runtime
 				return false;
 			}
 
-			EntityGroupHelperBase entityGroupHelper = Helper.CreateHelper<EntityGroupHelperBase>(m_EntityGroupHelperTypeName, null, EntityGroupCount);
+			EntityGroupHelperBase entityGroupHelper = m_EntityGroupHelperFactory != null ? m_EntityGroupHelperFactory() : null;
 			if (entityGroupHelper == null)
 			{
 				Log.Error("Can not create entity group helper.");

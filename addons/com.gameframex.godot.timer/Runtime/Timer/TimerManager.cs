@@ -53,6 +53,17 @@ namespace GameFrameX.Timer.Runtime
         /// </summary>
         public static bool CatchCallbackExceptions = false;
 
+        /// <summary>
+        /// 初始化定时器管理器并消费 <see cref="TimerOptions"/> 启动配置（C9 配置终态：模块首次实例化时一次性消费）。
+        /// </summary>
+        public TimerManager()
+        {
+            if (GameFrameXOptions.TryGet<TimerOptions>(out var timerOptions))
+            {
+                CatchCallbackExceptions = timerOptions.CatchCallbackExceptions;
+            }
+        }
+
         public override void Update(float elapseSeconds, float realElapseSeconds)
         {
             lock (Locker)

@@ -44,6 +44,12 @@ namespace GameFrameX.Setting.Runtime
                 throw new GameFrameworkException("Storage backend factory is invalid.");
             }
 
+            if (s_BackendFactory != null)
+            {
+                Log.Warning("Setting storage backend is already registered. The duplicate registration is ignored.");
+                return;
+            }
+
             s_BackendFactory = backendFactory;
         }
 
@@ -53,7 +59,9 @@ namespace GameFrameX.Setting.Runtime
         /// <returns>配置存储后端。</returns>
         internal static ISettingStorageBackend Create()
         {
-            return s_BackendFactory == null ? new GodotConfigFileSettingStorage() : s_BackendFactory();
+            ISettingStorageBackend backend = s_BackendFactory == null ? new GodotConfigFileSettingStorage() : s_BackendFactory();
+            Log.Info("Setting storage backend created : '{0}'.", backend.GetType().FullName);
+            return backend;
         }
 
         /// <summary>

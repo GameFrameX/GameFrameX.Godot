@@ -44,6 +44,7 @@ namespace GameFrameX.Scene.Runtime
     /// 场景组件。
     /// </summary>
     [GlobalClass]
+    [GameFrameXAutoComponent(-4000)]
     public sealed partial class SceneComponent : GameFrameworkComponent
     {
         /// <summary>
@@ -62,9 +63,9 @@ namespace GameFrameX.Scene.Runtime
         private string m_PendingActivateSceneAssetName = null;
         private int m_PendingActivateRetryCount = 0;
 
-        [Export] private bool m_EnableLoadSceneUpdateEvent = true;
+        private bool m_EnableLoadSceneUpdateEvent = true;
 
-        [Export] private bool m_EnableLoadSceneDependencyAssetEvent = true;
+        private bool m_EnableLoadSceneDependencyAssetEvent = true;
 
         /// <summary>
         /// 获取当前场景主摄像机（3D）。
@@ -89,6 +90,12 @@ namespace GameFrameX.Scene.Runtime
         {
             ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(IGameSceneManager);
+            if (GameFrameXOptions.TryGet<SceneOptions>(out var sceneOptions))
+            {
+                m_EnableLoadSceneUpdateEvent = sceneOptions.EnableLoadSceneUpdateEvent;
+                m_EnableLoadSceneDependencyAssetEvent = sceneOptions.EnableLoadSceneDependencyAssetEvent;
+            }
+
             base._Ready();
             _gameSceneManager = GameFrameworkEntry.GetModule<IGameSceneManager>();
             if (_gameSceneManager == null)

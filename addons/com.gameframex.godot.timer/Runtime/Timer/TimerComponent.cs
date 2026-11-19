@@ -9,6 +9,7 @@ namespace GameFrameX.Timer.Runtime
     /// <summary>
     /// 计时器组件。
     /// </summary>
+    [GameFrameXAutoComponent(-5000)]
     public sealed partial class TimerComponent : GameFrameworkComponent
     {
         private ITimerManager _timerManager;

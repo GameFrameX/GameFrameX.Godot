@@ -42,12 +42,12 @@ namespace GameFrameX.Setting.Runtime
 	/// 游戏配置组件。
 	/// </summary>
 	[GlobalClass]
+	[GameFrameXAutoComponent(-5000)]
 	public sealed partial class SettingComponent : GameFrameworkComponent
 	{
-		[Export] private string m_SettingHelperTypeName = "GameFrameX.Setting.Runtime.DefaultSettingHelper";
+		private Func<SettingHelperBase> m_SettingHelperFactory = () => new DefaultSettingHelper();
 
-		private ISettingManager m_SettingManager = null;
-
+		private ISettingManager m_SettingManager;
 		/// <summary>
 		/// 获取游戏配置项数量。
 		/// </summary>
@@ -65,6 +65,14 @@ namespace GameFrameX.Setting.Runtime
 			}
 			ImplementationComponentType = Utility.Assembly.GetType(componentType);
 			InterfaceComponentType = typeof(ISettingManager);
+			if (GameFrameXOptions.TryGet<SettingOptions>(out var settingOptions))
+			{
+				m_SettingHelperFactory = settingOptions.SettingHelperFactory;
+				if (!string.IsNullOrEmpty(settingOptions.SaveSlotFileStorageRoot))
+				{
+					SaveSlotFileStorageBackendFactory.SetSaveSlotFileStorageRoot(settingOptions.SaveSlotFileStorageRoot);
+				}
+			}
 			base._Ready();
 			m_SettingManager = GameFrameworkEntry.GetModule<ISettingManager>();
 			if (m_SettingManager == null)
@@ -73,13 +81,15 @@ namespace GameFrameX.Setting.Runtime
 				return;
 			}
 
-			ISettingHelper settingHelper = Helper.CreateHelper<SettingHelperBase>(this, m_SettingHelperTypeName, null, 0);
+			SettingHelperBase settingHelper = m_SettingHelperFactory();
 			if (settingHelper == null)
 			{
 				Log.Fatal("Setting helper is invalid.");
 				return;
 			}
 
+			settingHelper.Name = "SettingHelper";
+			AddChild(settingHelper);
 			m_SettingManager.SetSettingHelper(settingHelper);
 			CallDeferred(nameof(LoadSettingsInternal));
 		}

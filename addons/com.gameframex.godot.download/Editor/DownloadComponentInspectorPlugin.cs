@@ -89,8 +89,6 @@ namespace GameFrameX.Download.Editor
             return new Dictionary<string, Type>(System.StringComparer.OrdinalIgnoreCase)
             {
                 { "componentType", GetManagerType() },
-                { "mDownloadAgentHelperTypeName", typeof(DownloadAgentHelperBase) },
-                { "DownloadAgentHelperTypeName", typeof(DownloadAgentHelperBase) },
             };
         }
     }

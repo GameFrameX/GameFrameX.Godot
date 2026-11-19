@@ -9,6 +9,7 @@ namespace GameFrameX.GlobalConfig.Runtime
     /// 全局配置组件。
     /// </summary>
     [GlobalClass]
+    [GameFrameXAutoComponent(500)]
     public sealed partial class GlobalConfigComponent : GameFrameworkComponent
     {
         /// <summary>

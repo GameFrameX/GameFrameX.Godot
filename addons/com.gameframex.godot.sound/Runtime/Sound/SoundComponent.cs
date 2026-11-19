@@ -51,8 +51,10 @@ namespace GameFrameX.Sound.Runtime
     /// - Unity 版的 AudioListener 唯一性管理（RefreshAudioListener/OnSceneLoaded/OnSceneUnloaded）省略：
     ///   Godot 的 Camera3D 自带 Listener，由相机体系管理。
     /// - 检查器组配置由 [SerializeField] SoundGroup[] 改为平行数组导出（见 m_SoundGroupNames 等字段说明）。
+    /// - 辅助器创建由类型名导出改为 Options 工厂注入（SoundOptions 的 SoundHelperFactory 等）。
     /// - UniTask 返回值统一替换为 Task。
     /// </remarks>
+    [GameFrameXAutoComponent(1200)]
     [GlobalClass]
     public sealed partial class SoundComponent : GameFrameworkComponent
     {
@@ -62,9 +64,9 @@ namespace GameFrameX.Sound.Runtime
         private EventComponent m_EventComponent = null;
 
         [Export] private Node m_InstanceRoot = null;
-        [Export] private string m_SoundHelperTypeName = "GameFrameX.Sound.Runtime.DefaultSoundHelper";
-        [Export] private string m_SoundGroupHelperTypeName = "GameFrameX.Sound.Runtime.DefaultSoundGroupHelper";
-        [Export] private string m_SoundAgentHelperTypeName = "GameFrameX.Sound.Runtime.DefaultSoundAgentHelper";
+        private Func<SoundHelperBase> m_SoundHelperFactory = () => new DefaultSoundHelper();
+        private Func<SoundGroupHelperBase> m_SoundGroupHelperFactory = () => new DefaultSoundGroupHelper();
+        private Func<SoundAgentHelperBase> m_SoundAgentHelperFactory = () => new DefaultSoundAgentHelper();
         [Export] private SoundHelperBase m_CustomSoundHelper = null;
         [Export] private SoundGroupHelperBase m_CustomSoundGroupHelper = null;
         [Export] private SoundAgentHelperBase m_CustomSoundAgentHelper = null;
@@ -92,7 +94,20 @@ namespace GameFrameX.Sound.Runtime
         /// </summary>
         public override void _Ready()
         {
+            InterfaceComponentType = typeof(ISoundManager);
             base._Ready();
+            if (!IsRuntimeComponentReady)
+            {
+                return;
+            }
+
+            if (GameFrameXOptions.TryGet<SoundOptions>(out var soundOptions))
+            {
+                m_SoundHelperFactory = soundOptions.SoundHelperFactory;
+                m_SoundGroupHelperFactory = soundOptions.SoundGroupHelperFactory;
+                m_SoundAgentHelperFactory = soundOptions.SoundAgentHelperFactory;
+            }
+
             m_SoundManager = GameFrameworkEntry.GetModule<ISoundManager>();
             if (m_SoundManager == null)
             {
@@ -112,7 +127,7 @@ namespace GameFrameX.Sound.Runtime
 
             m_SoundManager.SetResourceManager(GameFrameworkEntry.GetModule<IAssetManager>());
 
-            SoundHelperBase soundHelper = CreateHelper(m_SoundHelperTypeName, m_CustomSoundHelper, 0);
+            SoundHelperBase soundHelper = CreateHelper(m_SoundHelperFactory, m_CustomSoundHelper, 0);
             if (soundHelper == null)
             {
                 Log.Error("Can not create sound helper.");
@@ -217,7 +232,7 @@ namespace GameFrameX.Sound.Runtime
                 return false;
             }
 
-            SoundGroupHelperBase soundGroupHelper = CreateHelper(m_SoundGroupHelperTypeName, m_CustomSoundGroupHelper, SoundGroupCount);
+            SoundGroupHelperBase soundGroupHelper = CreateHelper(m_SoundGroupHelperFactory, m_CustomSoundGroupHelper, SoundGroupCount);
             if (soundGroupHelper == null)
             {
                 Log.Error("Can not create sound group helper.");
@@ -611,7 +626,7 @@ namespace GameFrameX.Sound.Runtime
         /// <returns>是否创建成功。</returns>
         private bool AddSoundAgentHelper(string soundGroupName, SoundGroupHelperBase soundGroupHelper, int index)
         {
-            SoundAgentHelperBase soundAgentHelper = CreateHelper(m_SoundAgentHelperTypeName, m_CustomSoundAgentHelper, index);
+            SoundAgentHelperBase soundAgentHelper = CreateHelper(m_SoundAgentHelperFactory, m_CustomSoundAgentHelper, index);
             if (soundAgentHelper == null)
             {
                 Log.Error("Can not create sound agent helper.");
@@ -628,41 +643,29 @@ namespace GameFrameX.Sound.Runtime
         /// 创建辅助器节点。
         /// </summary>
         /// <remarks>
-        /// 对应 Unity 版 Helper.CreateHelper：自定义辅助器优先；否则按类型名反射创建。
-        /// Godot 迁移说明：自定义辅助器仅首个（索引 0）使用，其余代理按类型名创建，
+        /// 对应 Unity 版 Helper.CreateHelper：自定义辅助器优先；否则经 Options 工厂创建。
+        /// Godot 迁移说明：自定义辅助器仅首个（索引 0）使用，其余代理经工厂创建，
         /// 避免同一节点被重复挂到多个父节点（Godot 的 AddChild 不允许重复父节点）。
         /// </remarks>
         /// <typeparam name="T">辅助器基类型。</typeparam>
-        /// <param name="helperTypeName">辅助器类型名。</param>
+        /// <param name="helperFactory">辅助器工厂。</param>
         /// <param name="customHelper">自定义辅助器。</param>
         /// <param name="helperIndex">辅助器索引。</param>
         /// <returns>创建的辅助器节点，失败时返回 null。</returns>
-        private T CreateHelper<T>(string helperTypeName, T customHelper, int helperIndex) where T : Node
+        private T CreateHelper<T>(Func<T> helperFactory, T customHelper, int helperIndex) where T : Node
         {
-            Node helperNode;
             if (customHelper != null && helperIndex == 0)
             {
-                helperNode = customHelper;
+                return customHelper;
             }
-            else
+
+            if (helperFactory == null)
             {
-                if (string.IsNullOrEmpty(helperTypeName))
-                {
-                    Log.Error("Can not create helper with empty type name.");
-                    return null;
-                }
-
-                Type helperType = Type.GetType(helperTypeName);
-                if (helperType == null || !typeof(T).IsAssignableFrom(helperType))
-                {
-                    Log.Error($"Can not create helper with type name '{helperTypeName}'.");
-                    return null;
-                }
-
-                helperNode = (Node)Activator.CreateInstance(helperType);
+                Log.Error("Can not create helper with empty factory.");
+                return null;
             }
 
-            return (T)helperNode;
+            return helperFactory();
         }
 
         /// <summary>

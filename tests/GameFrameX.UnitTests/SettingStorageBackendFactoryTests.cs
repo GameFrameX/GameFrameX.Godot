@@ -44,6 +44,18 @@ namespace GameFrameX.UnitTests
             Assert.Throws<GameFrameworkException>(() => SettingStorageBackendFactory.RegisterBackend(null));
         }
 
+        [Fact]
+        public void RegisterBackend_Duplicate_KeepsFirst()
+        {
+            FakeSettingStorageBackend first = new FakeSettingStorageBackend();
+            FakeSettingStorageBackend second = new FakeSettingStorageBackend();
+            SettingStorageBackendFactory.RegisterBackend(() => first);
+
+            SettingStorageBackendFactory.RegisterBackend(() => second);
+
+            Assert.Same(first, SettingStorageBackendFactory.Create());
+        }
+
         private sealed class FakeSettingStorageBackend : ISettingStorageBackend
         {
             public bool Load()

@@ -40,6 +40,7 @@ namespace GameFrameX.Event.Runtime
     /// <summary>
     /// 事件组件。
     /// </summary>
+    [GameFrameXAutoComponent(-7000)]
     public sealed partial class EventComponent : GameFrameworkComponent, IEventPublisher
     {
         private IEventManager m_EventManager = null;
@@ -70,7 +71,7 @@ namespace GameFrameX.Event.Runtime
                 // 代码动态创建（LauncherAuto 场景）无场景序列化值，空值兜底默认实现，避免注册 Guard 中断
                 componentType = typeof(EventManager).FullName;
             }
-            ImplementationComponentType = Type.GetType(componentType);
+            ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(IEventManager);
             base._Ready();
             m_EventManager = GameFrameworkEntry.GetModule<IEventManager>();

@@ -4,6 +4,7 @@ using Godot;
 
 namespace GameFrameX.Web.ProtoBuff.Runtime
 {
+    [GameFrameXAutoComponent(1500)]
     public sealed partial class WebProtoBuffComponent : GameFrameworkComponent
     {
         private IWebProtoBuffManager m_WebProtoBuffManager;
@@ -19,12 +20,6 @@ namespace GameFrameX.Web.ProtoBuff.Runtime
 
         public override void _Ready()
         {
-            if (string.IsNullOrEmpty(componentType))
-            {
-                // 代码动态创建（LauncherAuto 场景）无场景序列化值，空值兜底默认实现，避免注册 Guard 中断
-                componentType = typeof(WebProtoBuffManager).FullName;
-            }
-            ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(IWebProtoBuffManager);
             base._Ready();
             m_WebProtoBuffManager = GameFrameworkEntry.GetModule<IWebProtoBuffManager>();

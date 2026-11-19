@@ -44,16 +44,28 @@ namespace GameFrameX.Procedure.Runtime
     /// <summary>
     /// 流程组件。
     /// </summary>
+    [GameFrameXAutoComponent(-1000)]
     public sealed partial class ProcedureComponent : GameFrameworkComponent
     {
         private IProcedureManager m_ProcedureManager = null;
         private ProcedureBase m_EntranceProcedure = null;
 
+        /// <summary>
+        /// 可用流程类型名列表。
+        /// </summary>
+        /// <remarks>
+        /// 场景序列化保留项：与 Unity 版 [SerializeField] m_AvailableProcedureTypeNames 对齐（C9 终态仍由 Inspector 多选编辑）；
+        /// 入口流程与启动接管开关已迁移至 <see cref="ProcedureOptions"/> 代码注入。
+        /// </remarks>
         [Export] private string[] m_AvailableProcedureTypeNames = Array.Empty<string>();
-        [Export] private string m_EntranceProcedureTypeName = string.Empty;
 
         /// <summary>
-        /// 是否由 StartupRunner 接管启动流程。
+        /// 入口流程类型名（经 <see cref="ProcedureOptions"/> 启动注入；默认 null，配合 Inspector 配置的可用流程列表使用）。
+        /// </summary>
+        private string m_EntranceProcedureTypeName = null;
+
+        /// <summary>
+        /// 是否由 StartupRunner 接管启动流程（经 <see cref="ProcedureOptions"/> 启动注入）。
         /// </summary>
         /// <remarks>
         /// 为 true 时，本组件仅在 _Ready 中注册 IProcedureManager 模块，
@@ -61,7 +73,7 @@ namespace GameFrameX.Procedure.Runtime
         /// 由应用层通过 StartupRunner.Run 统一创建流程状态机并启动，
         /// 避免两处 Initialize 导致 Already exist FSM 异常。
         /// </remarks>
-        [Export] private bool m_UseStartupRunner = false;
+        private bool m_UseStartupRunner = false;
 
 
         /// <summary>
@@ -98,9 +110,20 @@ namespace GameFrameX.Procedure.Runtime
                 // 代码动态创建（LauncherAuto 场景）无场景序列化值，空值兜底默认实现，避免注册 Guard 中断
                 componentType = typeof(ProcedureManager).FullName;
             }
-            ImplementationComponentType = Type.GetType(componentType);
+            ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(IProcedureManager);
+            if (GameFrameXOptions.TryGet<ProcedureOptions>(out var procedureOptions))
+            {
+                m_EntranceProcedureTypeName = procedureOptions.EntranceProcedureTypeName;
+                m_UseStartupRunner = procedureOptions.UseStartupRunner;
+            }
+
             base._Ready();
+            if (!IsRuntimeComponentReady)
+            {
+                return;
+            }
+
             m_ProcedureManager = GameFrameworkEntry.GetModule<IProcedureManager>();
             if (m_ProcedureManager == null)
             {
@@ -314,9 +337,12 @@ namespace GameFrameX.Procedure.Runtime
         }
 
         /// <summary>
-        /// 配置可用流程与入口流程（代码建链场景用，等价场景序列化的 [Export] 值）。
+        /// 配置可用流程与入口流程（代码建链场景用；可用列表等价场景序列化 [Export] 值，入口流程等价 <see cref="ProcedureOptions.EntranceProcedureTypeName"/>）。
         /// </summary>
-        /// <remarks>必须在节点进入场景树之前调用：_Ready 触发的 StartProcedureInternal 会读取这两个配置自跑流程。</remarks>
+        /// <remarks>
+        /// 必须在节点进入场景树之前调用：_Ready 触发的 StartProcedureInternal 会读取这两个配置自跑流程；
+        /// 若同时经 <c>GameFrameXOptions.Configure</c> 注入了 <see cref="ProcedureOptions"/>，则注册表值在 _Ready 中优先生效。
+        /// </remarks>
         public void ConfigureProcedures(string[] availableProcedureTypeNames, string entranceProcedureTypeName)
         {
             m_AvailableProcedureTypeNames = availableProcedureTypeNames ?? Array.Empty<string>();

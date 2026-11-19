@@ -97,8 +97,8 @@ namespace GameFrameX.UI.Runtime
                 return false;
             }
 
-            // 传入 index=1 可避免 custom helper 在树内时直接复用原节点，确保每个组拿到独立实例。
-            UIGroupHelperBase helperInstance = Helper.CreateHelper(m_UIGroupHelperTypeName, m_CustomUIGroupHelper, 1);
+            // Options 显式配置的工厂优先；未配置时按类型名称默认解析。传入 index=1 可避免 custom helper 在树内时直接复用原节点，确保每个组拿到独立实例。
+            UIGroupHelperBase helperInstance = m_UIGroupHelperFactory != null ? m_UIGroupHelperFactory() : Helper.CreateHelper(m_UIGroupHelperTypeName, m_CustomUIGroupHelper, 1);
             if (helperInstance == null)
             {
                 Log.Error("Can not create UI group helper.");

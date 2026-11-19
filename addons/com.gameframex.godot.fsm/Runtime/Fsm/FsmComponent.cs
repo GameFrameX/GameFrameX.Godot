@@ -41,6 +41,7 @@ namespace GameFrameX.Fsm.Runtime
 	/// <summary>
 	/// 有限状态机组件。
 	/// </summary>
+	[GameFrameXAutoComponent(-6000)]
 	public sealed partial class FsmComponent : GameFrameworkComponent
 	{
 		private IFsmManager m_FsmManager = null;
@@ -64,7 +65,7 @@ namespace GameFrameX.Fsm.Runtime
 			    // 代码动态创建（LauncherAuto 场景）无场景序列化值，空值兜底默认实现，避免注册 Guard 中断
 			    componentType = typeof(FsmManager).FullName;
 			}
-			ImplementationComponentType = Type.GetType(componentType);
+			ImplementationComponentType = Utility.Assembly.GetType(componentType);
 			InterfaceComponentType = typeof(IFsmManager);
 			base._Ready();
 			m_FsmManager = GameFrameworkEntry.GetModule<IFsmManager>();

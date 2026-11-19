@@ -46,6 +46,10 @@ namespace GameFrameX.Web.Runtime
             MaxConnectionPerServer = 8;
             m_MemoryStream = new MemoryStream();
             Timeout = 5f;
+            if (GameFrameXOptions.TryGet<WebOptions>(out var webOptions))
+            {
+                Timeout = webOptions.Timeout;
+            }
         }
 
         /// <summary>

@@ -51,11 +51,6 @@ namespace GameFrameX.Procedure.Editor
         /// </summary>
         private string m_AvailablePropertyName = "m_AvailableProcedureTypeNames";
 
-        /// <summary>
-        /// 记录当前检查器实例命中的“入口流程”属性名，确保入口与可用列表始终绑定到同一对象属性。
-        /// </summary>
-        private string m_EntrancePropertyName = "m_EntranceProcedureTypeName";
-
         protected override Type GetComponentType()
         {
             return typeof(ProcedureComponent);
@@ -74,21 +69,7 @@ namespace GameFrameX.Procedure.Editor
             {
                 // 命中可用流程字段后，使用自定义多选渲染替代默认数组编辑器。
                 m_AvailablePropertyName = name;
-                AddPropertyEditor(name, new ProcedureMultiSelectEditorProperty(name, m_EntrancePropertyName));
-                return true;
-            }
-
-            var isEntranceProperty =
-                normalized is "mentranceproceduretypename" or "entranceproceduretypename" ||
-                normalized.Contains("entranceproceduretypename", StringComparison.Ordinal) ||
-                (normalized.Contains("entrance", StringComparison.Ordinal) &&
-                 normalized.Contains("procedure", StringComparison.Ordinal) &&
-                 normalized.Contains("type", StringComparison.Ordinal));
-            if (isEntranceProperty)
-            {
-                // 命中入口流程字段后，使用下拉渲染并绑定上一步识别到的可用流程字段名。
-                m_EntrancePropertyName = name;
-                AddPropertyEditor(name, new EntranceProcedureDropdownEditorProperty(name, m_AvailablePropertyName));
+                AddPropertyEditor(name, new ProcedureMultiSelectEditorProperty(name));
                 return true;
             }
 
@@ -139,7 +120,6 @@ namespace GameFrameX.Procedure.Editor
         private sealed partial class ProcedureMultiSelectEditorProperty : EditorProperty
         {
             private readonly string m_PropertyName;
-            private readonly string m_EntrancePropertyName;
             private readonly VBoxContainer m_Root;
             private readonly Dictionary<string, CheckBox> m_Checks = new Dictionary<string, CheckBox>(StringComparer.Ordinal);
             private readonly string[] m_AllProcedureTypeNames;
@@ -148,10 +128,9 @@ namespace GameFrameX.Procedure.Editor
             /// <summary>
             /// 初始化多选流程列表编辑器
             /// </summary>
-            public ProcedureMultiSelectEditorProperty(string propertyName, string entrancePropertyName)
+            public ProcedureMultiSelectEditorProperty(string propertyName)
             {
                 m_PropertyName = propertyName;
-                m_EntrancePropertyName = entrancePropertyName;
                 m_AllProcedureTypeNames = BuildAllProcedures();
 
                 m_Root = new VBoxContainer();
@@ -212,18 +191,6 @@ namespace GameFrameX.Procedure.Editor
                     EmitChanged(m_PropertyName, selectedArray);
                 }
 
-                var entrance = GetEditedObject().Get(m_EntrancePropertyName).AsString();
-                var nextEntrance = entrance;
-                if (!string.IsNullOrEmpty(entrance) && !selected.Contains(entrance))
-                {
-                    nextEntrance = selected.Count > 0 ? selected[0] : string.Empty;
-                }
-
-                // 入口值仅在实际变化时写回，避免无意义的属性写入日志刷屏。
-                if (!string.Equals(entrance, nextEntrance, StringComparison.Ordinal))
-                {
-                    EmitChanged(m_EntrancePropertyName, nextEntrance);
-                }
             }
 
             private static string[] BuildAllProcedures()
@@ -239,111 +206,6 @@ namespace GameFrameX.Procedure.Editor
                 return array != null ? new HashSet<string>(array, StringComparer.Ordinal) : new HashSet<string>(StringComparer.Ordinal);
             }
         }
-
-        private sealed partial class EntranceProcedureDropdownEditorProperty : EditorProperty
-        {
-            private const string NoneOptionName = "<None>";
-            private readonly string m_PropertyName;
-            private readonly string m_AvailablePropertyName;
-            private readonly OptionButton m_OptionButton;
-            private readonly Label m_EmptyHintLabel;
-
-            /// <summary>
-            /// 初始化入口流程下拉编辑器
-            /// </summary>
-            public EntranceProcedureDropdownEditorProperty(string propertyName, string availablePropertyName)
-            {
-                m_PropertyName = propertyName;
-                m_AvailablePropertyName = availablePropertyName;
-
-                var root = new VBoxContainer();
-                var container = new HBoxContainer();
-                var label = new Label();
-                label.Text = "Entrance Procedure";
-                label.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-                container.AddChild(label);
-
-                m_OptionButton = new OptionButton();
-                m_OptionButton.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-                m_OptionButton.ItemSelected += OnItemSelected;
-                container.AddChild(m_OptionButton);
-
-                root.AddChild(container);
-
-                m_EmptyHintLabel = new Label();
-                m_EmptyHintLabel.Text = "Select available procedures first.";
-                m_EmptyHintLabel.AddThemeColorOverride("font_color", new Color(0.9f, 0.7f, 0.2f));
-                root.AddChild(m_EmptyHintLabel);
-
-                AddChild(root);
-                AddFocusable(m_OptionButton);
-                RefreshItems();
-            }
-
-            public override void _UpdateProperty()
-            {
-                RefreshItems();
-                var selectedTypeName = GetEditedObject().Get(m_PropertyName).AsString();
-                var idx = IndexOfItem(selectedTypeName);
-                if (idx < 0)
-                {
-                    idx = 0;
-                }
-                if (m_OptionButton.Selected != idx)
-                {
-                    m_OptionButton.Select(idx);
-                }
-            }
-
-            private void OnItemSelected(long index)
-            {
-                var selectedTypeName = m_OptionButton.GetItemMetadata((int)index).AsString();
-                EmitChanged(m_PropertyName, selectedTypeName);
-            }
-
-            private void RefreshItems()
-            {
-                var editedObject = GetEditedObject();
-                var available = Array.Empty<string>();
-                if (editedObject != null)
-                {
-                    // 下拉候选只读取当前绑定的可用流程属性，确保与上方勾选列表完全同源。
-                    available = editedObject.Get(m_AvailablePropertyName).AsStringArray() ?? Array.Empty<string>();
-                }
-
-                m_OptionButton.Clear();
-                m_OptionButton.AddItem(NoneOptionName);
-                m_OptionButton.SetItemMetadata(0, string.Empty);
-                foreach (var name in available.OrderBy(n => n, StringComparer.Ordinal))
-                {
-                    m_OptionButton.AddItem(GetDisplayTypeName(name));
-                    var index = m_OptionButton.ItemCount - 1;
-                    m_OptionButton.SetItemMetadata(index, name);
-                }
-
-                var hasAvailable = available.Length > 0;
-                m_OptionButton.Disabled = !hasAvailable;
-                m_EmptyHintLabel.Visible = !hasAvailable;
-            }
-
-            private int IndexOfItem(string typeName)
-            {
-                if (string.IsNullOrEmpty(typeName))
-                {
-                    return 0;
-                }
-
-                for (var i = 0; i < m_OptionButton.ItemCount; i++)
-                {
-                    var metadataTypeName = m_OptionButton.GetItemMetadata(i).AsString();
-                    if (string.Equals(metadataTypeName, typeName, StringComparison.Ordinal))
-                    {
-                        return i;
-                    }
-                }
-                return -1;
-            }
-        }
-    }
+}
 }
 #endif

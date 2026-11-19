@@ -42,6 +42,7 @@ namespace GameFrameX.UI.Runtime
     /// <summary>
     /// 界面组件。
     /// </summary>
+    [GameFrameXAutoComponent(1400)]
     public partial class UIComponent : GameFrameworkComponent
     {
         private const int DefaultPriority = 0;
@@ -61,29 +62,27 @@ namespace GameFrameX.UI.Runtime
         private int m_InitializeRetryFrames = 0;
         private bool m_IsRuntimeInitialized = false;
 
-        [Export] private bool m_EnableOpenUIFormSuccessEvent = true;
+        private bool m_EnableOpenUIFormSuccessEvent = true;
 
-        [Export] private bool m_EnableOpenUIFormFailureEvent = true;
+        private bool m_EnableOpenUIFormFailureEvent = true;
 
-        [Export] private bool m_EnableOpenUIFormUpdateEvent = false;
+        private bool m_EnableOpenUIFormUpdateEvent = false;
 
-        [Export] private bool m_EnableOpenUIFormDependencyAssetEvent = false;
+        private bool m_EnableOpenUIFormDependencyAssetEvent = false;
 
-        [Export] private bool m_EnableCloseUIFormCompleteEvent = true;
-        [Export] private bool m_IsEnableUIShowAnimation = false;
-        [Export] private bool m_IsEnableUIHideAnimation = false;
+        private bool m_EnableCloseUIFormCompleteEvent = true;
+        private bool m_IsEnableUIShowAnimation = false;
+        private bool m_IsEnableUIHideAnimation = false;
         /// <summary>
         /// 是否启用界面关闭后自动回收（释放资源链路）。
         /// </summary>
-        [Export] private bool m_EnableAutoReleaseUIForm = true;
+        private bool m_EnableAutoReleaseUIForm = true;
 
-        [Export(PropertyHint.Range, "30,120,1")]
         private float m_InstanceAutoReleaseInterval = 60f;
 
         // [Export(PropertyHint.Range, "16,120,1")] 
         private int m_InstanceCapacity = 16;
 
-        [Export(PropertyHint.Range, "30,1200,1")]
         private float m_InstanceExpireTime = 60f;
 
         // [Export(PropertyHint.Range, "30.0,120.0,1.0")] 
@@ -91,13 +90,23 @@ namespace GameFrameX.UI.Runtime
 
         [Export] private NodePath m_UIRootPath;
 
-        [Export] private string m_UIFormHelperTypeName = GetDefaultUIFormHelperTypeName();
+        private string m_UIFormHelperTypeName = GetDefaultUIFormHelperTypeName();
 
         [Export] private UIFormHelperBase m_CustomUIFormHelper = null;
 
-        [Export] private string m_UIGroupHelperTypeName = GetDefaultUIGroupHelperTypeName();
+        private string m_UIGroupHelperTypeName = GetDefaultUIGroupHelperTypeName();
 
         [Export] private UIGroupHelperBase m_CustomUIGroupHelper = null;
+
+        /// <summary>
+        /// 界面表单辅助器工厂（来自 <see cref="UIOptions.UIFormHelperFactory"/>，未配置时为 null，走类型名称默认解析）。
+        /// </summary>
+        private Func<UIFormHelperBase> m_UIFormHelperFactory = null;
+
+        /// <summary>
+        /// 界面组辅助器工厂（来自 <see cref="UIOptions.UIGroupHelperFactory"/>，未配置时为 null，走类型名称默认解析）。
+        /// </summary>
+        private Func<UIGroupHelperBase> m_UIGroupHelperFactory = null;
 
         private UIGroup[] m_UIGroups = new UIGroup[]
         {
@@ -247,6 +256,24 @@ namespace GameFrameX.UI.Runtime
             ImplementationComponentType = Utility.Assembly.GetType(componentType);
             InterfaceComponentType = typeof(IUIManager);
             base._Ready();
+            // 模块级 Options 一次性消费：默认值即开箱值，游戏在启动前经 GameFrameXOptions.Configure 注入差异值
+            if (GameFrameXOptions.TryGet<UIOptions>(out var uiOptions))
+            {
+                m_EnableOpenUIFormSuccessEvent = uiOptions.EnableOpenUIFormSuccessEvent;
+                m_EnableOpenUIFormFailureEvent = uiOptions.EnableOpenUIFormFailureEvent;
+                m_EnableOpenUIFormUpdateEvent = uiOptions.EnableOpenUIFormUpdateEvent;
+                m_EnableOpenUIFormDependencyAssetEvent = uiOptions.EnableOpenUIFormDependencyAssetEvent;
+                m_EnableAutoReleaseUIForm = uiOptions.EnableAutoReleaseUIForm;
+                m_EnableCloseUIFormCompleteEvent = uiOptions.EnableCloseUIFormCompleteEvent;
+                m_IsEnableUIShowAnimation = uiOptions.IsEnableUIShowAnimation;
+                m_IsEnableUIHideAnimation = uiOptions.IsEnableUIHideAnimation;
+                m_InstanceAutoReleaseInterval = uiOptions.InstanceAutoReleaseInterval;
+                m_InstanceCapacity = uiOptions.InstanceCapacity;
+                m_InstanceExpireTime = uiOptions.InstanceExpireTime;
+                m_UIFormHelperFactory = uiOptions.UIFormHelperFactory;
+                m_UIGroupHelperFactory = uiOptions.UIGroupHelperFactory;
+            }
+
             InitializeUIRoots();
 
             m_UIManager = GameFrameworkEntry.GetModule<IUIManager>();
@@ -389,7 +416,8 @@ namespace GameFrameX.UI.Runtime
                 m_UIFormHelperTypeName = "GameFrameX.UI.Runtime.DefaultUIFormHelper";
             }
 
-            UIFormHelperBase uiFormHelper = Helper.CreateHelper(m_UIFormHelperTypeName, m_CustomUIFormHelper);
+            // Options 显式配置的工厂优先；未配置时按类型名称默认解析（等价 Unity UIHelperBackendFactory 的后端兜底）
+            UIFormHelperBase uiFormHelper = m_UIFormHelperFactory != null ? m_UIFormHelperFactory() : Helper.CreateHelper(m_UIFormHelperTypeName, m_CustomUIFormHelper);
             if (uiFormHelper == null)
             {
                 Log.Error("Can not create UI form helper.");

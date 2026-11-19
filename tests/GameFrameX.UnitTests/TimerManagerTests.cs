@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using GameFrameX.Runtime;
 using GameFrameX.Timer.Runtime;
 using Xunit;
 
@@ -24,6 +25,23 @@ namespace GameFrameX.UnitTests
         public void Dispose()
         {
             _timerManager.Shutdown();
+            TimerManager.CatchCallbackExceptions = false;
+            GameFrameXOptions.Reset(); // 清除 Options 需求标记，避免跨用例静态泄漏
+        }
+
+        [Fact]
+        public void Ctor_ConsumesTimerOptions_FromRegistry()
+        {
+            GameFrameXOptions.Reset(); // 构造函数已实例化 TimerManager（需求已标记），先清理再注入
+            GameFrameXOptions.Configure(new TimerOptions { CatchCallbackExceptions = true });
+
+            var manager = new TimerManager();
+            manager.Shutdown();
+
+            Assert.True(TimerManager.CatchCallbackExceptions, "模块首次实例化应消费 TimerOptions 并同步静态开关");
+
+            // 时机违例：模块已消费后重复 Configure 响亮失败
+            Assert.Throws<GameFrameworkException>(() => GameFrameXOptions.Configure(new TimerOptions()));
         }
 
         // ──────────────── Add / AddOnce / AddUpdate ────────────────

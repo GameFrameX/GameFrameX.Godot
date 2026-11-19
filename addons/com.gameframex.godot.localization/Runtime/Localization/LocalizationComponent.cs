@@ -29,6 +29,7 @@
 //  Official Documentation: https://gameframex.doc.alianblank.com/
 // ==========================================================================================
 
+using System;
 using GameFrameX.Event.Runtime;
 using GameFrameX.Runtime;
 using GameFrameX.Setting.Runtime;
@@ -39,6 +40,7 @@ namespace GameFrameX.Localization.Runtime
     /// <summary>
     /// 本地化组件。
     /// </summary>
+    [GameFrameXAutoComponent(700)]
     public sealed partial class LocalizationComponent : GameFrameworkComponent
     {
         private ILocalizationManager m_LocalizationManager = null;
@@ -51,15 +53,14 @@ namespace GameFrameX.Localization.Runtime
         /// </summary>
         const string UnknownLocalization = "zxx";
 
-        [Export] private string m_EditorLanguage = "zh_CN";
+        private string m_EditorLanguage = "zh_CN";
 
-        [Export] private string m_DefaultLanguage = "zh_CN";
+        private string m_DefaultLanguage = "zh_CN";
 
-        [Export] private bool m_EnableLoadDictionaryUpdateEvent = false;
-        [Export] private bool m_IsEnableEditorMode = false;
+        private bool m_EnableLoadDictionaryUpdateEvent = false;
+        private bool m_IsEnableEditorMode = false;
 
-        [Export] private string m_LocalizationHelperTypeName = "GameFrameX.Localization.Runtime.DefaultLocalizationHelper";
-
+        private Func<LocalizationHelperBase> m_LocalizationHelperFactory = () => new DefaultLocalizationHelper();
 
         /// <summary>
         /// 获取或设置编辑器语言（仅编辑器内有效）。
@@ -67,7 +68,11 @@ namespace GameFrameX.Localization.Runtime
         public string EditorLanguage
         {
             get { return m_EditorLanguage; }
-            set { m_EditorLanguage = value; }
+            set
+            {
+                // 启动期型参数：仅模块首次实例化前经 GameFrameXOptions.Configure 生效，运行期修改响亮拒绝
+                Log.Warning("EditorLanguage 是启动期参数，运行期修改已被拒绝，请在启动前经 GameFrameXOptions.Configure 配置。");
+            }
         }
 
         /// <summary>
@@ -90,12 +95,8 @@ namespace GameFrameX.Localization.Runtime
             }
             set
             {
-                if (m_LocalizationManager.DefaultLanguage != value)
-                {
-                    m_LocalizationManager.DefaultLanguage = value;
-                    m_SettingComponent.SetString(nameof(LocalizationComponent) + "." + nameof(DefaultLanguage), value);
-                    m_SettingComponent.Save();
-                }
+                // 启动期型参数：仅模块首次实例化前经 GameFrameXOptions.Configure 生效，运行期修改响亮拒绝
+                Log.Warning("DefaultLanguage 是启动期参数，运行期修改已被拒绝，请在启动前经 GameFrameXOptions.Configure 配置。");
             }
         }
 
@@ -172,6 +173,14 @@ namespace GameFrameX.Localization.Runtime
                 return;
             }
 
+            if (GameFrameXOptions.TryGet<LocalizationOptions>(out var localizationOptions))
+            {
+                m_EditorLanguage = localizationOptions.EditorLanguage;
+                m_DefaultLanguage = localizationOptions.DefaultLanguage;
+                m_EnableLoadDictionaryUpdateEvent = localizationOptions.EnableLoadDictionaryUpdateEvent;
+                m_IsEnableEditorMode = localizationOptions.IsEnableEditorMode;
+                m_LocalizationHelperFactory = localizationOptions.LocalizationHelperFactory;
+            }
             /*m_LocalizationManager.ReadDataSuccess += OnReadDataSuccess;
             m_LocalizationManager.ReadDataFailure += OnReadDataFailure;
 
@@ -206,7 +215,7 @@ namespace GameFrameX.Localization.Runtime
             }
 
 
-            LocalizationHelperBase localizationHelper = Helper.CreateHelper<LocalizationHelperBase>(m_LocalizationHelperTypeName, null);
+            LocalizationHelperBase localizationHelper = m_LocalizationHelperFactory();
             if (localizationHelper == null)
             {
                 Log.Error("Can not create localization helper.");
@@ -214,8 +223,7 @@ namespace GameFrameX.Localization.Runtime
             }
 
             localizationHelper.Name = "Localization Helper";
-            Node localizationHelperTransform = localizationHelper;
-            AddChild(localizationHelperTransform);
+            AddChild(localizationHelper);
             m_LocalizationManager.SetLocalizationHelper(localizationHelper);
             if (Engine.IsEditorHint() && m_IsEnableEditorMode)
             {
@@ -226,7 +234,8 @@ namespace GameFrameX.Localization.Runtime
                 Language = m_LocalizationManager.SystemLanguage;
             }
 
-            DefaultLanguage = m_DefaultLanguage != UnknownLocalization ? m_DefaultLanguage : m_LocalizationManager.SystemLanguage;
+            // 启动期消费路径直接写管理器，绕开已被改为运行期拒绝的 DefaultLanguage setter
+            m_LocalizationManager.DefaultLanguage = m_DefaultLanguage != UnknownLocalization ? m_DefaultLanguage : m_LocalizationManager.SystemLanguage;
         }
 
         /// <summary>
