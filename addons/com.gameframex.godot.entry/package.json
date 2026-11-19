@@ -22,27 +22,7 @@
     "email": "alianblank@outlook.com",
     "url": "https://gameframex.doc.alianblank.com"
   },
-  "dependencies": {
-    "com.gameframex.godot": "1.0.0",
-    "com.gameframex.godot.asset": "1.0.0",
-    "com.gameframex.godot.config": "1.0.0",
-    "com.gameframex.godot.download": "1.0.0",
-    "com.gameframex.godot.entity": "1.0.0",
-    "com.gameframex.godot.event": "1.0.0",
-    "com.gameframex.godot.fsm": "1.0.0",
-    "com.gameframex.godot.globalconfig": "1.0.0",
-    "com.gameframex.godot.localization": "1.0.0",
-    "com.gameframex.godot.network": "1.0.0",
-    "com.gameframex.godot.procedure": "1.0.0",
-    "com.gameframex.godot.scene": "1.0.0",
-    "com.gameframex.godot.setting": "1.0.0",
-    "com.gameframex.godot.sound": "1.0.0",
-    "com.gameframex.godot.timer": "1.0.0",
-    "com.gameframex.godot.ui": "1.0.0",
-    "com.gameframex.godot.ui.fairygui": "1.0.0",
-    "com.gameframex.godot.web": "1.0.0",
-    "com.gameframex.godot.web.protobuff": "1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "semantic-release": "^24.2.0",
     "@semantic-release/changelog": "^6.0.3",
