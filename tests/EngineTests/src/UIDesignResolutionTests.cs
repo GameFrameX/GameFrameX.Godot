@@ -180,7 +180,9 @@ namespace GameFrameX.EngineTests
 
         /// <summary>
         /// 抑制 _Ready 的 UIComponent 测试替身：避免触发框架组件注册与初始化重试。
+        /// 声明手动启动，不参与自动 Host 挂载（正式运行不应出现测试替身）。
         /// </summary>
+        [GameFrameX.Runtime.GameFrameXManualStartup]
         private sealed partial class SilentUIComponent : UIComponent
         {
             public override void _Ready()

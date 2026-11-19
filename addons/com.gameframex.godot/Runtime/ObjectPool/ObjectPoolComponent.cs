@@ -39,6 +39,7 @@ namespace GameFrameX.Runtime
 	/// <summary>
 	/// 对象池组件。
 	/// </summary>
+	[GameFrameXAutoComponent(-8000)]
 	public sealed partial class ObjectPoolComponent : GameFrameworkComponent
 	{
 		private IObjectPoolManager m_ObjectPoolManager = null;

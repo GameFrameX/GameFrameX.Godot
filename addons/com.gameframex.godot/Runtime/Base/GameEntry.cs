@@ -168,6 +168,19 @@ namespace GameFrameX.Runtime
         }
 
         /// <summary>
+        /// 重置游戏入口静态状态（清空组件注册表）。
+        /// </summary>
+        /// <remarks>
+        /// 由 <see cref="GameFrameXRuntimeBootstrap"/> 在会话边界调用：Godot 进程内场景重载后静态链表仍持有
+        /// 已释放组件的引用，新会话注册会误报 already exist 并自我禁用——重置后与全新进程的初始状态对齐
+        /// （对应 Unity 关闭 Domain Reload 的重复 Play 修复）。
+        /// </remarks>
+        public static void Reset()
+        {
+            GameFrameworkComponents.Clear();
+        }
+
+        /// <summary>
         /// 注册游戏框架组件。
         /// </summary>
         /// <param name="gameFrameworkComponent">要注册的游戏框架组件。</param>

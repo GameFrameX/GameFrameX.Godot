@@ -100,7 +100,8 @@ namespace GameFrameX.Runtime
             {
                 if (string.IsNullOrEmpty(typeName))
                 {
-                    throw new GameFrameworkException("Type name is invalid.");
+                    // 对齐 Unity 版行为：空类型名返回 null（组件薄入口化后 componentType 可为空，由解析器走默认实现）
+                    return null;
                 }
 
                 Type type = null;

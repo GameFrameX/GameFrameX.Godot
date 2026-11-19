@@ -43,6 +43,17 @@ namespace GameFrameX.Runtime
 
         private static readonly Dictionary<Type, Type> s_ModuleTypeMap = new Dictionary<Type, Type>();
 
+        private static int s_SessionVersion;
+
+        /// <summary>
+        /// 获取会话版本号：每次 <see cref="Shutdown"/> 后自增，供缓存方（如访问器）感知框架重启。
+        /// </summary>
+        public static int SessionVersion
+        {
+            get { return s_SessionVersion; }
+        }
+
+
         /// <summary>
         /// 所有游戏框架模块轮询。
         /// </summary>
@@ -70,6 +81,9 @@ namespace GameFrameX.Runtime
             ReferencePool.ClearAll();
             Utility.Marshal.FreeCachedHGlobal();
             GameFrameworkLog.SetLogHelper(null);
+            s_ModuleTypeMap.Clear();
+            GameFrameXOptions.Reset();
+            s_SessionVersion++;
         }
 
         /// <summary>
@@ -95,7 +109,7 @@ namespace GameFrameX.Runtime
             if (!s_ModuleTypeMap.TryGetValue(interfaceType, out Type moduleType))
             {
                 string moduleName = Utility.Text.Format("{0}.{1}", interfaceType.Namespace, interfaceType.Name.Substring(1));
-                moduleType = s_ModuleTypeMap.TryGetValue(interfaceType, out moduleType) ? moduleType : Type.GetType(moduleName);
+                moduleType = Utility.Assembly.GetType(moduleName);
                 if (moduleType == null)
                 {
                     throw new GameFrameworkException(Utility.Text.Format("Can not find Game Framework module type '{0}'.", moduleName));
@@ -145,6 +159,31 @@ namespace GameFrameX.Runtime
             if (!s_ModuleTypeMap.TryGetValue(interfaceType, out _))
             {
                 s_ModuleTypeMap[interfaceType] = implType;
+            }
+        }
+
+        /// <summary>
+        /// 全量实例化已注册模块（安装即启用兜底；组件初始化阶段已按需创建的为幂等跳过）。
+        /// </summary>
+        /// <remarks>
+        /// 标注 <see cref="GameFrameXLazyModuleAttribute"/> 的模块跳过，仅首次被获取时创建。
+        /// </remarks>
+        public static void InstantiateAllModules()
+        {
+            var implemented = new HashSet<Type>();
+            foreach (var implType in s_ModuleTypeMap.Values)
+            {
+                if (!implemented.Add(implType))
+                {
+                    continue;
+                }
+
+                if (implType.IsDefined(typeof(GameFrameXLazyModuleAttribute), false))
+                {
+                    continue;
+                }
+
+                GetModule(implType);
             }
         }
 

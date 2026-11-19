@@ -37,6 +37,7 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 基础组件。
     /// </summary>
+    [GameFrameXAutoComponent(-10000)]
     public sealed partial class BaseComponent : GameFrameworkComponent
     {
         private const int DefaultDpi = 96; // default windows dpi
@@ -149,6 +150,12 @@ namespace GameFrameX.Runtime
             IsAutoRegister = false;
             base._Ready();
 
+            if (m_SuppressedByAutoHost)
+            {
+                // 残留抑制已在 base._Ready 生效（自动注入接管时本组件退场）：抑制后不得再初始化 helpers、订阅事件或驱动框架。
+                return;
+            }
+
             // TODO: DontDestroyOnLoad equivalent in Godot - use AutoLoad singletons instead
             // DontDestroyOnLoad(this);
             InitTextHelper();
@@ -210,6 +217,12 @@ namespace GameFrameX.Runtime
             }
             else if (what == NotificationPredelete || what == NotificationExitTree)
             {
+                // 被自动 Host 抑制的场景残留组件不参与框架生命周期，不得触发框架关闭。
+                if (m_SuppressedByAutoHost)
+                {
+                    return;
+                }
+
                 // Equivalent dispose callback
                 // 备案（2026-08-29 核实）：ExitTree 与 Predelete 两个通知各触发一次 Shutdown，第二次为严格幂等空转——
                 // GameFrameworkEntry.Shutdown 首次调用后模块链表已 Clear（各模块 Shutdown 不会重复执行），

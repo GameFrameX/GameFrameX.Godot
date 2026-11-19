@@ -21,6 +21,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+GameFrameXRuntimeBootstrap="*res://addons/com.gameframex.godot/Runtime/RuntimeHost/GameFrameXRuntimeBootstrap.cs"
 DsInspector="*uid://8bedrhl5kt4g"
 
 [display]

@@ -36,9 +36,10 @@ namespace GameFrameX.Runtime
     /// <summary>
     /// 引用池组件。
     /// </summary>
+    [GameFrameXAutoComponent(-9000)]
     public sealed partial class ReferencePoolComponent : GameFrameworkComponent
     {
-        [Export] private ReferenceStrictCheckType m_EnableStrictCheck = ReferenceStrictCheckType.AlwaysEnable;
+        private ReferenceStrictCheckType m_EnableStrictCheck = ReferenceStrictCheckType.AlwaysEnable;
 
         /// <summary>
         /// 获取或设置是否开启强制检查。
@@ -63,6 +64,12 @@ namespace GameFrameX.Runtime
         {
             IsAutoRegister = false;
             base._Ready();
+            // 模块级 Options 一次性消费：严格检查分档在启动阶段确定，默认值 AlwaysEnable 与原字段默认值同源
+            if (GameFrameXOptions.TryGet<ReferencePoolOptions>(out var referencePoolOptions))
+            {
+                m_EnableStrictCheck = referencePoolOptions.EnableStrictCheck;
+            }
+
             ApplyStrictCheck();
         }
 
