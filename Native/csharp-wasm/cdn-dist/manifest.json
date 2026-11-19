@@ -1,0 +1,8 @@
+{
+    "version": 6,
+    "target": "WasmLogicV2",
+    "assemblies": [
+        "WasmLogic",
+        "WasmLogicV2"
+    ]
+}

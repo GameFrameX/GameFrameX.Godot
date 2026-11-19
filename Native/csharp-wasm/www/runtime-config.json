@@ -1,0 +1,889 @@
+{
+ "mainAssemblyName": "WasmLogic",
+ "assembly": [
+  "Microsoft.CSharp.dll",
+  "Microsoft.VisualBasic.Core.dll",
+  "Microsoft.VisualBasic.dll",
+  "Microsoft.Win32.Primitives.dll",
+  "Microsoft.Win32.Registry.dll",
+  "System.AppContext.dll",
+  "System.Buffers.dll",
+  "System.Collections.Concurrent.dll",
+  "System.Collections.Immutable.dll",
+  "System.Collections.NonGeneric.dll",
+  "System.Collections.Specialized.dll",
+  "System.Collections.dll",
+  "System.ComponentModel.Annotations.dll",
+  "System.ComponentModel.DataAnnotations.dll",
+  "System.ComponentModel.EventBasedAsync.dll",
+  "System.ComponentModel.Primitives.dll",
+  "System.ComponentModel.TypeConverter.dll",
+  "System.ComponentModel.dll",
+  "System.Configuration.dll",
+  "System.Console.dll",
+  "System.Core.dll",
+  "System.Data.Common.dll",
+  "System.Data.DataSetExtensions.dll",
+  "System.Data.dll",
+  "System.Diagnostics.Contracts.dll",
+  "System.Diagnostics.Debug.dll",
+  "System.Diagnostics.DiagnosticSource.dll",
+  "System.Diagnostics.FileVersionInfo.dll",
+  "System.Diagnostics.Process.dll",
+  "System.Diagnostics.StackTrace.dll",
+  "System.Diagnostics.TextWriterTraceListener.dll",
+  "System.Diagnostics.Tools.dll",
+  "System.Diagnostics.TraceSource.dll",
+  "System.Diagnostics.Tracing.dll",
+  "System.Drawing.Primitives.dll",
+  "System.Drawing.dll",
+  "System.Dynamic.Runtime.dll",
+  "System.Formats.Asn1.dll",
+  "System.Formats.Tar.dll",
+  "System.Globalization.Calendars.dll",
+  "System.Globalization.Extensions.dll",
+  "System.Globalization.dll",
+  "System.IO.Compression.Brotli.dll",
+  "System.IO.Compression.FileSystem.dll",
+  "System.IO.Compression.ZipFile.dll",
+  "System.IO.Compression.dll",
+  "System.IO.FileSystem.AccessControl.dll",
+  "System.IO.FileSystem.DriveInfo.dll",
+  "System.IO.FileSystem.Primitives.dll",
+  "System.IO.FileSystem.Watcher.dll",
+  "System.IO.FileSystem.dll",
+  "System.IO.IsolatedStorage.dll",
+  "System.IO.MemoryMappedFiles.dll",
+  "System.IO.Pipelines.dll",
+  "System.IO.Pipes.AccessControl.dll",
+  "System.IO.Pipes.dll",
+  "System.IO.UnmanagedMemoryStream.dll",
+  "System.IO.dll",
+  "System.Linq.AsyncEnumerable.dll",
+  "System.Linq.Expressions.dll",
+  "System.Linq.Parallel.dll",
+  "System.Linq.Queryable.dll",
+  "System.Linq.dll",
+  "System.Memory.dll",
+  "System.Net.Http.Json.dll",
+  "System.Net.Http.dll",
+  "System.Net.HttpListener.dll",
+  "System.Net.Mail.dll",
+  "System.Net.NameResolution.dll",
+  "System.Net.NetworkInformation.dll",
+  "System.Net.Ping.dll",
+  "System.Net.Primitives.dll",
+  "System.Net.Quic.dll",
+  "System.Net.Requests.dll",
+  "System.Net.Security.dll",
+  "System.Net.ServerSentEvents.dll",
+  "System.Net.ServicePoint.dll",
+  "System.Net.Sockets.dll",
+  "System.Net.WebClient.dll",
+  "System.Net.WebHeaderCollection.dll",
+  "System.Net.WebProxy.dll",
+  "System.Net.WebSockets.Client.dll",
+  "System.Net.WebSockets.dll",
+  "System.Net.dll",
+  "System.Numerics.Vectors.dll",
+  "System.Numerics.dll",
+  "System.ObjectModel.dll",
+  "System.Private.DataContractSerialization.dll",
+  "System.Private.Uri.dll",
+  "System.Private.Xml.Linq.dll",
+  "System.Private.Xml.dll",
+  "System.Reflection.DispatchProxy.dll",
+  "System.Reflection.Emit.ILGeneration.dll",
+  "System.Reflection.Emit.Lightweight.dll",
+  "System.Reflection.Emit.dll",
+  "System.Reflection.Extensions.dll",
+  "System.Reflection.Metadata.dll",
+  "System.Reflection.Primitives.dll",
+  "System.Reflection.TypeExtensions.dll",
+  "System.Reflection.dll",
+  "System.Resources.Reader.dll",
+  "System.Resources.ResourceManager.dll",
+  "System.Resources.Writer.dll",
+  "System.Runtime.CompilerServices.Unsafe.dll",
+  "System.Runtime.CompilerServices.VisualC.dll",
+  "System.Runtime.Extensions.dll",
+  "System.Runtime.Handles.dll",
+  "System.Runtime.InteropServices.RuntimeInformation.dll",
+  "System.Runtime.InteropServices.dll",
+  "System.Runtime.Intrinsics.dll",
+  "System.Runtime.Loader.dll",
+  "System.Runtime.Numerics.dll",
+  "System.Runtime.Serialization.Formatters.dll",
+  "System.Runtime.Serialization.Json.dll",
+  "System.Runtime.Serialization.Primitives.dll",
+  "System.Runtime.Serialization.Xml.dll",
+  "System.Runtime.Serialization.dll",
+  "System.Runtime.dll",
+  "System.Security.AccessControl.dll",
+  "System.Security.Claims.dll",
+  "System.Security.Cryptography.Algorithms.dll",
+  "System.Security.Cryptography.Cng.dll",
+  "System.Security.Cryptography.Csp.dll",
+  "System.Security.Cryptography.Encoding.dll",
+  "System.Security.Cryptography.OpenSsl.dll",
+  "System.Security.Cryptography.Primitives.dll",
+  "System.Security.Cryptography.X509Certificates.dll",
+  "System.Security.Cryptography.dll",
+  "System.Security.Principal.Windows.dll",
+  "System.Security.Principal.dll",
+  "System.Security.SecureString.dll",
+  "System.Security.dll",
+  "System.ServiceModel.Web.dll",
+  "System.ServiceProcess.dll",
+  "System.Text.Encoding.CodePages.dll",
+  "System.Text.Encoding.Extensions.dll",
+  "System.Text.Encoding.dll",
+  "System.Text.Encodings.Web.dll",
+  "System.Text.Json.dll",
+  "System.Text.RegularExpressions.dll",
+  "System.Threading.AccessControl.dll",
+  "System.Threading.Channels.dll",
+  "System.Threading.Overlapped.dll",
+  "System.Threading.Tasks.Dataflow.dll",
+  "System.Threading.Tasks.Extensions.dll",
+  "System.Threading.Tasks.Parallel.dll",
+  "System.Threading.Tasks.dll",
+  "System.Threading.Thread.dll",
+  "System.Threading.ThreadPool.dll",
+  "System.Threading.Timer.dll",
+  "System.Threading.dll",
+  "System.Transactions.Local.dll",
+  "System.Transactions.dll",
+  "System.ValueTuple.dll",
+  "System.Web.HttpUtility.dll",
+  "System.Web.dll",
+  "System.Windows.dll",
+  "System.Xml.Linq.dll",
+  "System.Xml.ReaderWriter.dll",
+  "System.Xml.Serialization.dll",
+  "System.Xml.XDocument.dll",
+  "System.Xml.XPath.XDocument.dll",
+  "System.Xml.XPath.dll",
+  "System.Xml.XmlDocument.dll",
+  "System.Xml.XmlSerializer.dll",
+  "System.Xml.dll",
+  "System.dll",
+  "WasmLogic.dll",
+  "WindowsBase.dll",
+  "mscorlib.dll",
+  "netstandard.dll"
+ ],
+ "resources": {
+  "coreAssembly": [
+   {
+    "name": "System.Private.CoreLib.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.InteropServices.JavaScript.dll",
+    "behavior": "assembly"
+   }
+  ],
+  "assembly": [
+   {
+    "name": "Microsoft.CSharp.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "Microsoft.VisualBasic.Core.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "Microsoft.VisualBasic.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "Microsoft.Win32.Primitives.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "Microsoft.Win32.Registry.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.AppContext.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Buffers.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Collections.Concurrent.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Collections.Immutable.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Collections.NonGeneric.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Collections.Specialized.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Collections.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.ComponentModel.Annotations.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.ComponentModel.DataAnnotations.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.ComponentModel.EventBasedAsync.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.ComponentModel.Primitives.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.ComponentModel.TypeConverter.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.ComponentModel.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Configuration.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Console.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Core.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Data.Common.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Data.DataSetExtensions.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Data.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Diagnostics.Contracts.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Diagnostics.Debug.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Diagnostics.DiagnosticSource.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Diagnostics.FileVersionInfo.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Diagnostics.Process.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Diagnostics.StackTrace.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Diagnostics.TextWriterTraceListener.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Diagnostics.Tools.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Diagnostics.TraceSource.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Diagnostics.Tracing.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Drawing.Primitives.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Drawing.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Dynamic.Runtime.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Formats.Asn1.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Formats.Tar.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Globalization.Calendars.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Globalization.Extensions.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Globalization.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.Compression.Brotli.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.Compression.FileSystem.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.Compression.ZipFile.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.Compression.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.FileSystem.AccessControl.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.FileSystem.DriveInfo.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.FileSystem.Primitives.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.FileSystem.Watcher.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.FileSystem.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.IsolatedStorage.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.MemoryMappedFiles.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.Pipelines.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.Pipes.AccessControl.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.Pipes.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.UnmanagedMemoryStream.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.IO.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Linq.AsyncEnumerable.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Linq.Expressions.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Linq.Parallel.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Linq.Queryable.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Linq.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Memory.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.Http.Json.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.Http.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.HttpListener.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.Mail.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.NameResolution.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.NetworkInformation.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.Ping.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.Primitives.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.Quic.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.Requests.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.Security.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.ServerSentEvents.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.ServicePoint.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.Sockets.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.WebClient.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.WebHeaderCollection.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.WebProxy.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.WebSockets.Client.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.WebSockets.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Net.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Numerics.Vectors.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Numerics.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.ObjectModel.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Private.DataContractSerialization.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Private.Uri.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Private.Xml.Linq.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Private.Xml.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Reflection.DispatchProxy.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Reflection.Emit.ILGeneration.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Reflection.Emit.Lightweight.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Reflection.Emit.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Reflection.Extensions.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Reflection.Metadata.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Reflection.Primitives.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Reflection.TypeExtensions.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Reflection.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Resources.Reader.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Resources.ResourceManager.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Resources.Writer.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.CompilerServices.Unsafe.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.CompilerServices.VisualC.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.Extensions.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.Handles.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.InteropServices.RuntimeInformation.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.InteropServices.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.Intrinsics.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.Loader.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.Numerics.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.Serialization.Formatters.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.Serialization.Json.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.Serialization.Primitives.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.Serialization.Xml.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.Serialization.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Runtime.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.AccessControl.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Claims.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Cryptography.Algorithms.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Cryptography.Cng.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Cryptography.Csp.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Cryptography.Encoding.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Cryptography.OpenSsl.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Cryptography.Primitives.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Cryptography.X509Certificates.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Cryptography.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Principal.Windows.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.Principal.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.SecureString.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Security.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.ServiceModel.Web.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.ServiceProcess.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Text.Encoding.CodePages.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Text.Encoding.Extensions.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Text.Encoding.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Text.Encodings.Web.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Text.Json.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Text.RegularExpressions.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.AccessControl.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.Channels.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.Overlapped.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.Tasks.Dataflow.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.Tasks.Extensions.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.Tasks.Parallel.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.Tasks.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.Thread.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.ThreadPool.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.Timer.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Threading.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Transactions.Local.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Transactions.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.ValueTuple.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Web.HttpUtility.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Web.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Windows.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Xml.Linq.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Xml.ReaderWriter.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Xml.Serialization.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Xml.XDocument.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Xml.XPath.XDocument.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Xml.XPath.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Xml.XmlDocument.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Xml.XmlSerializer.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.Xml.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "System.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "WasmLogic.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "WindowsBase.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "mscorlib.dll",
+    "behavior": "assembly"
+   },
+   {
+    "name": "netstandard.dll",
+    "behavior": "assembly"
+   }
+  ],
+  "wasmNative": [
+   {
+    "name": "dotnet.native.wasm"
+   }
+  ],
+  "jsModuleNative": [
+   {
+    "name": "dotnet.native.js"
+   }
+  ],
+  "jsModuleRuntime": [
+   {
+    "name": "dotnet.runtime.js"
+   }
+  ]
+ }
+}

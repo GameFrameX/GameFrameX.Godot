@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <!-- 热更分发带调试符号：wasm 运行时仅支持 portable pdb，与程序集一起经 CDN 加载 -->
+    <DebugType>portable</DebugType>
+    <!-- JSExport 源生成器产出 C# 12 语法；仅本桥接程序集上调，业务 Hotfix 程序集保持 7.3 -->
+    <LangVersion>12</LangVersion>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>WasmLogic</AssemblyName>
+    <RootNamespace>WasmLogic</RootNamespace>
+  </PropertyGroup>
+</Project>
